@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+   <parent>
+        <artifactId>platform-parent</artifactId>
+        <groupId>com.jdrx.platform</groupId>
+        <version>1.2.8</version>
+    </parent>
+
+    <groupId>gis-service</groupId>
+    <artifactId>gis-service</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <modules>
+        <module>gis-service-api</module>
+        <module>gis-service-beans</module>
+		<module>gis-service-boot</module>
+        <module>gis-service-cloudboot</module>
+    </modules>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <platform.version>1.2.9</platform.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+	
+    <dependencies>
+       
+    </dependencies>
+</project>
