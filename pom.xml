@@ -27,8 +27,25 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-	
+
+    <repositories>
+        <repository>
+            <id>nexus-local</id>
+            <name>nexus public repositories</name>
+            <url>http://192.168.0.174:8081/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>nexus-aliyun</id>
+            <name>Nexus aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+        </repository>
+    </repositories>
+
     <dependencies>
-       
+        <dependency>
+            <groupId>com.jdrx.platform</groupId>
+            <artifactId>platform-rest</artifactId>
+            <version>${platform.version}</version>
+        </dependency>
     </dependencies>
 </project>
