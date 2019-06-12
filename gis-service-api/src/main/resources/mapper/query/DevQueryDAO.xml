@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jdrx.dao.query.DevQueryDAO">
+    <resultMap id="BaseResultMap" type="com.jdrx.beans.entry.query.SpaceInfTotalPO">
+        <result column="coverageName" property="coverageName" jdbcType="VARCHAR"/>
+        <result column="devNum" property="number" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="queryAllDevNum" resultMap="BaseResultMap">
+        select rs.name as coverageName, count(1) devNum from (
+            with recursive a as (SELECT a.* FROM dev.share_dev_type a where p_id = -1
+                union all
+                select b.* from dev.share_dev_type b , a  where a.id = b.p_id
+            ) SELECT * from a
+        ) as rs GROUP BY name
+    </select>
+</mapper>
