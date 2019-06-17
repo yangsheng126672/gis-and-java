@@ -6,6 +6,82 @@
         <result column="devNum" property="number" jdbcType="INTEGER"/>
     </resultMap>
 
+    <resultMap id="BaseResultMap2" type="com.jdrx.beans.entry.basic.ShareDevTypePO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="val" jdbcType="VARCHAR" property="val"/>
+        <result column="p_id" jdbcType="BIGINT" property="pId"/>
+        <result column="platform_code" jdbcType="VARCHAR" property="platformCode"/>
+        <result column="limb_leaf" jdbcType="SMALLINT" property="limbLeaf"/>
+        <result column="delete_flag" jdbcType="BIT" property="deleteFlag"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_at" jdbcType="TIMESTAMP" property="updateAt"/>
+    </resultMap>
+
+    <resultMap id="BaseResultMap3" type="com.jdrx.beans.vo.SpaceInfoVO">
+        <id column="devId" jdbcType="BIGINT" property="devId"/>
+        <result column="typeName" jdbcType="VARCHAR" property="typeName"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="addr" jdbcType="VARCHAR" property="addr"/>
+        <result column="dataInfo" jdbcType="OTHER" property="dataInfo"/>
+    </resultMap>
+
+    <select id="findFirstierarchy" resultMap="BaseResultMap2">
+        select * from share_dev_type where p_id = -1 and delete_flag = FALSE
+    </select>
+
+    <select id="findDevTypeByPID" resultMap="BaseResultMap2">
+        select * from (
+		    with recursive a as (
+			    select a.* FROM share_dev_type a where p_id = #{pID,jdbcType=BIGINT}
+				    and delete_flag = false
+               union all
+               select b.* from share_dev_type b,a where a.id = b.p_id
+				    and b.delete_flag = false
+             ) select * from a
+		) rs where rs.limb_leaf = 2
+    </select>
+
+    <select id="getCountByTypeIds" resultType="java.lang.Integer" parameterType="java.util.List">
+        select count(1) cnt from share_dev
+        <where>
+            delete_flag = FALSE
+            <if test="list != null">
+                and type_id in
+                <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="findDevByTypeId" resultMap="BaseResultMap3">
+        SELECT devId, name, typeName, addr, dataInfo
+            FROM
+             (
+              SELECT sd.ID devId, sd.name, sd.addr, sdt.name typeName
+              FROM
+                (
+                SELECT *  FROM share_dev
+                  WHERE type_id IN (
+                            SELECT id  FROM (
+                                    WITH RECURSIVE A AS (
+                                    SELECT A.*  FROM share_dev_type A
+                                        WHERE p_id = #{typeId,jdbcType=BIGINT}
+                                        AND delete_flag = FALSE UNION ALL
+                                    SELECT b.*  FROM share_dev_type b, A
+                                        WHERE A.ID = b.p_id  AND b.delete_flag = FALSE
+                                    ) SELECT *  FROM A
+                                ) rs  WHERE rs.limb_leaf = 2
+                        )
+                    ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
+                    AND sd.delete_flag = FALSE
+                ) dv LEFT JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext WHERE delete_flag = FALSE ) b
+        ON dv.devId = b.dev_id
+    </select>
+
     <select id="queryAllDevNum" resultMap="BaseResultMap">
         select rs.name as coverageName, count(1) devNum from (
             with recursive a as (SELECT a.* FROM dev.share_dev_type a where p_id = -1

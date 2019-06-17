@@ -1,6 +1,8 @@
 package com.jdrx.service.basic;
 
+import com.jdrx.beans.entry.basic.GISDevExtPO;
 import com.jdrx.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.dao.basic.GISDevExtPOMapper;
 import com.jdrx.dao.basic.ShareDevTypePOMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,25 @@ public class BasicDevQuery {
 	@Autowired
 	private ShareDevTypePOMapper shareDevTypePOMapper;
 
+	@Autowired
+	private GISDevExtPOMapper gisDevExtPOMapper;
+
+	/**
+	 * 查询所有设备类型
+	 * @return
+	 */
 	public List<ShareDevTypePO> fiandAllDevType(){
 		List<ShareDevTypePO> list  = shareDevTypePOMapper.findAllDevType();
 		return list;
+	}
+
+	/**
+	 * 根据设备ID查当前设备的属性信息
+	 * @param devId
+	 */
+	public GISDevExtPO getDevById(Long devId){
+		GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByDevID(devId);
+		return gisDevExtPO;
 	}
 
 }

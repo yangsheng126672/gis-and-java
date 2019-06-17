@@ -1,6 +1,8 @@
 package com.jdrx.api.basic;
 
-import com.jdrx.platform.commons.rest.beans.dto.IdsDTO;
+import com.jdrx.beans.entry.basic.GISDevExtPO;
+import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
+import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,9 +41,14 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.fiandAllDevType());
 	}
 
-	@ApiOperation(value = "根据所勾选类型查类型的数据")
-	@RequestMapping(value = "findDevByTypeIDs")
-	public ResposeVO findDevByTypeIDs(@ApiParam(name = "dtos", required = true) @RequestBody @Valid IdsDTO dtos){
-		return ResponseFactory.ok(null);
+	@ApiOperation(value = "根据所勾选类型查数据")
+	@RequestMapping(value = "findDevByDevId")
+	public ResposeVO findDevByTypeID(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{
+		if (StringUtils.isEmpty(dto.getId())){
+			Logger.debug("设备ID参数为空");
+			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
+		}
+		GISDevExtPO gisDevExtPO =  basicDevQuery.getDevById(dto.getId());
+		return ResponseFactory.ok(gisDevExtPO);
 	}
 }

@@ -16,4 +16,6 @@ public class SpaceInfTotalPO {
 	/** 数量 */
 	private Integer number;
 
+	/** id */
+	private Long id;
 }
