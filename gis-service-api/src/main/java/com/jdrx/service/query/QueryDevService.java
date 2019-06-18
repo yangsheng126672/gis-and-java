@@ -1,8 +1,12 @@
 package com.jdrx.service.query;
 
+import com.jdrx.beans.constants.basic.ECaliber;
 import com.jdrx.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.beans.entry.query.SpaceInfTotalPO;
-import com.jdrx.beans.vo.SpaceInfoVO;
+import com.jdrx.beans.vo.query.FieldNameVO;
+import com.jdrx.beans.vo.query.SonsNumVO;
+import com.jdrx.beans.vo.query.SpaceInfoVO;
+import com.jdrx.beans.vo.query.WaterPipeTypeNumVO;
 import com.jdrx.dao.query.DevQueryDAO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
@@ -63,5 +67,70 @@ public class QueryDevService {
 	public List<SpaceInfoVO> getDevByPid(Long pid) throws BizException{
 		List<SpaceInfoVO> list = devQueryDAO.findDevByTypeId(pid);
 		return list;
+	}
+
+	/**
+	 * 根据类型ID查表头，递归该ID下面所有子类，让所有子类的模板配置的字段都展示出来，
+	 * 若字段名称一样就合并成一个。
+	 * @param id
+	 * @return
+	 * @throws BizException
+	 */
+	public List<FieldNameVO> findFieldNameByTypeID(Long id) throws BizException{
+		List<FieldNameVO> list = devQueryDAO.findFieldNameByTypeID(id);
+		return list;
+	}
+
+	/**
+	 * 水管口径数量统计，当前按照我们自己定义的大小分类
+	 * @return
+	 * @throws BizException
+	 */
+	public List<WaterPipeTypeNumVO> findWaterPipeCaliberSum() throws BizException{
+		List<WaterPipeTypeNumVO> list = new ArrayList<>();
+		for (ECaliber ec : ECaliber.values()){
+			WaterPipeTypeNumVO vo = new WaterPipeTypeNumVO();
+			vo.setTypeName(ec.getName());
+			long num;
+			switch (ec.getCode()){
+				case "D1" :
+					num = devQueryDAO.findWaterPipeCaliberSum(null,100);
+					vo.setNum(num);
+					list.add(vo);
+					break;
+				case "D2" :
+					num = devQueryDAO.findWaterPipeCaliberSum(100,200);
+					vo.setNum(num);
+					list.add(vo);
+					break;
+				case "D3" :
+					num = devQueryDAO.findWaterPipeCaliberSum(200,400);
+					vo.setNum(num);
+					list.add(vo);
+					break;
+				case "D4" :
+					num = devQueryDAO.findWaterPipeCaliberSum(400,600);
+					vo.setNum(num);
+					list.add(vo);
+					break;
+				case "D5" :
+					num = devQueryDAO.findWaterPipeCaliberSum(600,900);
+					vo.setNum(num);
+					list.add(vo);
+					break;
+				case "D6" :
+					num = devQueryDAO.findWaterPipeCaliberSum(900,null);
+					vo.setNum(num);
+					list.add(vo);
+					break;
+				default : break;
+			}
+		}
+		return list;
+	}
+
+	public List<SonsNumVO> findSonsNumByPid(Long id) throws BizException {
+		devQueryDAO.findSonsNumByPid(id);
+		return null;
 	}
 }

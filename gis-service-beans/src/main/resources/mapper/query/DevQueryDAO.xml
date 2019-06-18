@@ -20,13 +20,24 @@
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap3" type="com.jdrx.beans.vo.SpaceInfoVO">
+    <resultMap id="BaseResultMap3" type="com.jdrx.beans.vo.query.SpaceInfoVO">
         <id column="devId" jdbcType="BIGINT" property="devId"/>
         <result column="typeName" jdbcType="VARCHAR" property="typeName"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="addr" jdbcType="VARCHAR" property="addr"/>
         <result column="dataInfo" jdbcType="OTHER" property="dataInfo"/>
     </resultMap>
+
+    <resultMap id="BaseResultMap4" type="com.jdrx.beans.vo.query.FieldNameVO">
+        <result column="fieldDesc" jdbcType="VARCHAR" property="fieldDesc"/>
+        <result column="fieldName" jdbcType="VARCHAR" property="fieldName"/>
+    </resultMap>
+
+    <resultMap id="BaseResultMap5" type="com.jdrx.beans.vo.query.SonsNumVO">
+        <result column="typeName" jdbcType="VARCHAR" property="typeName"/>
+        <result column="num" jdbcType="VARCHAR" property="num"/>
+    </resultMap>
+
 
     <select id="findFirstierarchy" resultMap="BaseResultMap2">
         select * from share_dev_type where p_id = -1 and delete_flag = FALSE
@@ -80,6 +91,44 @@
                     AND sd.delete_flag = FALSE
                 ) dv LEFT JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext WHERE delete_flag = FALSE ) b
         ON dv.devId = b.dev_id
+    </select>
+
+    <select id="findFieldNameByTypeID" resultMap="BaseResultMap4">
+        SELECT
+            field_name fieldName, MAX ( field_desc ) fieldDesc
+        FROM
+            (
+            SELECT type_id, field_desc, field_name
+            FROM gis_dev_tpl_attr
+            WHERE delete_flag = FALSE
+                AND type_id IN (
+                        WITH RECURSIVE A AS (
+                        SELECT A.*
+                        FROM share_dev_type A
+                        WHERE ID = #{id,jdbcType=BIGINT}
+                        AND delete_flag = FALSE
+                        UNION ALL
+                        SELECT b.*  FROM share_dev_type b, A  WHERE A.ID = b.p_id
+                        AND b.delete_flag = FALSE
+                        ) SELECT ID FROM A
+                    )
+            ) rss
+        GROUP BY field_name
+    </select>
+
+    <select id="findWaterPipeCaliberSum" resultType="java.lang.Long" parameterType="java.lang.Integer">
+        select count(1) num from gis_dev_line
+        where delete_flag = false
+          <if test="min != null">
+            and  caliber > #{min,jdbcType=INTEGER}
+          </if>
+        <if test="max != null">
+            and  caliber &lt;= #{max,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <select id="findSonsNumByPid" resultMap="BaseResultMap5" resultType="java.lang.Long">
+
     </select>
 
     <select id="queryAllDevNum" resultMap="BaseResultMap">

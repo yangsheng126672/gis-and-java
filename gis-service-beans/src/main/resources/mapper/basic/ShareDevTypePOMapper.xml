@@ -26,4 +26,21 @@
         from share_dev_type
         where delete_flag = false
     </select>
+
+    <select id="selectByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT *  FROM
+            (
+                WITH RECURSIVE T ( ID, NAME, p_id, DEPTH ) AS (
+                SELECT A .ID, A.NAME, A.p_id, 1
+                FROM share_dev_type A
+                WHERE delete_flag = false
+                AND ID = #{id,jdbcType=BIGINT}
+                UNION ALL
+                SELECT b.ID, b.NAME, b.p_id, C.DEPTH + 1
+                FROM share_dev_type b, T C
+                WHERE C.ID = b.p_id
+                ) SELECT *  FROM T
+            ) AS rs
+        WHERE DEPTH = 2
+    </select>
 </mapper>

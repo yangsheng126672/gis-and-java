@@ -7,4 +7,6 @@ import java.util.List;
 public interface ShareDevTypePOMapper {
 
 	List<ShareDevTypePO> findAllDevType();
+
+	List<ShareDevTypePO> selectByTypeId(Long id);
 }

@@ -2,7 +2,10 @@ package com.jdrx.dao.query;
 
 import com.jdrx.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.beans.entry.query.SpaceInfTotalPO;
-import com.jdrx.beans.vo.SpaceInfoVO;
+import com.jdrx.beans.vo.query.FieldNameVO;
+import com.jdrx.beans.vo.query.SonsNumVO;
+import com.jdrx.beans.vo.query.SpaceInfoVO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -39,6 +42,27 @@ public interface DevQueryDAO {
 	 * @return
 	 */
 	List<SpaceInfoVO> findDevByTypeId(Long typeId);
+
+	/**
+	 * 根据类型ID查表头
+	 * @param id
+	 * @return
+	 */
+	List<FieldNameVO> findFieldNameByTypeID(Long id);
+
+
+	/**
+	 * 水管口径数量查询
+	 * @return
+	 */
+	Long findWaterPipeCaliberSum(@Param("min")Integer min, @Param("max")Integer max);
+
+	/**
+	 * 根据设备类型ID 查子类设备的个数，只递归到第二层即可
+	 * @param id
+	 * @return
+	 */
+	List<SonsNumVO> findSonsNumByPid(Long id);
 
 	List<SpaceInfTotalPO> queryAllDevNum();
 }

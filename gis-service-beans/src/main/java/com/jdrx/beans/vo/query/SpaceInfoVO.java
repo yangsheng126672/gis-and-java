@@ -1,4 +1,4 @@
-package com.jdrx.beans.vo;
+package com.jdrx.beans.vo.query;
 
 import lombok.Data;
 
