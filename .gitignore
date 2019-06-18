@@ -32,7 +32,6 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 .idea/*
 /.idea/
 **/target/
-**/test/
 **/logs/
 **/.**/*
 **/resources/bootstrap.properties
