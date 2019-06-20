@@ -30,8 +30,8 @@ public class BasicDevQuery {
 	 * 查询所有设备类型
 	 * @return
 	 */
-	public List<ShareDevTypePO> fiandAllDevType(){
-		List<ShareDevTypePO> list  = shareDevTypePOMapper.findAllDevType();
+	public List<ShareDevTypePO> findDevTypeList(){
+		List<ShareDevTypePO> list  = shareDevTypePOMapper.findDevTypeList();
 		return list;
 	}
 
@@ -39,8 +39,8 @@ public class BasicDevQuery {
 	 * 根据设备ID查当前设备的属性信息
 	 * @param devId
 	 */
-	public GISDevExtPO getDevById(Long devId){
-		GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByDevID(devId);
+	public GISDevExtPO getDevExtByDevId(Long devId){
+		GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
 		return gisDevExtPO;
 	}
 

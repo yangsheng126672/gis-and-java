@@ -35,20 +35,20 @@ public class BasciDevApi {
 	@Autowired
 	private BasicDevQuery basicDevQuery;
 
-	@ApiOperation(value = "获取所有设备信息")
-	@RequestMapping(value = "findAllDevType")
-	public ResposeVO findAllDevType() throws BizException{
-		return ResponseFactory.ok(basicDevQuery.fiandAllDevType());
+	@ApiOperation(value = "获取所有设备类型列表")
+	@RequestMapping(value = "findDevTypeList")
+	public ResposeVO findDevTypeList() throws BizException{
+		return ResponseFactory.ok(basicDevQuery.findDevTypeList());
 	}
 
 	@ApiOperation(value = "根据所勾选类型查数据")
-	@RequestMapping(value = "findDevByDevId")
-	public ResposeVO findDevByTypeID(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{
+	@RequestMapping(value = "getDevExtByDevId")
+	public ResposeVO getDevExtByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{
 		if (ObjectUtils.isEmpty(dto.getId())){
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
-		GISDevExtPO gisDevExtPO =  basicDevQuery.getDevById(dto.getId());
+		GISDevExtPO gisDevExtPO =  basicDevQuery.getDevExtByDevId(dto.getId());
 		return ResponseFactory.ok(gisDevExtPO);
 	}
 

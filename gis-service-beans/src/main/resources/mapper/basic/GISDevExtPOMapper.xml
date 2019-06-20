@@ -14,7 +14,7 @@
   <sql id="Base_Column_List">
     id, dev_id, data_info, delete_flag, create_by, create_at, update_by, update_at
   </sql>
-  <select id="selectByDevID" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  <select id="getDevExtByDevId" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select
       <include refid="Base_Column_List" />
     from gis_dev_ext

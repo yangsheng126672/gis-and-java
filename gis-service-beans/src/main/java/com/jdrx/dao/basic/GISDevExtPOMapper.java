@@ -4,6 +4,6 @@ import com.jdrx.beans.entry.basic.GISDevExtPO;
 
 public interface GISDevExtPOMapper {
 
-    GISDevExtPO selectByDevID(Long devId);
+    GISDevExtPO getDevExtByDevId(Long devId);
 
 }

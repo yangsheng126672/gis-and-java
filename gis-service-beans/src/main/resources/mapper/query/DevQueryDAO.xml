@@ -39,7 +39,7 @@
     </resultMap>
 
 
-    <select id="findFirstierarchy" resultMap="BaseResultMap2">
+    <select id="findFirstHierarchyDevTypeNum" resultMap="BaseResultMap2">
         select * from share_dev_type where p_id = -1 and delete_flag = FALSE
     </select>
 
@@ -55,20 +55,20 @@
 		) rs where rs.limb_leaf = 2
     </select>
 
-    <select id="getCountByTypeIds" resultType="java.lang.Integer" parameterType="java.util.List">
+    <select id="getCountByTypeIds" resultType="java.lang.Long" parameterType="java.util.List">
         select count(1) cnt from share_dev
         <where>
             delete_flag = FALSE
-            <if test="list != null">
+            <if test="typeIds != null and typeIds.size > 0">
                 and type_id in
-                <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                <foreach collection="typeIds" index="index" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
             </if>
         </where>
     </select>
 
-    <select id="findDevByTypeId" resultMap="BaseResultMap3">
+    <select id="findDevListByTypeID" resultMap="BaseResultMap3">
         SELECT devId, name, typeName, addr, dataInfo
             FROM
              (
@@ -93,7 +93,7 @@
         ON dv.devId = b.dev_id
     </select>
 
-    <select id="findFieldNameByTypeID" resultMap="BaseResultMap4">
+    <select id="findFieldNamesByTypeID" resultMap="BaseResultMap4">
         SELECT
             field_name fieldName, MAX ( field_desc ) fieldDesc
         FROM
@@ -125,10 +125,6 @@
         <if test="max != null">
             and  caliber &lt;= #{max,jdbcType=INTEGER}
         </if>
-    </select>
-
-    <select id="findSonsNumByPid" resultMap="BaseResultMap5" resultType="java.lang.Long">
-
     </select>
 
     <select id="queryAllDevNum" resultMap="BaseResultMap">

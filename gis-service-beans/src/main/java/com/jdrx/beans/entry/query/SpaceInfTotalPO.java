@@ -14,7 +14,7 @@ public class SpaceInfTotalPO {
 	private String coverageName;
 
 	/** 数量 */
-	private Integer number;
+	private Long number;
 
 	/** id */
 	private Long id;

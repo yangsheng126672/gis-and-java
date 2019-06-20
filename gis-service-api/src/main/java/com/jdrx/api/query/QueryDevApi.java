@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -37,24 +38,24 @@ public class QueryDevApi {
 	private QueryDevService queryDevService;
 
 	@ApiOperation(value = "获取所有图层对应设备个数")
-	@RequestMapping(value = "getFirstHierarchyCount")
-	public ResposeVO getFirstHierarchyCount() throws BizException{
-		Logger.debug("api/0/query/getFirstHierarchyCount 获取所有图层对应设备个数");
-		return ResponseFactory.ok(queryDevService.getFirstHierarchyCount());
+	@RequestMapping(value = "findFirstHierarchyDevTypeNum")
+	public ResposeVO findFirstHierarchyDevTypeNum() throws BizException{
+		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 获取所有图层对应设备个数");
+		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum());
 	}
 
-	@ApiOperation(value = "根据类型ID查设备信息")
-	@RequestMapping(value = "findDevByTypeID")
+	@ApiOperation(value = "根据设备类型ID查设备列表信息")
+	@RequestMapping(value = "findDevListByTypeID")
 	public ResposeVO findDevByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO dto) throws BizException{
-		Logger.debug("api/0/query/findDevByTypeID 根据类型ID查设备信息");
-		return ResponseFactory.ok(queryDevService.getDevByPid(dto.getId()));
+		Logger.debug("api/0/query/findDevListByTypeID 根据设备类型ID查设备列表信息");
+		return ResponseFactory.ok(queryDevService.findDevListByTypeID(dto.getId()));
 	}
 
-	@ApiOperation(value = "根据类型ID查表格列名")
-	@RequestMapping(value = "findFieldNameByTypeID")
-	public ResposeVO findFieldNameByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO dto) throws BizException{
-		Logger.debug("api/0/query/findFieldNameByTypeID 根据类型ID查表格列名");
-		return ResponseFactory.ok(queryDevService.findFieldNameByTypeID(dto.getId()));
+	@ApiOperation(value = "根据设备类型ID查表格列名")
+	@RequestMapping(value = "findFieldNamesByTypeID")
+	public ResposeVO findFieldNamesByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO dto) throws BizException{
+		Logger.debug("api/0/query/findFieldNamesByTypeID 根据设备类型ID查表格列名");
+		return ResponseFactory.ok(queryDevService.findFieldNamesByTypeID(dto.getId()));
 	}
 
 	@ApiOperation(value = "水管类型的水管口径数量统计")
@@ -64,7 +65,7 @@ public class QueryDevApi {
 		return ResponseFactory.ok(queryDevService.findWaterPipeCaliberSum());
 	}
 
-	@ApiOperation(value = "当前父类型下的子类型设备个数")
+	@ApiOperation(value = "当前设备类型下的子类型设备个数")
 	@RequestMapping(value = "findSonsNumByPid")
 	public ResposeVO findSonsNumByPid(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto)
 		throws BizException {
@@ -72,6 +73,13 @@ public class QueryDevApi {
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
-		return null;
+		return ResponseFactory.ok(queryDevService.findSonsNumByPid(dto.getId()));
+	}
+
+	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息" , produces="application/octet-stream")
+	@RequestMapping(value = "exportDevInfoByPID", method = RequestMethod.POST)
+	public void export(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto,
+	                   HttpServletResponse response) throws Exception {
+		queryDevService.exportDevInfoByPID(response, dto.getId());
 	}
 }

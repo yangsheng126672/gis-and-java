@@ -34,13 +34,13 @@ public class ShareDevTypeApi {
 	private ShareDevTypeService shareDevTypeService;
 
 	@ApiOperation(value = "类别为其他的二级子类")
-	@RequestMapping(value = "findSonsOfOtherType")
-	public ResposeVO findSonsOfOtherType(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException {
-		Logger.debug("api/0/devtype/findSonsOfOtherType 类别为其他的二级子类");
+	@RequestMapping(value = "findSonListOfOtherType")
+	public ResposeVO findSonListOfOtherType(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException {
+		Logger.debug("api/0/devtype/findSonListOfOtherType 类别为其他的二级子类");
 		if (ObjectUtils.isEmpty(dto.getId())){
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
-		return ResponseFactory.ok(shareDevTypeService.selectByTypeId(dto.getId()));
+		return ResponseFactory.ok(shareDevTypeService.findDevTypeListByTypeId(dto.getId()));
 	}
 }

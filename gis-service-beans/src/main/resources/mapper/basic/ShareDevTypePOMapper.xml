@@ -20,27 +20,57 @@
     update_by, update_at
     </sql>
 
-    <select id="findAllDevType" resultMap="BaseResultMap">
+    <select id="getByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List" />
+        from share_dev_type
+        where delete_flag = false
+        and id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="findDevTypeList" resultMap="BaseResultMap">
         select
           <include refid="Base_Column_List" />
         from share_dev_type
         where delete_flag = false
     </select>
 
-    <select id="selectByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="findDevTypeListByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         SELECT *  FROM
             (
-                WITH RECURSIVE T ( ID, NAME, p_id, DEPTH ) AS (
-                SELECT A .ID, A.NAME, A.p_id, 1
+                WITH RECURSIVE T ( ID, NAME, p_id, val, limb_leaf, DEPTH ) AS (
+                SELECT A .ID, A.NAME, A.p_id, A.val, A.limb_leaf, 1
                 FROM share_dev_type A
                 WHERE delete_flag = false
                 AND ID = #{id,jdbcType=BIGINT}
                 UNION ALL
-                SELECT b.ID, b.NAME, b.p_id, C.DEPTH + 1
+                SELECT b.ID, b.NAME, b.p_id, b.val, b.limb_leaf, C.DEPTH + 1
                 FROM share_dev_type b, T C
                 WHERE C.ID = b.p_id
                 ) SELECT *  FROM T
             ) AS rs
         WHERE DEPTH = 2
+    </select>
+
+    <select id="selectAllDevByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        WITH RECURSIVE A AS (
+            SELECT A .*
+            FROM share_dev_type A
+            WHERE p_id = #{id,jdbcType=BIGINT}
+            UNION ALL
+            SELECT b.* FROM share_dev_type b,A
+            WHERE b.p_id = A.id
+        ) SELECT * FROM A
+    </select>
+
+    <select id="selectAllDevByCurrTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        WITH RECURSIVE A AS (
+            SELECT A .*
+            FROM share_dev_type A
+            WHERE id = #{id,jdbcType=BIGINT}
+            UNION ALL
+            SELECT b.* FROM share_dev_type b,A
+            WHERE b.p_id = A.id
+        ) SELECT * FROM A
     </select>
 </mapper>

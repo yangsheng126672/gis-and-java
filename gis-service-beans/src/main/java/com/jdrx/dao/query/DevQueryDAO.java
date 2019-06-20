@@ -3,7 +3,6 @@ package com.jdrx.dao.query;
 import com.jdrx.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.beans.vo.query.FieldNameVO;
-import com.jdrx.beans.vo.query.SonsNumVO;
 import com.jdrx.beans.vo.query.SpaceInfoVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,7 +19,7 @@ public interface DevQueryDAO {
 	 * 查第一层，即图层大分类，目前定为6类
 	 * @return
 	 */
-	List<ShareDevTypePO> findFirstierarchy();
+	List<ShareDevTypePO> findFirstHierarchyDevTypeNum();
 
 	/**
 	 * 根据PID查所有子类（不包含枝干）
@@ -34,21 +33,21 @@ public interface DevQueryDAO {
 	 * @param typeIds
 	 * @return
 	 */
-	Integer getCountByTypeIds(List<Long> typeIds);
+	Long getCountByTypeIds(@Param("typeIds") List<Long> typeIds);
 
 	/**
 	 * 根据类型ID查询所属设备信息
 	 * @param typeId
 	 * @return
 	 */
-	List<SpaceInfoVO> findDevByTypeId(Long typeId);
+	List<SpaceInfoVO> findDevListByTypeID(Long typeId);
 
 	/**
 	 * 根据类型ID查表头
 	 * @param id
 	 * @return
 	 */
-	List<FieldNameVO> findFieldNameByTypeID(Long id);
+	List<FieldNameVO> findFieldNamesByTypeID(Long id);
 
 
 	/**
@@ -57,12 +56,6 @@ public interface DevQueryDAO {
 	 */
 	Long findWaterPipeCaliberSum(@Param("min")Integer min, @Param("max")Integer max);
 
-	/**
-	 * 根据设备类型ID 查子类设备的个数，只递归到第二层即可
-	 * @param id
-	 * @return
-	 */
-	List<SonsNumVO> findSonsNumByPid(Long id);
 
 	List<SpaceInfTotalPO> queryAllDevNum();
 }
