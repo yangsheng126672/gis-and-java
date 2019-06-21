@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.jdrx.dao.basic.ShareDevTypePOMapper">
-    <resultMap id="BaseResultMap" type="com.jdrx.beans.entry.basic.ShareDevTypePO">
+<mapper namespace="com.jdrx.gis.dao.basic.ShareDevTypePOMapper">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.basic.ShareDevTypePO">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="val" jdbcType="VARCHAR" property="val"/>
@@ -72,5 +72,29 @@
             SELECT b.* FROM share_dev_type b,A
             WHERE b.p_id = A.id
         ) SELECT * FROM A
+    </select>
+
+    <select id="findHasTplDevTypeListById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    SELECT *  FROM
+        (
+            WITH RECURSIVE A AS (
+            SELECT A .* FROM share_dev_type A
+            WHERE
+                ID = 1
+                AND delete_flag = FALSE
+            UNION ALL
+            SELECT b.* FROM share_dev_type b, A
+            WHERE
+                A.ID = b.p_id
+                AND b.delete_flag = FALSE
+            ) SELECT * FROM A
+        ) aa
+    WHERE EXISTS
+    (
+        SELECT 1 FROM
+            ( SELECT type_id FROM gis_dev_tpl_attr WHERE delete_flag = FALSE GROUP BY type_id ) b
+        WHERE
+            aa.ID = b.type_id
+    )
     </select>
 </mapper>

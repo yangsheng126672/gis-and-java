@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.jdrx.dao.query.DevQueryDAO">
-    <resultMap id="BaseResultMap" type="com.jdrx.beans.entry.query.SpaceInfTotalPO">
+<mapper namespace="com.jdrx.gis.dao.query.DevQueryDAO">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.query.SpaceInfTotalPO">
         <result column="coverageName" property="coverageName" jdbcType="VARCHAR"/>
         <result column="devNum" property="number" jdbcType="INTEGER"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap2" type="com.jdrx.beans.entry.basic.ShareDevTypePO">
+    <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.entry.basic.ShareDevTypePO">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="val" jdbcType="VARCHAR" property="val"/>
@@ -20,7 +20,7 @@
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap3" type="com.jdrx.beans.vo.query.SpaceInfoVO">
+    <resultMap id="BaseResultMap3" type="com.jdrx.gis.beans.vo.query.SpaceInfoVO">
         <id column="devId" jdbcType="BIGINT" property="devId"/>
         <result column="typeName" jdbcType="VARCHAR" property="typeName"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
@@ -28,12 +28,12 @@
         <result column="dataInfo" jdbcType="OTHER" property="dataInfo"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap4" type="com.jdrx.beans.vo.query.FieldNameVO">
+    <resultMap id="BaseResultMap4" type="com.jdrx.gis.beans.vo.query.FieldNameVO">
         <result column="fieldDesc" jdbcType="VARCHAR" property="fieldDesc"/>
         <result column="fieldName" jdbcType="VARCHAR" property="fieldName"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap5" type="com.jdrx.beans.vo.query.SonsNumVO">
+    <resultMap id="BaseResultMap5" type="com.jdrx.gis.beans.vo.query.SonsNumVO">
         <result column="typeName" jdbcType="VARCHAR" property="typeName"/>
         <result column="num" jdbcType="VARCHAR" property="num"/>
     </resultMap>
