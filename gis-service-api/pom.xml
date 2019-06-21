@@ -12,11 +12,24 @@
 	<artifactId>gis-service-api</artifactId>
 
 	<dependencies>
-		<dependency>
+
+        <dependency>
 			<groupId>gis-service</groupId>
 			<artifactId>gis-service-beans</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${gis.version}</version>
 		</dependency>
+
+        <dependency>
+            <groupId>com.jdrx.platform</groupId>
+            <artifactId>platform-jdbc</artifactId>
+            <version>${platform.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.2.5</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.poi</groupId>

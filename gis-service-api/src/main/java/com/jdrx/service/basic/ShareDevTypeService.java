@@ -45,9 +45,9 @@ public class ShareDevTypeService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<ShareDevTypePO> selectAllDevByTypeId(Long typeId) throws BizException{
+	public List<ShareDevTypePO> findAllDevTypeListByTypePId(Long typeId) throws BizException{
 		Logger.debug("根据父类ID递归查询所有子类，PID = {}", typeId);
-		return shareDevTypePOMapper.selectAllDevByTypeId(typeId);
+		return shareDevTypePOMapper.findAllDevTypeListByTypePId(typeId);
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class ShareDevTypeService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<ShareDevTypePO> selectAllDevByCurrTypeId(Long typeId) throws BizException {
+	public List<ShareDevTypePO> findAllDevTypeListByCurrTypeId(Long typeId) throws BizException {
 		Logger.debug("根据当前类型ID，递归查询所有子类，ID = {}", typeId);
-		return shareDevTypePOMapper.selectAllDevByCurrTypeId(typeId);
+		return shareDevTypePOMapper.findAllDevTypeListByCurrTypeId(typeId);
 	}
 }

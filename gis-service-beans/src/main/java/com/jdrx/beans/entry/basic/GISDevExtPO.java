@@ -16,6 +16,11 @@ public class GISDevExtPO {
      */
     private Long devId;
 
+	/**
+	 * 模板类型ID
+	 */
+	private Long tplTypeId;
+
     /**
      * JSON数据
      */

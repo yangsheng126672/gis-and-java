@@ -52,7 +52,7 @@
         WHERE DEPTH = 2
     </select>
 
-    <select id="selectAllDevByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="findAllDevTypeListByTypePId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         WITH RECURSIVE A AS (
             SELECT A .*
             FROM share_dev_type A
@@ -63,7 +63,7 @@
         ) SELECT * FROM A
     </select>
 
-    <select id="selectAllDevByCurrTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="findAllDevTypeListByCurrTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         WITH RECURSIVE A AS (
             SELECT A .*
             FROM share_dev_type A

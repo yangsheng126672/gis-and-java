@@ -20,14 +20,14 @@ public interface ShareDevTypePOMapper {
 	 * @param id
 	 * @return
 	 */
-	List<ShareDevTypePO> selectAllDevByTypeId(Long id);
+	List<ShareDevTypePO> findAllDevTypeListByTypePId(Long id);
 
 	/**
 	 * 根据当前类型ID，递归查询所有子类
 	 * @param id
 	 * @return
 	 */
-	List<ShareDevTypePO> selectAllDevByCurrTypeId(Long id);
+	List<ShareDevTypePO> findAllDevTypeListByCurrTypeId(Long id);
 
 	/**
 	 * 主键查询

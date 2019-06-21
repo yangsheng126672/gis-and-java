@@ -56,6 +56,5 @@ public interface DevQueryDAO {
 	 */
 	Long findWaterPipeCaliberSum(@Param("min")Integer min, @Param("max")Integer max);
 
-
 	List<SpaceInfTotalPO> queryAllDevNum();
 }

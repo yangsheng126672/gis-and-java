@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Objects;
 
 /**
  * @Description: gis页面查询服务
@@ -45,10 +46,10 @@ public class QueryDevApi {
 	}
 
 	@ApiOperation(value = "根据设备类型ID查设备列表信息")
-	@RequestMapping(value = "findDevListByTypeID")
-	public ResposeVO findDevByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO dto) throws BizException{
+	@RequestMapping(value = "findDevListPageByTypeID")
+	public ResposeVO findDevListPageByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO dto) throws BizException{
 		Logger.debug("api/0/query/findDevListByTypeID 根据设备类型ID查设备列表信息");
-		return ResponseFactory.ok(queryDevService.findDevListByTypeID(dto.getId()));
+		return ResponseFactory.ok(queryDevService.findDevListPageByTypeID(dto));
 	}
 
 	@ApiOperation(value = "根据设备类型ID查表格列名")
@@ -73,13 +74,25 @@ public class QueryDevApi {
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
+		Logger.debug("api/0/query/findSonsNumByPid 前设备类型下的子类型设备个数");
 		return ResponseFactory.ok(queryDevService.findSonsNumByPid(dto.getId()));
 	}
 
-	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息" , produces="application/octet-stream")
+	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息", produces="application/octet-stream")
 	@RequestMapping(value = "exportDevInfoByPID", method = RequestMethod.POST)
 	public void export(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto,
 	                   HttpServletResponse response) throws Exception {
 		queryDevService.exportDevInfoByPID(response, dto.getId());
+	}
+
+	@ApiOperation(value = "根据设备ID集合查设备列表数据", notes = "根据设备ID集合查设备列表数据")
+	@RequestMapping(value = "findDevListPageByDevIDs", method = RequestMethod.POST)
+	public ResposeVO findDevListPageByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
+		throws BizException {
+		Logger.debug("api/0/query/findDevListPageByDevIDs 根据设备ID集合查设备列表数据");
+		if (Objects.isNull(devDTO) || Objects.isNull(devDTO.getIds())){
+			throw new BizException("参数为空");
+		}
+		return ResponseFactory.ok(queryDevService.findDevListPageByDevIDs(devDTO));
 	}
 }

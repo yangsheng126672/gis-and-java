@@ -2,6 +2,8 @@ package com.jdrx.beans.vo.query;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * @Description: 空间查询VO
  * @Author: liaosijun
@@ -24,4 +26,6 @@ public class SpaceInfoVO {
 	/** 设备属性信息 */
 	private Object dataInfo;
 
+	/** 根据表格title解析出来的设备信息 */
+	private Map<String, String> dataMap;
 }

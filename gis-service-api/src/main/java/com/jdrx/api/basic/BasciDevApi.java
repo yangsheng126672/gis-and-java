@@ -41,7 +41,7 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.findDevTypeList());
 	}
 
-	@ApiOperation(value = "根据所勾选类型查数据")
+	@ApiOperation(value = "根据所勾选类型查设备数据")
 	@RequestMapping(value = "getDevExtByDevId")
 	public ResposeVO getDevExtByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{
 		if (ObjectUtils.isEmpty(dto.getId())){
