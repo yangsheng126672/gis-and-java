@@ -1,12 +1,17 @@
 package com.jdrx.gis.util;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
+import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import org.postgresql.util.PGobject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -91,5 +96,48 @@ public class ComUtil {
 		}
 		return map;
 	}
+
+	/**
+	 * 递归处理   数据库树结构数据->树形json
+	 * @param id
+	 * @param list
+	 * @return
+	 */
+	public static JSONArray getNodeJson(Long id,List<ShareDevTypePO> list){
+		if (list.size() ==0){
+			return null;
+		}
+		//当前层级当前点下的所有子节点
+		List<ShareDevTypePO> childList = getChildNodes(id,list);
+		JSONArray childTree = new JSONArray();
+		for (ShareDevTypePO node : childList) {
+			JSONObject o = new JSONObject();
+			o.put("name", node.getName());
+			o.put("type", node.getLimbLeaf());
+			JSONArray childs = getNodeJson(node.getId(),list);  //递归调用该方法
+			if(!childs.isEmpty()) {
+				o.put("children",childs);
+			}
+			childTree.fluentAdd(o);
+		}
+		return childTree;
+	}
+
+	/**
+	 * 获取当前节点的所有子节点
+	 * @param nodeId
+	 * @param nodes
+	 * @return
+	 */
+	public static List<ShareDevTypePO> getChildNodes(Long nodeId, List<ShareDevTypePO> nodes){
+		List<ShareDevTypePO> list = new ArrayList();
+		for (ShareDevTypePO shareDevTypePO : nodes ) {
+			if(shareDevTypePO.getPId().equals(nodeId)){
+				list.add(shareDevTypePO);
+			}
+		}
+		return list;
+	}
+
 
 }

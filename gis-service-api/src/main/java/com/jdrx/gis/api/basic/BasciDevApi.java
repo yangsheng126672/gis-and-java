@@ -1,6 +1,8 @@
 package com.jdrx.gis.api.basic;
 
+import com.jdrx.gis.beans.dto.base.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -52,5 +54,23 @@ public class BasciDevApi {
 		return ResponseFactory.ok(gisDevExtPO);
 	}
 
+	@ApiOperation(value = "获取所有测量列表")
+	@RequestMapping(value = "findMeasurementList")
+	public ResposeVO findMeasurementList() throws BizException{
+		return ResponseFactory.ok(basicDevQuery.findMeasurementList());
+	}
+
+	@ApiOperation(value = "保存测量结果")
+	@RequestMapping(value ="saveMeasurement" )
+	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementPO dto){
+		return ResponseFactory.ok(basicDevQuery.saveMeasurement(dto));
+	}
+
+	@ApiOperation(value = "删除测量信息")
+	@RequestMapping(value ="deleteMeasurementByID" )
+	public ResposeVO deleteMeasurementByID(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto){
+		return  ResponseFactory.ok(basicDevQuery.deleteMeasurementByID(dto.getId()));
+
+	}
 
 }

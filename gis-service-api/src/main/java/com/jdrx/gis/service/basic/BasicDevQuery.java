@@ -1,14 +1,21 @@
 package com.jdrx.gis.service.basic;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.jdrx.gis.beans.dto.base.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.jdrx.gis.util.ComUtil.getNodeJson;
 
 /**
  * @Description: 基本功能中的图层服务
@@ -26,13 +33,17 @@ public class BasicDevQuery {
 	@Autowired
 	private GISDevExtPOMapper gisDevExtPOMapper;
 
+	@Autowired
+	private MeasurementPOMapper measurementPOMapper;
+
 	/**
 	 * 查询所有设备类型
 	 * @return
 	 */
-	public List<ShareDevTypePO> findDevTypeList(){
+	public JSONArray findDevTypeList(){
 		List<ShareDevTypePO> list  = shareDevTypePOMapper.findDevTypeList();
-		return list;
+		JSONArray jsonArray = getNodeJson(-1L,list);
+		return jsonArray;
 	}
 
 	/**
@@ -43,5 +54,34 @@ public class BasicDevQuery {
 		GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
 		return gisDevExtPO;
 	}
+
+	/**
+	 * 获取所有测量列表
+	 * @return
+	 */
+	public List<MeasurementPO> findMeasurementList(){
+		List<MeasurementPO> list  = measurementPOMapper.findMeasurementList();
+		return list;
+	}
+
+	/**
+	 * 保存测量信息
+	 * @param dto
+	 * @return
+	 */
+	public Integer saveMeasurement(MeasurementPO dto){
+		return measurementPOMapper.insertSelective(dto);
+	}
+
+	/**
+	 * 删除测量信息
+	 * @param id
+	 * @return
+	 */
+	public Integer deleteMeasurementByID(Long id){
+		return measurementPOMapper.deleteByPrimaryKey(id);
+	}
+
+
 
 }
