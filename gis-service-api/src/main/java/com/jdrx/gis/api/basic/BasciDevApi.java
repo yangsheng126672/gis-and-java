@@ -1,6 +1,5 @@
 package com.jdrx.gis.api.basic;
 
-import com.jdrx.gis.beans.dto.base.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;

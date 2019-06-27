@@ -25,4 +25,11 @@ public interface DictDetailPOMapper {
 	 * @return
 	 */
 	List<DictDetailPO> selectByVal(String val);
+
+	/**
+	 * 逻辑删除字典详情数据
+	 * @param id
+	 * @return
+	 */
+	int logicDeleteById(Long id);
 }

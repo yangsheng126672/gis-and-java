@@ -21,7 +21,9 @@
         select
         <include refid="Base_Column_List"/>
         from dict_type
-        where id = #{id,jdbcType=BIGINT}
+        where
+        delete_flag = FALSE
+        and id = #{id,jdbcType=BIGINT}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         <!--
@@ -151,9 +153,14 @@
             <if test="updateBy != null">
                 update_by = #{updateBy,jdbcType=VARCHAR},
             </if>
-            <if test="updateAt != null">
-                update_at = #{updateAt,jdbcType=TIMESTAMP},
-            </if>
+            <choose>
+                <when test="updateAt != null">
+                    update_at = #{updateAt,jdbcType=TIMESTAMP},
+                </when>
+                <otherwise>
+                    update_at = now(),
+                </otherwise>
+            </choose>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
@@ -176,4 +183,10 @@
         where id = #{id,jdbcType=BIGINT}
     </update>
 
+    <!-- 根据ID逻辑删除类型数据 -->
+    <update id="logicDeleteById" parameterType="java.lang.Long">
+        update dict_type
+        set delete_flag = TRUE
+        where id = #{id,jdbcType=BIGINT}
+    </update>
 </mapper>

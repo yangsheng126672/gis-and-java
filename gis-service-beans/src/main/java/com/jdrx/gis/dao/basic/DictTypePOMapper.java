@@ -17,4 +17,5 @@ public interface DictTypePOMapper {
 
     int updateByPrimaryKey(DictTypePO record);
 
+	int logicDeleteById(Long id);
 }
