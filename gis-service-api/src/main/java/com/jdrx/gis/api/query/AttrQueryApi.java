@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Objects;
 
@@ -49,6 +50,8 @@ public class AttrQueryApi {
 		Logger.debug("api/0/query/findAttrListByTypeId 根据设备类型ID查模板配置信息");
 		return ResponseFactory.ok(attrQueryService.findAttrListByTypeId(dto.getId()));
 	}
+
+
 	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息")
 	@RequestMapping(value = "findDevListByAreaOrInputVal")
 	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
@@ -59,4 +62,10 @@ public class AttrQueryApi {
 		return ResponseFactory.ok(attrQueryService.findDevListByAreaOrInputVal(dto));
 	}
 
+	@ApiOperation(value = "导出根据所选区域或属性键入的参数值所查询设备列表信息")
+	@RequestMapping(value = "exportDevListByAreaOrInputVal")
+	public void exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto,HttpServletResponse response) throws BizException {
+		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息");
+		attrQueryService.exportDevListByAreaOrInputVal(dto, response);
+	}
 }

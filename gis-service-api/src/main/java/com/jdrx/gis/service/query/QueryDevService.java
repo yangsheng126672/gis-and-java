@@ -63,6 +63,9 @@ public class QueryDevService {
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum() throws BizException{
 		List<SpaceInfTotalPO> list  = new ArrayList<>();
 		List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevTypeNum();
+		if (Objects.isNull(devTypePOs)) {
+			return list;
+		}
 		devTypePOs.stream().forEach(devTypePO ->{
 			SpaceInfTotalPO spaceInfTotalPO = new SpaceInfTotalPO();
 			spaceInfTotalPO.setCoverageName(devTypePO.getName());
@@ -70,6 +73,7 @@ public class QueryDevService {
 			spaceInfTotalPO.setId(devTypePO.getId());
 			list.add(spaceInfTotalPO);
 		});
+		Logger.debug("设备类型PID=-1的个数：{}", devTypePOs.size());
 		list.stream().forEach(spaceInfTotalPO -> {
 			List<ShareDevTypePO> shareDevTypePOs = devQueryDAO.findDevTypeByPID(spaceInfTotalPO.getId());
 			List<Long> ids = new ArrayList<>();
@@ -107,7 +111,7 @@ public class QueryDevService {
 		List<FieldNameVO> list = devQueryDAO.findFieldNamesByTypeID(id);
 		if (Objects.nonNull(list)) {
 			// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
-			// 这里就把类名称这一列+上来
+			// 所以这里就把类名称这一列+上来
 			FieldNameVO vo = new FieldNameVO();
 			vo.setFieldName(GISConstants.DEV_TYPE_NAME);
 			vo.setFieldDesc(GISConstants.DEV_TYPE_NAME_DESC);
@@ -136,7 +140,7 @@ public class QueryDevService {
 
 	/**
 	 * 获取设备类型下面的设备列表信息，处理json
-	 * @param id
+	 * @param id 设备类型ID
 	 * @return
 	 * @throws BizException
 	 */

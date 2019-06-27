@@ -48,7 +48,11 @@
         </javaClientGenerator>
 
         <!-- 生成哪些表，tableName对应数据库表，domainObjectName对应实体类名 -->
+<<<<<<< Updated upstream
         <table tableName="gis_measurement" domainObjectName="MeasurementPO" enableCountByExample="true"
+=======
+        <table tableName="dict_detail" domainObjectName="DictDetailPO" enableCountByExample="true"
+>>>>>>> Stashed changes
                enableUpdateByExample="false"
                enableDeleteByExample="false"
                enableSelectByExample="false"

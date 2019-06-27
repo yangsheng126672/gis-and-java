@@ -16,4 +16,5 @@ public interface DictTypePOMapper {
     int updateByPrimaryKeySelective(DictTypePO record);
 
     int updateByPrimaryKey(DictTypePO record);
+
 }

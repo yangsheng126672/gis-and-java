@@ -25,4 +25,9 @@ public class GISConstants {
 	 * 类型模板中配置json数据的那个空间信息字段，统一取名geom，方便空间查询展示时，过滤掉
 	 */
 	public final static String GEOM = "geom";
+
+	/**
+	 * 管径大小类型
+	 */
+	public final static String CALIBER_TYPE = "CALIBER_TYPE";
 }

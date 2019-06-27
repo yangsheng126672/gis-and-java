@@ -15,7 +15,7 @@ import java.util.List;
 public class AttrQeuryDTO {
 
 	@NotNull
-	@ApiModelProperty("设备类型ID")
+	@ApiModelProperty("设备类型ID，也是模板表中的类型ID")
 	private Long typeId;
 
 	@NotNull

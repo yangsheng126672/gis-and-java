@@ -176,12 +176,13 @@
         where id = #{id,jdbcType=BIGINT}
     </update>
 
+    <!-- 根据dict_type的val值查询dict_detail里面的配置值-->
     <select id="selectByVal" resultMap="BaseResultMap" parameterType="java.lang.String">
         select
         <include refid="Base_Column_List"/>
-        from dict_detail where type_id in (
+        from dict_detail where type_id = (
             select id from dict_type where val = #{val,jdbcType=VARCHAR},
-            and delete_flag = false
+            and delete_flag = false limit 1
         )
     </select>
 </mapper>

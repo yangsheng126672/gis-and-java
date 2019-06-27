@@ -17,7 +17,7 @@ public interface GISDevExtPOMapper {
 	List<GISDevExtVO> findDevListByDevIds(@Param("devIds") List<Long> devIds);
 
 	/**
-	 *
+	 * 根据所选区域或属性键入的参数值查设备列表信息
 	 * @param dto
 	 * @return
 	 */

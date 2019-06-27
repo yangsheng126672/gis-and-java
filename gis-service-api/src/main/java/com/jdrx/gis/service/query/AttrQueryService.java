@@ -7,12 +7,19 @@ import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.util.ComUtil;
+import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -78,5 +85,110 @@ public class AttrQueryService {
 		}
 		List<GISDevExtVO> gisDevExtVOList = queryDevService.findDevListByDevIDs(devIds);
 		return gisDevExtVOList;
+	}
+
+	/**
+	 * 导出根据所选区域或属性键入的参数值所查询设备列表信息
+	 * @param dto
+	 * @param response
+	 * @throws BizException
+	 */
+	public void exportDevListByAreaOrInputVal(AttrQeuryDTO dto, HttpServletResponse response) throws BizException {
+		try {
+			ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.getByPrimaryKey(dto.getTypeId());
+			XSSFWorkbook workbook;
+			workbook = new XSSFWorkbook(this.getClass().getResourceAsStream("/template/devinfoAttr.xlsx"));
+
+			String title = "Sheet1";
+			if (Objects.nonNull(shareDevTypePO)) {
+				title = shareDevTypePO.getName();
+			}
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			workbook.setSheetName(0, title);
+			sheet.setDefaultColumnWidth((short) 12); // 设置列宽
+			XSSFCellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
+			XSSFCellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+
+			XSSFRow row = sheet.createRow(0);
+			List<GisDevTplAttrPO> attrPOs = gisDevTplAttrPOMapper.findAttrListByTypeId(dto.getTypeId());
+			if (Objects.isNull(attrPOs)) {
+				Logger.error("表头信息为空");
+				throw new BizException("设备列表的title为空");
+			}
+			for (int i = 0; i < attrPOs.size(); i++) {
+				GisDevTplAttrPO gisDevTplAttrPO = attrPOs.get(i);
+				XSSFCell cell = row.createCell(i);
+				cell.setCellStyle(style);
+				String txt = gisDevTplAttrPO.getFieldDesc();
+				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+				cell.setCellValue(text);
+			}
+			List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto);
+			if (Objects.nonNull(devList)) {
+				String[] filedNames = attrPOs.stream().map(GisDevTplAttrPO::getFieldName).toArray(String[]::new);
+				devList =  dealDataInfoByDevIds(devList, filedNames);
+			} else {
+				Logger.debug("条件参数{}获取的设备信息为空", dto.toString());
+			}
+			if (Objects.nonNull(devList)) {
+				int body_i = 1;
+				for (GISDevExtVO gisDevExtVO : devList) {
+					Map<String, String> map = gisDevExtVO.getDataMap();
+					if(Objects.isNull(map)) {
+						continue;
+					}
+					XSSFRow xssfRow = sheet.createRow(body_i ++);
+					for (int i = 0; i < attrPOs.size(); i++) {
+						XSSFCell cell = xssfRow.createCell(i);
+						XSSFRichTextString text;
+						GisDevTplAttrPO gisDevTplAttrPO = attrPOs.get(i);
+						String txt = null;
+						if (Objects.nonNull(gisDevTplAttrPO)){
+							String fieldName = gisDevTplAttrPO.getFieldName();
+							txt = map.get(fieldName);
+						}
+						text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+						cell.setCellValue(text);
+						cell.setCellStyle(style2);
+					}
+				}
+			}
+			response.reset();
+			response.setCharacterEncoding("utf-8");
+			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
+			response.setContentType("application/vnd.ms-excel;charset=utf-8");
+			workbook.write(response.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 根据配置的模板字段，把json数据转换成map信息
+	 * @param gisDevExtVOs  设备信息列表
+	 * @param filedNames  模板的字段
+	 * @return
+	 * @throws BizException
+	 */
+	private List<GISDevExtVO> dealDataInfoByDevIds(List<GISDevExtVO> gisDevExtVOs, String[] filedNames) throws BizException {
+		if (Objects.isNull(gisDevExtVOs) || Objects.isNull(filedNames)) {
+			throw new BizException("参数为空");
+		}
+		gisDevExtVOs.stream().map(vo -> {
+			Object obj = vo.getDataInfo();
+			if (Objects.isNull(obj)) {
+				return vo;
+			}
+			try {
+				Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+				vo.setDataMap(map);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return vo;
+		}).collect(Collectors.toList());
+		return gisDevExtVOs;
 	}
 }

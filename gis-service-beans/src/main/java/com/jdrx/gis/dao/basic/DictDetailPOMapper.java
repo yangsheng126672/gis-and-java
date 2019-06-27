@@ -18,5 +18,11 @@ public interface DictDetailPOMapper {
 
     int updateByPrimaryKey(DictDetailPO record);
 
+
+	/**
+	 * 根据dict_type里面的val字段的值查dict_detail的配置详情信息
+	 * @param val
+	 * @return
+	 */
 	List<DictDetailPO> selectByVal(String val);
 }
