@@ -187,7 +187,7 @@
         select
         <include refid="Base_Column_List"/>
         from dict_detail where type_id = (
-            select id from dict_type where val = #{val,jdbcType=VARCHAR},
+            select id from dict_type where val = #{val,jdbcType=VARCHAR}
             and delete_flag = false limit 1
         )
     </select>

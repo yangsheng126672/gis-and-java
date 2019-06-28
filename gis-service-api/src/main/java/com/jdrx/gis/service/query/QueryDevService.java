@@ -3,23 +3,25 @@ package com.jdrx.gis.service.query;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
-import com.jdrx.gis.beans.constants.basic.ECaliber;
 import com.jdrx.gis.beans.constants.basic.ELimbLeaf;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.QueryDevDTO;
+import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.*;
+import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
-import com.jdrx.platform.commons.rest.exception.BizException;
-import com.jdrx.platform.jdbc.beans.vo.PageVO;
+import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.ShareDevTypeService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
+import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,13 +58,19 @@ public class QueryDevService {
 
 	@Autowired
 	private ShareDevPOMapper shareDevPOMapper;
+
+	@Autowired
+	DictConfig dictConfig;
+
+	@Autowired
+	DictDetailService dictDetailService;
 	/**
 	 * 获取第一级图层对应的设备个数
 	 * @return
 	 */
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum() throws BizException{
 		List<SpaceInfTotalPO> list  = new ArrayList<>();
-		List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevTypeNum();
+		List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevType();
 		if (Objects.isNull(devTypePOs)) {
 			return list;
 		}
@@ -177,43 +185,34 @@ public class QueryDevService {
 	 */
 	public List<WaterPipeTypeNumVO> findWaterPipeCaliberSum() throws BizException{
 		List<WaterPipeTypeNumVO> list = new ArrayList<>();
-		for (ECaliber ec : ECaliber.values()){
-			WaterPipeTypeNumVO vo = new WaterPipeTypeNumVO();
-			vo.setTypeName(ec.getName());
-			long num;
-			switch (ec.getCode()){
-				case "D1" :
-					num = devQueryDAO.findWaterPipeCaliberSum(null,100);
+		String caliberType = dictConfig.getCaliberType();
+		if (Objects.isNull(caliberType)) {
+			throw new BizException("配置文件中未配置水管口径的类型值！");
+		}
+		List<DictDetailPO> dictDetailPOs = dictDetailService.findDetailsByTypeVal(caliberType);
+		if (Objects.nonNull(dictDetailPOs)) {
+			dictDetailPOs.stream().forEach(dictDetailPO -> {
+				WaterPipeTypeNumVO vo = new WaterPipeTypeNumVO();
+				vo.setTypeName(dictDetailPO.getName());
+				try {
+					Object[] params = ComUtil.splitCaliberType(dictDetailPO.getVal());
+					if (Objects.isNull(params)) {
+						throw new BizException("水管口径类型参数值格式不正确");
+					}
+					String pre = String.valueOf(params[0]);
+					int min = Integer.parseInt(String.valueOf(params[1]));
+					int max = Integer.parseInt(String.valueOf(params[2]));
+					String suf = String.valueOf(params[3]);
+					long num = devQueryDAO.findWaterPipeCaliberSum(pre, min, max, suf);
 					vo.setNum(num);
 					list.add(vo);
-					break;
-				case "D2" :
-					num = devQueryDAO.findWaterPipeCaliberSum(100,200);
-					vo.setNum(num);
-					list.add(vo);
-					break;
-				case "D3" :
-					num = devQueryDAO.findWaterPipeCaliberSum(200,400);
-					vo.setNum(num);
-					list.add(vo);
-					break;
-				case "D4" :
-					num = devQueryDAO.findWaterPipeCaliberSum(400,600);
-					vo.setNum(num);
-					list.add(vo);
-					break;
-				case "D5" :
-					num = devQueryDAO.findWaterPipeCaliberSum(600,900);
-					vo.setNum(num);
-					list.add(vo);
-					break;
-				case "D6" :
-					num = devQueryDAO.findWaterPipeCaliberSum(900,null);
-					vo.setNum(num);
-					list.add(vo);
-					break;
-				default : break;
-			}
+				} catch (BizException e) {
+					Logger.error("根据水管口径对应设备数量出错：{}", e.getMsg());
+					e.printStackTrace();
+				}
+			});
+		} else {
+			throw new BizException("数据库dict_detail表中没有配置水管口径的范围值！");
 		}
 		return list;
 	}

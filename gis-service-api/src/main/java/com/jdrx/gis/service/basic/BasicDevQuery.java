@@ -1,14 +1,13 @@
 package com.jdrx.gis.service.basic;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.jdrx.gis.beans.dto.base.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dao.query.DevQueryDAO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +34,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private MeasurementPOMapper measurementPOMapper;
+
+	@Autowired
+	private DevQueryDAO devQueryDAO;
 
 	/**
 	 * 查询所有设备类型
@@ -82,6 +84,13 @@ public class BasicDevQuery {
 		return measurementPOMapper.deleteByPrimaryKey(id);
 	}
 
-
+	/**
+	 * 获取首层图层
+	 * @return
+	 */
+	public List<ShareDevTypePO> findFirstHierarchyDevType() {
+		List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevType();
+		return devTypePOs;
+	}
 
 }

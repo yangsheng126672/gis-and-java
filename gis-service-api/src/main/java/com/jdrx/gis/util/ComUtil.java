@@ -8,12 +8,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.platform.commons.rest.exception.BizException;
 import org.postgresql.util.PGobject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Description: 工具类
@@ -139,5 +142,35 @@ public class ComUtil {
 		return list;
 	}
 
-
+	/**
+	 * 管径范围解析
+	 * @param val dict_detail里面配置的管径范围
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object[] splitCaliberType(String val) throws BizException {
+		if (Objects.isNull(val)) {
+			throw new BizException("水管口径类型参数值为空！");
+		}
+		String pattern = "([\\[|\\(])(\\d+)(.)(\\d+)([\\)|\\]])";
+		Pattern r = Pattern.compile(pattern);
+		Matcher m = r.matcher(val);
+		Object[] result = null;
+		if(Objects.nonNull(m)) {
+			if (m.groupCount() == 5){
+				if (m.find()) {
+					result = new Object[4];
+					result[0] = m.group(1);
+					result[1] = m.group(2);
+					result[2] = m.group(4);
+					result[3] = m.group(5);
+				}
+			} else {
+				throw new BizException("水管口径类型参数值格式不正确");
+			}
+		} else {
+			throw new BizException("水管口径类型参数值格式不正确");
+		}
+		return result;
+	}
 }

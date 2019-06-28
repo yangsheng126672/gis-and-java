@@ -19,7 +19,7 @@ public interface DevQueryDAO {
 	 * 查第一层，即图层大分类，目前定为6类
 	 * @return
 	 */
-	List<ShareDevTypePO> findFirstHierarchyDevTypeNum();
+	List<ShareDevTypePO> findFirstHierarchyDevType();
 
 	/**
 	 * 根据PID查所有子类（不包含枝干）
@@ -54,7 +54,7 @@ public interface DevQueryDAO {
 	 * 水管口径数量查询
 	 * @return
 	 */
-	Long findWaterPipeCaliberSum(@Param("min")Integer min, @Param("max")Integer max);
+	Long findWaterPipeCaliberSum(@Param("pre")String pre, @Param("min")Integer min, @Param("max")Integer max, @Param("suf") String suf);
 
 	List<SpaceInfTotalPO> queryAllDevNum();
 }

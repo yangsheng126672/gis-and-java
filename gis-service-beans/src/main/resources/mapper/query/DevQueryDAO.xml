@@ -39,7 +39,7 @@
     </resultMap>
 
 
-    <select id="findFirstHierarchyDevTypeNum" resultMap="BaseResultMap2">
+    <select id="findFirstHierarchyDevType" resultMap="BaseResultMap2">
         select * from share_dev_type where p_id = -1 and delete_flag = FALSE
     </select>
 
@@ -116,15 +116,25 @@
         GROUP BY field_name
     </select>
 
-    <select id="findWaterPipeCaliberSum" resultType="java.lang.Long" parameterType="java.lang.Integer">
+    <select id="findWaterPipeCaliberSum" resultType="java.lang.Long">
         select count(1) num from gis_dev_line
         where delete_flag = false
-          <if test="min != null">
-            and  caliber > #{min,jdbcType=INTEGER}
-          </if>
-        <if test="max != null">
-            and  caliber &lt;= #{max,jdbcType=INTEGER}
-        </if>
+        <choose>
+            <when test='pre == "("'>
+                and  caliber > #{min,jdbcType=INTEGER}
+            </when>
+            <when test='pre == "["'>
+                and  caliber >= #{min,jdbcType=INTEGER}
+            </when>
+        </choose>
+        <choose>
+            <when test='suf == ")"'>
+                and  caliber &lt; #{max,jdbcType=INTEGER}
+            </when>
+            <when test='suf == "]"'>
+                and  caliber &lt;= #{min,jdbcType=INTEGER}
+            </when>
+        </choose>
     </select>
 
     <select id="queryAllDevNum" resultMap="BaseResultMap">

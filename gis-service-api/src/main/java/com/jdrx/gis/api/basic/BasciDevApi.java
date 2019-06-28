@@ -36,13 +36,21 @@ public class BasciDevApi {
 	@Autowired
 	private BasicDevQuery basicDevQuery;
 
+
+	@ApiOperation(value = "获取首层图层")
+	@RequestMapping(value = "findFirstHierarchyDevType")
+	public ResposeVO findFirstHierarchyDevType() throws BizException{
+		Logger.debug("api/0/basic/findFirstHierarchyDevType 获取首层图层");
+		return ResponseFactory.ok(basicDevQuery.findFirstHierarchyDevType());
+	}
+
 	@ApiOperation(value = "获取所有设备类型列表")
 	@RequestMapping(value = "findDevTypeList")
 	public ResposeVO findDevTypeList() throws BizException{
 		return ResponseFactory.ok(basicDevQuery.findDevTypeList());
 	}
 
-	@ApiOperation(value = "根据所勾选类型查设备数据")
+	@ApiOperation(value = "根据设备ID查当前设备的属性信息")
 	@RequestMapping(value = "getDevExtByDevId")
 	public ResposeVO getDevExtByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{
 		if (ObjectUtils.isEmpty(dto.getId())){
