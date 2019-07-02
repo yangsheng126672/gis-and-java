@@ -1,8 +1,11 @@
 package com.jdrx.gis.service.basic;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.dto.basic.DictDetailDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.basic.DictDetailVO;
+import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -25,6 +29,9 @@ public class DictDetailService {
 
 	@Autowired
 	private DictDetailPOMapper dictDetailPOMapper;
+
+	@Autowired
+	private DictConfig dictConfig;
 
 	/**
 	 * 根据dict_type中val的值查询配置的dict_detail列表
@@ -112,6 +119,43 @@ public class DictDetailService {
 		} catch (Exception e) {
 			Logger.error("根据ID{}查询失败！", id);
 			throw new BizException("根据ID查询失败！");
+		}
+	}
+
+	/**
+	 * 根据设备类型ID集查询它在数据字典中配置的url列表
+	 * @param typeIds
+	 * @return
+	 * @throws BizException
+	 */
+	public List<Map<String,String>> findLayerUrlListByTypeIds(Long[] typeIds) throws BizException {
+		try {
+			String layerUrl = dictConfig.getLayerUrl();
+			List<DictDetailPO> detailPOs = findDetailsByTypeVal(layerUrl);
+			List<Map<String, String>> urlList = Lists.newArrayList();
+			if (Objects.nonNull(detailPOs) && detailPOs.size() > 0) {
+				detailPOs.stream().forEach(dictDetailPO -> {
+					String val = dictDetailPO.getVal();
+					Map<String, String> map = Maps.newHashMap();
+					String[] vals = val.split(",");
+					map.put(vals[0], vals[1]);
+					System.out.println(vals[0] + "," + vals[1]);
+					if (Objects.nonNull(typeIds) && typeIds.length > 0) {
+						for (int i = 0; i < typeIds.length; i ++) {
+							if (map.containsKey(String.valueOf(typeIds[i]))) {
+								System.out.println("map=" + map);
+								urlList.add(map);
+								break;
+							}
+						}
+					}
+				});
+			}
+			return urlList;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("根据设备类型ID集查询它在数据字典中配置的url列表失败！typeIds = {}", typeIds);
+			throw new BizException("根据设备类型ID集查询它在数据字典中配置的url列表失败！");
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package com.jdrx.gis.dao.query;
 
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
-import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.beans.vo.query.SpaceInfoVO;
 import org.apache.ibatis.annotations.Param;
@@ -56,5 +55,4 @@ public interface DevQueryDAO {
 	 */
 	Long findWaterPipeCaliberSum(@Param("pre")String pre, @Param("min")Integer min, @Param("max")Integer max, @Param("suf") String suf);
 
-	List<SpaceInfTotalPO> queryAllDevNum();
 }

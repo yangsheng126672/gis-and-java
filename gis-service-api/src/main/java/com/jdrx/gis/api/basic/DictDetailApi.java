@@ -1,10 +1,8 @@
 package com.jdrx.gis.api.basic;
 
-import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.base.InsertDTO;
 import com.jdrx.gis.beans.dto.base.UpdateDTO;
 import com.jdrx.gis.beans.dto.basic.DictDetailDTO;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.basic.DictDetailVO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -12,7 +10,6 @@ import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
@@ -24,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * @Description: 数据字典Api
@@ -41,13 +37,6 @@ public class DictDetailApi {
 	@Autowired
 	private DictDetailService dictDetailService;
 
-	@ApiOperation(value = "查询管径的配置信息")
-	@RequestMapping(value = "findCaliberDicts")
-	public ResposeVO findCaliberDicts() throws BizException {
-		Logger.debug("api/0/dictDetail/findCaliberDicts 查询管径的配置信息");
-		List<DictDetailPO> dictDetailPOs = dictDetailService.findDetailsByTypeVal(GISConstants.CALIBER_TYPE);
-		return ResponseFactory.ok(dictDetailPOs);
-	}
 
 	@ApiOperation(value = "新增字典")
 	@RequestMapping(value = "addDictDetail")
@@ -67,7 +56,7 @@ public class DictDetailApi {
 		return ResponseFactory.ok(b);
 	}
 
-	@ApiModelProperty(value = "修改字典")
+	@ApiOperation(value = "修改字典")
 	@RequestMapping(value = "updateDictDetailById")
 	public ResposeVO updateDictDetailById(@ApiParam(name = "dictDetailDto", required = true) @RequestBody @Validated({UpdateDTO.class})
 			                                DictDetailDTO dictDetailDTO) throws BizException {
@@ -76,7 +65,7 @@ public class DictDetailApi {
 		return ResponseFactory.ok(b);
 	}
 
-	@ApiModelProperty(value = "根据ID查字典数据")
+	@ApiOperation(value = "根据ID查字典数据")
 	@RequestMapping(value = "getDictDetailById")
 	public ResposeVO getDictDetailById(@ApiParam(name = "id", required = true) @RequestBody @Valid
 			                                 IdDTO<Long> idDTO) throws BizException {
@@ -84,4 +73,14 @@ public class DictDetailApi {
 		DictDetailVO dictDetailVO = dictDetailService.getDictTypeById(idDTO.getId());
 		return ResponseFactory.ok(dictDetailVO);
 	}
+
+	/**
+	@ApiModelProperty(value = "根据设备类型ID集查图层服务的URL列表")
+	@RequestMapping(value = "findLayerUrlListByTypeIds")
+	public ResposeVO findLayerUrlListByTypeIds(@ApiParam(name = "typeIds", required = true) @RequestBody @Valid
+	                                           Long[] typeIds) throws BizException {
+		Logger.debug("api/0/dictDetail/findLayerUrlListByTypeIds 根据设备类型ID集查图层服务的URL列表 {}", typeIds.toString());
+		List<Map<String,String>> list = dictDetailService.findLayerUrlListByTypeIds(typeIds);
+		return ResponseFactory.ok(list);
+	}**/
 }
