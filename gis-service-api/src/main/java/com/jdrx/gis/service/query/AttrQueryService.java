@@ -107,7 +107,7 @@ public class AttrQueryService {
 	 * @throws BizException
 	 */
 	public PageVO<GISDevExtVO> findDevListPageByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
-		PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByAreaOrInputVal(dto);
 		return new PageVO<>(list);
 	}

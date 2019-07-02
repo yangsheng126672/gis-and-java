@@ -117,7 +117,7 @@
     </select>
 
     <select id="findWaterPipeCaliberSum" resultType="java.lang.Long">
-        select count(1) num from gis_dev_line
+        select count(1) num from gis_dev_ext
         where delete_flag = false
         <choose>
             <when test='pre == "("'>
@@ -137,12 +137,4 @@
         </choose>
     </select>
 
-    <select id="queryAllDevNum" resultMap="BaseResultMap">
-        select rs.name as coverageName, count(1) devNum from (
-            with recursive a as (SELECT a.* FROM dev.share_dev_type a where p_id = -1
-                union all
-                select b.* from dev.share_dev_type b , a  where a.id = b.p_id
-            ) SELECT * from a
-        ) as rs GROUP BY name
-    </select>
 </mapper>

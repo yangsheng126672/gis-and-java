@@ -367,7 +367,7 @@ public class QueryDevService {
 	 * @throws BizException
 	 */
 	public PageVO<SpaceInfoVO> findDevListPageByTypeID(QueryDevDTO dto) throws BizException {
-		PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID2(dto.getTypeId());
 		return new PageVO<>(list);
 	}
@@ -425,7 +425,7 @@ public class QueryDevService {
 	 * @throws BizException
 	 */
 	public PageVO<GISDevExtVO> findDevListPageByDevIDs(QueryDevDTO dto) throws BizException {
-		PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByDevIDs(dto.getDevIds());
 		return new PageVO<>(list);
 	}

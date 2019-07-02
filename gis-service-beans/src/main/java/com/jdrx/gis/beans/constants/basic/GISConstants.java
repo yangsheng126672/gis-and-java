@@ -26,8 +26,4 @@ public class GISConstants {
 	 */
 	public final static String GEOM = "geom";
 
-	/**
-	 * 管径大小类型
-	 */
-	public final static String CALIBER_TYPE = "CALIBER_TYPE";
 }

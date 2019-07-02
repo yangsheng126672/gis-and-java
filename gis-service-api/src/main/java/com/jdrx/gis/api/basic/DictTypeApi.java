@@ -10,7 +10,6 @@ import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ public class DictTypeApi {
 		return ResponseFactory.ok(b);
 	}
 
-	@ApiModelProperty(value = "修改字典类型")
+	@ApiOperation(value = "修改字典类型")
 	@RequestMapping(value = "updateDictTypeById")
 	public ResposeVO updateDictType(@ApiParam(name = "dictTypeDto", required = true) @RequestBody @Validated(UpdateDTO.class)
 			                                    DictTypeDTO dictTypeDTO) throws BizException {
@@ -65,7 +64,7 @@ public class DictTypeApi {
 		return ResponseFactory.ok(b);
 	}
 
-	@ApiModelProperty(value = "根据ID查字典类型数据")
+	@ApiOperation(value = "根据ID查字典类型数据")
 	@RequestMapping(value = "getDictTypeById")
 	public ResposeVO getDictTypeById(@ApiParam(name = "id", required = true) @RequestBody @Valid
 			                                     IdDTO<Long> idDTO) throws BizException {

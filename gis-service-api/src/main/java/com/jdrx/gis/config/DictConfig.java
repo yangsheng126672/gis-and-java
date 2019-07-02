@@ -16,4 +16,7 @@ public class DictConfig {
 
 	/**口径类型的值*/
 	private String caliberType;
+
+	/** arcgis发布图层的URL对应的参数 */
+	private String layerUrl;
 }

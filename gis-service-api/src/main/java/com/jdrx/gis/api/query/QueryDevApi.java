@@ -101,7 +101,7 @@ public class QueryDevApi {
 	@RequestMapping(value = "findDevListByDevIDs", method = RequestMethod.POST)
 	public ResposeVO findDevListByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
 			throws BizException {
-		Logger.debug("api/0/query/findDevListByDevIDs 根据设备ID集合查设备列表数据(分页)");
+		Logger.debug("api/0/query/findDevListByDevIDs 根据设备ID集合查设备列表数据");
 		if (Objects.isNull(devDTO)){
 			throw new BizException("参数为空");
 		}
