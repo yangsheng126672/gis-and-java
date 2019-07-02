@@ -18,6 +18,6 @@ public class QueryDevDTO extends PageDTO {
 	@ApiModelProperty("设备类型ID")
 	private Long typeId;
 
-	@ApiModelProperty("选中区域的设备ID集合")
+	@ApiModelProperty("选中区域的设备ID集合，空集合查询全部")
 	private List<Long> devIds;
 }

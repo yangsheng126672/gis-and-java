@@ -33,7 +33,12 @@ public class DictDetailService {
 	 * @throws BizException
 	 */
 	public List<DictDetailPO> findDetailsByTypeVal(String val) throws BizException {
-		return dictDetailPOMapper.selectByVal(val);
+		try {
+			return dictDetailPOMapper.selectByVal(val);
+		} catch (Exception e) {
+			Logger.error("根据dict_type中val的值查询配置的dict_detail列表失败！", e.getMessage());
+			throw new BizException("根据dict_type中val的值查询配置的dict_detail列表失败！");
+		}
 	}
 
 	/**
@@ -43,12 +48,17 @@ public class DictDetailService {
 	 * @throws BizException
 	 */
 	public Boolean addDictDetail(DictDetailDTO dictDetailDTO) throws BizException {
-		DictDetailPO dictDetailPO = new DictDetailPO();
-		if (Objects.nonNull(dictDetailDTO)) {
-			BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
+		try {
+			DictDetailPO dictDetailPO = new DictDetailPO();
+			if (Objects.nonNull(dictDetailDTO)) {
+				BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
+			}
+			int affectedRows = dictDetailPOMapper.insertSelective(dictDetailPO);
+			return affectedRows > 0 ? true : false;
+		} catch (Exception e) {
+			Logger.error("新增字典数据失败！", e.getMessage());
+			throw new BizException("新增字典数据失败！");
 		}
-		int affectedRows = dictDetailPOMapper.insertSelective(dictDetailPO);
-		return affectedRows > 0 ? true : false;
 	}
 
 	/**
@@ -58,8 +68,13 @@ public class DictDetailService {
 	 * @throws BizException
 	 */
 	public Boolean delDictDetailById(Long id) throws BizException {
-		int affectedRows = dictDetailPOMapper.logicDeleteById(id);
-		return affectedRows > 0 ? true : false;
+		try {
+			int affectedRows = dictDetailPOMapper.logicDeleteById(id);
+			return affectedRows > 0 ? true : false;
+		} catch (Exception e) {
+			Logger.error("删除字典数据失败！", e.getMessage());
+			throw new BizException("删除字典数据失败！");
+		}
 	}
 
 	/**
@@ -69,12 +84,17 @@ public class DictDetailService {
 	 * @throws BizException
 	 */
 	public Boolean updateDictType(DictDetailDTO dictDetailDTO) throws BizException {
-		DictDetailPO dictDetailPO = new DictDetailPO();
-		if (Objects.nonNull(dictDetailDTO)) {
-			BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
+		try {
+			DictDetailPO dictDetailPO = new DictDetailPO();
+			if (Objects.nonNull(dictDetailDTO)) {
+				BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
+			}
+			int affectedRows = dictDetailPOMapper.updateByPrimaryKeySelective(dictDetailPO);
+			return affectedRows > 0 ? true : false;
+		} catch (Exception e) {
+			Logger.error("更新字典数据失败！", e.getMessage());
+			throw new BizException("更新字典数据失败！");
 		}
-		int affectedRows = dictDetailPOMapper.updateByPrimaryKeySelective(dictDetailPO);
-		return affectedRows > 0 ? true : false;
 	}
 
 	/**
@@ -84,9 +104,14 @@ public class DictDetailService {
 	 * @throws BizException
 	 */
 	public DictDetailVO getDictTypeById(Long id) throws BizException {
-		DictDetailPO dictDetailPO =  dictDetailPOMapper.selectByPrimaryKey(id);
-		DictDetailVO dictDetailVO = new DictDetailVO();
-		BeanUtils.copyProperties(dictDetailPO, dictDetailVO);
-		return dictDetailVO;
+		try {
+			DictDetailPO dictDetailPO = dictDetailPOMapper.selectByPrimaryKey(id);
+			DictDetailVO dictDetailVO = new DictDetailVO();
+			BeanUtils.copyProperties(dictDetailPO, dictDetailVO);
+			return dictDetailVO;
+		} catch (Exception e) {
+			Logger.error("根据ID{}查询失败！", id);
+			throw new BizException("根据ID查询失败！");
+		}
 	}
 }

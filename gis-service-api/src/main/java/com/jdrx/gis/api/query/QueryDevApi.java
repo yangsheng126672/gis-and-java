@@ -80,9 +80,9 @@ public class QueryDevApi {
 
 	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息", produces="application/octet-stream")
 	@RequestMapping(value = "exportDevInfoByPID", method = RequestMethod.POST)
-	public void export(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto,
+	public ResposeVO export(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto,
 	                   HttpServletResponse response) throws Exception {
-		queryDevService.exportDevInfoByPID(response, dto.getId());
+		return ResponseFactory.ok(queryDevService.exportDevInfoByPID(response, dto.getId()));
 	}
 
 	@ApiOperation(value = "根据设备ID集合查设备列表数据(分页)", notes = "根据设备ID集合查设备列表数据(分页)")
@@ -90,7 +90,7 @@ public class QueryDevApi {
 	public ResposeVO findDevListPageByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
 		throws BizException {
 		Logger.debug("api/0/query/findDevListPageByDevIDs 根据设备ID集合查设备列表数据(分页)");
-		if (Objects.isNull(devDTO) || Objects.isNull(devDTO.getDevIds())){
+		if (Objects.isNull(devDTO)){
 			throw new BizException("参数为空");
 		}
 		return ResponseFactory.ok(queryDevService.findDevListPageByDevIDs(devDTO));
@@ -102,7 +102,7 @@ public class QueryDevApi {
 	public ResposeVO findDevListByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
 			throws BizException {
 		Logger.debug("api/0/query/findDevListByDevIDs 根据设备ID集合查设备列表数据(分页)");
-		if (Objects.isNull(devDTO) || Objects.isNull(devDTO.getDevIds())){
+		if (Objects.isNull(devDTO)){
 			throw new BizException("参数为空");
 		}
 		return ResponseFactory.ok(queryDevService.findDevListByDevIDs(devDTO.getDevIds()));

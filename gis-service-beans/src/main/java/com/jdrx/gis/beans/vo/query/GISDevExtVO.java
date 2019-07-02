@@ -34,4 +34,5 @@ public class GISDevExtVO {
 
 	/** 根据表格title解析出来的设备信息 */
 	private Map<String, String> dataMap;
+
 }

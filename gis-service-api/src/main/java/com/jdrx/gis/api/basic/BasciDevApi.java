@@ -47,6 +47,7 @@ public class BasciDevApi {
 	@ApiOperation(value = "获取所有设备类型列表")
 	@RequestMapping(value = "findDevTypeList")
 	public ResposeVO findDevTypeList() throws BizException{
+		Logger.debug("api/0/basic/findDevTypeList 获取所有设备类型列表");
 		return ResponseFactory.ok(basicDevQuery.findDevTypeList());
 	}
 
@@ -57,6 +58,7 @@ public class BasciDevApi {
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
+		Logger.debug("api/0/basic/getDevExtByDevId 根据设备ID查当前设备的属性信息");
 		GISDevExtPO gisDevExtPO =  basicDevQuery.getDevExtByDevId(dto.getId());
 		return ResponseFactory.ok(gisDevExtPO);
 	}
@@ -64,18 +66,21 @@ public class BasciDevApi {
 	@ApiOperation(value = "获取所有测量列表")
 	@RequestMapping(value = "findMeasurementList")
 	public ResposeVO findMeasurementList() throws BizException{
+		Logger.debug("api/0/basic/findMeasurementList 获取所有测量列表");
 		return ResponseFactory.ok(basicDevQuery.findMeasurementList());
 	}
 
 	@ApiOperation(value = "保存测量结果")
 	@RequestMapping(value ="saveMeasurement" )
-	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementPO dto){
+	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementPO dto) throws BizException{
+		Logger.debug("api/0/basic/saveMeasurement 保存测量结果");
 		return ResponseFactory.ok(basicDevQuery.saveMeasurement(dto));
 	}
 
 	@ApiOperation(value = "删除测量信息")
 	@RequestMapping(value ="deleteMeasurementByID" )
-	public ResposeVO deleteMeasurementByID(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto){
+	public ResposeVO deleteMeasurementByID(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException {
+		Logger.debug("api/0/basic/deleteMeasurementByID 删除测量信息");
 		return  ResponseFactory.ok(basicDevQuery.deleteMeasurementByID(dto.getId()));
 
 	}

@@ -7,7 +7,6 @@ import com.jdrx.gis.beans.constants.basic.ELimbLeaf;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.QueryDevDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
-import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.*;
@@ -64,36 +63,42 @@ public class QueryDevService {
 
 	@Autowired
 	DictDetailService dictDetailService;
+
 	/**
 	 * 获取第一级图层对应的设备个数
 	 * @return
 	 */
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum() throws BizException{
-		List<SpaceInfTotalPO> list  = new ArrayList<>();
-		List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevType();
-		if (Objects.isNull(devTypePOs)) {
-			return list;
-		}
-		devTypePOs.stream().forEach(devTypePO ->{
-			SpaceInfTotalPO spaceInfTotalPO = new SpaceInfTotalPO();
-			spaceInfTotalPO.setCoverageName(devTypePO.getName());
-			spaceInfTotalPO.setNumber(0L);
-			spaceInfTotalPO.setId(devTypePO.getId());
-			list.add(spaceInfTotalPO);
-		});
-		Logger.debug("设备类型PID=-1的个数：{}", devTypePOs.size());
-		list.stream().forEach(spaceInfTotalPO -> {
-			List<ShareDevTypePO> shareDevTypePOs = devQueryDAO.findDevTypeByPID(spaceInfTotalPO.getId());
-			List<Long> ids = new ArrayList<>();
-			if (!ObjectUtils.isEmpty(shareDevTypePOs)){
-				shareDevTypePOs.stream().forEach(shareDevTypePO ->{
-					ids.add(shareDevTypePO.getId());
-				});
+		try {
+			List<SpaceInfTotalPO> list = new ArrayList<>();
+			List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevType();
+			if (Objects.isNull(devTypePOs)) {
+				return list;
 			}
-			Long cnt = devQueryDAO.getCountByTypeIds(ids);
-			spaceInfTotalPO.setNumber(cnt);
-		});
-		return list;
+			devTypePOs.stream().forEach(devTypePO -> {
+				SpaceInfTotalPO spaceInfTotalPO = new SpaceInfTotalPO();
+				spaceInfTotalPO.setCoverageName(devTypePO.getName());
+				spaceInfTotalPO.setNumber(0L);
+				spaceInfTotalPO.setId(devTypePO.getId());
+				list.add(spaceInfTotalPO);
+			});
+			Logger.debug("设备类型PID=-1的个数：{}", devTypePOs.size());
+			list.stream().forEach(spaceInfTotalPO -> {
+				List<ShareDevTypePO> shareDevTypePOs = devQueryDAO.findDevTypeByPID(spaceInfTotalPO.getId());
+				List<Long> ids = new ArrayList<>();
+				if (!ObjectUtils.isEmpty(shareDevTypePOs)) {
+					shareDevTypePOs.stream().forEach(shareDevTypePO -> {
+						ids.add(shareDevTypePO.getId());
+					});
+				}
+				Long cnt = devQueryDAO.getCountByTypeIds(ids);
+				spaceInfTotalPO.setNumber(cnt);
+			});
+			return list;
+		} catch (Exception e) {
+			Logger.error("获取第一级图层对应的设备个数失败！");
+			throw new BizException("获取第一级图层对应的设备个数失败！");
+		}
 	}
 
 	/**
@@ -103,8 +108,13 @@ public class QueryDevService {
 	 * @throws BizException
 	 */
 	public List<SpaceInfoVO> findDevListByTypeID(Long pid) throws BizException{
-		List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(pid);
-		return list;
+		try {
+			List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(pid);
+			return list;
+		} catch (Exception e) {
+			Logger.error("根据类型ID查询所属设备信息失败！pid = {} , pid)");
+			throw  new BizException("根据类型ID查询所属设备信息失败");
+		}
 	}
 
 	/**
@@ -116,34 +126,40 @@ public class QueryDevService {
 	 * @throws BizException
 	 */
 	public List<FieldNameVO> findFieldNamesByTypeID(Long id) throws BizException{
-		List<FieldNameVO> list = devQueryDAO.findFieldNamesByTypeID(id);
-		if (Objects.nonNull(list)) {
-			// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
-			// 所以这里就把类名称这一列+上来
-			FieldNameVO vo = new FieldNameVO();
-			vo.setFieldName(GISConstants.DEV_TYPE_NAME);
-			vo.setFieldDesc(GISConstants.DEV_TYPE_NAME_DESC);
-			list.add(vo);
+		try {
+			List<FieldNameVO> list = devQueryDAO.findFieldNamesByTypeID(id);
+			if (Objects.nonNull(list)) {
+				// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
+				// 所以这里就把类名称这一列+上来
+				FieldNameVO vo = new FieldNameVO();
+				vo.setFieldName(GISConstants.DEV_TYPE_NAME);
+				vo.setFieldDesc(GISConstants.DEV_TYPE_NAME_DESC);
+				list.add(vo);
 
-			for (int i = 0; i < list.size(); i++){
-				FieldNameVO fieldNameVO = list.get(i);
-				if (Objects.isNull(fieldNameVO)) {
-					break;
-				}
-				String fieldName = fieldNameVO.getFieldName();
-				if (StringUtils.isEmpty(fieldName)) {
-					break;
-				}
-				if (GISConstants.DEV_ID.equals(fieldName)) {
-					Collections.swap(list, i, 0);
-					continue;
-				}
-				if (GISConstants.DEV_TYPE_NAME.equals(fieldName)){
-					Collections.swap(list, i, 1);
+				for (int i = 0; i < list.size(); i++) {
+					FieldNameVO fieldNameVO = list.get(i);
+					if (Objects.isNull(fieldNameVO)) {
+						break;
+					}
+					String fieldName = fieldNameVO.getFieldName();
+					if (StringUtils.isEmpty(fieldName)) {
+						break;
+					}
+					if (GISConstants.DEV_ID.equals(fieldName)) {
+						Collections.swap(list, i, 0);
+						continue;
+					}
+					if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+						Collections.swap(list, i, 1);
+					}
 				}
 			}
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("根据类型ID查表头失败！");
+			throw new BizException("根据类型ID查表头失败！");
 		}
-		return list;
 	}
 
 	/**
@@ -270,7 +286,8 @@ public class QueryDevService {
 	 * @param id
 	 * @throws BizException
 	 */
-	public void exportDevInfoByPID(HttpServletResponse response, Long id) throws BizException {
+	public Boolean  exportDevInfoByPID(HttpServletResponse response, Long id) throws BizException {
+		Boolean result;
 		try {
 			XSSFWorkbook workbook;
 			workbook = new XSSFWorkbook(this.getClass().getResourceAsStream("/template/devinfo.xlsx"));
@@ -332,11 +349,15 @@ public class QueryDevService {
 			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
 			response.setContentType("application/vnd.ms-excel;charset=utf-8");
 			workbook.write(response.getOutputStream());
+			result = true;
 		} catch (IOException e) {
 			e.printStackTrace();
+			throw new BizException("导出空间数据信息失败！");
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new BizException("导出空间数据信息失败！");
 		}
+		return result;
 	}
 
 	/**
@@ -358,30 +379,43 @@ public class QueryDevService {
 	 * @throws BizException
 	 */
 	public List<GISDevExtVO> findDevListByDevIDs(List<Long> ids) throws BizException {
-		if (Objects.isNull(ids) || ids.size() == 0) {
+		if (Objects.isNull(ids)) {
 			Logger.error("参数为空");
 			return Lists.newArrayList();
 		}
-		List<GISDevExtVO> list =  gisDevExtPOMapper.findDevListByDevIds(ids);
-		if (Objects.nonNull(list)){
-			list.stream().map(vo ->{
-				Object obj = vo.getDataInfo();
-				if (Objects.isNull(obj)) {
-					return vo;
-				}
-				Long devId = vo.getDevId();
-				List<GisDevTplAttrPO> attrPOList = gisDevTplAttrPOMapper.findTplAttrsByDevId(devId);
-				String[] filedNames = attrPOList.stream().map(GisDevTplAttrPO::getFieldName).toArray(String[]::new);
-				try {
-					Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
-					vo.setDataMap(map);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return vo;
-			}).collect(Collectors.toList());
+		try {
+			List<GISDevExtVO> list  = gisDevExtPOMapper.findDevListByDevIds(ids);
+			return list;
+		} catch (Exception e) {
+			Logger.error("根据设备ID集合获取设备列表信息失败！");
+			throw new BizException("根据设备ID集合获取设备列表信息失败！");
 		}
-		return list;
+		/** 可以不用转换，前端直接去datainfo字段的值
+		try {
+			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByDevIds(ids);
+			if (Objects.nonNull(list)) {
+				list.stream().map(vo -> {
+					Object obj = vo.getDataInfo();
+					if (Objects.isNull(obj)) {
+						return vo;
+					}
+					Long devId = vo.getDevId();
+					List<GisDevTplAttrPO> attrPOList = gisDevTplAttrPOMapper.findTplAttrsByDevId(devId);
+					String[] filedNames = attrPOList.stream().map(GisDevTplAttrPO::getFieldName).toArray(String[]::new);
+					try {
+						Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+						vo.setDataMap(map);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return vo;
+				}).collect(Collectors.toList());
+			}
+			return list;
+		} catch (Exception e) {
+			Logger.error("根据设备ID集合获取设备列表信息失败！");
+			throw new BizException("根据设备ID集合获取设备列表信息失败！");
+		}**/
 	}
 
 	/**

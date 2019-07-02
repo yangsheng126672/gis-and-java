@@ -57,15 +57,26 @@ public class AttrQueryApi {
 	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
 		Logger.debug("api/0/query/findDevListByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息");
 		if (Objects.isNull(dto)) {
-			throw new  BizException("参数为空");
+			throw new BizException("参数为空");
 		}
 		return ResponseFactory.ok(attrQueryService.findDevListByAreaOrInputVal(dto));
 	}
 
 	@ApiOperation(value = "导出根据所选区域或属性键入的参数值所查询设备列表信息")
 	@RequestMapping(value = "exportDevListByAreaOrInputVal")
-	public void exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto,HttpServletResponse response) throws BizException {
+	public ResposeVO exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto,HttpServletResponse response) throws BizException {
 		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息");
-		attrQueryService.exportDevListByAreaOrInputVal(dto, response);
+		return ResponseFactory.ok(attrQueryService.exportDevListByAreaOrInputVal(dto, response));
+	}
+
+
+	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息(分页)")
+	@RequestMapping(value = "findDevListPageByAreaOrInputVal")
+	public ResposeVO findDevListPageByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
+		Logger.debug("api/0/query/findDevListPageByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息，分页");
+		if (Objects.isNull(dto)) {
+			throw new BizException("参数为空");
+		}
+		return ResponseFactory.ok(attrQueryService.findDevListPageByAreaOrInputVal(dto));
 	}
 }

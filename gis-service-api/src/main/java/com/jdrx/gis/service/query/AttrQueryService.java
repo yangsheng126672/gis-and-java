@@ -1,5 +1,7 @@
 package com.jdrx.gis.service.query;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
@@ -10,6 +12,7 @@ import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +59,13 @@ public class AttrQueryService {
 	 * @throws BizException
 	 */
 	public List<ShareDevTypePO> findHasTplDevTypeListById(Long id) throws BizException {
-		Logger.debug("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类");
-		return shareDevTypePOMapper.findHasTplDevTypeListById(id);
+		try {
+			Logger.debug("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类");
+			return shareDevTypePOMapper.findHasTplDevTypeListById(id);
+		} catch (Exception e) {
+			Logger.error("根据设备类型的ID{}查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类失败！", id);
+			throw new BizException("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类失败！");
+		}
 	}
 
 
@@ -68,7 +76,12 @@ public class AttrQueryService {
 	 * @throws BizException
 	 */
 	public List<GisDevTplAttrPO> findAttrListByTypeId(Long typeId) throws BizException {
-		return gisDevTplAttrPOMapper.findAttrListByTypeId(typeId);
+		try {
+			return gisDevTplAttrPOMapper.findAttrListByTypeId(typeId);
+		} catch (Exception e) {
+			Logger.error("根据设备类型ID{}查模板信息失败！", typeId);
+			throw new BizException("根据设备类型ID查模板信息失败！");
+		}
 	}
 
 	/**
@@ -78,13 +91,25 @@ public class AttrQueryService {
 	 * @throws BizException
 	 */
 	public List<GISDevExtVO> findDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
-		List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto);
-		List<Long> devIds = null;
-		if (Objects.nonNull(list)) {
-			devIds = list.stream().map(GISDevExtVO::getDevId).collect(Collectors.toList());
+		try {
+			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto);
+			return list;
+		} catch (Exception e) {
+			Logger.error("据所选区域或属性键入的参数值查设备列表信息失败，{}", dto.toString());
+			throw new BizException("据所选区域或属性键入的参数值查设备列表信息失败！");
 		}
-		List<GISDevExtVO> gisDevExtVOList = queryDevService.findDevListByDevIDs(devIds);
-		return gisDevExtVOList;
+	}
+
+	/**
+	 * 根据所选区域或属性键入的参数值查设备列表信息，分页
+	 * @param dto
+	 * @return
+	 * @throws BizException
+	 */
+	public PageVO<GISDevExtVO> findDevListPageByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByAreaOrInputVal(dto);
+		return new PageVO<>(list);
 	}
 
 	/**
@@ -93,7 +118,8 @@ public class AttrQueryService {
 	 * @param response
 	 * @throws BizException
 	 */
-	public void exportDevListByAreaOrInputVal(AttrQeuryDTO dto, HttpServletResponse response) throws BizException {
+	public Boolean exportDevListByAreaOrInputVal(AttrQeuryDTO dto, HttpServletResponse response) throws BizException {
+		Boolean result;
 		try {
 			ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.getByPrimaryKey(dto.getTypeId());
 			XSSFWorkbook workbook;
@@ -158,11 +184,17 @@ public class AttrQueryService {
 			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
 			response.setContentType("application/vnd.ms-excel;charset=utf-8");
 			workbook.write(response.getOutputStream());
+			result = true;
 		} catch (IOException e) {
 			e.printStackTrace();
+			Logger.error("导出属性信息失败，{}", dto.toString());
+			throw new BizException("导出属性信息失败！");
 		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.error("导出属性信息失败，{}", dto.toString());
+			throw new BizException("导出属性信息失败！");
 		}
+		return result;
 	}
 
 	/**
@@ -191,4 +223,7 @@ public class AttrQueryService {
 		}).collect(Collectors.toList());
 		return gisDevExtVOs;
 	}
+
+
+
 }
