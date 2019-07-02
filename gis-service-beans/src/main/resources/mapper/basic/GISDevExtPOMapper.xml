@@ -81,4 +81,7 @@
             </if>
         </where>
     </select>
+
+    <select id="searchDevListByStr" resultMap="BaseResultMap2" >
+    </select>
 </mapper>

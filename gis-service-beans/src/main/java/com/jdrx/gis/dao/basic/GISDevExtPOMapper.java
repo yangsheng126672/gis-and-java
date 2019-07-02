@@ -23,4 +23,5 @@ public interface GISDevExtPOMapper {
 	 */
 	List<GISDevExtVO> findDevListByAreaOrInputVal(@Param("dto") AttrQeuryDTO dto);
 
+
 }

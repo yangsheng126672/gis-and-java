@@ -30,4 +30,9 @@ public class GISConstants {
 	 * 管径大小类型
 	 */
 	public final static String CALIBER_TYPE = "CALIBER_TYPE";
+
+	/**
+	 * gis搜索字段列表
+	 */
+	public final static String SEARCH_FIELDS = "MAP_QUERY_CONDITION";
 }

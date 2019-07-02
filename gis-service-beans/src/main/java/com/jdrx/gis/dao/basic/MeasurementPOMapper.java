@@ -1,5 +1,6 @@
 package com.jdrx.gis.dao.basic;
 
+import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 
 import java.util.List;
@@ -24,6 +25,6 @@ public interface MeasurementPOMapper {
      * @param record
      * @return
      */
-    int insertSelective(MeasurementPO record);
+    int insertSelective(MeasurementDTO record);
 
 }

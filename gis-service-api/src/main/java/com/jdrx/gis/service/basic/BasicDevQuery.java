@@ -1,6 +1,7 @@
 package com.jdrx.gis.service.basic;
 
 import com.alibaba.fastjson.JSONArray;
+import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
@@ -88,7 +89,7 @@ public class BasicDevQuery {
 	 * @param dto
 	 * @return
 	 */
-	public Integer saveMeasurement(MeasurementPO dto) throws BizException{
+	public Integer saveMeasurement(MeasurementDTO dto) throws BizException{
 		try {
 			return measurementPOMapper.insertSelective(dto);
 		} catch (Exception e) {

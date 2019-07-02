@@ -115,6 +115,7 @@ public class ComUtil {
 		JSONArray childTree = new JSONArray();
 		for (ShareDevTypePO node : childList) {
 			JSONObject o = new JSONObject();
+			o.put("id",node.getId());
 			o.put("name", node.getName());
 			o.put("type", node.getLimbLeaf());
 			JSONArray childs = getNodeJson(node.getId(),list);  //递归调用该方法

@@ -1,7 +1,7 @@
 package com.jdrx.gis.api.basic;
 
+import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -72,7 +72,7 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "保存测量结果")
 	@RequestMapping(value ="saveMeasurement" )
-	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementPO dto) throws BizException{
+	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementDTO dto) throws BizException{
 		Logger.debug("api/0/basic/saveMeasurement 保存测量结果");
 		return ResponseFactory.ok(basicDevQuery.saveMeasurement(dto));
 	}
