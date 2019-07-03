@@ -158,4 +158,19 @@ public class DictDetailService {
 			throw new BizException("根据设备类型ID集查询它在数据字典中配置的url列表失败！");
 		}
 	}
+
+	/**
+	 * 根据typeId查字典列表
+	 * @param typeId
+	 * @return
+	 * @throws BizException
+	 */
+	public List<DictDetailPO> findDictDetailListByTypeId(Long typeId) throws BizException {
+		try{
+			return dictDetailPOMapper.findDictDetailListByTypeId(typeId);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("根据typeId查字典数据失败！");
+		}
+	}
 }

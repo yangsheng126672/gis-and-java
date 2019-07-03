@@ -2,6 +2,8 @@ package com.jdrx.gis.dao.basic;
 
 import com.jdrx.gis.beans.entry.basic.DictTypePO;
 
+import java.util.List;
+
 public interface DictTypePOMapper {
 
 
@@ -18,4 +20,6 @@ public interface DictTypePOMapper {
     int updateByPrimaryKey(DictTypePO record);
 
 	int logicDeleteById(Long id);
+
+	List<DictTypePO> findAll();
 }

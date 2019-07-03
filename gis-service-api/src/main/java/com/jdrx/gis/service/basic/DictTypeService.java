@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -96,6 +97,20 @@ public class DictTypeService {
 		} catch (Exception e) {
 			Logger.error("根据ID{}查类型失败！", id);
 			throw new BizException("根据ID查类型失败！");
+		}
+	}
+
+	/**
+	 * 查询所有类型
+	 * @return
+	 * @throws BizException
+	 */
+	public List<DictTypePO> findAllDictTypes() throws BizException {
+		try {
+			return dictTypePOMapper.findAll();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("查询所有字典类型失败！");
 		}
 	}
 }

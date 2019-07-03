@@ -198,4 +198,11 @@
         set delete_flag = TRUE
         where id = #{id,jdbcType=BIGINT}
     </update>
+
+    <select id="findDictDetailListByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from dict_detail where delete_flag = false
+        and type_id = #{typeId,jdbcType=BIGINT}
+    </select>
 </mapper>

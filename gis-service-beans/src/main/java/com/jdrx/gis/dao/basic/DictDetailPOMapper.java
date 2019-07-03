@@ -32,4 +32,12 @@ public interface DictDetailPOMapper {
 	 * @return
 	 */
 	int logicDeleteById(Long id);
+
+	/**
+	 * 根据typeId查字典数据
+	 * @param typeId
+	 * @return
+	 */
+	List<DictDetailPO> findDictDetailListByTypeId(Long typeId);
+
 }

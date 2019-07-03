@@ -3,6 +3,7 @@ package com.jdrx.gis.api.basic;
 import com.jdrx.gis.beans.dto.base.InsertDTO;
 import com.jdrx.gis.beans.dto.base.UpdateDTO;
 import com.jdrx.gis.beans.dto.basic.DictDetailDTO;
+import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.basic.DictDetailVO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @Description: 数据字典Api
@@ -83,4 +85,15 @@ public class DictDetailApi {
 		List<Map<String,String>> list = dictDetailService.findLayerUrlListByTypeIds(typeIds);
 		return ResponseFactory.ok(list);
 	}**/
+
+
+	@ApiOperation(value = "根据typeID查字典数据")
+	@RequestMapping(value = "findDictDetailListByTypeId")
+	public ResposeVO findDictDetailListByTypeId(@ApiParam(name = "id", required = true) @RequestBody @Valid
+			                                   IdDTO<Long> idDTO) throws BizException {
+		Logger.debug("api/0/dictDetail/findDictDetailListByTypeId 根据typeID查字典数据 {}", idDTO.getId());
+		List<DictDetailPO> list = dictDetailService.findDictDetailListByTypeId(idDTO.getId());
+		return ResponseFactory.ok(list);
+	}
+
 }

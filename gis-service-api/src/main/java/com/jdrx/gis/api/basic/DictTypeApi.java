@@ -72,4 +72,11 @@ public class DictTypeApi {
 		DictTypeVO dictTypeVO = dictTypeService.getDictTypeById(idDTO.getId());
 		return ResponseFactory.ok(dictTypeVO);
 	}
+
+	@ApiOperation(value = "查询所有字典类型")
+	@RequestMapping(value = "findAllDictTypes")
+	public ResposeVO findAllDictTypes() throws BizException {
+		Logger.debug("api/0/dictType/findAllDictTypes 查询所有字典类型");
+		return ResponseFactory.ok(dictTypeService.findAllDictTypes());
+	}
 }
