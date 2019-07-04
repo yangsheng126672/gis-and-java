@@ -96,7 +96,8 @@ public class QueryDevApi {
 		return ResponseFactory.ok(queryDevService.findDevListPageByDevIDs(devDTO));
 	}
 
-
+	/**
+	 *  查所有数据太多，用分页
 	@ApiOperation(value = "根据设备ID集合查设备列表数据", notes = "根据设备ID集合查设备列表数据")
 	@RequestMapping(value = "findDevListByDevIDs", method = RequestMethod.POST)
 	public ResposeVO findDevListByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
@@ -106,5 +107,5 @@ public class QueryDevApi {
 			throw new BizException("参数为空");
 		}
 		return ResponseFactory.ok(queryDevService.findDevListByDevIDs(devDTO.getDevIds()));
-	}
+	}**/
 }

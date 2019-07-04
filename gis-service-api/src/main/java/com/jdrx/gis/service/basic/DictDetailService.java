@@ -61,7 +61,11 @@ public class DictDetailService {
 				BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
 			}
 			int affectedRows = dictDetailPOMapper.insertSelective(dictDetailPO);
-			return affectedRows > 0 ? true : false;
+			Boolean bool =  affectedRows > 0 ? true : false;
+			if (!bool) {
+				throw new BizException("新增字典数据失败！");
+			}
+			return bool;
 		} catch (Exception e) {
 			Logger.error("新增字典数据失败！", e.getMessage());
 			throw new BizException("新增字典数据失败！");
@@ -77,7 +81,11 @@ public class DictDetailService {
 	public Boolean delDictDetailById(Long id) throws BizException {
 		try {
 			int affectedRows = dictDetailPOMapper.logicDeleteById(id);
-			return affectedRows > 0 ? true : false;
+			Boolean bool = affectedRows > 0 ? true : false;
+			if (!bool) {
+				throw new BizException("删除字典数据失败！");
+			}
+			return bool;
 		} catch (Exception e) {
 			Logger.error("删除字典数据失败！", e.getMessage());
 			throw new BizException("删除字典数据失败！");
@@ -97,7 +105,11 @@ public class DictDetailService {
 				BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
 			}
 			int affectedRows = dictDetailPOMapper.updateByPrimaryKeySelective(dictDetailPO);
-			return affectedRows > 0 ? true : false;
+			Boolean bool = affectedRows > 0 ? true : false;
+			if (!bool) {
+				throw new BizException("更新字典数据失败！");
+			}
+			return bool;
 		} catch (Exception e) {
 			Logger.error("更新字典数据失败！", e.getMessage());
 			throw new BizException("更新字典数据失败！");

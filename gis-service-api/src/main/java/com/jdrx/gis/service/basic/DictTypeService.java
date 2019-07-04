@@ -39,7 +39,11 @@ public class DictTypeService {
 				BeanUtils.copyProperties(dictTypeDTO, dictTypePO);
 			}
 			int affectedRows = dictTypePOMapper.insertSelective(dictTypePO);
-			return affectedRows > 0 ? true : false;
+			Boolean bool =  affectedRows > 0 ? true : false;
+			if(!bool) {
+				throw new BizException("新增字典类型失败");
+			}
+			return bool;
 		} catch (Exception e) {
 			Logger.error("新增字典类型失败！", e.getMessage());
 			throw new BizException("新增字典类型失败");
@@ -55,7 +59,11 @@ public class DictTypeService {
 	public Boolean delDictTypeById(Long id) throws BizException {
 		try {
 			int affectedRows = dictTypePOMapper.logicDeleteById(id);
-			return affectedRows > 0 ? true : false;
+			Boolean bool = affectedRows > 0 ? true : false;
+			if(!bool) {
+				throw new BizException("删除字典类型数据失败");
+			}
+			return bool;
 		} catch (Exception e) {
 			Logger.error("删除字典类型数据失败！", e.getMessage());
 			throw new BizException("删除字典类型数据失败！");
@@ -75,7 +83,11 @@ public class DictTypeService {
 				BeanUtils.copyProperties(dictTypeDTO, dictTypePO);
 			}
 			int affectedRows = dictTypePOMapper.updateByPrimaryKeySelective(dictTypePO);
-			return affectedRows > 0 ? true : false;
+			Boolean bool = affectedRows > 0 ? true : false;
+			if (!bool) {
+				throw new BizException("更新字典类型数据失败！");
+			}
+			return bool;
 		} catch (Exception e) {
 			Logger.error("更新字典类型数据失败！", e.getMessage());
 			throw new BizException("更新字典类型数据失败！");
