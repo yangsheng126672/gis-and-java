@@ -13,7 +13,7 @@
         <result column="p_id" jdbcType="BIGINT" property="pId"/>
         <result column="platform_code" jdbcType="VARCHAR" property="platformCode"/>
         <result column="limb_leaf" jdbcType="SMALLINT" property="limbLeaf"/>
-        <result column="delete_flag" jdbcType="BIT" property="deleteFlag"/>
+        <result column="del_flag" jdbcType="SMALLINT" property="delFlag"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
@@ -40,17 +40,17 @@
 
 
     <select id="findFirstHierarchyDevType" resultMap="BaseResultMap2">
-        select * from share_dev_type where p_id = -1 and delete_flag = FALSE
+        select * from share_dev_type where p_id = -1 and del_flag = 0
     </select>
 
     <select id="findDevTypeByPID" resultMap="BaseResultMap2">
         select * from (
 		    with recursive a as (
 			    select a.* FROM share_dev_type a where p_id = #{pID,jdbcType=BIGINT}
-				    and delete_flag = false
+				    and del_flag = 0
                union all
                select b.* from share_dev_type b,a where a.id = b.p_id
-				    and b.delete_flag = false
+				    and b.del_flag = 0
              ) select * from a
 		) rs where rs.limb_leaf = 2
     </select>
@@ -58,7 +58,7 @@
     <select id="getCountByTypeIds" resultType="java.lang.Long" parameterType="java.util.List">
         select count(1) cnt from share_dev
         <where>
-            delete_flag = FALSE
+            del_flag = 0
             <if test="typeIds != null and typeIds.size > 0">
                 and type_id in
                 <foreach collection="typeIds" index="index" item="item" open="(" separator="," close=")">
@@ -81,14 +81,14 @@
                                     WITH RECURSIVE A AS (
                                     SELECT A.*  FROM share_dev_type A
                                         WHERE p_id = #{typeId,jdbcType=BIGINT}
-                                        AND delete_flag = FALSE UNION ALL
+                                        AND del_flag = 0 UNION ALL
                                     SELECT b.*  FROM share_dev_type b, A
-                                        WHERE A.ID = b.p_id  AND b.delete_flag = FALSE
+                                        WHERE A.ID = b.p_id  AND b.del_flag = 0
                                     ) SELECT *  FROM A
                                 ) rs  WHERE rs.limb_leaf = 2
                         )
                     ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
-                    AND sd.delete_flag = FALSE
+                    AND sd.del_flag = 0
                 ) dv LEFT JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext WHERE delete_flag = FALSE ) b
         ON dv.devId = b.dev_id
     </select>
@@ -106,10 +106,10 @@
                         SELECT A.*
                         FROM share_dev_type A
                         WHERE ID = #{id,jdbcType=BIGINT}
-                        AND delete_flag = FALSE
+                        AND del_flag = 0
                         UNION ALL
                         SELECT b.*  FROM share_dev_type b, A  WHERE A.ID = b.p_id
-                        AND b.delete_flag = FALSE
+                        AND b.del_flag = 0
                         ) SELECT ID FROM A
                     )
             ) rss

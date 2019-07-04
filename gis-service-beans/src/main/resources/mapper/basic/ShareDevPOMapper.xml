@@ -11,14 +11,14 @@
         <result column="lat" jdbcType="VARCHAR" property="lat"/>
         <result column="addr" jdbcType="VARCHAR" property="addr"/>
         <result column="platform_code" jdbcType="VARCHAR" property="platformCode"/>
-        <result column="delete_flag" jdbcType="BIT" property="deleteFlag"/>
+        <result column="del_flag" jdbcType="SMALLINT" property="delFlag"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt"/>
     </resultMap>
     <sql id="Base_Column_List">
-    id, type_id, name, status, sn, lng, lat, addr, platform_code, delete_flag, create_by,
+    id, type_id, name, status, sn, lng, lat, addr, platform_code, del_flag, create_by,
     create_at, update_by, update_at
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -30,12 +30,12 @@
     <insert id="insert" parameterType="com.jdrx.gis.beans.entry.basic.ShareDevPO">
     insert into share_dev (id, type_id, name,
       status, sn, lng, lat, 
-      addr, platform_code, delete_flag, 
+      addr, platform_code, del_flag,
       create_by, create_at, update_by, 
       update_at)
     values (#{id,jdbcType=BIGINT}, #{typeId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, 
       #{status,jdbcType=SMALLINT}, #{sn,jdbcType=VARCHAR}, #{lng,jdbcType=VARCHAR}, #{lat,jdbcType=VARCHAR}, 
-      #{addr,jdbcType=VARCHAR}, #{platformCode,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT}, 
+      #{addr,jdbcType=VARCHAR}, #{platformCode,jdbcType=VARCHAR}, #{delFlag,jdbcType=SMALLINT},
       #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
       #{updateAt,jdbcType=TIMESTAMP})
   </insert>
@@ -69,8 +69,8 @@
             <if test="platformCode != null">
                 platform_code,
             </if>
-            <if test="deleteFlag != null">
-                delete_flag,
+            <if test="delFlag != null">
+                del_flag,
             </if>
             <if test="createBy != null">
                 create_by,
@@ -113,8 +113,8 @@
             <if test="platformCode != null">
                 #{platformCode,jdbcType=VARCHAR},
             </if>
-            <if test="deleteFlag != null">
-                #{deleteFlag,jdbcType=BIT},
+            <if test="delFlag != null">
+                #{delFlag,jdbcType=BIT},
             </if>
             <if test="createBy != null">
                 #{createBy,jdbcType=VARCHAR},
@@ -158,7 +158,7 @@
                 platform_code = #{platformCode,jdbcType=VARCHAR},
             </if>
             <if test="deleteFlag != null">
-                delete_flag = #{deleteFlag,jdbcType=BIT},
+                del_flag = #{delFlag,jdbcType=BIT},
             </if>
             <if test="createBy != null">
                 create_by = #{createBy,jdbcType=VARCHAR},
@@ -186,7 +186,7 @@
       lat = #{lat,jdbcType=VARCHAR},
       addr = #{addr,jdbcType=VARCHAR},
       platform_code = #{platformCode,jdbcType=VARCHAR},
-      delete_flag = #{deleteFlag,jdbcType=BIT},
+      del_flag = #{delFlag,jdbcType=BIT},
       create_by = #{createBy,jdbcType=VARCHAR},
       create_at = #{createAt,jdbcType=TIMESTAMP},
       update_by = #{updateBy,jdbcType=VARCHAR},
@@ -196,7 +196,7 @@
 
     <select id="getTypeIdPrimaryKey" parameterType="java.lang.Long" resultType="java.lang.Long">
         select type_id from share_dev
-        where delete_flag = false
+        where del_flag = false
         and id = #{id,jdbcType=BIGINT}
     </select>
 </mapper>

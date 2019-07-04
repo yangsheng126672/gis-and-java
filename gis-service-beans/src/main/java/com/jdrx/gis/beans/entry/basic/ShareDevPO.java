@@ -1,7 +1,10 @@
 package com.jdrx.gis.beans.entry.basic;
 
+import lombok.Data;
+
 import java.util.Date;
 
+@Data
 public class ShareDevPO {
     /**
      * 主键
@@ -51,7 +54,7 @@ public class ShareDevPO {
     /**
      * 是否删除
      */
-    private Boolean deleteFlag;
+    private Short delFlag;
 
     /**
      * 创建人
@@ -73,115 +76,4 @@ public class ShareDevPO {
      */
     private Date updateAt;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getTypeId() {
-        return typeId;
-    }
-
-    public void setTypeId(Long typeId) {
-        this.typeId = typeId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name == null ? null : name.trim();
-    }
-
-    public Short getStatus() {
-        return status;
-    }
-
-    public void setStatus(Short status) {
-        this.status = status;
-    }
-
-    public String getSn() {
-        return sn;
-    }
-
-    public void setSn(String sn) {
-        this.sn = sn == null ? null : sn.trim();
-    }
-
-    public String getLng() {
-        return lng;
-    }
-
-    public void setLng(String lng) {
-        this.lng = lng == null ? null : lng.trim();
-    }
-
-    public String getLat() {
-        return lat;
-    }
-
-    public void setLat(String lat) {
-        this.lat = lat == null ? null : lat.trim();
-    }
-
-    public String getAddr() {
-        return addr;
-    }
-
-    public void setAddr(String addr) {
-        this.addr = addr == null ? null : addr.trim();
-    }
-
-    public String getPlatformCode() {
-        return platformCode;
-    }
-
-    public void setPlatformCode(String platformCode) {
-        this.platformCode = platformCode == null ? null : platformCode.trim();
-    }
-
-    public Boolean getDeleteFlag() {
-        return deleteFlag;
-    }
-
-    public void setDeleteFlag(Boolean deleteFlag) {
-        this.deleteFlag = deleteFlag;
-    }
-
-    public String getCreateBy() {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy == null ? null : createBy.trim();
-    }
-
-    public Date getCreateAt() {
-        return createAt;
-    }
-
-    public void setCreateAt(Date createAt) {
-        this.createAt = createAt;
-    }
-
-    public String getUpdateBy() {
-        return updateBy;
-    }
-
-    public void setUpdateBy(String updateBy) {
-        this.updateBy = updateBy == null ? null : updateBy.trim();
-    }
-
-    public Date getUpdateAt() {
-        return updateAt;
-    }
-
-    public void setUpdateAt(Date updateAt) {
-        this.updateAt = updateAt;
-    }
 }

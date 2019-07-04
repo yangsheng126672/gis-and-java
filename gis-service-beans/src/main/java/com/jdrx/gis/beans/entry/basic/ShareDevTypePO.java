@@ -39,7 +39,7 @@ public class ShareDevTypePO {
     /**
      * 是否删除
      */
-    private Boolean deleteFlag;
+    private Short delFlag;
 
     /**
      * 创建人

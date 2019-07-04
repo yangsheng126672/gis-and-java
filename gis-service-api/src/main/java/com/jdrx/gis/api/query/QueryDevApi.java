@@ -74,7 +74,7 @@ public class QueryDevApi {
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
-		Logger.debug("api/0/query/findSonsNumByPid 前设备类型下的子类型设备个数");
+		Logger.debug("api/0/query/findSonsNumByPid 当前设备类型下的子类型设备个数");
 		return ResponseFactory.ok(queryDevService.findSonsNumByPid(dto.getId()));
 	}
 

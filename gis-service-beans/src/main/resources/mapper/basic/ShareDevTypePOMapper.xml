@@ -8,7 +8,7 @@
         <result column="p_id" jdbcType="BIGINT" property="pId"/>
         <result column="platform_code" jdbcType="VARCHAR" property="platformCode"/>
         <result column="limb_leaf" jdbcType="SMALLINT" property="limbLeaf"/>
-        <result column="delete_flag" jdbcType="BIT" property="deleteFlag"/>
+        <result column="del_flag" jdbcType="SMALLINT" property="delFlag"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
         <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
@@ -16,7 +16,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-    id, name, val, p_id, platform_code, limb_leaf, delete_flag, create_by, create_at,
+    id, name, val, p_id, platform_code, limb_leaf, del_flag, create_by, create_at,
     update_by, update_at
     </sql>
 
@@ -24,7 +24,7 @@
         select
         <include refid="Base_Column_List" />
         from share_dev_type
-        where delete_flag = false
+        where del_flag = 0
         and id = #{id,jdbcType=BIGINT}
     </select>
 
@@ -32,7 +32,7 @@
         select
           <include refid="Base_Column_List" />
         from share_dev_type
-        where delete_flag = false
+        where del_flag = 0
     </select>
 
     <select id="findDevTypeListByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -41,7 +41,7 @@
                 WITH RECURSIVE T ( ID, NAME, p_id, val, limb_leaf, DEPTH ) AS (
                 SELECT A .ID, A.NAME, A.p_id, A.val, A.limb_leaf, 1
                 FROM share_dev_type A
-                WHERE delete_flag = false
+                WHERE del_flag = 0
                 AND ID = #{id,jdbcType=BIGINT}
                 UNION ALL
                 SELECT b.ID, b.NAME, b.p_id, b.val, b.limb_leaf, C.DEPTH + 1
@@ -81,12 +81,12 @@
             SELECT A .* FROM share_dev_type A
             WHERE
                 ID = 1
-                AND delete_flag = FALSE
+                AND del_flag = 0
             UNION ALL
             SELECT b.* FROM share_dev_type b, A
             WHERE
                 A.ID = b.p_id
-                AND b.delete_flag = FALSE
+                AND b.del_flag = 0
             ) SELECT * FROM A
         ) aa
     WHERE EXISTS
