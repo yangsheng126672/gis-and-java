@@ -38,6 +38,12 @@
         <result column="num" jdbcType="VARCHAR" property="num"/>
     </resultMap>
 
+    <resultMap id="BaseResultMap6" type="com.jdrx.gis.beans.entry.query.SpaceInfTotalPO">
+        <result column="coverageName" jdbcType="VARCHAR" property="coverageName"/>
+        <result column="number" jdbcType="BIGINT" property="number"/>
+        <result column="id" jdbcType="BIGINT" property="id"/>
+    </resultMap>
+
 
     <select id="findFirstHierarchyDevType" resultMap="BaseResultMap2">
         select * from share_dev_type where p_id = -1 and del_flag = 0
@@ -137,4 +143,33 @@
         </choose>
     </select>
 
+    <select id="findSpaceInfoByDevIds" resultMap="BaseResultMap6" parameterType="java.util.List">
+        select firstTypeid id,firstTypeName coverageName,count(1) number from (
+            select ccc.*,ddd.* from (
+                select dev_id,type_id from (
+                SELECT dev_id FROM gis_dev_ext_1
+                    <where>
+                        1=1
+                        <if test="devIds != null and devIds.size > 0">
+                            and dev_id in
+                            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                                #{item}
+                            </foreach>
+                        </if>
+                    </where>
+                ) a INNER JOIN share_dev b on a.dev_id = b.id
+            ) ccc left join (
+                select bcd.*,tc.name firstTypeName from (
+                    select id,name,path,path[1] firstTypeId from (
+                        with RECURSIVE t(id,name,path)  as (
+                        SELECT a.id,a.name,array[a.id] FROM share_dev_type a where p_id = -1
+                        union all
+                        select b.id,b.name,PATH||b.id from share_dev_type b , t c where c.id = b.p_id
+                        ) select * from t
+                    ) ac
+                ) bcd left join
+                (select id,name from share_dev_type where del_flag = 0) tc on bcd.firstTypeId = tc.id
+            ) ddd on ccc.type_id = ddd.id
+        ) fff group by firsttypeId,firsttypename
+    </select>
 </mapper>

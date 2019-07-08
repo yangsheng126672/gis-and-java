@@ -76,6 +76,7 @@ public class DictDetailApi {
 		return ResponseFactory.ok(dictDetailVO);
 	}
 
+
 	/**
 	@ApiModelProperty(value = "根据设备类型ID集查图层服务的URL列表")
 	@RequestMapping(value = "findLayerUrlListByTypeIds")

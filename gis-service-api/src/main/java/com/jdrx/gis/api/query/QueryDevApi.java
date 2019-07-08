@@ -1,7 +1,8 @@
 package com.jdrx.gis.api.query;
 
-import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.beans.dto.query.QueryDevDTO;
+import com.jdrx.gis.beans.dto.query.RangeDTO;
+import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -38,11 +39,11 @@ public class QueryDevApi {
 	@Autowired
 	private QueryDevService queryDevService;
 
-	@ApiOperation(value = "获取所有图层对应设备个数")
+	@ApiOperation(value = "获取划定范围内图层对应设备个数")
 	@RequestMapping(value = "findFirstHierarchyDevTypeNum")
-	public ResposeVO findFirstHierarchyDevTypeNum() throws BizException{
-		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 获取所有图层对应设备个数");
-		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum());
+	public ResposeVO findFirstHierarchyDevTypeNum(@ApiParam(name = "dto", required = true) @RequestBody @Valid RangeDTO rangeDTO) throws BizException{
+		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 获取所有图层对应设备个数 dto = {}", rangeDTO.toString());
+		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum(rangeDTO));
 	}
 
 	@ApiOperation(value = "根据设备类型ID查设备列表信息")

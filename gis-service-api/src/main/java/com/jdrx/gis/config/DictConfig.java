@@ -19,4 +19,7 @@ public class DictConfig {
 
 	/** arcgis发布图层的URL对应的参数 */
 	private String layerUrl;
+
+	/** 点和面的图层URL */
+	private String plLayerUrl;
 }

@@ -9,8 +9,10 @@ import com.google.gson.JsonObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import okhttp3.*;
 import org.postgresql.util.PGobject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,8 @@ import java.util.regex.Pattern;
  * @Time: 2019/6/19 16:04
  */
 public class ComUtil {
+
+	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 	/**
 	 * 交换ss数组中target字符到idx位置,适用于ss数组元素不重复
@@ -173,5 +177,43 @@ public class ComUtil {
 			throw new BizException("水管口径类型参数值格式不正确");
 		}
 		return result;
+	}
+
+	/**
+	 * arcgis发布图层服务httppost 请求
+	 * @param url
+	 * @param map 参数
+	 * @return
+	 * @throws IOException
+	 */
+	public static String httpPost(String url, Map<String, String> map) throws IOException {
+		OkHttpClient httpClient = new OkHttpClient();
+		FormBody.Builder builder = new FormBody.Builder();
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			builder.add(entry.getKey(), entry.getValue());
+		}
+		RequestBody requestBody = builder.build();
+		Request request = new Request.Builder()
+				.url(url)
+				.post(requestBody)
+				.build();
+		Response response = httpClient.newCall(request).execute();
+		return response.body().string();
+	}
+
+	/**
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static String httpGet(String url) throws IOException {
+		OkHttpClient httpClient = new OkHttpClient();
+		Request request = new Request.Builder()
+				.url(url)
+				.get()
+				.build();
+		Response response = httpClient.newCall(request).execute();
+		return response.body().string();
 	}
 }

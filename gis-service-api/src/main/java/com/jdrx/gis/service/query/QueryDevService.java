@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.ELimbLeaf;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.QueryDevDTO;
+import com.jdrx.gis.beans.dto.query.RangeDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
@@ -25,7 +26,6 @@ import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
@@ -64,38 +64,23 @@ public class QueryDevService {
 	@Autowired
 	DictDetailService dictDetailService;
 
+	@Autowired
+	LayerService layerService;
+
 	/**
 	 * 获取第一级图层对应的设备个数
 	 * @return
 	 */
-	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum() throws BizException{
+	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(RangeDTO rangeDTO) throws BizException{
 		try {
-			List<SpaceInfTotalPO> list = new ArrayList<>();
-			List<ShareDevTypePO> devTypePOs = devQueryDAO.findFirstHierarchyDevType();
-			if (Objects.isNull(devTypePOs)) {
-				return list;
+			List<Long> devIds = null;
+			if (Objects.isNull(rangeDTO.getRange()) || StringUtils.isEmpty(rangeDTO.getRange())) {
+				devIds = layerService.findDevIdsByAreaRange(rangeDTO.getRange(), rangeDTO.getInSR());
 			}
-			devTypePOs.stream().forEach(devTypePO -> {
-				SpaceInfTotalPO spaceInfTotalPO = new SpaceInfTotalPO();
-				spaceInfTotalPO.setCoverageName(devTypePO.getName());
-				spaceInfTotalPO.setNumber(0L);
-				spaceInfTotalPO.setId(devTypePO.getId());
-				list.add(spaceInfTotalPO);
-			});
-			Logger.debug("设备类型PID=-1的个数：{}", devTypePOs.size());
-			list.stream().forEach(spaceInfTotalPO -> {
-				List<ShareDevTypePO> shareDevTypePOs = devQueryDAO.findDevTypeByPID(spaceInfTotalPO.getId());
-				List<Long> ids = new ArrayList<>();
-				if (!ObjectUtils.isEmpty(shareDevTypePOs)) {
-					shareDevTypePOs.stream().forEach(shareDevTypePO -> {
-						ids.add(shareDevTypePO.getId());
-					});
-				}
-				Long cnt = devQueryDAO.getCountByTypeIds(ids);
-				spaceInfTotalPO.setNumber(cnt);
-			});
+			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devIds);
 			return list;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("获取第一级图层对应的设备个数失败！");
 			throw new BizException("获取第一级图层对应的设备个数失败！");
 		}
