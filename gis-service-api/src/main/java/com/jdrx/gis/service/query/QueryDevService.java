@@ -74,7 +74,7 @@ public class QueryDevService {
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(RangeDTO rangeDTO) throws BizException{
 		try {
 			List<Long> devIds = null;
-			if (Objects.isNull(rangeDTO.getRange()) || StringUtils.isEmpty(rangeDTO.getRange())) {
+			if (Objects.nonNull(rangeDTO.getRange()) && !StringUtils.isEmpty(rangeDTO.getRange())) {
 				devIds = layerService.findDevIdsByAreaRange(rangeDTO.getRange(), rangeDTO.getInSR());
 			}
 			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devIds);

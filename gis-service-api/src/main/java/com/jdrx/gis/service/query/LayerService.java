@@ -127,6 +127,7 @@ public class LayerService {
 				Object dev_id = ((JSONObject)attributes).get(GISConstants.DEV_ID);
 				list.add(Long.parseLong(String.valueOf(dev_id)));
 			});
+			Logger.debug("范围内设备个数为：{} ", list.size());
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();

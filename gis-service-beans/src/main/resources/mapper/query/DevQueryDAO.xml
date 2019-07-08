@@ -147,7 +147,7 @@
         select firstTypeid id,firstTypeName coverageName,count(1) number from (
             select ccc.*,ddd.* from (
                 select dev_id,type_id from (
-                SELECT dev_id FROM gis_dev_ext_1
+                SELECT dev_id FROM gis_dev_ext
                     <where>
                         1=1
                         <if test="devIds != null and devIds.size > 0">
