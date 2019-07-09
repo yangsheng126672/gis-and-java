@@ -1,6 +1,7 @@
 package com.jdrx.gis.service.basic;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
@@ -14,8 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static com.jdrx.gis.util.ComUtil.getChildNodes;
 import static com.jdrx.gis.util.ComUtil.getNodeJson;
 
 /**
@@ -40,6 +44,108 @@ public class BasicDevQuery {
 	@Autowired
 	private DevQueryDAO devQueryDAO;
 
+	@Autowired
+	private DictDetailService detailService;
+
+
+	/**
+	 * 递归处理   数据库树结构数据->树形json
+	 * @param id
+	 * @param list
+	 * @return
+	 */
+	public  JSONArray getNodeJson(Long id,List<ShareDevTypePO> list,final int level) throws BizException{
+		if (list.size() ==0){
+			return null;
+		}
+		String layerUrl = null;
+		String iconUrl = null;
+		List<Map<String,String>> mapList = new ArrayList<>();
+		List<Map<String,String>> iconmapList = new ArrayList<>();
+		JSONArray childTree = new JSONArray();
+		if (level<3){
+			//当前层级当前点下的所有子节点
+			List<ShareDevTypePO> childList = getChildNodes(id,list);
+			for (ShareDevTypePO node : childList) {
+				Long[] ids = new Long[1];
+				JSONObject o = new JSONObject();
+				o.put("id",node.getId());
+				o.put("name", node.getName());
+				o.put("type", node.getLimbLeaf());
+				o.put("pid",node.getPId());
+				ids[0] = node.getId();
+				//获取图层url
+				mapList = detailService.findLayerUrlListByTypeIds(ids,1);
+				if (mapList.size()>0){
+					layerUrl = mapList.get(0).get(node.getId().toString());
+				}
+				o.put("layerUrl",layerUrl);
+				//获取图例url
+				iconmapList = detailService.findLayerUrlListByTypeIds(ids,2);
+				if (iconmapList.size()>0){
+					iconUrl = iconmapList.get(0).get(node.getId().toString());
+				}
+				o.put("iconUrl",iconUrl);
+				JSONArray childs = getNodeJson(node.getId(),list,level+1);  //递归调用该方法
+				if(!childs.isEmpty()) {
+					o.put("children",childs);
+				}
+				childTree.fluentAdd(o);
+			}
+		}
+		return childTree;
+	}
+
+	/**
+	 * 获取图例列表
+	 * @param id
+	 * @param list
+	 * @param level
+	 * @return
+	 * @throws BizException
+	 */
+	public  JSONArray getIconJsonTree(Long id,List<ShareDevTypePO> list,int level) throws BizException{
+		if (list.size() ==0){
+			return null;
+		}
+		String iconUrl = null;
+		List<Map<String,String>> iconmapList = new ArrayList<>();
+		JSONArray childTree = new JSONArray();
+//		if(level < 2){
+		//当前层级当前点下的所有子节点
+		List<ShareDevTypePO> childList = getChildNodes(id,list);
+		for (ShareDevTypePO node : childList) {
+			//获取图例url
+			Long[] ids = new Long[1];
+			ids[0] = node.getId();
+			iconmapList = detailService.findLayerUrlListByTypeIds(ids,2);
+			if (iconmapList.size()>0){
+				iconUrl = iconmapList.get(0).get(node.getId().toString());
+			}
+			JSONObject o = new JSONObject();
+			o.put("id",node.getId());
+			o.put("name", node.getName());
+			o.put("type", node.getLimbLeaf());
+			o.put("level",level);
+			o.put("iconUrl",iconUrl);
+
+			//递归调用该方法
+			JSONArray childs = getIconJsonTree(node.getId(),list,level+1);
+
+//				childTree.fluentAdd(o);
+
+			if (level<2){
+				if(!childs.isEmpty()) {
+					o.put("children",childs);
+				}
+				childTree.fluentAdd(o);
+			}else if (!childs.isEmpty()){
+				childTree.addAll(childs);
+			}
+		}
+//		}
+		return childTree;
+	}
 	/**
 	 * 查询所有设备类型
 	 * @return
@@ -48,11 +154,28 @@ public class BasicDevQuery {
 		try {
 
 			List<ShareDevTypePO> list = shareDevTypePOMapper.findDevTypeList();
-			JSONArray jsonArray = getNodeJson(-1L, list);
+			JSONArray jsonArray = getNodeJson(-1L, list,0);
 			return jsonArray;
 		} catch (Exception e) {
 			Logger.error("查询所有设备类型失败，{}", e.getMessage());
 			throw new BizException("查询所有设备类型失败!");
+		}
+	}
+
+	/**
+	 * 获取图例层级及图标
+	 * @return
+	 * @throws BizException
+	 */
+	public JSONArray findDevTypeIconList() throws BizException{
+		try {
+			List<ShareDevTypePO> list = shareDevTypePOMapper.findDevTypeList();
+			JSONArray jsonArray = getIconJsonTree(-1L, list,0);
+			return jsonArray;
+
+		} catch (Exception e) {
+			Logger.error("查询图例图标失败，{}", e.getMessage());
+			throw new BizException("查询图例图标失败!");
 		}
 	}
 

@@ -54,6 +54,14 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.findDevTypeList());
 	}
 
+
+	@ApiOperation(value = "获取所有图例图标类型列表")
+	@RequestMapping(value = "findIconTypeList")
+	public ResposeVO findIconTypeList() throws BizException{
+		Logger.debug("api/0/basic/findIconTypeList 获取所有图例图标类型列表");
+		return ResponseFactory.ok(basicDevQuery.findDevTypeIconList());
+	}
+
 	@ApiOperation(value = "根据设备ID查当前设备的属性信息")
 	@RequestMapping(value = "getDevExtByDevId")
 	public ResposeVO getDevExtByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{

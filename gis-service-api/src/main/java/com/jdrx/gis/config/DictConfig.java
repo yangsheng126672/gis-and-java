@@ -22,4 +22,7 @@ public class DictConfig {
 
 	/** 点和面的图层URL */
 	private String plLayerUrl;
+
+	/**  图例icon对应的URL */
+	private String iconUrl;
 }

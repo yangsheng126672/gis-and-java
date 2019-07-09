@@ -140,9 +140,14 @@ public class DictDetailService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<Map<String,String>> findLayerUrlListByTypeIds(Long[] typeIds) throws BizException {
+	public List<Map<String,String>> findLayerUrlListByTypeIds(Long[] typeIds,int typeStr) throws BizException {
+		String layerUrl = null;
 		try {
-			String layerUrl = dictConfig.getLayerUrl();
+			if (1 == typeStr){
+				layerUrl = dictConfig.getLayerUrl();
+			}else if(2 == typeStr){
+				layerUrl = dictConfig.getIconUrl();
+			}
 			List<DictDetailPO> detailPOs = findDetailsByTypeVal(layerUrl);
 			List<Map<String, String>> urlList = Lists.newArrayList();
 			if (Objects.nonNull(detailPOs) && detailPOs.size() > 0) {
