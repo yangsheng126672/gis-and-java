@@ -2,19 +2,20 @@ package com.jdrx.gis.service.query;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.ELimbLeaf;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
+import com.jdrx.gis.beans.dto.query.ExpRangeTypeDTO;
 import com.jdrx.gis.beans.dto.query.QueryDevDTO;
 import com.jdrx.gis.beans.dto.query.RangeDTO;
+import com.jdrx.gis.beans.dto.query.RangeTypeDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.*;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
-import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
-import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.ShareDevTypeService;
@@ -53,12 +54,6 @@ public class QueryDevService {
 	private GISDevExtPOMapper gisDevExtPOMapper;
 
 	@Autowired
-	private GisDevTplAttrPOMapper gisDevTplAttrPOMapper;
-
-	@Autowired
-	private ShareDevPOMapper shareDevPOMapper;
-
-	@Autowired
 	DictConfig dictConfig;
 
 	@Autowired
@@ -73,11 +68,8 @@ public class QueryDevService {
 	 */
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(RangeDTO rangeDTO) throws BizException{
 		try {
-			List<Long> devIds = null;
-			if (Objects.nonNull(rangeDTO.getRange()) && !StringUtils.isEmpty(rangeDTO.getRange())) {
-				devIds = layerService.findDevIdsByAreaRange(rangeDTO.getRange(), rangeDTO.getInSR());
-			}
-			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devIds);
+			String devStr = layerService.getDevIdsArray(rangeDTO.getRange(), rangeDTO.getInSR());
+			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devStr);
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,18 +79,18 @@ public class QueryDevService {
 	}
 
 	/**
-	 * 根据类型ID查询所属的设备信息
+	 * 根据类型ID和经纬度范围查询所属的设备信息
 	 * @param pid
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SpaceInfoVO> findDevListByTypeID(Long pid) throws BizException{
+	public List<SpaceInfoVO> findDevListByTypeID(Long pid, String devIds) throws BizException{
 		try {
-			List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(pid);
+			List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(pid, devIds);
 			return list;
 		} catch (Exception e) {
-			Logger.error("根据类型ID查询所属设备信息失败！pid = {} , pid)");
-			throw  new BizException("根据类型ID查询所属设备信息失败");
+			Logger.error("根据类型ID和经纬度范围查询所属设备信息失败！pid = {} ", pid);
+			throw  new BizException("根据类型ID和经纬度范围查询所属设备信息失败");
 		}
 	}
 
@@ -148,51 +140,32 @@ public class QueryDevService {
 	}
 
 	/**
-	 * 获取设备类型下面的设备列表信息，处理json
+	 * 获取设备类型下面的设备列表信息
 	 * @param id 设备类型ID
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SpaceInfoVO> findDevListByTypeID2(Long id) throws BizException {
-		List<SpaceInfoVO> list = findDevListByTypeID(id);
-		List<FieldNameVO> fieldsList = findFieldNamesByTypeID(id);
-		if (Objects.isNull(fieldsList)) {
-			Logger.error("空间查询的表头信息为空");
-			throw new BizException("设备列表的title为空");
-		}
-		String[] filedNames = fieldsList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
-		if (Objects.nonNull(list)) {
-			list.stream().map(vo -> {
-				Object obj = vo.getDataInfo();
-				if (Objects.isNull(obj)) {
-					return vo;
-				}
-				try {
-					Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
-					vo.setDataMap(map);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return vo;
-			}).collect(Collectors.toList());
-		}
+	/**
+	public List<SpaceInfoVO> findDevListByTypeID2(Long id, String devIds) throws BizException {
+		List<SpaceInfoVO> list = findDevListByTypeID(id, devIds);
 		return list;
-	}
+	}*/
 
 	/**
 	 * 水管口径数量统计，当前按照我们自己定义的大小分类
 	 * @return
 	 * @throws BizException
 	 */
-	public List<WaterPipeTypeNumVO> findWaterPipeCaliberSum() throws BizException{
+	public List<WaterPipeTypeNumVO> findWaterPipeCaliberSum(RangeDTO rangeDTO) throws BizException{
 		List<WaterPipeTypeNumVO> list = new ArrayList<>();
 		String caliberType = dictConfig.getCaliberType();
 		if (Objects.isNull(caliberType)) {
 			throw new BizException("配置文件中未配置水管口径的类型值！");
 		}
+		String devStr = layerService.getDevIdsArray(rangeDTO.getRange(), rangeDTO.getInSR());
 		List<DictDetailPO> dictDetailPOs = dictDetailService.findDetailsByTypeVal(caliberType);
 		if (Objects.nonNull(dictDetailPOs)) {
-			dictDetailPOs.stream().forEach(dictDetailPO -> {
+			for (DictDetailPO dictDetailPO : dictDetailPOs) {
 				WaterPipeTypeNumVO vo = new WaterPipeTypeNumVO();
 				vo.setTypeName(dictDetailPO.getName());
 				try {
@@ -204,14 +177,15 @@ public class QueryDevService {
 					int min = Integer.parseInt(String.valueOf(params[1]));
 					int max = Integer.parseInt(String.valueOf(params[2]));
 					String suf = String.valueOf(params[3]);
-					long num = devQueryDAO.findWaterPipeCaliberSum(pre, min, max, suf);
+
+					long num = devQueryDAO.findWaterPipeCaliberSum(pre, min, max, suf, devStr);
 					vo.setNum(num);
 					list.add(vo);
 				} catch (BizException e) {
 					Logger.error("根据水管口径对应设备数量出错：{}", e.getMsg());
 					e.printStackTrace();
 				}
-			});
+			}
 		} else {
 			throw new BizException("数据库dict_detail表中没有配置水管口径的范围值！");
 		}
@@ -219,18 +193,25 @@ public class QueryDevService {
 	}
 
 	/**
-	 * 根据设备类型的ID，查询子类的设备个数，子类为第二层的子类
-	 * @param id
+	 * 根据设备类型的ID和经纬度范围，查询子类的设备个数，子类为第二层的子类
+	 * @param expRangeTypeDTO
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SonsNumVO> findSonsNumByPid(Long id) throws BizException {
+	public List<SonsNumVO> findSonsNumByPid(ExpRangeTypeDTO expRangeTypeDTO) throws BizException {
 		List<SonsNumVO> resultList = new ArrayList<>();
 		// 根据设备类型ID查第二层的子类
-		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(id);
+		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(expRangeTypeDTO.getTypeId());
+
+		List<Long> devIds;
+		String devStr = null;
+		if (Objects.nonNull(expRangeTypeDTO.getRange()) && !StringUtils.isEmpty(expRangeTypeDTO.getRange())) {
+			devIds = layerService.findDevIdsByAreaRange(expRangeTypeDTO.getRange(), expRangeTypeDTO.getInSR());
+			devStr = Joiner.on(",").join(devIds);
+		}
 
 		if (!Objects.isNull(secondTypeList)) {
-			secondTypeList.stream().forEach(po -> {
+			for (ShareDevTypePO po : secondTypeList) {
 				SonsNumVO vo = new SonsNumVO();
 				// 根据ID查所有子类
 				try {
@@ -252,7 +233,7 @@ public class QueryDevService {
 					long num = 0L;
 					// 如果typeIds 为空就会统计称全表个数，故不为空才查询
 					if (typeIds != null && typeIds.size() > 0) {
-						num = devQueryDAO.getCountByTypeIds(typeIds);
+						num = devQueryDAO.getCountByTypeIds(typeIds, devStr);
 					}
 					vo.setNum(num);
 					resultList.add(vo);
@@ -260,7 +241,7 @@ public class QueryDevService {
 					Logger.error("空间查询，子类个数统计异常：{}", e.getMsg());
 					e.printStackTrace();
 				}
-			});
+			}
 		}
 		return resultList;
 	}
@@ -268,15 +249,15 @@ public class QueryDevService {
 	/**
 	 * 导出空间查询的设备列表数据
 	 * @param response
-	 * @param id
+	 * @param dto
 	 * @throws BizException
 	 */
-	public Boolean  exportDevInfoByPID(HttpServletResponse response, Long id) throws BizException {
+	public Boolean  exportDevInfoByPID(HttpServletResponse response, ExpRangeTypeDTO dto) throws BizException {
 		Boolean result;
 		try {
 			XSSFWorkbook workbook;
 			workbook = new XSSFWorkbook(this.getClass().getResourceAsStream("/template/devinfo.xlsx"));
-			ShareDevTypePO shareDevTypePO = shareDevTypeService.getByPrimaryKey(id);
+			ShareDevTypePO shareDevTypePO = shareDevTypeService.getByPrimaryKey(dto.getTypeId());
 			String title = "Sheet1";
 			if (Objects.nonNull(shareDevTypePO)) {
 				title = shareDevTypePO.getName();
@@ -288,7 +269,7 @@ public class QueryDevService {
 			XSSFCellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
 
 			XSSFRow row = sheet.createRow(0);
-			List<FieldNameVO> headerList = findFieldNamesByTypeID(id);
+			List<FieldNameVO> headerList = findFieldNamesByTypeID(dto.getTypeId());
 			if (Objects.isNull(headerList)) {
 				Logger.error("空间查询的表头信息为空");
 				throw new BizException("设备列表的title为空");
@@ -301,8 +282,29 @@ public class QueryDevService {
 				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
 				cell.setCellValue(text);
 			}
-			List<SpaceInfoVO> devList = findDevListByTypeID2(id);
+			String devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+			List<SpaceInfoVO> devList = findDevListByTypeID(dto.getTypeId(), devStr);
+			List<FieldNameVO> fieldsList = findFieldNamesByTypeID(dto.getTypeId());
+			if (Objects.isNull(fieldsList)) {
+				Logger.error("空间查询的表头信息为空");
+				throw new BizException("设备列表的title为空");
+			}
+			String[] filedNames = fieldsList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
 			if (Objects.nonNull(devList)) {
+				devList.stream().map(vo -> {
+					Object obj = vo.getDataInfo();
+					if (Objects.isNull(obj)) {
+						return vo;
+					}
+					try {
+						Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+						vo.setDataMap(map);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return vo;
+				}).collect(Collectors.toList());
+
 				int body_i = 1;
 				for (SpaceInfoVO spaceInfoVO : devList) {
 					Map<String, String> map = spaceInfoVO.getDataMap();
@@ -351,9 +353,10 @@ public class QueryDevService {
 	 * @return
 	 * @throws BizException
 	 */
-	public PageVO<SpaceInfoVO> findDevListPageByTypeID(QueryDevDTO dto) throws BizException {
-		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID2(dto.getTypeId());
+	public PageVO<SpaceInfoVO> findDevListPageByTypeID(RangeTypeDTO dto) throws BizException {
+		String devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto.getTypeId(), devStr);
 		return new PageVO<>(list);
 	}
 
@@ -414,4 +417,5 @@ public class QueryDevService {
 		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByDevIDs(dto.getDevIds());
 		return new PageVO<>(list);
 	}
+
 }

@@ -2,6 +2,7 @@ package com.jdrx.gis.service.query;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
@@ -13,6 +14,7 @@ import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -136,4 +138,26 @@ public class LayerService {
 		return Lists.newArrayList();
 	}
 
+	/**
+	 *  传经纬度范围和inSR获取设备列表
+	 * @param range
+	 * @param inSR
+	 * @return
+	 * @throws BizException
+	 */
+	public String getDevIdsArray(String range, String inSR) throws BizException{
+		try {
+			List<Long> devIds;
+			String devStr = null;
+			if (Objects.nonNull(range) && !StringUtils.isEmpty(range)) {
+				devIds = findDevIdsByAreaRange(range, inSR);
+				devStr = Joiner.on(",").join(devIds);
+			}
+			return devStr;
+		} catch (Exception e){
+			e.printStackTrace();
+			Logger.error("从arcgis服务获取设备列表失败！");
+			throw new BizException("从arcgis服务获取设备列表失败！");
+		}
+	}
 }

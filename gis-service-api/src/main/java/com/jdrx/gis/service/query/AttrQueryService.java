@@ -48,6 +48,9 @@ public class AttrQueryService {
 	@Autowired
 	QueryDevService queryDevService;
 
+	@Autowired
+	LayerService layerService;
+
 	/**
 	 * 根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类，
 	 * 并且查询出来的设备类型信息就不做层级展示。因为，按照前端页面的需求：父类A查出所有子类B1，B2等等都展示在下拉框中，
@@ -92,7 +95,9 @@ public class AttrQueryService {
 	 */
 	public List<GISDevExtVO> findDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
 		try {
-			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto);
+			String devIds = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
 			return list;
 		} catch (Exception e) {
 			Logger.error("据所选区域或属性键入的参数值查设备列表信息失败，{}", dto.toString());
@@ -107,7 +112,6 @@ public class AttrQueryService {
 	 * @throws BizException
 	 */
 	public PageVO<GISDevExtVO> findDevListPageByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
-		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByAreaOrInputVal(dto);
 		return new PageVO<>(list);
 	}
@@ -149,7 +153,8 @@ public class AttrQueryService {
 				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
 				cell.setCellValue(text);
 			}
-			List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto);
+			String devIds = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+			List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
 			if (Objects.nonNull(devList)) {
 				String[] filedNames = attrPOs.stream().map(GisDevTplAttrPO::getFieldName).toArray(String[]::new);
 				devList =  dealDataInfoByDevIds(devList, filedNames);

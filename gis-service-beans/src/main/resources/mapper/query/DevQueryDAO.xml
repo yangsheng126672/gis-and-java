@@ -62,7 +62,7 @@
     </select>
 
     <select id="getCountByTypeIds" resultType="java.lang.Long" parameterType="java.util.List">
-        select count(1) cnt from share_dev
+        select count(1) cnt from share_dev sd
         <where>
             del_flag = 0
             <if test="typeIds != null and typeIds.size > 0">
@@ -70,6 +70,10 @@
                 <foreach collection="typeIds" index="index" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
+            </if>
+            <if test="devIds != null and devIds != ''">
+                and EXISTS (select 1 from
+                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir where cast(vir.dev_id as BIGINT) = sd.id)
             </if>
         </where>
     </select>
@@ -81,7 +85,7 @@
               SELECT sd.ID devId, sd.name, sd.addr, sdt.name typeName
               FROM
                 (
-                SELECT *  FROM share_dev
+                SELECT *  FROM share_dev sd
                   WHERE type_id IN (
                             SELECT id  FROM (
                                     WITH RECURSIVE A AS (
@@ -93,6 +97,10 @@
                                     ) SELECT *  FROM A
                                 ) rs  WHERE rs.limb_leaf = 2
                         )
+                        <if test="devIds != null and devIds != ''">
+                            and EXISTS (select 1 from
+                            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir where cast(vir.dev_id as BIGINT) = sd.id)
+                        </if>
                     ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
                     AND sd.del_flag = 0
                 ) dv LEFT JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext WHERE delete_flag = FALSE ) b
@@ -123,8 +131,12 @@
     </select>
 
     <select id="findWaterPipeCaliberSum" resultType="java.lang.Long">
-        select count(1) num from gis_dev_ext
+        select count(1) num from gis_dev_ext gdx
         where delete_flag = false
+        <if test="devIds != null and devIds != ''">
+            and EXISTS (select 1 from
+            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast (vir.dev_id as BIGINT) = gdx.dev_id)
+        </if>
         <choose>
             <when test='pre == "("'>
                 and  caliber > #{min,jdbcType=INTEGER}
@@ -143,18 +155,16 @@
         </choose>
     </select>
 
-    <select id="findSpaceInfoByDevIds" resultMap="BaseResultMap6" parameterType="java.util.List">
+    <select id="findSpaceInfoByDevIds" resultMap="BaseResultMap6">
         select firstTypeid id,firstTypeName coverageName,count(1) number from (
             select ccc.*,ddd.* from (
                 select dev_id,type_id from (
-                SELECT dev_id FROM gis_dev_ext
+                SELECT dev_id FROM gis_dev_ext gdx
                     <where>
                         1=1
-                        <if test="devIds != null and devIds.size > 0">
-                            and dev_id in
-                            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
-                                #{item}
-                            </foreach>
+                        <if test="devIds != null and devIds != ''">
+                            and EXISTS (select 1 from
+                            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
                         </if>
                     </where>
                 ) a INNER JOIN share_dev b on a.dev_id = b.id

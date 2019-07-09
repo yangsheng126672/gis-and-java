@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * @Description: 属性查询DTO
@@ -26,6 +25,10 @@ public class AttrQeuryDTO extends PageDTO {
 	@ApiModelProperty("参数内容")
 	private String paramVal;
 
-	@ApiModelProperty("选中区域的设备ID集合，空集合查全部")
-	private List<Long> devIds;
+	@ApiModelProperty("投影坐标系编号")
+	@NotNull(message = "投影坐标系编号不能为空")
+	private String inSR;
+
+	@ApiModelProperty("经纬度范围,逗号隔开,如果该值为空即查询所有设备")
+	private String range;
 }

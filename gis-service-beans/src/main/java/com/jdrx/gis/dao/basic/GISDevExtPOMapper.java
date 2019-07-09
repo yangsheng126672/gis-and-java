@@ -21,7 +21,7 @@ public interface GISDevExtPOMapper {
 	 * @param dto
 	 * @return
 	 */
-	List<GISDevExtVO> findDevListByAreaOrInputVal(@Param("dto") AttrQeuryDTO dto);
+	List<GISDevExtVO> findDevListByAreaOrInputVal(@Param("dto") AttrQeuryDTO dto, @Param("devIds") String devIds);
 
 
 }

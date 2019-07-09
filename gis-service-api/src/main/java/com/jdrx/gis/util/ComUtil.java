@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -187,7 +188,7 @@ public class ComUtil {
 	 * @throws IOException
 	 */
 	public static String httpPost(String url, Map<String, String> map) throws IOException {
-		OkHttpClient httpClient = new OkHttpClient();
+		OkHttpClient httpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).build();
 		FormBody.Builder builder = new FormBody.Builder();
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			builder.add(entry.getKey(), entry.getValue());

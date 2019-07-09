@@ -33,14 +33,13 @@ public interface DevQueryDAO {
 	 * @param typeIds
 	 * @return
 	 */
-	Long getCountByTypeIds(@Param("typeIds") List<Long> typeIds);
+	Long getCountByTypeIds(@Param("typeIds") List<Long> typeIds, @Param("devIds" ) String devIds);
 
 	/**
-	 * 根据类型ID查询所属设备信息
-	 * @param typeId
+	 * 根据类型ID和经纬度范围查询所属设备信息
 	 * @return
 	 */
-	List<SpaceInfoVO> findDevListByTypeID(Long typeId);
+	List<SpaceInfoVO> findDevListByTypeID(@Param("typeId") Long typeId, @Param("devIds") String devIds);
 
 	/**
 	 * 根据类型ID查表头
@@ -54,12 +53,13 @@ public interface DevQueryDAO {
 	 * 水管口径数量查询
 	 * @return
 	 */
-	Long findWaterPipeCaliberSum(@Param("pre")String pre, @Param("min")Integer min, @Param("max")Integer max, @Param("suf") String suf);
+	Long findWaterPipeCaliberSum(@Param("pre")String pre, @Param("min")Integer min,
+	                             @Param("max")Integer max, @Param("suf") String suf, @Param("devIds") String devIds);
 
 	/**
 	 * 根据设备ID集查每个类型设备个数
 	 * @param devIds
 	 * @return
 	 */
-	List<SpaceInfTotalPO> findSpaceInfoByDevIds(@Param("devIds") List<Long> devIds);
+	List<SpaceInfTotalPO> findSpaceInfoByDevIds(@Param("devIds") String devIds);
 }

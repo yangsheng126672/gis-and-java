@@ -53,10 +53,10 @@
         </where>
     </select>
 
-    <select id="findDevListByAreaOrInputVal" resultMap="BaseResultMap2" parameterType="com.jdrx.gis.beans.dto.query.AttrQeuryDTO">
+    <select id="findDevListByAreaOrInputVal" resultMap="BaseResultMap2">
         select
           id, dev_id, tpl_type_id,data_info
-        from gis_dev_ext
+        from gis_dev_ext gdx
         <where>
             delete_flag = FALSE
             <if test="dto.typeId != null">
@@ -80,11 +80,9 @@
                 and data_info :: jsonb ->> #{dto.fieldName, jdbcType=VARCHAR}
                 like concat('%', #{dto.paramVal, jdbcType=VARCHAR}, '%')
             </if>
-            <if test="dto.devIds != null and dto.devIds.size > 0">
-                and dev_id in
-                <foreach collection="dto.devIds" index="index" item="item" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
+            <if test="devIds != null and devIds != ''">
+                and EXISTS (select 1 from
+                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
             </if>
         </where>
     </select>
