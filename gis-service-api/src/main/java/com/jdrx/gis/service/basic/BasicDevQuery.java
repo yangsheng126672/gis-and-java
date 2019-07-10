@@ -111,7 +111,6 @@ public class BasicDevQuery {
 		String iconUrl = null;
 		List<Map<String,String>> iconmapList = new ArrayList<>();
 		JSONArray childTree = new JSONArray();
-//		if(level < 2){
 		//当前层级当前点下的所有子节点
 		List<ShareDevTypePO> childList = getChildNodes(id,list);
 		for (ShareDevTypePO node : childList) {
@@ -126,21 +125,29 @@ public class BasicDevQuery {
 			o.put("id",node.getId());
 			o.put("name", node.getName());
 			o.put("type", node.getLimbLeaf());
-			o.put("level",level);
+//			o.put("level",level);
 			o.put("iconUrl",iconUrl);
 
 			//递归调用该方法
 			JSONArray childs = getIconJsonTree(node.getId(),list,level+1);
-
-//				childTree.fluentAdd(o);
 
 			if (level<2){
 				if(!childs.isEmpty()) {
 					o.put("children",childs);
 				}
 				childTree.fluentAdd(o);
-			}else if (!childs.isEmpty()){
-				childTree.addAll(childs);
+			}else if (level == 2){
+				if (!childs.isEmpty()){
+					childTree.addAll(childs);
+				}
+				if (2 == node.getLimbLeaf()){
+					childTree.fluentAdd(o);
+				}
+			}else{
+				childTree.fluentAdd(o);
+				if (!childs.isEmpty()){
+					childTree.addAll(childs);
+				}
 			}
 		}
 //		}
