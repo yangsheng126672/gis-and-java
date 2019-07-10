@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
  */
 public class ComUtil {
 
-	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 	/**
 	 * 交换ss数组中target字符到idx位置,适用于ss数组元素不重复

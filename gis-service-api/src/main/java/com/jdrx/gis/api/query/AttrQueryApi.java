@@ -39,7 +39,7 @@ public class AttrQueryApi {
 	@RequestMapping(value = "findHasTplDevTypeListById")
 	public ResposeVO findHasTplDevTypeListById(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto)
 			throws BizException {
-		Logger.debug("api/0/query/findHasTplDevTypeListById 根据设备类型ID递归查询所有配置了模板的子类");
+		Logger.debug("api/0/query/findHasTplDevTypeListById 根据设备类型ID递归查询所有配置了模板的子类，typeId = {}", dto.getId());
 		return ResponseFactory.ok(attrQueryService.findHasTplDevTypeListById(dto.getId()));
 	}
 
@@ -47,14 +47,15 @@ public class AttrQueryApi {
 	@RequestMapping(value = "findAttrListByTypeId")
 	public ResposeVO findAttrListByTypeId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto)
 		throws BizException {
-		Logger.debug("api/0/query/findAttrListByTypeId 根据设备类型ID查模板配置信息");
+		Logger.debug("api/0/query/findAttrListByTypeId 根据设备类型ID查模板配置信息，typeId = {}", dto.getId());
 		return ResponseFactory.ok(attrQueryService.findAttrListByTypeId(dto.getId()));
 	}
 
 
 	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息")
 	@RequestMapping(value = "findDevListByAreaOrInputVal")
-	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
+	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException
+	{
 		Logger.debug("api/0/query/findDevListByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息");
 		if (Objects.isNull(dto)) {
 			throw new BizException("参数为空");
