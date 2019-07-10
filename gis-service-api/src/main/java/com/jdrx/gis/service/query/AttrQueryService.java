@@ -2,13 +2,20 @@ package com.jdrx.gis.service.query;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
+import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
+import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -50,6 +57,12 @@ public class AttrQueryService {
 
 	@Autowired
 	LayerService layerService;
+
+	@Autowired
+	private DictDetailService detailService;
+
+	@Autowired
+	private DictConfig dictConfig;
 
 	/**
 	 * 根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类，
@@ -227,6 +240,50 @@ public class AttrQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 		return gisDevExtVOs;
+	}
+
+	/**
+	 * 获取管径范围对应的图层地址
+	 * @param num
+	 * @return
+	 */
+	public String findCiliberLayerUrlByNum(String num)throws BizException {
+		String layerUrl = null;
+		String caliberLyerUrl = null;
+		try {
+			layerUrl = dictConfig.getCaliberUrl();
+			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
+			for (DictDetailPO dictDetail:detailPOs){
+				if (dictDetail.getName().equals(num)){
+					caliberLyerUrl = dictDetail.getVal();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return caliberLyerUrl;
+	}
+
+	/**
+	 * 获取管材对应的图层地址
+	 * @param type
+	 * @return
+	 */
+	public String findMeterialLayerUrlByNum(String type)throws BizException {
+		String layerUrl = null;
+		String caliberLyerUrl = null;
+		try {
+			layerUrl = dictConfig.getMeterialUrl();
+			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
+			for (DictDetailPO dictDetail:detailPOs){
+				if (dictDetail.getName().equals(type)){
+					caliberLyerUrl = dictDetail.getVal();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return caliberLyerUrl;
 	}
 
 

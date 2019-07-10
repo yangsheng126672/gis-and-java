@@ -25,4 +25,10 @@ public class DictConfig {
 
 	/**  图例icon对应的URL */
 	private String iconUrl;
+
+	/**  管径范围对应的URL */
+	private String caliberUrl;
+
+	/** 管材对应的URL */
+	private String meterialUrl;
 }

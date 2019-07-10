@@ -79,4 +79,24 @@ public class AttrQueryApi {
 		}
 		return ResponseFactory.ok(attrQueryService.findDevListPageByAreaOrInputVal(dto));
 	}
+
+	@ApiOperation(value = "根据管径范围值获取对应的图层url")
+	@RequestMapping(value = "findCaliberLayerUrl")
+	public ResposeVO findCaliberLayerUrl(@RequestBody @Valid String num) throws BizException {
+		if (Objects.isNull(num)) {
+			throw new BizException("参数为空");
+		}
+		return ResponseFactory.ok(attrQueryService.findCiliberLayerUrlByNum(num));
+	}
+
+	@ApiOperation(value = "根据管材值获取对应的图层url")
+	@RequestMapping(value = "findMeterialLayerUrl")
+	public ResposeVO findMeterialLayerUrl(@RequestBody @Valid String type) throws BizException {
+		if (Objects.isNull(type)) {
+			throw new BizException("参数为空");
+		}
+		return ResponseFactory.ok(attrQueryService.findMeterialLayerUrlByNum(type));
+	}
+
+
 }
