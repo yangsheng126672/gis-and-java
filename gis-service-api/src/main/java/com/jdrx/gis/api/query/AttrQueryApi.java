@@ -54,7 +54,8 @@ public class AttrQueryApi {
 
 	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息")
 	@RequestMapping(value = "findDevListByAreaOrInputVal")
-	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
+	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException
+	{
 		Logger.debug("api/0/query/findDevListByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息");
 		if (Objects.isNull(dto)) {
 			throw new BizException("参数为空");

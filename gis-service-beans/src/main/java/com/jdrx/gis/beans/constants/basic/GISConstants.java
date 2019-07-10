@@ -26,20 +26,6 @@ public class GISConstants {
 	 */
 	public final static String GEOM = "geom";
 
-	/**
-	 * 管径大小类型
-	 */
-	public final static String CALIBER_TYPE = "CALIBER_TYPE";
-
-	/**
-	 * 点图层URL数据字典配置的值
-	 */
-	public final static String POINT = "POINT";
-
-	/**
-	 * 面图层URL数据字典配置的值
-	 */
-	public final static String LINE = "LINE";
 
 	/********************************图层请求参数常量字段start**********************/
 	public final static String F = "f";
@@ -52,10 +38,11 @@ public class GISConstants {
 
 	public final static String INSR = "inSR";
 
-	public final static String WHERE = "where";
-
 	public final static String FEATURES = "features";
 
 	public final static String ATTRIBUTES = "attributes";
 	/********************************图层请求参数常量字段end**********************/
+
+	/** 编码 */
+	public final static String UTF8 = "UTF-8";
 }

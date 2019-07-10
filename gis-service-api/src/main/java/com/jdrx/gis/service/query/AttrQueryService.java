@@ -2,6 +2,7 @@ package com.jdrx.gis.service.query;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
@@ -185,7 +186,7 @@ public class AttrQueryService {
 				}
 			}
 			response.reset();
-			response.setCharacterEncoding("utf-8");
+			response.setCharacterEncoding(GISConstants.UTF8);
 			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
 			response.setContentType("application/vnd.ms-excel;charset=utf-8");
 			workbook.write(response.getOutputStream());
@@ -211,7 +212,7 @@ public class AttrQueryService {
 	 */
 	private List<GISDevExtVO> dealDataInfoByDevIds(List<GISDevExtVO> gisDevExtVOs, String[] filedNames) throws BizException {
 		if (Objects.isNull(gisDevExtVOs) || Objects.isNull(filedNames)) {
-			throw new BizException("参数为空");
+			throw new BizException("根据配置的模板字段，把json数据转换成map信息，传入的设备信息和模板字段参数为空！");
 		}
 		gisDevExtVOs.stream().map(vo -> {
 			Object obj = vo.getDataInfo();
