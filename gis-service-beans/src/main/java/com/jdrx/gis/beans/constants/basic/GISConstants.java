@@ -45,4 +45,10 @@ public class GISConstants {
 
 	/** 编码 */
 	public final static String UTF8 = "UTF-8";
+
+	/** 饼图分块大小 */
+	public final static int PIE_SIZE = 10;
+
+	/** 饼图里面超过PIE_SIZE （含） 都放在其它里面 */
+	public final static String OTHER_NAME = "其它";
 }

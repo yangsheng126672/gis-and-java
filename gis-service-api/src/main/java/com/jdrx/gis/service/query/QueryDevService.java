@@ -243,6 +243,20 @@ public class QueryDevService {
 				}
 			}
 		}
+		// 数量倒序
+		resultList.sort(Comparator.comparing(SonsNumVO :: getNum).reversed());
+		if (resultList.size() > GISConstants.PIE_SIZE) {
+			SonsNumVO other = new SonsNumVO();
+			long num = 0L;
+			for (int i = GISConstants.PIE_SIZE - 1; i < resultList.size(); i ++){
+				num += resultList.get(i).getNum();
+				resultList.remove(i);
+				i--;
+			}
+			other.setNum(num);
+			other.setTypeName(GISConstants.OTHER_NAME);
+			resultList.add(other);
+		}
 		return resultList;
 	}
 
@@ -332,7 +346,7 @@ public class QueryDevService {
 				}
 			}
 			response.reset();
-			response.setCharacterEncoding("utf-8");
+			response.setCharacterEncoding(GISConstants.UTF8);
 			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
 			response.setContentType("application/vnd.ms-excel;charset=utf-8");
 			workbook.write(response.getOutputStream());

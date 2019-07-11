@@ -2,19 +2,16 @@ package com.jdrx.gis.service.query;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import com.jdrx.gis.config.DictConfig;
-import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
-import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
@@ -198,7 +195,7 @@ public class AttrQueryService {
 				}
 			}
 			response.reset();
-			response.setCharacterEncoding("utf-8");
+			response.setCharacterEncoding(GISConstants.UTF8);
 			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
 			response.setContentType("application/vnd.ms-excel;charset=utf-8");
 			workbook.write(response.getOutputStream());
