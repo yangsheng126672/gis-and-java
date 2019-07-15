@@ -1,6 +1,8 @@
 package com.jdrx.gis.api.query;
 
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
+import com.jdrx.gis.beans.dto.query.CaliberDTO;
+import com.jdrx.gis.beans.dto.query.MeterialDTO;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -83,20 +85,20 @@ public class AttrQueryApi {
 
 	@ApiOperation(value = "根据管径范围值获取对应的图层url")
 	@RequestMapping(value = "findCaliberLayerUrl")
-	public ResposeVO findCaliberLayerUrl(@RequestBody @Valid String num) throws BizException {
-		if (Objects.isNull(num)) {
+	public ResposeVO findCaliberLayerUrl(@RequestBody @Valid CaliberDTO caliberDTO) throws BizException {
+		if (Objects.isNull(caliberDTO)) {
 			throw new BizException("参数为空");
 		}
-		return ResponseFactory.ok(attrQueryService.findCiliberLayerUrlByNum(num));
+		return ResponseFactory.ok(attrQueryService.findCiliberLayerUrlByNum(caliberDTO));
 	}
 
 	@ApiOperation(value = "根据管材值获取对应的图层url")
 	@RequestMapping(value = "findMeterialLayerUrl")
-	public ResposeVO findMeterialLayerUrl(@RequestBody @Valid String type) throws BizException {
-		if (Objects.isNull(type)) {
+	public ResposeVO findMeterialLayerUrl(@RequestBody @Valid MeterialDTO meterial) throws BizException {
+		if (Objects.isNull(meterial)) {
 			throw new BizException("参数为空");
 		}
-		return ResponseFactory.ok(attrQueryService.findMeterialLayerUrlByNum(type));
+		return ResponseFactory.ok(attrQueryService.findMeterialLayerUrlByNum(meterial));
 	}
 
 

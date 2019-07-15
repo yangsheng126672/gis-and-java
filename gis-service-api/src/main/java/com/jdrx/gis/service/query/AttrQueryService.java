@@ -4,6 +4,8 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
+import com.jdrx.gis.beans.dto.query.CaliberDTO;
+import com.jdrx.gis.beans.dto.query.MeterialDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
@@ -241,17 +243,17 @@ public class AttrQueryService {
 
 	/**
 	 * 获取管径范围对应的图层地址
-	 * @param num
+	 * @param caliberDTO
 	 * @return
 	 */
-	public String findCiliberLayerUrlByNum(String num)throws BizException {
+	public String findCiliberLayerUrlByNum(CaliberDTO caliberDTO)throws BizException {
 		String layerUrl = null;
 		String caliberLyerUrl = null;
 		try {
 			layerUrl = dictConfig.getCaliberUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
-				if (dictDetail.getName().equals(num)){
+				if (dictDetail.getName().equals(caliberDTO.getNum())){
 					caliberLyerUrl = dictDetail.getVal();
 				}
 			}
@@ -263,17 +265,17 @@ public class AttrQueryService {
 
 	/**
 	 * 获取管材对应的图层地址
-	 * @param type
+	 * @param meterialDTO
 	 * @return
 	 */
-	public String findMeterialLayerUrlByNum(String type)throws BizException {
+	public String findMeterialLayerUrlByNum(MeterialDTO meterialDTO)throws BizException {
 		String layerUrl = null;
 		String caliberLyerUrl = null;
 		try {
 			layerUrl = dictConfig.getMeterialUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
-				if (dictDetail.getName().equals(type)){
+				if (dictDetail.getName().equals(meterialDTO.getType())){
 					caliberLyerUrl = dictDetail.getVal();
 				}
 			}
