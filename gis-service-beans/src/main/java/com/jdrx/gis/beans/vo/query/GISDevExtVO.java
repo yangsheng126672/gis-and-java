@@ -28,6 +28,11 @@ public class GISDevExtVO {
 	private Long tplTypeId;
 
 	/**
+	 * 类名称
+	 */
+	private String typeName;
+
+	/**
 	 * JSON数据
 	 */
 	private Object dataInfo;

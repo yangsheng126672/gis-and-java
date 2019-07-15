@@ -1,10 +1,14 @@
 package com.jdrx.gis.api.query;
 
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.dto.query.CaliberDTO;
 import com.jdrx.gis.beans.dto.query.MeterialDTO;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.service.query.AttrQueryService;
+import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
+import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
@@ -18,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Objects;
 
@@ -36,6 +39,12 @@ public class AttrQueryApi {
 
 	@Autowired
 	AttrQueryService attrQueryService;
+
+	@Autowired
+	RedisComponents redisComponents;
+
+	@Autowired
+	PathConfig pathConfig;
 
 	@ApiOperation(value = "根据设备类型ID递归查询所有配置了模板的子类")
 	@RequestMapping(value = "findHasTplDevTypeListById")
@@ -58,7 +67,7 @@ public class AttrQueryApi {
 	@RequestMapping(value = "findDevListByAreaOrInputVal")
 	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException
 	{
-		Logger.debug("api/0/query/findDevListByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息");
+		Logger.debug("api/0/query/findDevListByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息，参数值 = {}", dto.toString());
 		if (Objects.isNull(dto)) {
 			throw new BizException("参数为空");
 		}
@@ -67,16 +76,31 @@ public class AttrQueryApi {
 
 	@ApiOperation(value = "导出根据所选区域或属性键入的参数值所查询设备列表信息")
 	@RequestMapping(value = "exportDevListByAreaOrInputVal")
-	public ResposeVO exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto,HttpServletResponse response) throws BizException {
-		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息");
-		return ResponseFactory.ok(attrQueryService.exportDevListByAreaOrInputVal(dto, response));
+	public ResposeVO exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) {
+		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息，参数值 = {}", dto.toString());
+		try {
+			new Thread(() -> {
+				try {
+					String result = attrQueryService.exportDevListByAreaOrInputVal(dto);
+					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
+				} catch (BizException e) {
+					e.printStackTrace();
+					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
+					redisComponents.set(dto.getRange() + dto.getTypeId(), EApiStatus.ERR_SYS.getStatus(), 60);
+				}
+			}).start();
+		return ResponseFactory.ok(Boolean.TRUE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
 	}
 
 
 	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息(分页)")
 	@RequestMapping(value = "findDevListPageByAreaOrInputVal")
 	public ResposeVO findDevListPageByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
-		Logger.debug("api/0/query/findDevListPageByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息，分页");
+		Logger.debug("api/0/query/findDevListPageByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息，分页，参数值 = {}", dto.toString());
 		if (Objects.isNull(dto)) {
 			throw new BizException("参数为空");
 		}
@@ -100,6 +124,5 @@ public class AttrQueryApi {
 		}
 		return ResponseFactory.ok(attrQueryService.findMeterialLayerUrlByNum(meterial));
 	}
-
 
 }

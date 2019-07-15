@@ -3,7 +3,6 @@ package com.jdrx.gis.api.basic;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
-import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -36,9 +35,6 @@ public class BasciDevApi {
 
 	@Autowired
 	private BasicDevQuery basicDevQuery;
-
-	@Autowired
-	private LayerService layerService;
 
 	@ApiOperation(value = "获取首层图层")
 	@RequestMapping(value = "findFirstHierarchyDevType")

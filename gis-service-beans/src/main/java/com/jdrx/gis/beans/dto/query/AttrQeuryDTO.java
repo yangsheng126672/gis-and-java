@@ -3,6 +3,7 @@ package com.jdrx.gis.beans.dto.query;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,6 +13,7 @@ import javax.validation.constraints.NotNull;
  * @Time: 2019/6/21 11:03
  */
 @Data
+@ToString
 public class AttrQeuryDTO extends PageDTO {
 
 	@NotNull(message = "设备类型ID不能为空")

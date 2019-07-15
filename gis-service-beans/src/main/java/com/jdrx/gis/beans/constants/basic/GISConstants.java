@@ -51,4 +51,10 @@ public class GISConstants {
 
 	/** 饼图里面超过PIE_SIZE （含） 都放在其它里面 */
 	public final static String OTHER_NAME = "其它";
+
+	/** 导出Excel拆解 */
+	public final static int EXPORT_PAGESIZE = 20000;
+
+	/** 下载文件redis失效时间 */
+	public final static int DOWNLOAD_EXPIRE = 3600;
 }

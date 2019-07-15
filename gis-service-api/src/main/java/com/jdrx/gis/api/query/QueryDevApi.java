@@ -1,10 +1,13 @@
 package com.jdrx.gis.api.query;
 
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.ExpRangeTypeDTO;
 import com.jdrx.gis.beans.dto.query.RangeDTO;
 import com.jdrx.gis.beans.dto.query.RangeTypeDTO;
 import com.jdrx.gis.beans.dto.query.TypeIDDTO;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.service.query.QueryDevService;
+import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -21,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -38,6 +40,10 @@ public class QueryDevApi {
 
 	@Autowired
 	private QueryDevService queryDevService;
+	@Autowired
+	private RedisComponents redisComponents;
+	@Autowired
+	private PathConfig pathConfig;
 
 	@ApiOperation(value = "获取划定范围内图层对应设备个数")
 	@RequestMapping(value = "findFirstHierarchyDevTypeNum")
@@ -79,11 +85,25 @@ public class QueryDevApi {
 		return ResponseFactory.ok(queryDevService.findSonsNumByPid(dto));
 	}
 
-	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息", produces="application/octet-stream")
+	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息")
 	@RequestMapping(value = "exportDevListByPID", method = RequestMethod.POST)
-	public ResposeVO export(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExpRangeTypeDTO dto,
-	                   HttpServletResponse response) throws Exception {
-		return ResponseFactory.ok(queryDevService.exportDevInfoByPID(response, dto));
+	public ResposeVO export(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExpRangeTypeDTO dto) throws Exception {
+		try {
+			new Thread(() -> {
+				try {
+					String result = queryDevService.exportDevInfoByPID(dto);
+					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
+				} catch (BizException e) {
+					e.printStackTrace();
+					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
+					redisComponents.set(dto.getRange() + dto.getTypeId(), EApiStatus.ERR_SYS.getStatus(), 60);
+				}
+			}).start();
+			return ResponseFactory.ok(Boolean.TRUE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
 	}
 
 	/**
@@ -110,4 +130,12 @@ public class QueryDevApi {
 		}
 		return ResponseFactory.ok(queryDevService.findDevListByDevIDs(devDTO.getDevIds()));
 	}**/
+
+	@ApiOperation(value = "查询下载文件")
+	@RequestMapping(value = "getDownLoadFile")
+	public ResposeVO getDownLoadFile(@RequestBody RangeTypeDTO dto) throws BizException {
+		Logger.debug("根据划定范围和类型获取导出文件的存放路径");
+		String result = queryDevService.getDownLoadFile(dto.getRange() + dto.getTypeId());
+		return ResponseFactory.ok(result);
+	}
 }

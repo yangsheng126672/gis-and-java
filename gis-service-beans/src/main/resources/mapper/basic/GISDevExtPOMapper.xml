@@ -23,6 +23,7 @@
         <result column="dev_id" jdbcType="BIGINT" property="devId"/>
         <result column="tpl_type_id" jdbcType="BIGINT" property="tplTypeId"/>
         <result column="data_info" jdbcType="OTHER" property="dataInfo"/>
+        <result column="typeName" jdbcType="VARCHAR" property="typeName"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -54,26 +55,63 @@
     </select>
 
     <select id="findDevListByAreaOrInputVal" resultMap="BaseResultMap2">
-        select
-          id, dev_id, tpl_type_id,data_info
+        select ext.*,dt.name typeName from (
+            select id, dev_id, tpl_type_id,data_info
+            from gis_dev_ext gdx
+            <where>
+                delete_flag = FALSE
+                <if test="dto.typeId != null">
+                    and dev_id in (
+                      SELECT id FROM share_dev WHERE
+                      type_id IN (
+                        WITH RECURSIVE A AS
+                          ( SELECT A .*  FROM share_dev_type A
+                          WHERE
+                          ID = #{dto.typeId, jdbcType=BIGINT}
+                          AND del_flag = 0
+                          UNION ALL
+                          SELECT b.* FROM share_dev_type b, A
+                          WHERE A.ID = b.p_id
+                          AND b.del_flag = 0
+                          ) SELECT ID  FROM A
+                      )
+                    )
+                </if>
+                <if test="dto.paramVal != null and dto.paramVal != ''">
+                    and data_info :: jsonb ->> #{dto.fieldName, jdbcType=VARCHAR}
+                    like concat('%', #{dto.paramVal, jdbcType=VARCHAR}, '%')
+                </if>
+                <if test="devIds != null and devIds != ''">
+                    and EXISTS (select 1 from
+                    (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
+                </if>
+            </where>
+        ) ext left join (
+        select dv.id ,dv.type_id,dvt.name from share_dev dv left join share_dev_type dvt on dv.type_id = dvt.id
+        ) dt on ext.dev_id = dt.id
+    </select>
+
+    <select id="findDevListByAreaOrInputValCount" resultType="java.lang.Integer">
+        select count(*) from (
+        select id, dev_id, tpl_type_id,data_info
         from gis_dev_ext gdx
         <where>
             delete_flag = FALSE
             <if test="dto.typeId != null">
                 and dev_id in (
-                  SELECT id FROM share_dev WHERE
-                  type_id IN (
-                    WITH RECURSIVE A AS
-                      ( SELECT A .*  FROM share_dev_type A
-                      WHERE
-                      ID = #{dto.typeId, jdbcType=BIGINT}
-                      AND del_flag = 0
-                      UNION ALL
-                      SELECT b.* FROM share_dev_type b, A
-                      WHERE A.ID = b.p_id
-                      AND b.del_flag = 0
-                      ) SELECT ID  FROM A
-                  )
+                SELECT id FROM share_dev WHERE
+                type_id IN (
+                WITH RECURSIVE A AS
+                ( SELECT A .*  FROM share_dev_type A
+                WHERE
+                ID = #{dto.typeId, jdbcType=BIGINT}
+                AND del_flag = 0
+                UNION ALL
+                SELECT b.* FROM share_dev_type b, A
+                WHERE A.ID = b.p_id
+                AND b.del_flag = 0
+                ) SELECT ID  FROM A
+                )
                 )
             </if>
             <if test="dto.paramVal != null and dto.paramVal != ''">
@@ -85,8 +123,9 @@
                 (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
             </if>
         </where>
+        ) ext left join (
+        select dv.id ,dv.type_id,dvt.name from share_dev dv left join share_dev_type dvt on dv.type_id = dvt.id
+        ) dt on ext.dev_id = dt.id
     </select>
 
-    <select id="searchDevListByStr" resultMap="BaseResultMap2" >
-    </select>
 </mapper>

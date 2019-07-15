@@ -15,22 +15,34 @@ import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.*;
 import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.ShareDevTypeService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
+import com.jdrx.gis.util.JavaFileToFormUpload;
+import com.jdrx.gis.util.RedisComponents;
+import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,6 +74,12 @@ public class QueryDevService {
 	@Autowired
 	LayerService layerService;
 
+	@Autowired
+	private PathConfig pathConfig;
+
+	@Autowired
+	private RedisComponents redisComponents;
+
 	/**
 	 * 获取第一级图层对应的设备个数
 	 * @return
@@ -80,16 +98,17 @@ public class QueryDevService {
 
 	/**
 	 * 根据类型ID和经纬度范围查询所属的设备信息
-	 * @param pid
+	 * @param dto
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SpaceInfoVO> findDevListByTypeID(Long pid, String devIds) throws BizException{
+	public List<SpaceInfoVO> findDevListByTypeID(RangeTypeDTO dto, String devIds) throws BizException{
 		try {
-			List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(pid, devIds);
+			List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(dto, devIds);
 			return list;
 		} catch (Exception e) {
-			Logger.error("根据类型ID和经纬度范围查询所属设备信息失败！pid = {} ", pid);
+			e.printStackTrace();
+			Logger.error("根据类型ID和经纬度范围查询所属设备信息失败！pid = {} ", dto.getTypeId());
 			throw  new BizException("根据类型ID和经纬度范围查询所属设备信息失败");
 		}
 	}
@@ -245,6 +264,12 @@ public class QueryDevService {
 		}
 		// 数量倒序
 		resultList.sort(Comparator.comparing(SonsNumVO :: getNum).reversed());
+
+		Logger.debug("typeId = {}子类数据：" , expRangeTypeDTO.getTypeId());
+		resultList.stream().forEach(vo -> {
+			Logger.debug(vo.toString());
+		} );
+
 		if (resultList.size() > GISConstants.PIE_SIZE) {
 			SonsNumVO other = new SonsNumVO();
 			long num = 0L;
@@ -262,27 +287,26 @@ public class QueryDevService {
 
 	/**
 	 * 导出空间查询的设备列表数据
-	 * @param response
 	 * @param dto
 	 * @throws BizException
 	 */
-	public Boolean  exportDevInfoByPID(HttpServletResponse response, ExpRangeTypeDTO dto) throws BizException {
-		Boolean result;
+	public String exportDevInfoByPID(ExpRangeTypeDTO dto) throws BizException {
+		OutputStream os = null;
 		try {
-			XSSFWorkbook workbook;
-			workbook = new XSSFWorkbook(this.getClass().getResourceAsStream("/template/devinfo.xlsx"));
+			SXSSFWorkbook workbook;
+			workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
 			ShareDevTypePO shareDevTypePO = shareDevTypeService.getByPrimaryKey(dto.getTypeId());
 			String title = "Sheet1";
 			if (Objects.nonNull(shareDevTypePO)) {
 				title = shareDevTypePO.getName();
 			}
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			workbook.setSheetName(0, title);
-			sheet.setDefaultColumnWidth((short) 12); // 设置列宽
-			XSSFCellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
-			XSSFCellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
 
-			XSSFRow row = sheet.createRow(0);
+			SXSSFSheet sheet = workbook.createSheet(title);
+			sheet.setDefaultColumnWidth((short) 12); // 设置列宽
+			CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
+			CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+
+			Row row = sheet.createRow(0);
 			List<FieldNameVO> headerList = findFieldNamesByTypeID(dto.getTypeId());
 			if (Objects.isNull(headerList)) {
 				Logger.error("空间查询的表头信息为空");
@@ -290,75 +314,110 @@ public class QueryDevService {
 			}
 			for (int i = 0; i < headerList.size(); i++) {
 				FieldNameVO fieldNameVO = headerList.get(i);
-				XSSFCell cell = row.createCell(i);
+				Cell cell = row.createCell(i);
 				cell.setCellStyle(style);
 				String txt = fieldNameVO.getFieldDesc();
 				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
 				cell.setCellValue(text);
 			}
 			String devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-			List<SpaceInfoVO> devList = findDevListByTypeID(dto.getTypeId(), devStr);
+			RangeTypeDTO rangeTypeDTO = new RangeTypeDTO();
+			BeanUtils.copyProperties(dto, rangeTypeDTO);
+			Integer total = devQueryDAO.findDevListByTypeIDCount(rangeTypeDTO, devStr); // 总条数
+
+			/**
+			 * 之所以分一下，是因为如果数据量过大，一次加载到内存有可能出现OOM，
+			 * 针对Excel的大数据SXSSFWorkbook比XSSFWorkbook支持更好
+ 			 */
+			int pageSize = GISConstants.EXPORT_PAGESIZE;
+			int pageTotal;
+			if (total <= pageSize) {
+				pageTotal = 1;
+			} else {
+				pageTotal = total / pageSize == 0 ? total / pageSize : total / pageSize + 1;
+			}
+			Logger.debug("总条数：" + total + "\t每页条数：" + pageSize + "\t总页数：" + pageTotal);
+
 			List<FieldNameVO> fieldsList = findFieldNamesByTypeID(dto.getTypeId());
 			if (Objects.isNull(fieldsList)) {
 				Logger.error("空间查询的表头信息为空");
 				throw new BizException("设备列表的title为空");
 			}
 			String[] filedNames = fieldsList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
-			if (Objects.nonNull(devList)) {
-				devList.stream().map(vo -> {
-					Object obj = vo.getDataInfo();
-					if (Objects.isNull(obj)) {
-						return vo;
-					}
-					try {
-						Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
-						vo.setDataMap(map);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					return vo;
-				}).collect(Collectors.toList());
 
-				int body_i = 1;
-				for (SpaceInfoVO spaceInfoVO : devList) {
-					Map<String, String> map = spaceInfoVO.getDataMap();
-					if(Objects.isNull(map)) {
-						continue;
-					}
-					XSSFRow xssfRow = sheet.createRow(body_i ++);
-					for (int i = 0; i < headerList.size(); i++) {
-						XSSFCell cell = xssfRow.createCell(i);
-						XSSFRichTextString text;
-						FieldNameVO fieldNameVO = headerList.get(i);
-						String txt = null;
-						if (Objects.nonNull(fieldNameVO)){
-							String fieldName = fieldNameVO.getFieldName();
-							if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
-								txt = spaceInfoVO.getTypeName();
-							}else {
-								txt = map.get(fieldName);
-							}
+			int body_i = 1; // body 行索引
+			int pageNum = 1;
+			while (pageTotal-- > 0) {
+				RangeTypeDTO rangeType = new RangeTypeDTO();
+				BeanUtils.copyProperties(dto,rangeType);
+				rangeType.setPageSize(pageSize);
+				rangeType.setPageNum(pageNum);
+				PageVO<SpaceInfoVO> pageVO = findDevListPageByTypeID(rangeType);
+				List<SpaceInfoVO> subDevList = pageVO.getData();
+				if (Objects.nonNull(subDevList)) {
+					subDevList.stream().map(vo -> {
+						Object obj = vo.getDataInfo();
+						if (Objects.isNull(obj)) {
+							return vo;
 						}
-						text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
-						cell.setCellValue(text);
-						cell.setCellStyle(style2);
+						try {
+							Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+							vo.setDataMap(map);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						return vo;
+					}).collect(Collectors.toList());
+
+
+					for (SpaceInfoVO spaceInfoVO : subDevList) {
+						Map<String, String> map = spaceInfoVO.getDataMap();
+						if (Objects.isNull(map)) {
+							continue;
+						}
+						Row xssfRow = sheet.createRow(body_i++);
+						for (int i = 0; i < headerList.size(); i++) {
+							Cell cell = xssfRow.createCell(i);
+							XSSFRichTextString text;
+							FieldNameVO fieldNameVO = headerList.get(i);
+							String txt = null;
+							if (Objects.nonNull(fieldNameVO)) {
+								String fieldName = fieldNameVO.getFieldName();
+								if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+									txt = spaceInfoVO.getTypeName();
+								} else {
+									txt = map.get(fieldName);
+								}
+							}
+							text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+							cell.setCellValue(text);
+							cell.setCellStyle(style2);
+						}
 					}
 				}
+				subDevList.clear();
+				pageNum ++;
 			}
-			response.reset();
-			response.setCharacterEncoding(GISConstants.UTF8);
-			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
-			response.setContentType("application/vnd.ms-excel;charset=utf-8");
-			workbook.write(response.getOutputStream());
-			result = true;
+			String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
+			os = new FileOutputStream(new File(filePath));
+			workbook.write(os);
+			String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new BizException("导出空间数据信息失败！");
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException("导出空间数据信息失败！");
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		return result;
 	}
 
 	/**
@@ -369,8 +428,8 @@ public class QueryDevService {
 	 */
 	public PageVO<SpaceInfoVO> findDevListPageByTypeID(RangeTypeDTO dto) throws BizException {
 		String devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-		PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
-		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto.getTypeId(), devStr);
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto, devStr);
 		return new PageVO<>(list);
 	}
 
@@ -389,6 +448,7 @@ public class QueryDevService {
 			List<GISDevExtVO> list  = gisDevExtPOMapper.findDevListByDevIds(ids);
 			return list;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据设备ID集合获取设备列表信息失败！");
 			throw new BizException("根据设备ID集合获取设备列表信息失败！");
 		}
@@ -430,6 +490,29 @@ public class QueryDevService {
 		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByDevIDs(dto.getDevIds());
 		return new PageVO<>(list);
+	}
+
+	/**
+	 * 根据前端传来的范围+typeId获取路径
+	 * @param parm 划定的范围 + typeId
+	 * @return
+	 * @throws BizException
+	 */
+	public String getDownLoadFile(String parm) throws BizException {
+		try {
+		Object obj = redisComponents.get(parm);
+		if(obj == null) {
+			return EApiStatus.ERR_VALIDATE.getStatus();
+		} else if(obj != null  && EApiStatus.ERR_SYS.getStatus().equals(obj.toString())) {
+			return EApiStatus.ERR_SYS.getStatus();
+		} else{
+			return obj.toString();
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("获取下载文件param = {} 失败", parm);
+			throw new BizException("获取下载文件失败！");
+		}
 	}
 
 }

@@ -2,6 +2,7 @@ package com.jdrx.gis.service.query;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.dto.query.CaliberDTO;
@@ -9,24 +10,36 @@ import com.jdrx.gis.beans.dto.query.MeterialDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
+import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +76,9 @@ public class AttrQueryService {
 	@Autowired
 	private DictConfig dictConfig;
 
+	@Autowired
+	private PathConfig pathConfig;
+
 	/**
 	 * 根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类，
 	 * 并且查询出来的设备类型信息就不做层级展示。因为，按照前端页面的需求：父类A查出所有子类B1，B2等等都展示在下拉框中，
@@ -78,6 +94,7 @@ public class AttrQueryService {
 			Logger.debug("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类");
 			return shareDevTypePOMapper.findHasTplDevTypeListById(id);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据设备类型的ID{}查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类失败！", id);
 			throw new BizException("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类失败！");
 		}
@@ -90,11 +107,46 @@ public class AttrQueryService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<GisDevTplAttrPO> findAttrListByTypeId(Long typeId) throws BizException {
+	public List<FieldNameVO> findAttrListByTypeId(Long typeId) throws BizException {
 		try {
-			return gisDevTplAttrPOMapper.findAttrListByTypeId(typeId);
+
+			List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.findAttrListByTypeId(typeId);
+			List<FieldNameVO> fieldNameVOS = Lists.newArrayList();
+			if (Objects.nonNull(list)) {
+				list.stream().forEach(gisDevTplAttrPO -> {
+					FieldNameVO vo = new FieldNameVO();
+					BeanUtils.copyProperties(gisDevTplAttrPO, vo);
+					fieldNameVOS.add(vo);
+				});
+				// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
+				// 所以这里就把类名称这一列+上来
+				FieldNameVO vo = new FieldNameVO();
+				vo.setFieldName(GISConstants.DEV_TYPE_NAME);
+				vo.setFieldDesc(GISConstants.DEV_TYPE_NAME_DESC);
+				fieldNameVOS.add(vo);
+
+				for (int i = 0; i < fieldNameVOS.size(); i++) {
+					FieldNameVO fieldNameVO = fieldNameVOS.get(i);
+					if (Objects.isNull(fieldNameVO)) {
+						break;
+					}
+					String fieldName = fieldNameVO.getFieldName();
+					if (StringUtils.isEmpty(fieldName)) {
+						break;
+					}
+					if (GISConstants.DEV_ID.equals(fieldName)) {
+						Collections.swap(fieldNameVOS, i, 0);
+						continue;
+					}
+					if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+						Collections.swap(fieldNameVOS, i, 1);
+					}
+				}
+			}
+			return fieldNameVOS;
 		} catch (Exception e) {
-			Logger.error("根据设备类型ID{}查模板信息失败！", typeId);
+			e.printStackTrace();
+			Logger.error("根据设备类型ID={}查模板信息失败！", typeId);
 			throw new BizException("根据设备类型ID查模板信息失败！");
 		}
 	}
@@ -112,6 +164,7 @@ public class AttrQueryService {
 			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
 			return list;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("据所选区域或属性键入的参数值查设备列表信息失败，{}", dto.toString());
 			throw new BizException("据所选区域或属性键入的参数值查设备列表信息失败！");
 		}
@@ -131,87 +184,112 @@ public class AttrQueryService {
 	/**
 	 * 导出根据所选区域或属性键入的参数值所查询设备列表信息
 	 * @param dto
-	 * @param response
 	 * @throws BizException
 	 */
-	public Boolean exportDevListByAreaOrInputVal(AttrQeuryDTO dto, HttpServletResponse response) throws BizException {
-		Boolean result;
+	public String exportDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
+		OutputStream bos = null;
 		try {
 			ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.getByPrimaryKey(dto.getTypeId());
-			XSSFWorkbook workbook;
-			workbook = new XSSFWorkbook(this.getClass().getResourceAsStream("/template/devinfoAttr.xlsx"));
+			SXSSFWorkbook workbook;
+			workbook = new SXSSFWorkbook(1000);
 
 			String title = "Sheet1";
 			if (Objects.nonNull(shareDevTypePO)) {
 				title = shareDevTypePO.getName();
 			}
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			workbook.setSheetName(0, title);
+			SXSSFSheet sheet = workbook.createSheet(title);
 			sheet.setDefaultColumnWidth((short) 12); // 设置列宽
-			XSSFCellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
-			XSSFCellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+			CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
+			CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
 
-			XSSFRow row = sheet.createRow(0);
-			List<GisDevTplAttrPO> attrPOs = gisDevTplAttrPOMapper.findAttrListByTypeId(dto.getTypeId());
+			Row row = sheet.createRow(0);
+			List<FieldNameVO> attrPOs = findAttrListByTypeId(dto.getTypeId());
 			if (Objects.isNull(attrPOs)) {
 				Logger.error("表头信息为空");
 				throw new BizException("设备列表的title为空");
 			}
+
 			for (int i = 0; i < attrPOs.size(); i++) {
-				GisDevTplAttrPO gisDevTplAttrPO = attrPOs.get(i);
-				XSSFCell cell = row.createCell(i);
+				FieldNameVO fieldNameVO = attrPOs.get(i);
+				Cell cell = row.createCell(i);
 				cell.setCellStyle(style);
-				String txt = gisDevTplAttrPO.getFieldDesc();
+				String txt = fieldNameVO.getFieldDesc();
 				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
 				cell.setCellValue(text);
 			}
 			String devIds = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-			List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
-			if (Objects.nonNull(devList)) {
-				String[] filedNames = attrPOs.stream().map(GisDevTplAttrPO::getFieldName).toArray(String[]::new);
-				devList =  dealDataInfoByDevIds(devList, filedNames);
+			int total = gisDevExtPOMapper.findDevListByAreaOrInputValCount(dto, devIds);
+			int pageSize = GISConstants.EXPORT_PAGESIZE;
+			int pageTotal;
+			if (total <= pageSize) {
+				pageTotal = 1;
 			} else {
-				Logger.debug("条件参数{}获取的设备信息为空", dto.toString());
+				pageTotal = total / pageSize == 0 ? total / pageSize : total / pageSize + 1;
 			}
-			if (Objects.nonNull(devList)) {
-				int body_i = 1;
-				for (GISDevExtVO gisDevExtVO : devList) {
-					Map<String, String> map = gisDevExtVO.getDataMap();
-					if(Objects.isNull(map)) {
-						continue;
-					}
-					XSSFRow xssfRow = sheet.createRow(body_i ++);
-					for (int i = 0; i < attrPOs.size(); i++) {
-						XSSFCell cell = xssfRow.createCell(i);
-						XSSFRichTextString text;
-						GisDevTplAttrPO gisDevTplAttrPO = attrPOs.get(i);
-						String txt = null;
-						if (Objects.nonNull(gisDevTplAttrPO)){
-							String fieldName = gisDevTplAttrPO.getFieldName();
-							txt = map.get(fieldName);
+			Logger.debug("总条数：" + total + "\t每页条数：" + pageSize + "\t总页数：" + pageTotal);
+			int pageNum = 1;
+			while(pageTotal -- > 0) {
+				dto.setPageNum(pageNum);
+				dto.setPageSize(GISConstants.EXPORT_PAGESIZE);
+				List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
+				if (Objects.nonNull(devList)) {
+					String[] filedNames = attrPOs.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
+					devList = dealDataInfoByDevIds(devList, filedNames);
+				} else {
+					Logger.debug("条件参数{}获取的设备信息为空", dto.toString());
+				}
+				if (Objects.nonNull(devList)) {
+					int body_i = 1;
+					for (GISDevExtVO gisDevExtVO : devList) {
+						Map<String, String> map = gisDevExtVO.getDataMap();
+						if (Objects.isNull(map)) {
+							continue;
 						}
-						text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
-						cell.setCellValue(text);
-						cell.setCellStyle(style2);
+						Row xssfRow = sheet.createRow(body_i++);
+						for (int i = 0; i < attrPOs.size(); i++) {
+							Cell cell = xssfRow.createCell(i);
+							XSSFRichTextString text;
+							FieldNameVO fieldNameVO = attrPOs.get(i);
+							String txt = null;
+							if (Objects.nonNull(fieldNameVO)) {
+								String fieldName = fieldNameVO.getFieldName();
+								if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+									txt = gisDevExtVO.getTypeName();
+								} else {
+									txt = map.get(fieldName);
+								}
+							}
+							text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+							cell.setCellValue(text);
+							cell.setCellStyle(style2);
+						}
 					}
 				}
+				devList.clear();
+				pageNum ++;
 			}
-			response.reset();
-			response.setCharacterEncoding(GISConstants.UTF8);
-			response.setHeader("content-disposition", "attachment;filename=" + title + ".xlsx");
-			response.setContentType("application/vnd.ms-excel;charset=utf-8");
-			workbook.write(response.getOutputStream());
-			result = true;
+			String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
+			bos = new FileOutputStream(new File(filePath));
+			workbook.write(bos);
+			String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
-			Logger.error("导出属性信息失败，{}", dto.toString());
-			throw new BizException("导出属性信息失败！");
+			Logger.error("IO失败，{}", dto.toString());
+			throw new BizException("IO失败！");
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error("导出属性信息失败，{}", dto.toString());
 			throw new BizException("导出属性信息失败！");
+		} finally {
+			if (bos != null){
+				try {
+					bos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		return result;
 	}
 
 	/**

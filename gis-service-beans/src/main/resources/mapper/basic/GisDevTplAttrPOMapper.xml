@@ -7,6 +7,7 @@
         <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc"/>
         <result column="field_name" jdbcType="VARCHAR" property="fieldName"/>
         <result column="data_type" jdbcType="VARCHAR" property="dataType"/>
+        <result column="idx" jdbcType="SMALLINT" property="idx"/>
         <result column="delete_flag" jdbcType="BIT" property="deleteFlag"/>
         <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
@@ -14,7 +15,7 @@
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt"/>
     </resultMap>
     <sql id="Base_Column_List">
-    id, type_id, field_desc, field_name, data_type, delete_flag, create_by, create_at,
+    id, type_id, field_desc, field_name, data_type, idx, delete_flag, create_by, create_at,
     update_by, update_at
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -25,11 +26,11 @@
     </select>
     <insert id="insert" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
     insert into gis_dev_tpl_attr (id, type_id, field_desc,
-      field_name, data_type, delete_flag, 
+      field_name, data_type, idx, delete_flag,
       create_by, create_at, update_by, 
       update_at)
     values (#{id,jdbcType=BIGINT}, #{typeId,jdbcType=BIGINT}, #{fieldDesc,jdbcType=VARCHAR}, 
-      #{fieldName,jdbcType=VARCHAR}, #{dataType,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT}, 
+      #{fieldName,jdbcType=VARCHAR}, #{dataType,jdbcType=VARCHAR}, #{idx,jdbcType=SMALLINT}, #{deleteFlag,jdbcType=BIT},
       #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
       #{updateAt,jdbcType=TIMESTAMP})
   </insert>
@@ -83,6 +84,9 @@
             <if test="dataType != null">
                 #{dataType,jdbcType=VARCHAR},
             </if>
+            <if test="idx != null">
+                #{idx,jdbcType=SMALLINT},
+            </if>
             <if test="deleteFlag != null">
                 #{deleteFlag,jdbcType=BIT},
             </if>
@@ -115,6 +119,9 @@
             <if test="dataType != null">
                 data_type = #{dataType,jdbcType=VARCHAR},
             </if>
+            <if test="idx != null">
+                idx = #{idx,jdbcType=SMALLINT},
+            </if>
             <if test="deleteFlag != null">
                 delete_flag = #{deleteFlag,jdbcType=BIT},
             </if>
@@ -139,6 +146,7 @@
       field_desc = #{fieldDesc,jdbcType=VARCHAR},
       field_name = #{fieldName,jdbcType=VARCHAR},
       data_type = #{dataType,jdbcType=VARCHAR},
+      idx = #{idx,jdbcType=SMALLINT},
       delete_flag = #{deleteFlag,jdbcType=BIT},
       create_by = #{createBy,jdbcType=VARCHAR},
       create_at = #{createAt,jdbcType=TIMESTAMP},
@@ -156,11 +164,13 @@
             where dev_id = #{devId,jdbcType=BIGINT}
             limit 1
          )
+         order by idx
     </select>
 
     <select id="findAttrListByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
      select * from gis_dev_tpl_attr
          where delete_flag = false
          and type_id = #{typeId,jdbcType=BIGINT}
+         order by idx
     </select>
 </mapper>

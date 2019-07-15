@@ -3,6 +3,7 @@ package com.jdrx.gis.api.basic;
 import com.jdrx.gis.beans.dto.base.InsertDTO;
 import com.jdrx.gis.beans.dto.base.UpdateDTO;
 import com.jdrx.gis.beans.dto.basic.DictDetailDTO;
+import com.jdrx.gis.beans.dto.basic.DictQueryByValDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.basic.DictDetailVO;
 import com.jdrx.gis.service.basic.DictDetailService;
@@ -97,4 +98,12 @@ public class DictDetailApi {
 		return ResponseFactory.ok(list);
 	}
 
+	@ApiOperation(value = "根据参数值查字典数据")
+	@RequestMapping(value = "findDictDetailListByVal")
+	public ResposeVO findDictDetailListByVal(@ApiParam(name = "dto", required = true) @RequestBody @Valid
+			                                         DictQueryByValDTO dto) throws BizException {
+		Logger.debug("api/0/dictDetail/findDictDetailListByVal 根据参数值查字典数据 {}", dto.toString());
+		List<DictDetailPO> list = dictDetailService.findDetailsByTypeVal(dto.getVal());
+		return ResponseFactory.ok(list);
+	}
 }

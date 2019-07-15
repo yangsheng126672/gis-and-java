@@ -23,5 +23,13 @@ public interface GISDevExtPOMapper {
 	 */
 	List<GISDevExtVO> findDevListByAreaOrInputVal(@Param("dto") AttrQeuryDTO dto, @Param("devIds") String devIds);
 
+	/**
+	 * 根据所选区域或属性键入的参数值查设备列表 个数
+	 * @param dto
+	 * @param devIds
+	 * @return
+	 */
+	Integer findDevListByAreaOrInputValCount(@Param("dto") AttrQeuryDTO dto, @Param("devIds") String devIds);
+
 
 }
