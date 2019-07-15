@@ -43,6 +43,7 @@ public class DictDetailService {
 		try {
 			return dictDetailPOMapper.selectByVal(val);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据dict_type中val的值查询配置的dict_detail列表失败！", e.getMessage());
 			throw new BizException("根据dict_type中val的值查询配置的dict_detail列表失败！");
 		}
@@ -67,6 +68,7 @@ public class DictDetailService {
 			}
 			return bool;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("新增字典数据失败！", e.getMessage());
 			throw new BizException("新增字典数据失败！");
 		}
@@ -87,6 +89,7 @@ public class DictDetailService {
 			}
 			return bool;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("删除字典数据失败！", e.getMessage());
 			throw new BizException("删除字典数据失败！");
 		}
@@ -111,6 +114,7 @@ public class DictDetailService {
 			}
 			return bool;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("更新字典数据失败！", e.getMessage());
 			throw new BizException("更新字典数据失败！");
 		}
@@ -129,6 +133,7 @@ public class DictDetailService {
 			BeanUtils.copyProperties(dictDetailPO, dictDetailVO);
 			return dictDetailVO;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据ID{}查询失败！", id);
 			throw new BizException("根据ID查询失败！");
 		}

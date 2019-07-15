@@ -93,6 +93,7 @@ public class QueryDevApi {
 				try {
 					String result = queryDevService.exportDevInfoByPID(dto);
 					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", dto.getRange() + dto.getTypeId());
 				} catch (BizException e) {
 					e.printStackTrace();
 					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
@@ -133,7 +134,7 @@ public class QueryDevApi {
 
 	@ApiOperation(value = "查询下载文件")
 	@RequestMapping(value = "getDownLoadFile")
-	public ResposeVO getDownLoadFile(@RequestBody RangeTypeDTO dto) throws BizException {
+	public ResposeVO getDownLoadFile(@RequestBody ExpRangeTypeDTO dto) throws BizException {
 		Logger.debug("根据划定范围和类型获取导出文件的存放路径");
 		String result = queryDevService.getDownLoadFile(dto.getRange() + dto.getTypeId());
 		return ResponseFactory.ok(result);

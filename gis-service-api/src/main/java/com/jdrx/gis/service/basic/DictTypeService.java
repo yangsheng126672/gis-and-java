@@ -1,16 +1,19 @@
 package com.jdrx.gis.service.basic;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.dto.basic.DictTypeDTO;
+import com.jdrx.gis.beans.dto.basic.DictTypeQueryDTO;
 import com.jdrx.gis.beans.entry.basic.DictTypePO;
 import com.jdrx.gis.beans.vo.basic.DictTypeVO;
 import com.jdrx.gis.dao.basic.DictTypePOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -45,6 +48,7 @@ public class DictTypeService {
 			}
 			return bool;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("新增字典类型失败！", e.getMessage());
 			throw new BizException("新增字典类型失败");
 		}
@@ -65,6 +69,7 @@ public class DictTypeService {
 			}
 			return bool;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("删除字典类型数据失败！", e.getMessage());
 			throw new BizException("删除字典类型数据失败！");
 		}
@@ -89,6 +94,7 @@ public class DictTypeService {
 			}
 			return bool;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("更新字典类型数据失败！", e.getMessage());
 			throw new BizException("更新字典类型数据失败！");
 		}
@@ -107,6 +113,7 @@ public class DictTypeService {
 			BeanUtils.copyProperties(dictTypePO, dictTypeVO);
 			return dictTypeVO;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据ID{}查类型失败！", id);
 			throw new BizException("根据ID查类型失败！");
 		}
@@ -117,9 +124,11 @@ public class DictTypeService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<DictTypePO> findAllDictTypes() throws BizException {
+	public PageVO<DictTypePO> findAllDictTypes(DictTypeQueryDTO dto) throws BizException {
 		try {
-			return dictTypePOMapper.findAll();
+			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+			Page<DictTypePO> list = (Page<DictTypePO>) dictTypePOMapper.findAll();
+			return new PageVO<>(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException("查询所有字典类型失败！");

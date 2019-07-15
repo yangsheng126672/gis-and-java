@@ -83,6 +83,7 @@ public class AttrQueryApi {
 				try {
 					String result = attrQueryService.exportDevListByAreaOrInputVal(dto);
 					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", dto.getRange() + dto.getTypeId());
 				} catch (BizException e) {
 					e.printStackTrace();
 					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());

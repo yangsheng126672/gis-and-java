@@ -3,6 +3,7 @@ package com.jdrx.gis.api.basic;
 import com.jdrx.gis.beans.dto.base.InsertDTO;
 import com.jdrx.gis.beans.dto.base.UpdateDTO;
 import com.jdrx.gis.beans.dto.basic.DictTypeDTO;
+import com.jdrx.gis.beans.dto.basic.DictTypeQueryDTO;
 import com.jdrx.gis.beans.vo.basic.DictTypeVO;
 import com.jdrx.gis.service.basic.DictTypeService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -75,8 +76,8 @@ public class DictTypeApi {
 
 	@ApiOperation(value = "查询所有字典类型")
 	@RequestMapping(value = "findAllDictTypes")
-	public ResposeVO findAllDictTypes() throws BizException {
+	public ResposeVO findAllDictTypes(@ApiParam(name = "dto", required = true) @RequestBody DictTypeQueryDTO dto) throws BizException {
 		Logger.debug("api/0/dictType/findAllDictTypes 查询所有字典类型");
-		return ResponseFactory.ok(dictTypeService.findAllDictTypes());
+		return ResponseFactory.ok(dictTypeService.findAllDictTypes(dto));
 	}
 }
