@@ -20,7 +20,7 @@ import javax.validation.Valid;
  * @Time: 2019/7/16 11:00
  */
 @RestController
-@Api("属性查询服务")
+@Api("三方服务")
 @RequestMapping(value = "api/0/third", method = RequestMethod.POST)
 public class DevInfoProvider {
 

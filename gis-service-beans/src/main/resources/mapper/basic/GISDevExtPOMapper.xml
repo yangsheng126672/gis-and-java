@@ -129,7 +129,7 @@
     </select>
 
     <select id="findPipeLength" resultType="com.jdrx.gis.beans.entry.query.PipeLengthPO" >
-         select sum(cast(data_info::jsonb->> #{val} as BIGINT)) caldate
+         select sum(cast(data_info::jsonb->> #{val} as BIGINT)) totalLength
          from gis_dev_ext where caliber is not null
     </select>
 </mapper>
