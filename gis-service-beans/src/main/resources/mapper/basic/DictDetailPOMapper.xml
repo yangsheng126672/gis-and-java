@@ -204,5 +204,6 @@
         <include refid="Base_Column_List" />
         from dict_detail where delete_flag = false
         and type_id = #{typeId,jdbcType=BIGINT}
+        order by update_at desc
     </select>
 </mapper>

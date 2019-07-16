@@ -10,8 +10,10 @@ import com.jdrx.gis.beans.dto.query.ExpRangeTypeDTO;
 import com.jdrx.gis.beans.dto.query.QueryDevDTO;
 import com.jdrx.gis.beans.dto.query.RangeDTO;
 import com.jdrx.gis.beans.dto.query.RangeTypeDTO;
+import com.jdrx.gis.beans.dto.third.GetPipeTotalLenthDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.*;
 import com.jdrx.gis.config.DictConfig;
@@ -500,14 +502,14 @@ public class QueryDevService {
 	 */
 	public String getDownLoadFile(String parm) throws BizException {
 		try {
-		Object obj = redisComponents.get(parm);
-		if(obj == null) {
-			return EApiStatus.ERR_VALIDATE.getStatus();
-		} else if(obj != null  && EApiStatus.ERR_SYS.getStatus().equals(obj.toString())) {
-			return EApiStatus.ERR_SYS.getStatus();
-		} else{
-			return obj.toString();
-		}
+			Object obj = redisComponents.get(parm);
+			if(obj == null) {
+				return EApiStatus.ERR_VALIDATE.getStatus();
+			} else if(obj != null  && EApiStatus.ERR_SYS.getStatus().equals(obj.toString())) {
+				return EApiStatus.ERR_SYS.getStatus();
+			} else{
+				return obj.toString();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error("获取下载文件param = {} 失败", parm);
@@ -515,4 +517,19 @@ public class QueryDevService {
 		}
 	}
 
+	/**
+	 * 获取每天的管段总长度
+	 * @param dto
+	 * @return
+	 * @throws BizException
+	 */
+	public PipeLengthPO findPipeLength(GetPipeTotalLenthDTO dto) throws BizException {
+		try{
+			return gisDevExtPOMapper.findPipeLength(GISConstants.PIPE_LENGTH);
+		} catch (Exception e){
+			e.printStackTrace();
+			Logger.debug("获取每天的管段总长度失败！");
+			throw new BizException(e);
+		}
+	}
 }

@@ -196,5 +196,6 @@
         from dict_type
         where
         delete_flag = FALSE
+        order by update_at desc
     </select>
 </mapper>
