@@ -95,6 +95,7 @@ public class LayerService {
 	 * @throws BizException
 	 */
 	public List<Long> findDevIdsByAreaRange(String lngLat, String inSR) throws BizException {
+		Long start = System.currentTimeMillis();
 		List<Long> devIds = Lists.newArrayList();
 		try {
 			List<String> urlList = getLayerUrls();
@@ -111,6 +112,8 @@ public class LayerService {
 			e.printStackTrace();
 			throw new BizException("获取dev_id列表失败！");
 		}
+		Long end = System.currentTimeMillis();
+		Logger.debug("请求图层数据并转换耗时：" + (end - start) + " ms");
 		return devIds;
 	}
 

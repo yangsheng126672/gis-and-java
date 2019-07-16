@@ -159,9 +159,12 @@ public class AttrQueryService {
 	 */
 	public List<GISDevExtVO> findDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
 		try {
+			Long start = System.currentTimeMillis();
 			String devIds = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
+			Long end = System.currentTimeMillis();
+			Logger.debug("请求图层和数据库总耗时： " + (end - start) + " ms");
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
