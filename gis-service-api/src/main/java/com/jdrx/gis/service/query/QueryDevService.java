@@ -88,7 +88,13 @@ public class QueryDevService {
 	 */
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(RangeDTO rangeDTO) throws BizException{
 		try {
-			String devStr = layerService.getDevIdsArray(rangeDTO.getRange(), rangeDTO.getInSR());
+			String devStr = null;
+			if (!StringUtils.isEmpty(rangeDTO.getRange())) {
+				devStr = layerService.getDevIdsArray(rangeDTO.getRange(), rangeDTO.getInSR());
+				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
+					devStr = "0";
+				}
+			}
 			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devStr);
 			return list;
 		} catch (Exception e) {
@@ -322,7 +328,14 @@ public class QueryDevService {
 				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
 				cell.setCellValue(text);
 			}
-			String devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+
+			String devStr = null;
+			if (!StringUtils.isEmpty(dto.getRange())) {
+				devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
+					devStr = "0";
+				}
+			}
 			RangeTypeDTO rangeTypeDTO = new RangeTypeDTO();
 			BeanUtils.copyProperties(dto, rangeTypeDTO);
 			Integer total = devQueryDAO.findDevListByTypeIDCount(rangeTypeDTO, devStr); // 总条数
@@ -429,7 +442,13 @@ public class QueryDevService {
 	 * @throws BizException
 	 */
 	public PageVO<SpaceInfoVO> findDevListPageByTypeID(RangeTypeDTO dto) throws BizException {
-		String devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+		String devStr = null;
+		if (!StringUtils.isEmpty(dto.getRange())) {
+			devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+			if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
+				devStr = "0";
+			}
+		}
 		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto, devStr);
 		return new PageVO<>(list);

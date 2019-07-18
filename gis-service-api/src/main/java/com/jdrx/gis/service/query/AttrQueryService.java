@@ -160,9 +160,15 @@ public class AttrQueryService {
 	public List<GISDevExtVO> findDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
 		try {
 			Long start = System.currentTimeMillis();
-			String devIds = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+			String devStr = null;
+			if (!StringUtils.isEmpty(dto.getRange())) {
+				devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
+					devStr = "0";
+				}
+			}
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
+			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
 			Long end = System.currentTimeMillis();
 			Logger.debug("请求图层和数据库总耗时： " + (end - start) + " ms");
 			return list;
@@ -220,8 +226,14 @@ public class AttrQueryService {
 				XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
 				cell.setCellValue(text);
 			}
-			String devIds = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-			int total = gisDevExtPOMapper.findDevListByAreaOrInputValCount(dto, devIds);
+			String devStr = null;
+			if (!StringUtils.isEmpty(dto.getRange())) {
+				devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
+					devStr = "0";
+				}
+			}
+			int total = gisDevExtPOMapper.findDevListByAreaOrInputValCount(dto, devStr);
 			int pageSize = GISConstants.EXPORT_PAGESIZE;
 			int pageTotal;
 			if (total <= pageSize) {
@@ -234,7 +246,7 @@ public class AttrQueryService {
 			while(pageTotal -- > 0) {
 				dto.setPageNum(pageNum);
 				dto.setPageSize(GISConstants.EXPORT_PAGESIZE);
-				List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devIds);
+				List<GISDevExtVO> devList = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
 				if (Objects.nonNull(devList)) {
 					String[] filedNames = attrPOs.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
 					devList = dealDataInfoByDevIds(devList, filedNames);
