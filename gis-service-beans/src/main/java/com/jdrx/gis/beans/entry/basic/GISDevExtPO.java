@@ -40,7 +40,7 @@ public class GISDevExtPO {
 	/**
 	 * 空间信息
 	 */
-	private Object geom;
+	private String geom;
 
 	/**
 	 * 模板类型ID

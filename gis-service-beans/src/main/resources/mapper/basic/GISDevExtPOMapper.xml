@@ -8,7 +8,7 @@
         <result column="code" jdbcType="VARCHAR" property="code" />
         <result column="caliber" jdbcType="INTEGER" property="caliber" />
         <result column="material" jdbcType="VARCHAR" property="material" />
-        <result column="geom" jdbcType="OTHER" property="geom" />
+        <result column="geom" jdbcType="VARCHAR" property="geom" />
         <result column="tpl_type_id" jdbcType="BIGINT" property="tplTypeId" />
         <result column="data_info" jdbcType="OTHER" property="dataInfo" />
         <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
@@ -33,9 +33,10 @@
 
     <select id="getDevExtByDevId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
+        id, dev_id, name, code, caliber, material, st_astext(geom) geom, tpl_type_id, data_info, delete_flag,
+    create_by, create_at, update_by, update_at
         from gis_dev_ext
-        where id = #{devId,jdbcType=BIGINT}
+        where dev_id = #{devId,jdbcType=BIGINT}
         limit 1
     </select>
 
