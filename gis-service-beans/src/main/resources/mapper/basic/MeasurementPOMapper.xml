@@ -125,12 +125,12 @@
   </select>
 
   <select id="getExtendArea"  parameterType="java.util.ArrayList" resultType="java.lang.String">
-    select st_Astext(ST_ConvexHull(ST_Union(geom))) from gis_dev_ext
-    where
-    dev_id in (
+    SELECT ST_AsText(ST_Transform(ST_GeomFromText(
+    (select st_Astext(ST_ConvexHull(ST_Union(geom))) from gis_dev_ext where dev_id in (
       <foreach collection="list" item="guard" index="index"
                separator=",">#{guard}</foreach>
-    )
+    ))
+    ,4544),4326)) As wgs_geom;
   </select>
 
 </mapper>
