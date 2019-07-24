@@ -71,7 +71,7 @@ public class LayerService {
 	 * @return
 	 * @throws BizException
 	 */
-	private List<String> getLayerUrls() throws BizException {
+	public List<String> getLayerUrls() throws BizException {
 		try {
 			List<String> list = Lists.newArrayList();
 			List<DictDetailPO> dictDetailPOs = dictDetailService.findDetailsByTypeVal(dictConfig.getPlLayerUrl());

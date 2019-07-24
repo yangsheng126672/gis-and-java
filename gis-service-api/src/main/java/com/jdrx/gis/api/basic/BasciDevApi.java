@@ -92,4 +92,12 @@ public class BasciDevApi {
 
 	}
 
+	@ApiOperation(value = "获取所有点线要素空间信息及dev_id")
+	@RequestMapping(value = "getAllFeaturesUrl")
+	public ResposeVO getAllFeaturesUrl() throws BizException{
+		Logger.debug("api/0/basic/getAllFeatures 获取所有点线要素空间信息及dev_id");
+		return ResponseFactory.ok(basicDevQuery.getAllFeaturesUrl());
+	}
+
+
 }

@@ -10,6 +10,7 @@ import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private DictDetailService detailService;
+
+	@Autowired
+	private LayerService layerService;
 
 
 	/**
@@ -253,6 +257,25 @@ public class BasicDevQuery {
 		}  catch (Exception e) {
 			Logger.error("查询图层失败，{}", e.getMessage());
 			throw new BizException("查询图层失败！");
+		}
+	}
+
+	/**
+	 * 获取点线所有要素
+	 * @return
+	 * @throws BizException
+	 */
+	public List<String> getAllFeaturesUrl() throws BizException{
+		try {
+			List<String> list = new ArrayList<>();
+			List<String>urlList = layerService.getLayerUrls();
+			for (String str:urlList){
+				list.add(str+"?where=id%3E0&outFields=dev_id&geometryType=esriGeometryEnvelope&returnExtentsOnly=false&f=geojson");
+			}
+			return list;
+		}  catch (Exception e) {
+			Logger.error("获取所有要素信息失败，{}", e.getMessage());
+			throw new BizException("获取所有要素信息失败！");
 		}
 	}
 
