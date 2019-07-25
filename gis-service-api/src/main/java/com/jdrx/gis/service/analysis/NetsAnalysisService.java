@@ -4,14 +4,20 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdrx.gis.beans.dto.analysis.AnalysisResultDTO;
 import com.jdrx.gis.beans.dto.analysis.NodeDTO;
+import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
+import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
+import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.sql.Connection;
 import java.util.*;
@@ -24,6 +30,8 @@ import java.util.*;
 
 @Service
 public class NetsAnalysisService {
+
+    private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(NetsAnalysisService.class);
 
     final static ObjectMapper mapper = new ObjectMapper();
 
@@ -125,6 +133,10 @@ public class NetsAnalysisService {
     public List<NodeDTO> findAllFamens(Long relationID){
         Long rid  = relationID;
         List<Value> values = getNodesFromRel(rid,gdlineLable);
+        if(values == null){
+            Logger.info("查询失败，无关系数据！"+ relationID);
+            return null;
+        }
         String nodetype = null;
         String nodeName = null;
         //阀门列表
@@ -181,10 +193,82 @@ public class NetsAnalysisService {
     }
 
     /**
+     * 查找二级关阀列表
+     * @param code
+     * */
+    public List<NodeDTO> findSecondAnalysisResult(String code){
+        List<Value> values = getNextNode(code,ljgdLable);
+        if(values == null){
+            Logger.info("查询失败，无关系数据！"+ code);
+            return null;
+        }
+        String nodetype = null;
+        String nodeName = null;
+        //阀门列表
+        List<NodeDTO> nodeDTOList = new ArrayList<>();
+        //已访问列表
+        Set<Value> lookedSet = new HashSet<>();
+        //待访问列表
+        ArrayList<Value> lookingSet = new ArrayList<>();
+        List<Value> tmpList = new ArrayList<>();
+        Value tmpValue = null;
+        try {
+            //初始化待访问列表  第一次，关系中的起始点
+            lookingSet.addAll(values);
+            ListIterator<Value> iterator = lookingSet.listIterator();
+            while (iterator.hasNext()){
+                tmpValue = iterator.next();
+                //添加到已经检查的阀门队列，避免重复检查
+                if (!(lookedSet.contains(tmpValue))){
+                    lookedSet.add(tmpValue);
+                }
+                //从待访问列表中移除节点
+                iterator.remove();
+                //判断nodetype是否为阀门类型
+                nodeName = tmpValue.asNode().get("name").asString();
+                if (nodeName.equals(code)){
+                    continue;
+                }
+                nodetype = tmpValue.asNode().get("nodetype").asString();
+                if (fmType.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
+                    //是阀门节点，添加到待返回的阀门队列
+                    NodeDTO dto = new NodeDTO();
+                    dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
+                    dto.setX(tmpValue.asNode().get("x").asDouble());
+                    dto.setY(tmpValue.asNode().get("y").asDouble());
+                    dto.setCode(nodeName);
+                    nodeDTOList.add(dto);
+                    continue;
+                }else {
+                    //不是阀门节点，继续遍历其关联节点
+                    tmpList =getNextNode(nodeName,gdLable);
+                    for (Value invalue:tmpList){
+                        //不在待访问和访问过的节点，添加
+                        if(!(lookedSet.contains(invalue))&&(!(lookingSet.contains(invalue)))){
+                            iterator.add(invalue);
+                        }
+                    }
+                }
+                iterator = lookingSet.listIterator();
+            }
+
+            return nodeDTOList;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    /**
      * 从一级关阀的所有阀门中筛选必须关闭的阀门
      * @param list
      */
     public List<NodeDTO> findFinalFamens(List<NodeDTO>list)throws Exception{
+        if ((list == null) ){
+            return null;
+        }
         List<Value> tmpList = new ArrayList<>();
         String tmpNodeName = null;
         Value tmpNode = null;
@@ -321,18 +405,44 @@ public class NetsAnalysisService {
      */
     public AnalysisResultDTO getAnalysisResult(Long id) throws Exception{
         AnalysisResultDTO analysisResultDTO = new AnalysisResultDTO();
-
         List<NodeDTO> fmlist_all = findAllFamens(id);
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
         List<Long>idList = findInfluenceArea(id,fmlist_final);
-        String geom = measurementPOMapper.getExtendArea(idList);
-        analysisResultDTO.setFmlist(fmlist_final);
-        analysisResultDTO.setGeom(geom);
-
+        if (idList == null){
+            return analysisResultDTO;
+        }
+        if (fmlist_final != null){
+            analysisResultDTO.setFmlist(fmlist_final);
+            String geom = measurementPOMapper.getExtendArea(idList);
+            analysisResultDTO.setGeom(geom);
+        }
         return analysisResultDTO;
+    }
 
-
-
+    /**
+     * 获取二次关阀结果
+     * @param secondAnalysisDTO
+     * @return
+     */
+    public List<NodeDTO>getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
+        List<String>dtoList = secondAnalysisDTO.getFealtureList();
+        List<String>fmList = secondAnalysisDTO.getFmlist();
+        List<NodeDTO> resultDtoList = new ArrayList<>();
+       try {
+           for(String string:dtoList){
+               List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string);
+               for(NodeDTO innerDto:tmpNodeList){
+                   if ((!fmList.contains(innerDto.getCode()))){
+                        resultDtoList.add(innerDto);
+                   }
+               }
+           }
+       }catch (Exception e){
+           Logger.error("二次关阀分析失败： "+e.getMessage());
+           throw new BizException("二次关阀分析失败!");
+       }
+        System.out.println("二级关阀所有阀门：total= "+resultDtoList.size()+","+resultDtoList);
+        return resultDtoList;
     }
 
 }

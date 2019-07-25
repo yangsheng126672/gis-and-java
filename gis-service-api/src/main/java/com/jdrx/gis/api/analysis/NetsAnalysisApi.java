@@ -1,8 +1,11 @@
 package com.jdrx.gis.api.analysis;
 
 import com.jdrx.gis.api.basic.BasciDevApi;
+import com.jdrx.gis.beans.dto.analysis.NodeDTO;
+import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
+import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @Description 爆管分析
@@ -38,6 +42,17 @@ public class NetsAnalysisApi {
     public ResposeVO getAnalysisiResult(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
         Logger.debug("api/0/analysis/getAnalysisiResult 获取爆管分析结果");
         return  ResponseFactory.ok(netsAnalysisService.getAnalysisResult(dto.getId()));
+
+    }
+
+    @ApiOperation(value = "获取二次关阀分析结果")
+    @RequestMapping(value ="getSecondAnalysisiResult" )
+    public ResposeVO getSecondAnalysisiResult(@ApiParam(name = "dto", required = true) @RequestBody @Valid SecondAnalysisDTO secondAnalysisDTO) throws Exception{
+        if (secondAnalysisDTO == null){
+            return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
+        }
+        Logger.debug("api/0/analysis/getSecondAnalysisiResult 获取二次关阀分析结果");
+        return  ResponseFactory.ok(netsAnalysisService.getSecondAnalysisResult(secondAnalysisDTO));
 
     }
 }
