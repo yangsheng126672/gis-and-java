@@ -85,17 +85,17 @@ public class QueryDevService {
 	private ShareDevPOMapper shareDevPOMapper;
 
 	/**
-	 * 获取第一级图层对应的设备个数
+	 * 根据传来的设备集合获取第一级图层和图层对应的设备个数
 	 * @return
 	 */
-	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(RangeDTO rangeDTO) throws BizException{
+	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(DevIDsDTO devIDsDTO) throws BizException{
 		try {
 			String devStr = null;
-			if (!StringUtils.isEmpty(rangeDTO.getRange())) {
-				devStr = layerService.getDevIdsArray(rangeDTO.getRange(), rangeDTO.getInSR());
-				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
-					devStr = "0";
-				}
+			Long[] devIds = devIDsDTO.getDevIds();
+			List<Long> ids = null;
+			if (Objects.nonNull(devIds) && devIds.length > 0) {
+				ids = Arrays.asList(devIds);
+				devStr = Joiner.on(",").join(ids);
 			}
 			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devStr);
 			return list;

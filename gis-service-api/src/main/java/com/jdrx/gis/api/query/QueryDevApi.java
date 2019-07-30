@@ -41,12 +41,12 @@ public class QueryDevApi {
 	@Autowired
 	private RedisComponents redisComponents;
 
-//	@ApiOperation(value = "获取划定范围内图层对应设备个数")
-//	@RequestMapping(value = "findFirstHierarchyDevTypeNum")
-//	public ResposeVO findFirstHierarchyDevTypeNum(@ApiParam(name = "dto", required = true) @RequestBody @Valid RangeDTO rangeDTO) throws BizException{
-//		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 获取所有图层对应设备个数 dto = {}", rangeDTO.toString());
-//		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum(rangeDTO));
-//	}
+	@ApiOperation(value = "根据传来的设备集合获取第一级图层和图层对应的设备个数")
+	@RequestMapping(value = "findFirstHierarchyDevTypeNum")
+	public ResposeVO findFirstHierarchyDevTypeNum(@ApiParam(name = "dto", required = true) @RequestBody @Valid DevIDsDTO devIDsDTO) throws BizException{
+		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 根据传来的设备集合获取第一级图层和图层对应的设备个数 dto = {}", devIDsDTO.toString());
+		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum(devIDsDTO));
+	}
 
 //	@ApiOperation(value = "根据设备类型ID和划取的经纬度范围查设备列表信息(分页)")
 //	@RequestMapping(value = "findDevListPageByTypeID")
