@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jdrx.gis.util.ComUtil.getChildNodes;
-import static com.jdrx.gis.util.ComUtil.getNodeJson;
 
 /**
  * @Description: 基本功能中的图层服务
@@ -168,6 +167,7 @@ public class BasicDevQuery {
 			JSONArray jsonArray = getNodeJson(-1L, list,0);
 			return jsonArray;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("查询所有设备类型失败，{}", e.getMessage());
 			throw new BizException("查询所有设备类型失败!");
 		}
@@ -183,8 +183,8 @@ public class BasicDevQuery {
 			List<ShareDevTypePO> list = shareDevTypePOMapper.findDevTypeList();
 			JSONArray jsonArray = getIconJsonTree(-1L, list,0);
 			return jsonArray;
-
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("查询图例图标失败，{}", e.getMessage());
 			throw new BizException("查询图例图标失败!");
 		}
@@ -199,6 +199,7 @@ public class BasicDevQuery {
 			GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
 			return gisDevExtPO;
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据设备ID{}查当前设备的属性信息失败!", devId);
 			throw new BizException("根据设备ID查当前设备的属性信息失败!");
 		}
@@ -227,6 +228,7 @@ public class BasicDevQuery {
 		try {
 			return measurementPOMapper.insertSelective(dto);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("保存测量信息失败！", e.getMessage());
 			throw new BizException("保存测量信息失败！");
 		}
@@ -241,6 +243,7 @@ public class BasicDevQuery {
 		try {
 			return measurementPOMapper.deleteByPrimaryKey(id);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("删除测量信息失败！{}", e.getMessage());
 			throw new BizException("删除测量信息失败！");
 		}
@@ -274,6 +277,7 @@ public class BasicDevQuery {
 			}
 			return list;
 		}  catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("获取所有要素信息失败，{}", e.getMessage());
 			throw new BizException("获取所有要素信息失败！");
 		}

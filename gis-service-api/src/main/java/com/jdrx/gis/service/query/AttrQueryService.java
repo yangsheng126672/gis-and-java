@@ -2,6 +2,7 @@ package com.jdrx.gis.service.query;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
@@ -39,10 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -161,11 +159,10 @@ public class AttrQueryService {
 		try {
 			Long start = System.currentTimeMillis();
 			String devStr = null;
-			if (!StringUtils.isEmpty(dto.getRange())) {
-				devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
-					devStr = "0";
-				}
+			Long[] devIds = dto.getDevIds();
+			List<Long> ids = Arrays.asList(devIds);
+			if (Objects.nonNull(devIds) && devIds.length > 0) {
+				devStr = Joiner.on(",").join(ids);
 			}
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
@@ -227,11 +224,10 @@ public class AttrQueryService {
 				cell.setCellValue(text);
 			}
 			String devStr = null;
-			if (!StringUtils.isEmpty(dto.getRange())) {
-				devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
-					devStr = "0";
-				}
+			Long[] devIds = dto.getDevIds();
+			List<Long> ids = Arrays.asList(devIds);
+			if (Objects.nonNull(devIds) && devIds.length > 0) {
+				devStr = Joiner.on(",").join(ids);
 			}
 			int total = gisDevExtPOMapper.findDevListByAreaOrInputValCount(dto, devStr);
 			int pageSize = GISConstants.EXPORT_PAGESIZE;

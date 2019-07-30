@@ -100,7 +100,7 @@
                             )
                             <if test="devIds != null and devIds != ''">
                                 and EXISTS (select 1 from
-                                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir where cast(vir.dev_id as BIGINT) = sd.id)
+                                (SELECT regexp_split_to_table(#{devIds, jdbc=VARCHAR},',') AS dev_id) AS vir where cast(vir.dev_id as BIGINT) = sd.id)
                             </if>
                         ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
                         AND sd.del_flag = 0
@@ -216,4 +216,5 @@
             ) ddd on ccc.type_id = ddd.id
         ) fff group by firsttypeId,firsttypename
     </select>
+
 </mapper>

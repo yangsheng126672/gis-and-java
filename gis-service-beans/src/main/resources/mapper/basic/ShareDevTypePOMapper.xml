@@ -97,4 +97,26 @@
             aa.ID = b.type_id
     )
     </select>
+
+    <select id="findLeafTypesByLimbTypeIds" parameterType="java.util.List" resultMap="BaseResultMap">
+    SELECT
+        <include refid="Base_Column_List" />
+    FROM (
+        WITH RECURSIVE a AS (
+            SELECT a.* FROM share_dev_type a
+            WHERE del_flag = 0
+                <if test="typeIds != null and typeIds.size > 0">
+                    and id in
+                    <foreach collection="typeIds" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+            UNION ALL
+            SELECT b.* FROM share_dev_type b,a
+            WHERE
+                a.ID = b.p_id
+                AND b.del_flag = 0
+        ) SELECT * FROM a
+     ) as tp where tp.limb_leaf = 2
+    </select>
 </mapper>

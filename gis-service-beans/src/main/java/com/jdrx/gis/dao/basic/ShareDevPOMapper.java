@@ -1,6 +1,9 @@
 package com.jdrx.gis.dao.basic;
 
 import com.jdrx.gis.beans.entry.basic.ShareDevPO;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface ShareDevPOMapper {
 
@@ -20,4 +23,12 @@ public interface ShareDevPOMapper {
 	 * @return
 	 */
 	Long getTypeIdPrimaryKey(Long id);
+
+	/**
+	 * 根据多个设备类型，查询它们下面的设备信息
+	 * @param typeIds 叶子节点的类型
+	 * @return
+	 */
+	List<ShareDevPO> findDevListByTypeIds(@Param("typeIds") String typeIds);
+
 }

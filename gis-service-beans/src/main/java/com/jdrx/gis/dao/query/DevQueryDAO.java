@@ -1,5 +1,6 @@
 package com.jdrx.gis.dao.query;
 
+import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.dto.query.RangeTypeDTO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
@@ -37,10 +38,10 @@ public interface DevQueryDAO {
 	Long getCountByTypeIds(@Param("typeIds") List<Long> typeIds, @Param("devIds" ) String devIds);
 
 	/**
-	 * 根据类型ID和经纬度范围查询所属设备信息
+	 * 根据设备IDs和类型ID获取设备信息
 	 * @return
 	 */
-	List<SpaceInfoVO> findDevListByTypeID(@Param("dto") RangeTypeDTO dto, @Param("devIds") String devIds);
+	List<SpaceInfoVO> findDevListByTypeID(@Param("dto") DevIDsForTypeDTO dto, @Param("devIds") String devIds);
 
 	/**
 	 * 根据类型ID和经纬度范围查询所属设备信息查询总条数
@@ -71,4 +72,5 @@ public interface DevQueryDAO {
 	 * @return
 	 */
 	List<SpaceInfTotalPO> findSpaceInfoByDevIds(@Param("devIds") String devIds);
+
 }

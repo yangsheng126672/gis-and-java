@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -79,15 +81,17 @@ public class AttrQueryApi {
 	public ResposeVO exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) {
 		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息，参数值 = {}", dto.toString());
 		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			String dateStr = sdf.format(new Date());
 			new Thread(() -> {
 				try {
 					String result = attrQueryService.exportDevListByAreaOrInputVal(dto);
-					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
-					Logger.debug("生成导出文件成功，key = {}", dto.getRange() + dto.getTypeId());
+					redisComponents.set(dto.getTypeId() + dateStr, result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", dto.getTypeId() + dateStr);
 				} catch (BizException e) {
 					e.printStackTrace();
 					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
-					redisComponents.set(dto.getRange() + dto.getTypeId(), EApiStatus.ERR_SYS.getStatus(), 60);
+					redisComponents.set(dto.getTypeId() + dateStr, EApiStatus.ERR_SYS.getStatus(), 60);
 				}
 			}).start();
 		return ResponseFactory.ok(Boolean.TRUE);

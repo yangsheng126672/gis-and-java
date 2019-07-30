@@ -24,7 +24,7 @@ public class GISConstants {
 	 */
 	public final static String DEV_TYPE_NAME = "devTypeName";
 
-	public final static String DEV_TYPE_NAME_DESC = "类名称";
+	public final static String DEV_TYPE_NAME_DESC = "类型";
 
 	/**
 	 * 类型模板中配置json数据的那个空间信息字段，统一取名geom，方便空间查询展示时，过滤掉
