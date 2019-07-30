@@ -15,6 +15,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class DevIDsDTO {
 	@ApiModelProperty("设备ID集")
-	@NotNull(message = "设备ID集合不能为空")
+	@NotNull(message = "设备ID集合不能为空, 查全部传空数组[]")
 	private Long[] devIds;
 }

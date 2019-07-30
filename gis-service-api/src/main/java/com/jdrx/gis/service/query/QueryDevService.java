@@ -94,7 +94,7 @@ public class QueryDevService {
 			Long[] devIds = devIDsDTO.getDevIds();
 			List<Long> ids = null;
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
-				ids = Arrays.asList(devIds);
+				ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 				devStr = Joiner.on(",").join(ids);
 			}
 			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devStr);
@@ -464,7 +464,7 @@ public class QueryDevService {
 	public PageVO<SpaceInfoVO> findDevListPageByTypeID(DevIDsForTypeDTO dto) throws BizException {
 		String devStr = null;
 		Long[] devIds = dto.getDevIds();
-		List<Long> ids = Arrays.asList(devIds);
+		List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 		if (Objects.nonNull(devIds) && devIds.length > 0) {
 			devStr = Joiner.on(",").join(ids);
 		}
