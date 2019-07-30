@@ -22,4 +22,7 @@ public class DevIDsForTypeDTO extends PageDTO {
 	@ApiModelProperty("设备类型ID")
 	@NotNull(message = "设备类型ID不能为空")
 	private Long typeId;
+
+	@ApiModelProperty("时间戳")
+	private String time;
 }

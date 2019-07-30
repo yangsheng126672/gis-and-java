@@ -607,6 +607,9 @@ public class QueryDevService {
 				devIds = shareDevPOS.stream().map(ShareDevPO :: getId).collect(Collectors.toList());
 				// 求交集
 				copyDevIdsRange.retainAll(devIds);
+				if (copyDevIdsRange.size() == 0) {
+					return gisDevExtVOS;
+				}
 				gisDevExtVOS = gisDevExtPOMapper.findDevListByDevIds(copyDevIdsRange);
 			}
 			return gisDevExtVOS;

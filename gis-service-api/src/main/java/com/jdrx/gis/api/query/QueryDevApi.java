@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @Description: gis页面查询服务
@@ -92,9 +90,7 @@ public class QueryDevApi {
 	@RequestMapping(value = "exportDevListByPID", method = RequestMethod.POST)
 	public ResposeVO export(@ApiParam(name = "dto", required = true) @RequestBody @Valid DevIDsForTypeDTO dto) {
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-			String dateStr = sdf.format(new Date());
-			String key = dto.getTypeId() + GISConstants.UNDER_LINE + dateStr;
+			String key = dto.getTypeId() + GISConstants.UNDER_LINE + dto.getTime();
 			new Thread(() -> {
 				try {
 					String result = queryDevService.exportDevInfoByPID(dto);
@@ -145,9 +141,10 @@ public class QueryDevApi {
 
 	@ApiOperation(value = "查询下载文件")
 	@RequestMapping(value = "getDownLoadFile")
-	public ResposeVO getDownLoadFile(@RequestBody ExpRangeTypeDTO dto) throws BizException {
+	public ResposeVO getDownLoadFile(@RequestBody DevIDsForTypeDTO dto) throws BizException {
 		Logger.debug("根据划定范围和类型获取导出文件的存放路径");
-		String result = queryDevService.getDownLoadFile(dto.getRange() + dto.getTypeId());
+		String key = dto.getTypeId() + GISConstants.UNDER_LINE + dto.getTime();
+		String result = queryDevService.getDownLoadFile(key);
 		return ResponseFactory.ok(result);
 	}
 
