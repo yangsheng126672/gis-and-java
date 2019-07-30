@@ -83,15 +83,21 @@ public class AttrQueryApi {
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 			String dateStr = sdf.format(new Date());
+			String key = dto.getTypeId() + GISConstants.UNDER_LINE + dateStr;
 			new Thread(() -> {
 				try {
 					String result = attrQueryService.exportDevListByAreaOrInputVal(dto);
-					redisComponents.set(dto.getTypeId() + dateStr, result, GISConstants.DOWNLOAD_EXPIRE);
-					Logger.debug("生成导出文件成功，key = {}", dto.getTypeId() + dateStr);
+					redisComponents.set(key, result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", key);
 				} catch (BizException e) {
 					e.printStackTrace();
 					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
-					redisComponents.set(dto.getTypeId() + dateStr, EApiStatus.ERR_SYS.getStatus(), 60);
+					redisComponents.set(key, EApiStatus.ERR_SYS.getStatus(), 60);
+					try {
+						throw new BizException(e);
+					} catch (BizException e1) {
+						e1.printStackTrace();
+					}
 				}
 			}).start();
 		return ResponseFactory.ok(Boolean.TRUE);

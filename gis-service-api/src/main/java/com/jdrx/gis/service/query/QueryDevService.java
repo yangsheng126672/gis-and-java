@@ -222,21 +222,22 @@ public class QueryDevService {
 	}
 
 	/**
-	 * 根据设备类型的ID和经纬度范围，查询子类的设备个数，子类为第二层的子类
-	 * @param expRangeTypeDTO
+	 * 根据typeID 和 DevIds 统计子类的个数
+	 * @param devIDsForTypeDTO
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SonsNumVO> findSonsNumByPid(ExpRangeTypeDTO expRangeTypeDTO) throws BizException {
+	public List<SonsNumVO> findSonsNumByPid(DevIDsForTypeDTO devIDsForTypeDTO) throws BizException {
 		List<SonsNumVO> resultList = new ArrayList<>();
 		// 根据设备类型ID查第二层的子类
-		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(expRangeTypeDTO.getTypeId());
+		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(devIDsForTypeDTO.getTypeId());
 
-		List<Long> devIds;
 		String devStr = null;
-		if (Objects.nonNull(expRangeTypeDTO.getRange()) && !StringUtils.isEmpty(expRangeTypeDTO.getRange())) {
-			devIds = layerService.findDevIdsByAreaRange(expRangeTypeDTO.getRange(), expRangeTypeDTO.getInSR());
-			devStr = Joiner.on(",").join(devIds);
+		Long[] devIds = devIDsForTypeDTO.getDevIds();
+		List<Long> ids = null;
+		if (Objects.nonNull(devIds) && devIds.length > 0) {
+			ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			devStr = Joiner.on(",").join(ids);
 		}
 
 		if (!Objects.isNull(secondTypeList)) {
@@ -275,7 +276,7 @@ public class QueryDevService {
 		// 数量倒序
 		resultList.sort(Comparator.comparing(SonsNumVO :: getNum).reversed());
 
-		Logger.debug("typeId = {}子类数据：" , expRangeTypeDTO.getTypeId());
+		Logger.debug("typeId = {}子类数据：" , devIDsForTypeDTO.getTypeId());
 		resultList.stream().forEach(vo -> {
 			Logger.debug(vo.toString());
 		} );
@@ -333,13 +334,11 @@ public class QueryDevService {
 
 			String devStr = null;
 			Long[] devIds = dto.getDevIds();
-			List<Long> ids = Arrays.asList(devIds);
+			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
-			RangeTypeDTO rangeTypeDTO = new RangeTypeDTO();
-			BeanUtils.copyProperties(dto, rangeTypeDTO);
-			Integer total = devQueryDAO.findDevListByTypeIDCount(rangeTypeDTO, devStr); // 总条数
+			Integer total = devQueryDAO.findDevListByTypeIDCount(dto, devStr); // 总条数
 
 			/**
 			 * 之所以分一下，是因为如果数据量过大，一次加载到内存有可能出现OOM，

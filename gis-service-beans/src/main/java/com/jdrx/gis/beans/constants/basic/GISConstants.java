@@ -65,4 +65,7 @@ public class GISConstants {
 
 	/** 管段长度配置模板的字段*/
 	public final static String PIPE_LENGTH = "pipe_length";
+
+	/** redis 导出文件的key加下划线 */
+	public final static String UNDER_LINE = "_";
 }
