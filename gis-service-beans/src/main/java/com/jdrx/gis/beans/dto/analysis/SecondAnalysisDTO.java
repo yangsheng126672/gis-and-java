@@ -16,5 +16,5 @@ public class SecondAnalysisDTO {
     @ApiModelProperty("第一次关阀列表")
     protected List<String> fmlist;
     @ApiModelProperty("关阀失败的列表")
-    protected List<String>fealtureList;
+    protected List<String>getFealtureList;
 }

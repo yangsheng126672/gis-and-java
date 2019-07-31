@@ -2,13 +2,16 @@ package com.jdrx.gis.service.analysis;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jdrx.gis.beans.dto.analysis.AnalysisResultDTO;
-import com.jdrx.gis.beans.dto.analysis.NodeDTO;
-import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
+import com.jdrx.gis.beans.dto.analysis.*;
+import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisPO;
+import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
+import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
+import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
+import com.jdrx.gis.dao.analysis.GisPipeAnalysisPOMapper;
+import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
+import com.jdrx.gis.dao.analysis.GisWaterUserInfoPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
-import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.exception.BizException;
-import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
@@ -17,9 +20,7 @@ import org.neo4j.driver.v1.types.Node;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -50,6 +51,15 @@ public class NetsAnalysisService {
     private Session session;
     @Autowired
     private MeasurementPOMapper measurementPOMapper;
+    @Autowired
+    private GisPipeAnalysisPOMapper gisPipeAnalysisPOMapper;
+    @Autowired
+    private GisPipeAnalysisValvePOMapper valvePOMapper;
+    @Autowired
+    private GisWaterUserInfoPOMapper waterUserInfoPOMapper;
+
+
+
 //    @Autowired
 //    private Connection connection;
     //逻辑管点标签
@@ -397,14 +407,20 @@ public class NetsAnalysisService {
 
     }
 
+    public List<GisWaterUserInfoPO>findInfluenceUser() throws Exception{
+        List<GisWaterUserInfoPO> userInfoDTOS = new ArrayList<>();
+        userInfoDTOS =  waterUserInfoPOMapper.selectAll();
+        return userInfoDTOS;
+    }
+
     /**
      * 获取爆管分析结果
      * @param id
      * @return
      * @throws Exception
      */
-    public AnalysisResultDTO getAnalysisResult(Long id) throws Exception{
-        AnalysisResultDTO analysisResultDTO = new AnalysisResultDTO();
+    public AnalysisResultVO getAnalysisResult(Long id) throws Exception{
+        AnalysisResultVO analysisResultDTO = new AnalysisResultVO();
         List<NodeDTO> fmlist_all = findAllFamens(id);
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
         List<Long>idList = findInfluenceArea(id,fmlist_final);
@@ -416,6 +432,8 @@ public class NetsAnalysisService {
             String geom = measurementPOMapper.getExtendArea(idList);
             analysisResultDTO.setGeom(geom);
         }
+        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
+        analysisResultDTO.setUserInfoPOS(userInfoPOS);
         return analysisResultDTO;
     }
 
@@ -424,8 +442,9 @@ public class NetsAnalysisService {
      * @param secondAnalysisDTO
      * @return
      */
-    public List<NodeDTO>getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
-        List<String>dtoList = secondAnalysisDTO.getFealtureList();
+    public AnalysisResultVO getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
+        AnalysisResultVO vo = new AnalysisResultVO();
+        List<String>dtoList = secondAnalysisDTO.getGetFealtureList();
         List<String>fmList = secondAnalysisDTO.getFmlist();
         List<NodeDTO> resultDtoList = new ArrayList<>();
        try {
@@ -437,12 +456,69 @@ public class NetsAnalysisService {
                    }
                }
            }
+           vo.setFmlist(resultDtoList);
+           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser();
+           vo.setUserInfoPOS(userInfoDTOS);
        }catch (Exception e){
            Logger.error("二次关阀分析失败： "+e.getMessage());
            throw new BizException("二次关阀分析失败!");
        }
         System.out.println("二级关阀所有阀门：total= "+resultDtoList.size()+","+resultDtoList);
-        return resultDtoList;
+        return vo;
     }
+
+    /**
+     * 保存爆管记录
+     * @param recordDTO
+     * @return
+     * @throws BizException
+     */
+    public boolean saveAnalysisRecond(AnalysisRecordDTO recordDTO) throws BizException {
+        try {
+            GisPipeAnalysisPO gisPipeAnalysisPO =new GisPipeAnalysisPO();
+            gisPipeAnalysisPO.setCode(recordDTO.getCode()) ;
+            gisPipeAnalysisPO.setPointgeom(recordDTO.getPointgeom());
+            gisPipeAnalysisPO.setAreaFirst(recordDTO.getArea_first());
+            gisPipeAnalysisPOMapper.insertSelective(gisPipeAnalysisPO);
+            //回填id
+            Long id = gisPipeAnalysisPO.getId();
+
+            //获取第一次关阀方案
+            List<NodeDTO> valve = recordDTO.getValves_first();
+            for (NodeDTO dto : valve){
+                GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
+                valvePO.setValveFirst(dto.getDev_id().toString());
+                valvePO.setRid(id);
+                //保存
+                valvePOMapper.insertSelective(valvePO);
+            }
+            //判断是否有二次关阀
+            if(!(recordDTO.getValve_failed() ==null ||(recordDTO.getValve_failed().size() ==0))){
+                List<String> failedValveList = recordDTO.getValve_failed();
+                for (String str:failedValveList){
+                    GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
+                    valvePO.setValveFirst(str);
+                    valvePO.setRid(id);
+                    //保存
+                    valvePOMapper.insertSelective(valvePO);
+                }
+                List<NodeDTO> valve_second = recordDTO.getValve_second();
+                for (NodeDTO secondDto : valve_second){
+                    GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
+                    valvePO.setValveFirst(secondDto.getCode());
+                    valvePO.setRid(id);
+                    //保存
+                    valvePOMapper.insertSelective(valvePO);
+                }
+            }
+
+        }catch (Exception e){
+            Logger.error("保存爆管记录失败： "+e.getMessage());
+            throw new BizException("保存爆管记录!");
+        }
+       return true;
+    }
+
+
 
 }

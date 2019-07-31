@@ -1,36 +1,35 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entry.analysis;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-public class MeasurementPO {
+public class GisPipeAnalysisValvePO {
     /**
-     * id
+     * null
      */
     private Long id;
 
     /**
-     * 名称
+     * null
      */
-    private String name;
+    private Long rid;
 
     /**
-     * 测量值
+     * null
      */
-    private BigDecimal meaturedValue;
+    private String valveFirst;
 
     /**
-     * 备注
+     * null
      */
-    private String remark;
+    private String valveFealed;
 
     /**
-     * 空间信息
+     * null
      */
-    private Object geom;
+    private String valveSecond;
 
     /**
      * 是否删除

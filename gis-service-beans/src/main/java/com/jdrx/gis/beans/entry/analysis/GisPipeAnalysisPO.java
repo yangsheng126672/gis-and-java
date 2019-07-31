@@ -1,36 +1,36 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entry.analysis;
 
 import lombok.Data;
+import org.apache.ibatis.annotations.Options;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-public class MeasurementPO {
+public class GisPipeAnalysisPO {
     /**
-     * id
+     * null
      */
     private Long id;
 
     /**
-     * 名称
+     * null
      */
-    private String name;
+    private String code;
 
     /**
-     * 测量值
+     * null
      */
-    private BigDecimal meaturedValue;
+    private Object pointgeom;
 
     /**
-     * 备注
+     * null
      */
-    private String remark;
+    private Object areaFirst;
 
     /**
-     * 空间信息
+     * null
      */
-    private Object geom;
+    private Object areaSecond;
 
     /**
      * 是否删除
@@ -56,5 +56,6 @@ public class MeasurementPO {
      * 修改时间
      */
     private Date updateAt;
+
 
 }
