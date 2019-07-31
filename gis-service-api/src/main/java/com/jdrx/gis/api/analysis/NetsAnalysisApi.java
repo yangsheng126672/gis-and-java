@@ -38,6 +38,9 @@ public class NetsAnalysisApi {
     @ApiOperation(value = "获取爆管分析结果")
     @RequestMapping(value ="getAnalysisiResult" )
     public ResposeVO getAnalysisiResult(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
+        if (dto == null || dto.getId() ==null){
+            return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
+        }
         Logger.debug("api/0/analysis/getAnalysisiResult 获取爆管分析结果");
         return  ResponseFactory.ok(netsAnalysisService.getAnalysisResult(dto.getId()));
 

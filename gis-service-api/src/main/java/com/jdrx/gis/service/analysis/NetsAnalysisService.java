@@ -407,6 +407,11 @@ public class NetsAnalysisService {
 
     }
 
+    /**
+     * 获取爆管影响用户列表
+     * @return
+     * @throws Exception
+     */
     public List<GisWaterUserInfoPO>findInfluenceUser() throws Exception{
         List<GisWaterUserInfoPO> userInfoDTOS = new ArrayList<>();
         userInfoDTOS =  waterUserInfoPOMapper.selectAll();
@@ -444,8 +449,9 @@ public class NetsAnalysisService {
      */
     public AnalysisResultVO getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
         AnalysisResultVO vo = new AnalysisResultVO();
-        List<String>dtoList = secondAnalysisDTO.getGetFealtureList();
+        List<String>dtoList = secondAnalysisDTO.getFealtureList();
         List<String>fmList = secondAnalysisDTO.getFmlist();
+        Long dev_id =secondAnalysisDTO.getDev_id();
         List<NodeDTO> resultDtoList = new ArrayList<>();
        try {
            for(String string:dtoList){
@@ -457,6 +463,23 @@ public class NetsAnalysisService {
                }
            }
            vo.setFmlist(resultDtoList);
+           List<NodeDTO> fmlist_all = new ArrayList<>();
+          for (String s:fmList){
+              if (dtoList.contains(s)){
+                  continue;
+              }
+              NodeDTO node = new NodeDTO();
+              node.setCode(s);
+              fmlist_all.add(node);
+          }
+          fmlist_all.addAll(resultDtoList);
+           //获取影响区域范围
+           List<Long> ids = findInfluenceArea(dev_id,fmlist_all);
+           if (ids !=null){
+               String area = measurementPOMapper.getExtendArea(ids);
+               vo.setGeom(area);
+           }
+           //添加影响用户
            List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser();
            vo.setUserInfoPOS(userInfoDTOS);
        }catch (Exception e){
