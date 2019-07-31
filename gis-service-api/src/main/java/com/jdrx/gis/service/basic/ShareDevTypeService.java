@@ -1,13 +1,19 @@
 package com.jdrx.gis.service.basic;
 
-import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.jdrx.gis.beans.dto.query.DevIDsAndTypeDTO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 设备类型服务类
@@ -100,5 +106,44 @@ public class ShareDevTypeService {
 			Logger.error("据多个类型ID（枝干）获取它们下属的子类型（叶子）, 查询失败！");
 			throw new BizException("据多个类型ID（枝干）获取它们下属的子类型（叶子）, 查询失败！");
 		}
+	}
+
+	/**
+	 * 根据传入的DevIDs和typeId, 查它们的父类集合
+	 * @param dto
+	 * @return
+	 * @throws BizException
+	 */
+	public List<ShareDevTypePO> findLeafTypesByDevIds(DevIDsAndTypeDTO dto) throws BizException {
+		List<ShareDevTypePO> shareDevTypePOList;
+		try{
+			// 根据type_id查它所有子类型
+			List<ShareDevTypePO> list1 = shareDevTypePOMapper.findAllDevTypeListByTypePId(dto.getTypeId());
+			List<Long> typeIdsList1 = null;
+			if (Objects.nonNull(list1)) {
+				typeIdsList1 = list1.stream().map(ShareDevTypePO :: getId).collect(Collectors.toList());
+			}
+
+
+			String devStr = null;
+			Long[] devIds = dto.getDevIds();
+			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			if (Objects.nonNull(devIds) && devIds.length > 0) {
+				devStr = Joiner.on(",").join(ids);
+			}
+
+			// 根据devIds 获取它们的父类IDs
+			List<Long> typeIdsList2 = shareDevTypePOMapper.findTypeIdsByDevIds(devStr);
+
+			if (Objects.nonNull(typeIdsList2)) {
+				typeIdsList2.retainAll(typeIdsList1);
+			}
+
+			shareDevTypePOList = shareDevTypePOMapper.findDevTypeListByIds(typeIdsList2);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("根据传入的DevIDs和typeId, 查它们的父类集合失败！");
+		}
+		return shareDevTypePOList;
 	}
 }

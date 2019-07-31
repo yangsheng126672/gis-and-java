@@ -119,4 +119,28 @@
         ) SELECT * FROM a
      ) as tp where tp.limb_leaf = 2
     </select>
+
+    <select id="findTypeIdsByDevIds" parameterType="java.lang.String" resultType="java.lang.Long">
+        select
+          type_id
+        from share_dev sd
+        where  del_flag = 0
+        <if test="devIds != null and devIds != ''">
+            and EXISTS (select 1 from
+            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast (vir.dev_id as BIGINT) = sd.id)
+        </if>
+    </select>
+
+    <select id="findDevTypeListByIds" parameterType="java.util.List" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from share_dev_type
+        where del_flag = 0
+        <if test="ids != null and ids.size > 0">
+            and id in
+            <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
 </mapper>

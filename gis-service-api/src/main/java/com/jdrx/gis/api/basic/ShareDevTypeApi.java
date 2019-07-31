@@ -1,11 +1,12 @@
 package com.jdrx.gis.api.basic;
 
+import com.jdrx.gis.beans.dto.query.DevIDsAndTypeDTO;
+import com.jdrx.gis.service.basic.ShareDevTypeService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
-import com.jdrx.gis.service.basic.ShareDevTypeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -42,5 +43,12 @@ public class ShareDevTypeApi {
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);
 		}
 		return ResponseFactory.ok(shareDevTypeService.findDevTypeListByTypeId(dto.getId()));
+	}
+
+	@ApiOperation(value = "根据传来的设备类型和设备ID或取叶子级别的类型")
+	@RequestMapping(value = "findLeafTypesByDevIds")
+	public ResposeVO findLeafTypesByDevIds(@RequestBody DevIDsAndTypeDTO dto) throws BizException {
+		Logger.debug("根据传来的设备类型和设备ID或取叶子级别的类型 dto={}", dto.toString());
+		return ResponseFactory.ok(shareDevTypeService.findLeafTypesByDevIds(dto));
 	}
 }
