@@ -29,4 +29,9 @@ public class GISDevExt2VO {
 	 * geom
 	 */
 	private String geom;
+
+	/**
+	 * 类型名称
+	 */
+	private String typeName;
 }

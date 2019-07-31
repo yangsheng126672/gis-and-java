@@ -31,6 +31,7 @@
         <result column="dev_id" jdbcType="BIGINT" property="devId"/>
         <result column="type_id" jdbcType="BIGINT" property="typeId"/>
         <result column="geom" jdbcType="VARCHAR" property="geom"/>
+        <result column="type_name" jdbcType="VARCHAR" property="typeName"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -142,25 +143,31 @@
     </select>
 
     <select id="findDevListAttTypeByDevIds" resultType="java.lang.String" resultMap="BaseResultMap3" >
-        SELECT id, dev_id, type_id, ST_AsText(st_transform(geom,4326)) geom
-        FROM (
-            SELECT t3.type_id, t2.*
+        SELECT t4.*, t5.name AS type_name
             FROM (
-                SELECT * FROM gis_dev_ext t1
-                WHERE delete_flag = false
-                    AND EXISTS (
-                        SELECT 1
-                        FROM (
-                            SELECT regexp_split_to_table(#{devIds}, ',') AS dev_id
-                        ) vir
-                        WHERE CAST(vir.dev_id AS BIGINT) = t1.dev_id
-                    )
-            ) t2
-                LEFT JOIN (
-                    SELECT id, type_id
-                    FROM share_dev
-                ) t3
-                ON t2.dev_id = t3.id
-        ) rs
+                SELECT id, dev_id, type_id
+                    , ST_AsText(st_transform(geom, 4326)) AS geom
+                FROM (
+                    SELECT t3.type_id, t2.*
+                    FROM (
+                        SELECT *
+                        FROM gis_dev_ext t1
+                        WHERE delete_flag = false
+                            AND EXISTS (
+                                SELECT 1
+                                FROM (
+                                    SELECT regexp_split_to_table(#{devIds}, ',') AS dev_id
+                                ) vir
+                                WHERE CAST(vir.dev_id AS BIGINT) = t1.dev_id
+                            )
+                    ) t2
+                        LEFT JOIN (
+                            SELECT id, type_id
+                            FROM share_dev
+                        ) t3
+                        ON t2.dev_id = t3.id
+                ) rs
+            ) t4
+                LEFT JOIN share_dev_type t5 ON t4.type_id = t5.id
     </select>
 </mapper>

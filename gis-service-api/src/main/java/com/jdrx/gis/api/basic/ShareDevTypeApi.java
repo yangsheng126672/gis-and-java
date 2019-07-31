@@ -45,10 +45,10 @@ public class ShareDevTypeApi {
 		return ResponseFactory.ok(shareDevTypeService.findDevTypeListByTypeId(dto.getId()));
 	}
 
-	@ApiOperation(value = "根据传来的设备类型和设备ID或取叶子级别的类型")
+	@ApiOperation(value = "根据传来的设备类型和设备IDs获取叶子级别的类型")
 	@RequestMapping(value = "findLeafTypesByDevIds")
 	public ResposeVO findLeafTypesByDevIds(@RequestBody DevIDsAndTypeDTO dto) throws BizException {
-		Logger.debug("根据传来的设备类型和设备ID或取叶子级别的类型 dto={}", dto.toString());
+		Logger.debug("根据传来的设备类型和设备IDs获取叶子级别的类型 dto={}", dto.toString());
 		return ResponseFactory.ok(shareDevTypeService.findLeafTypesByDevIds(dto));
 	}
 }
