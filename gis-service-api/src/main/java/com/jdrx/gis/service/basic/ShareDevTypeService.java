@@ -29,6 +29,7 @@ public class ShareDevTypeService {
 		try {
 			return shareDevTypePOMapper.getByPrimaryKey(id);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据ID{}查share_dev_type信息失败！", id);
 			throw new BizException("根据主键ID查设备类型表失败！");
 		}
@@ -44,6 +45,7 @@ public class ShareDevTypeService {
 			Logger.debug("查询设备类型ID的第二层子类，TYPE_ID = {}", typeId);
 			return shareDevTypePOMapper.findDevTypeListByTypeId(typeId);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("查询设备类型ID{}的第二层子类失败!", typeId);
 			throw new BizException("查询设备类型ID的第二层子类失败!");
 		}
@@ -60,6 +62,7 @@ public class ShareDevTypeService {
 			Logger.debug("根据父类ID递归查询所有子类，PID = {}", typeId);
 			return shareDevTypePOMapper.findAllDevTypeListByTypePId(typeId);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据父类ID{}递归查询所有子类失败!", typeId);
 			throw new BizException("根据父类ID递归查询所有子类失败!");
 		}
@@ -76,8 +79,26 @@ public class ShareDevTypeService {
 			Logger.debug("根据当前类型ID，递归查询所有子类，ID = {}", typeId);
 			return shareDevTypePOMapper.findAllDevTypeListByCurrTypeId(typeId);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.error("根据当前类型ID{}，递归查询所有子类失败！",  typeId);
 			throw new BizException("根据当前类型ID，递归查询所有子类失败！");
+		}
+	}
+
+	/**
+	 * 根据多个类型ID（枝干）获取它们下属的子类型（叶子）
+	 * @param typeIds
+	 * @return
+	 * @throws BizException
+	 */
+	public List<ShareDevTypePO> findLeafTypesByLimbTypeIds(List<Long> typeIds) throws BizException {
+		try {
+			Logger.debug("据多个类型ID（枝干）获取它们下属的子类型（叶子）, typeIds = {}", typeIds);
+			return shareDevTypePOMapper.findLeafTypesByLimbTypeIds(typeIds);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("据多个类型ID（枝干）获取它们下属的子类型（叶子）, 查询失败！");
+			throw new BizException("据多个类型ID（枝干）获取它们下属的子类型（叶子）, 查询失败！");
 		}
 	}
 }

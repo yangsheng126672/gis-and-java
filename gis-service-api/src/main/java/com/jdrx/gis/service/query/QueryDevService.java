@@ -6,12 +6,10 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.ELimbLeaf;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.dto.query.ExpRangeTypeDTO;
-import com.jdrx.gis.beans.dto.query.QueryDevDTO;
-import com.jdrx.gis.beans.dto.query.RangeDTO;
-import com.jdrx.gis.beans.dto.query.RangeTypeDTO;
+import com.jdrx.gis.beans.dto.query.*;
 import com.jdrx.gis.beans.dto.third.GetPipeTotalLenthDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
+import com.jdrx.gis.beans.entry.basic.ShareDevPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
@@ -19,6 +17,7 @@ import com.jdrx.gis.beans.vo.query.*;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.ShareDevTypeService;
@@ -82,18 +81,21 @@ public class QueryDevService {
 	@Autowired
 	private RedisComponents redisComponents;
 
+	@Autowired
+	private ShareDevPOMapper shareDevPOMapper;
+
 	/**
-	 * 获取第一级图层对应的设备个数
+	 * 根据传来的设备集合获取第一级图层和图层对应的设备个数
 	 * @return
 	 */
-	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(RangeDTO rangeDTO) throws BizException{
+	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(DevIDsDTO devIDsDTO) throws BizException{
 		try {
 			String devStr = null;
-			if (!StringUtils.isEmpty(rangeDTO.getRange())) {
-				devStr = layerService.getDevIdsArray(rangeDTO.getRange(), rangeDTO.getInSR());
-				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
-					devStr = "0";
-				}
+			Long[] devIds = devIDsDTO.getDevIds();
+			List<Long> ids = null;
+			if (Objects.nonNull(devIds) && devIds.length > 0) {
+				ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+				devStr = Joiner.on(",").join(ids);
 			}
 			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devStr);
 			return list;
@@ -105,19 +107,19 @@ public class QueryDevService {
 	}
 
 	/**
-	 * 根据类型ID和经纬度范围查询所属的设备信息
+	 * 根据设备IDs和类型ID获取设备信息
 	 * @param dto
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SpaceInfoVO> findDevListByTypeID(RangeTypeDTO dto, String devIds) throws BizException{
+	public List<SpaceInfoVO> findDevListByTypeID(DevIDsForTypeDTO dto, String devIds) throws BizException{
 		try {
 			List<SpaceInfoVO> list = devQueryDAO.findDevListByTypeID(dto, devIds);
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.error("根据类型ID和经纬度范围查询所属设备信息失败！pid = {} ", dto.getTypeId());
-			throw  new BizException("根据类型ID和经纬度范围查询所属设备信息失败");
+			Logger.error("根据设备IDs和类型ID获取设备信息失败！pid = {} ", dto.getTypeId());
+			throw  new BizException("根据设备IDs和类型ID获取设备信息失败！");
 		}
 	}
 
@@ -220,21 +222,22 @@ public class QueryDevService {
 	}
 
 	/**
-	 * 根据设备类型的ID和经纬度范围，查询子类的设备个数，子类为第二层的子类
-	 * @param expRangeTypeDTO
+	 * 根据typeID 和 DevIds 统计子类的个数
+	 * @param devIDsForTypeDTO
 	 * @return
 	 * @throws BizException
 	 */
-	public List<SonsNumVO> findSonsNumByPid(ExpRangeTypeDTO expRangeTypeDTO) throws BizException {
+	public List<SonsNumVO> findSonsNumByPid(DevIDsForTypeDTO devIDsForTypeDTO) throws BizException {
 		List<SonsNumVO> resultList = new ArrayList<>();
 		// 根据设备类型ID查第二层的子类
-		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(expRangeTypeDTO.getTypeId());
+		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(devIDsForTypeDTO.getTypeId());
 
-		List<Long> devIds;
 		String devStr = null;
-		if (Objects.nonNull(expRangeTypeDTO.getRange()) && !StringUtils.isEmpty(expRangeTypeDTO.getRange())) {
-			devIds = layerService.findDevIdsByAreaRange(expRangeTypeDTO.getRange(), expRangeTypeDTO.getInSR());
-			devStr = Joiner.on(",").join(devIds);
+		Long[] devIds = devIDsForTypeDTO.getDevIds();
+		List<Long> ids = null;
+		if (Objects.nonNull(devIds) && devIds.length > 0) {
+			ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			devStr = Joiner.on(",").join(ids);
 		}
 
 		if (!Objects.isNull(secondTypeList)) {
@@ -273,7 +276,7 @@ public class QueryDevService {
 		// 数量倒序
 		resultList.sort(Comparator.comparing(SonsNumVO :: getNum).reversed());
 
-		Logger.debug("typeId = {}子类数据：" , expRangeTypeDTO.getTypeId());
+		Logger.debug("typeId = {}子类数据：" , devIDsForTypeDTO.getTypeId());
 		resultList.stream().forEach(vo -> {
 			Logger.debug(vo.toString());
 		} );
@@ -298,7 +301,7 @@ public class QueryDevService {
 	 * @param dto
 	 * @throws BizException
 	 */
-	public String exportDevInfoByPID(ExpRangeTypeDTO dto) throws BizException {
+	public String exportDevInfoByPID(DevIDsForTypeDTO dto) throws BizException {
 		OutputStream os = null;
 		try {
 			SXSSFWorkbook workbook;
@@ -330,15 +333,12 @@ public class QueryDevService {
 			}
 
 			String devStr = null;
-			if (!StringUtils.isEmpty(dto.getRange())) {
-				devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-				if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
-					devStr = "0";
-				}
+			Long[] devIds = dto.getDevIds();
+			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			if (Objects.nonNull(devIds) && devIds.length > 0) {
+				devStr = Joiner.on(",").join(ids);
 			}
-			RangeTypeDTO rangeTypeDTO = new RangeTypeDTO();
-			BeanUtils.copyProperties(dto, rangeTypeDTO);
-			Integer total = devQueryDAO.findDevListByTypeIDCount(rangeTypeDTO, devStr); // 总条数
+			Integer total = devQueryDAO.findDevListByTypeIDCount(dto, devStr); // 总条数
 
 			/**
 			 * 之所以分一下，是因为如果数据量过大，一次加载到内存有可能出现OOM，
@@ -363,11 +363,11 @@ public class QueryDevService {
 			int body_i = 1; // body 行索引
 			int pageNum = 1;
 			while (pageTotal-- > 0) {
-				RangeTypeDTO rangeType = new RangeTypeDTO();
-				BeanUtils.copyProperties(dto,rangeType);
-				rangeType.setPageSize(pageSize);
-				rangeType.setPageNum(pageNum);
-				PageVO<SpaceInfoVO> pageVO = findDevListPageByTypeID(rangeType);
+				DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
+				BeanUtils.copyProperties(dto,devIDsForTypeDTO);
+				devIDsForTypeDTO.setPageSize(pageSize);
+				devIDsForTypeDTO.setPageNum(pageNum);
+				PageVO<SpaceInfoVO> pageVO = findDevListPageByTypeID(devIDsForTypeDTO);
 				List<SpaceInfoVO> subDevList = pageVO.getData();
 				if (Objects.nonNull(subDevList)) {
 					subDevList.stream().map(vo -> {
@@ -441,13 +441,31 @@ public class QueryDevService {
 	 * @return
 	 * @throws BizException
 	 */
-	public PageVO<SpaceInfoVO> findDevListPageByTypeID(RangeTypeDTO dto) throws BizException {
+//	public PageVO<SpaceInfoVO> findDevListPageByTypeID(RangeTypeDTO dto) throws BizException {
+//		String devStr = null;
+//		if (!StringUtils.isEmpty(dto.getRange())) {
+//			devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
+//			if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
+//				devStr = "0";
+//			}
+//		}
+//		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+//		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto, devStr);
+//		return new PageVO<>(list);
+//	}
+
+	/**
+	 * 获取设备类型下面的设备列表信息，分页
+	 * @param dto
+	 * @return
+	 * @throws BizException
+	 */
+	public PageVO<SpaceInfoVO> findDevListPageByTypeID(DevIDsForTypeDTO dto) throws BizException {
 		String devStr = null;
-		if (!StringUtils.isEmpty(dto.getRange())) {
-			devStr = layerService.getDevIdsArray(dto.getRange(), dto.getInSR());
-			if (Objects.nonNull(devStr) && StringUtils.trimWhitespace(devStr).length() == 0) {
-				devStr = "0";
-			}
+		Long[] devIds = dto.getDevIds();
+		List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+		if (Objects.nonNull(devIds) && devIds.length > 0) {
+			devStr = Joiner.on(",").join(ids);
 		}
 		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto, devStr);
@@ -548,6 +566,55 @@ public class QueryDevService {
 		} catch (Exception e){
 			e.printStackTrace();
 			Logger.debug("获取每天的管段总长度失败！");
+			throw new BizException(e);
+		}
+	}
+
+	/**
+	 * 根据多个设备类型（limb_leaf=1，即枝干），查它们所属的设备信息
+	 * @param dto
+	 * @return
+	 * @throws BizException
+	 */
+	public List<GISDevExtVO> findDevListByTypeIdsAndDevIds(DevIDsForTypesDTO dto) throws BizException {
+		try{
+			// 根据枝干获取叶子类型
+			Long[] limbTypeIds = dto.getTypeIds();
+			List<Long> typeIds = Arrays.asList(limbTypeIds);
+			List<ShareDevTypePO> devTypePOS = shareDevTypeService.findLeafTypesByLimbTypeIds(typeIds);
+
+			// 根据叶子类型获取设备信息
+			List<Long> leafTypeIds = null;
+			if (Objects.nonNull(devTypePOS)) {
+				leafTypeIds = devTypePOS.stream().map(ShareDevTypePO :: getId).collect(Collectors.toList());
+			}
+			String leafTypeIdsStr = null;
+			if (Objects.nonNull(leafTypeIds)) {
+				leafTypeIdsStr = Joiner.on(",").join(leafTypeIds);
+			}
+			List<ShareDevPO> shareDevPOS = shareDevPOMapper.findDevListByTypeIds(leafTypeIdsStr);
+
+			// 获取设备列表的属性信息
+			List<Long> devIds;
+			List<GISDevExtVO> gisDevExtVOS = null;
+			List<Long> devIdsRange = null;
+			if (Objects.nonNull(dto.getDevIds())) {
+				devIdsRange = Arrays.asList(dto.getDevIds());
+			}
+			List<Long> copyDevIdsRange = Lists.newArrayList();
+			copyDevIdsRange.addAll(devIdsRange);
+			if (Objects.nonNull(shareDevPOS)) {
+				devIds = shareDevPOS.stream().map(ShareDevPO :: getId).collect(Collectors.toList());
+				// 求交集
+				copyDevIdsRange.retainAll(devIds);
+				if (copyDevIdsRange.size() == 0) {
+					return gisDevExtVOS;
+				}
+				gisDevExtVOS = gisDevExtPOMapper.findDevListByDevIds(copyDevIdsRange);
+			}
+			return gisDevExtVOS;
+		} catch (Exception e) {
+			e.printStackTrace();
 			throw new BizException(e);
 		}
 	}

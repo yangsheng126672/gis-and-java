@@ -1,11 +1,7 @@
 package com.jdrx.gis.api.query;
 
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.dto.query.ExpRangeTypeDTO;
-import com.jdrx.gis.beans.dto.query.RangeDTO;
-import com.jdrx.gis.beans.dto.query.RangeTypeDTO;
-import com.jdrx.gis.beans.dto.query.TypeIDDTO;
-import com.jdrx.gis.config.PathConfig;
+import com.jdrx.gis.beans.dto.query.*;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
@@ -42,20 +38,25 @@ public class QueryDevApi {
 	private QueryDevService queryDevService;
 	@Autowired
 	private RedisComponents redisComponents;
-	@Autowired
-	private PathConfig pathConfig;
 
-	@ApiOperation(value = "获取划定范围内图层对应设备个数")
+	@ApiOperation(value = "根据传来的设备集合获取第一级图层和图层对应的设备个数")
 	@RequestMapping(value = "findFirstHierarchyDevTypeNum")
-	public ResposeVO findFirstHierarchyDevTypeNum(@ApiParam(name = "dto", required = true) @RequestBody @Valid RangeDTO rangeDTO) throws BizException{
-		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 获取所有图层对应设备个数 dto = {}", rangeDTO.toString());
-		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum(rangeDTO));
+	public ResposeVO findFirstHierarchyDevTypeNum(@ApiParam(name = "dto", required = true) @RequestBody @Valid DevIDsDTO devIDsDTO) throws BizException{
+		Logger.debug("api/0/query/findFirstHierarchyDevTypeNum 根据传来的设备集合获取第一级图层和图层对应的设备个数 dto = {}", devIDsDTO.toString());
+		return ResponseFactory.ok(queryDevService.findFirstHierarchyDevTypeNum(devIDsDTO));
 	}
 
-	@ApiOperation(value = "根据设备类型ID和划取的经纬度范围查设备列表信息(分页)")
+//	@ApiOperation(value = "根据设备类型ID和划取的经纬度范围查设备列表信息(分页)")
+//	@RequestMapping(value = "findDevListPageByTypeID")
+//	public ResposeVO findDevListPageByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid RangeTypeDTO dto) throws BizException{
+//		Logger.debug("api/0/query/findDevListByTypeID 根据设备类型ID和划取的经纬度范围查设备列表信息");
+//		return ResponseFactory.ok(queryDevService.findDevListPageByTypeID(dto));
+//	}
+
+	@ApiOperation(value = "根据设备类型ID和划设备ID集合查设备列表信息(分页)")
 	@RequestMapping(value = "findDevListPageByTypeID")
-	public ResposeVO findDevListPageByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid RangeTypeDTO dto) throws BizException{
-		Logger.debug("api/0/query/findDevListByTypeID 根据设备类型ID和划取的经纬度范围查设备列表信息");
+	public ResposeVO findDevListPageByTypeID(@ApiParam(name = "dto", required = true) @RequestBody @Valid DevIDsForTypeDTO dto) throws BizException {
+		Logger.debug("api/0/query/findDevListByTypeID 根据设备类型ID和划设备ID集合查设备列表信息");
 		return ResponseFactory.ok(queryDevService.findDevListPageByTypeID(dto));
 	}
 
@@ -75,7 +76,7 @@ public class QueryDevApi {
 
 	@ApiOperation(value = "当前设备类型下的子类型设备个数")
 	@RequestMapping(value = "findSonsNumByPid")
-	public ResposeVO findSonsNumByPid(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExpRangeTypeDTO dto)
+	public ResposeVO findSonsNumByPid(@ApiParam(name = "dto", required = true) @RequestBody @Valid DevIDsForTypeDTO dto)
 		throws BizException {
 		if (ObjectUtils.isEmpty(dto.getTypeId())){
 			Logger.debug("设备类型ID参数为空");
@@ -87,17 +88,23 @@ public class QueryDevApi {
 
 	@ApiOperation(value = "导出空间查询信息", notes = "导出空间查询信息")
 	@RequestMapping(value = "exportDevListByPID", method = RequestMethod.POST)
-	public ResposeVO export(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExpRangeTypeDTO dto) throws Exception {
+	public ResposeVO export(@ApiParam(name = "dto", required = true) @RequestBody @Valid DevIDsForTypeDTO dto) {
 		try {
+			String key = dto.getTypeId() + GISConstants.UNDER_LINE + dto.getTime();
 			new Thread(() -> {
 				try {
 					String result = queryDevService.exportDevInfoByPID(dto);
-					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
-					Logger.debug("生成导出文件成功，key = {}", dto.getRange() + dto.getTypeId());
+					redisComponents.set(key, result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", key);
 				} catch (BizException e) {
 					e.printStackTrace();
 					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
-					redisComponents.set(dto.getRange() + dto.getTypeId(), EApiStatus.ERR_SYS.getStatus(), 60);
+					redisComponents.set(key, EApiStatus.ERR_SYS.getStatus(), 60);
+					try {
+						throw new BizException(e);
+					} catch (BizException e1) {
+						e1.printStackTrace();
+					}
 				}
 			}).start();
 			return ResponseFactory.ok(Boolean.TRUE);
@@ -134,9 +141,17 @@ public class QueryDevApi {
 
 	@ApiOperation(value = "查询下载文件")
 	@RequestMapping(value = "getDownLoadFile")
-	public ResposeVO getDownLoadFile(@RequestBody ExpRangeTypeDTO dto) throws BizException {
+	public ResposeVO getDownLoadFile(@RequestBody DevIDsForTypeDTO dto) throws BizException {
 		Logger.debug("根据划定范围和类型获取导出文件的存放路径");
-		String result = queryDevService.getDownLoadFile(dto.getRange() + dto.getTypeId());
+		String key = dto.getTypeId() + GISConstants.UNDER_LINE + dto.getTime();
+		String result = queryDevService.getDownLoadFile(key);
 		return ResponseFactory.ok(result);
+	}
+
+	@ApiOperation(value = "根据传来的设备类型和设备ID筛选设备类型下的设备列表信息")
+	@RequestMapping(value = "findDevListByTypeIdsAndDevIds")
+	public ResposeVO findDevListByTypeIdsAndDevIds(@RequestBody DevIDsForTypesDTO dto) throws BizException {
+		Logger.debug("根据传来的设备类型和设备ID筛选设备类型下的设备列表信息 dto={}", dto.toString());
+		return ResponseFactory.ok(queryDevService.findDevListByTypeIdsAndDevIds(dto));
 	}
 }

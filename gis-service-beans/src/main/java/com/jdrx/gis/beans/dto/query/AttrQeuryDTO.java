@@ -27,10 +27,16 @@ public class AttrQeuryDTO extends PageDTO {
 	@ApiModelProperty("参数内容")
 	private String paramVal;
 
-	@ApiModelProperty("投影坐标系编号")
-	@NotNull(message = "投影坐标系编号不能为空")
-	private String inSR;
+//	@ApiModelProperty("投影坐标系编号")
+//	@NotNull(message = "投影坐标系编号不能为空")
+//	private String inSR;
+//
+//	@ApiModelProperty("经纬度范围,逗号隔开,如果该值为空即查询所有设备")
+//	private String range;
 
-	@ApiModelProperty("经纬度范围,逗号隔开,如果该值为空即查询所有设备")
-	private String range;
+	@ApiModelProperty("设备ID集合")
+	private Long[] devIds;
+
+	@ApiModelProperty("时间戳")
+	private String time;
 }

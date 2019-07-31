@@ -33,10 +33,10 @@ public class ShareDevTypeApi {
 	@Autowired
 	private ShareDevTypeService shareDevTypeService;
 
-	@ApiOperation(value = "类别为其他的二级子类")
+	@ApiOperation(value = "查询当前类型的二级子类")
 	@RequestMapping(value = "findSonListOfOtherType")
 	public ResposeVO findSonListOfOtherType(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException {
-		Logger.debug("api/0/devtype/findSonListOfOtherType 类别为其他的二级子类");
+		Logger.debug("api/0/devtype/findSonListOfOtherType 查询当前类型的二级子类");
 		if (ObjectUtils.isEmpty(dto.getId())){
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);

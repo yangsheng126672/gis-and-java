@@ -79,15 +79,21 @@ public class AttrQueryApi {
 	public ResposeVO exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) {
 		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息，参数值 = {}", dto.toString());
 		try {
+			String key = dto.getTypeId() + GISConstants.UNDER_LINE + dto.getTime();
 			new Thread(() -> {
 				try {
 					String result = attrQueryService.exportDevListByAreaOrInputVal(dto);
-					redisComponents.set(dto.getRange() + dto.getTypeId(), result, GISConstants.DOWNLOAD_EXPIRE);
-					Logger.debug("生成导出文件成功，key = {}", dto.getRange() + dto.getTypeId());
+					redisComponents.set(key, result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", key);
 				} catch (BizException e) {
 					e.printStackTrace();
 					Logger.error("导出设备列表信息失败！{}", Thread.currentThread().getName());
-					redisComponents.set(dto.getRange() + dto.getTypeId(), EApiStatus.ERR_SYS.getStatus(), 60);
+					redisComponents.set(key, EApiStatus.ERR_SYS.getStatus(), 60);
+					try {
+						throw new BizException(e);
+					} catch (BizException e1) {
+						e1.printStackTrace();
+					}
 				}
 			}).start();
 		return ResponseFactory.ok(Boolean.TRUE);
