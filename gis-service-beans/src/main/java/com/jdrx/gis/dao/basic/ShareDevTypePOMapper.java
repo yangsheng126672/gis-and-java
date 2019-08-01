@@ -52,4 +52,18 @@ public interface ShareDevTypePOMapper {
 	 * @return
 	 */
 	List<ShareDevTypePO> findLeafTypesByLimbTypeIds(@Param("typeIds") List<Long> typeIds);
+
+	/**
+	 * 根据传来的设备ID查询这些dev_id的父类type_id
+	 * @param devIds
+	 * @return
+	 */
+	List<Long> findTypeIdsByDevIds(@Param("devIds") String devIds);
+
+	/**
+	 * 根据ids 查列表
+	 * @param ids
+	 * @return
+	 */
+	List<ShareDevTypePO> findDevTypeListByIds(@Param("ids") List<Long> ids);
 }

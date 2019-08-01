@@ -576,7 +576,7 @@ public class QueryDevService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<GISDevExtVO> findDevListByTypeIdsAndDevIds(DevIDsForTypesDTO dto) throws BizException {
+	public List<GISDevExt2VO> findDevListByTypeIdsAndDevIds(DevIDsForTypesDTO dto) throws BizException {
 		try{
 			// 根据枝干获取叶子类型
 			Long[] limbTypeIds = dto.getTypeIds();
@@ -596,7 +596,7 @@ public class QueryDevService {
 
 			// 获取设备列表的属性信息
 			List<Long> devIds;
-			List<GISDevExtVO> gisDevExtVOS = null;
+			List<GISDevExt2VO> gisDevExt2VOS = null;
 			List<Long> devIdsRange = null;
 			if (Objects.nonNull(dto.getDevIds())) {
 				devIdsRange = Arrays.asList(dto.getDevIds());
@@ -607,12 +607,15 @@ public class QueryDevService {
 				devIds = shareDevPOS.stream().map(ShareDevPO :: getId).collect(Collectors.toList());
 				// 求交集
 				copyDevIdsRange.retainAll(devIds);
+				String devStr;
 				if (copyDevIdsRange.size() == 0) {
-					return gisDevExtVOS;
+					return gisDevExt2VOS;
+				} else {
+					devStr = Joiner.on(",").join(copyDevIdsRange);
 				}
-				gisDevExtVOS = gisDevExtPOMapper.findDevListByDevIds(copyDevIdsRange);
+				gisDevExt2VOS = gisDevExtPOMapper.findDevListAttTypeByDevIds(devStr);
 			}
-			return gisDevExtVOS;
+			return gisDevExt2VOS;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException(e);
