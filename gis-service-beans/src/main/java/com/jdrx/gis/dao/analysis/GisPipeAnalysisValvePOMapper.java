@@ -3,6 +3,8 @@ package com.jdrx.gis.dao.analysis;
 
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
 
+import java.util.List;
+
 public interface GisPipeAnalysisValvePOMapper {
 
     int deleteByPrimaryKey(Long id);
@@ -11,7 +13,7 @@ public interface GisPipeAnalysisValvePOMapper {
 
     int insertSelective(GisPipeAnalysisValvePO record);
 
-    GisPipeAnalysisValvePO selectByPrimaryKey(Long id);
+    List<GisPipeAnalysisValvePO> selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(GisPipeAnalysisValvePO record);
 

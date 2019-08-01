@@ -3,6 +3,9 @@ package com.jdrx.gis.beans.dto.analysis;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.sql.Date;
+
+
 /**
  * @Description
  * @Author lr
@@ -14,5 +17,5 @@ public class RecondParamasDTO {
     @ApiModelProperty("爆管点编号")
     String code;
     @ApiModelProperty("爆管时间")
-    String datetime;
+    Date datetime;
 }

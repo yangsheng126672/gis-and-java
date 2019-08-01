@@ -8,10 +8,12 @@ import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
 import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
+import com.jdrx.gis.beans.vo.analysis.RecondValveVO;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisPOMapper;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
 import com.jdrx.gis.dao.analysis.GisWaterUserInfoPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
+import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
@@ -76,6 +78,23 @@ public class NetsAnalysisService {
     //节点类型  1位阀门
     final private String fmType = "1";
 
+    /**
+     * 获取节点详细信息
+     * @return
+     */
+    public NodeDTO getValveNode(String code){
+        NodeDTO node = new NodeDTO();
+        String cypherSql = String.format("match (n:gd) where n.name = '%s' return n",code);
+        StatementResult result = session.run(cypherSql);
+        while (result.hasNext()) {
+            Record record = result.next();
+            node.setCode((record.get(0).asMap().get("name").toString()));
+            node.setX(Double.valueOf(record.get(0).asMap().get("x").toString()));
+            node.setY(Double.valueOf(record.get(0).asMap().get("y").toString()));
+            node.setDev_id(Long.valueOf(record.get(0).asMap().get("dev_id").toString()));
+        }
+        return node;
+    }
     /**
      * 获取关系中起始节点
      * @param relationID
@@ -549,23 +568,34 @@ public class NetsAnalysisService {
      */
     public List<GisPipeAnalysisPO> getAnalysisRecondList(RecondParamasDTO recondParamasDTO){
         List<GisPipeAnalysisPO> recordVOList = new ArrayList<>();
-        String code = null;
-        String datetime = null;
-        if (recondParamasDTO != null){
-            code = recondParamasDTO.getCode();
-            datetime = recondParamasDTO.getDatetime();
-        }
-        if ((recondParamasDTO ==null)||(StringUtils.isEmpty(code)&&(StringUtils.isEmpty(datetime)))){
-            recordVOList =gisPipeAnalysisPOMapper.selectAll();
-        }
-
+        recordVOList = gisPipeAnalysisPOMapper.selectByParamas(recondParamasDTO);
         return recordVOList;
     }
 
 
-    public List<GisPipeAnalysisValvePO> getValveById(Long id){
-        List<GisPipeAnalysisValvePO> valvePOS = new ArrayList<>();
-        return valvePOS;
+    /**
+     * 获取某条详细爆管记录
+     * @param idDTO
+     * @return
+     */
+    public RecondValveVO getValveById(IdDTO<Long> idDTO){
+        RecondValveVO valveVOS = new RecondValveVO();
+        List<NodeDTO>valves = new ArrayList<>();
+        List<NodeDTO>failedValves = new ArrayList<>();
+        Long id = idDTO.getId();
+        List<GisPipeAnalysisValvePO> valvePOS = valvePOMapper.selectByPrimaryKey(id);
+        for(GisPipeAnalysisValvePO po:valvePOS){
+            if (!StringUtils.isEmpty(po.getValve())){
+                NodeDTO node = getValveNode(po.getValve());
+                valves.add(node);
+            }else if(!StringUtils.isEmpty(po.getValveFailed())){
+                NodeDTO node = getValveNode(po.getValveFailed());
+                failedValves.add(node);
+            }
+        }
+        valveVOS.setValves(valves);
+        valveVOS.setFailedValves(failedValves);
+        return valveVOS;
 
     }
 

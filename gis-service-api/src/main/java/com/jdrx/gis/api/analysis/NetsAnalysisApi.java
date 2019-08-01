@@ -72,6 +72,13 @@ public class NetsAnalysisApi {
     public ResposeVO getAnalysisiReconds(@ApiParam(name = "dto", required = true) @RequestBody @Valid RecondParamasDTO recondParamasDTO) throws Exception{
         Logger.debug("api/0/analysis/getAnalysisiReconds 获取爆管历史记录列表");
         return  ResponseFactory.ok(netsAnalysisService.getAnalysisRecondList(recondParamasDTO));
+    }
+
+    @ApiOperation(value = "获取某条爆管记录详细关阀信息")
+    @RequestMapping(value ="getAnalysisiValveByID" )
+    public ResposeVO getAnalysisiValveByID(@ApiParam(name = "dto", required = true) @RequestBody @Valid IdDTO<Long> idDTO) throws Exception{
+        Logger.debug("api/0/analysis/getAnalysisiValveByID 获取某条爆管记录详细关阀信息");
+        return  ResponseFactory.ok(netsAnalysisService.getValveById(idDTO));
 
     }
 

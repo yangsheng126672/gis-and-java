@@ -68,7 +68,7 @@
     select 
     <include refid="Base_Column_List" />
     from gis_pipe_analysis_valve
-    where id = #{id,jdbcType=BIGINT}
+    where rid = #{id,jdbcType=BIGINT}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     <!--

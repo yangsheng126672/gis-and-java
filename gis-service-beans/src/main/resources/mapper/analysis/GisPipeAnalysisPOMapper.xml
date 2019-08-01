@@ -141,4 +141,20 @@
     from gis_pipe_analysis
     WHERE delete_flag = FALSE
   </select>
+
+  <select id="selectByParamas" parameterType="com.jdrx.gis.beans.dto.analysis.RecondParamasDTO" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from gis_pipe_analysis
+    WHERE delete_flag = FALSE
+    <if test="code != null and code != ''">
+      AND
+      code = #{code}
+    </if>
+    <if test="datetime != null and datetime != ''">
+      AND
+      (CAST(create_at AS DATE)) =  #{datetime}
+    </if>
+
+  </select>
 </mapper>
