@@ -1,8 +1,8 @@
 package com.jdrx.gis.beans.entry.analysis;
 
 import lombok.Data;
-import org.apache.ibatis.annotations.Options;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -13,24 +13,24 @@ public class GisPipeAnalysisPO {
     private Long id;
 
     /**
-     * null
+     * 爆管编号
      */
     private String code;
 
     /**
-     * null
+     * 经纬
      */
-    private Object pointgeom;
+    private BigDecimal x;
 
     /**
-     * null
+     * 纬度
      */
-    private Object areaFirst;
+    private BigDecimal y;
 
     /**
-     * null
+     * 爆管影响范围空间信息
      */
-    private Object areaSecond;
+    private Object area;
 
     /**
      * 是否删除
@@ -56,6 +56,5 @@ public class GisPipeAnalysisPO {
      * 修改时间
      */
     private Date updateAt;
-
 
 }

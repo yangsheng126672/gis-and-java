@@ -66,5 +66,13 @@ public class NetsAnalysisApi {
         return  ResponseFactory.ok(netsAnalysisService.saveAnalysisRecond(recordDTO));
     }
 
+    @ApiOperation(value = "获取爆管历史记录列表")
+    @RequestMapping(value ="getAnalysisiReconds" )
+    public ResposeVO getAnalysisiReconds() throws Exception{
+        Logger.debug("api/0/analysis/getAnalysisiReconds 获取爆管历史记录列表");
+        return  ResponseFactory.ok(netsAnalysisService.getAnalysisRecondList());
+
+    }
+
 
 }

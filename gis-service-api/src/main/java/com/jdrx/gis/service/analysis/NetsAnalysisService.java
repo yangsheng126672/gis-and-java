@@ -6,6 +6,7 @@ import com.jdrx.gis.beans.dto.analysis.*;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisPO;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
 import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
+import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisPOMapper;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -500,39 +502,37 @@ public class NetsAnalysisService {
         try {
             GisPipeAnalysisPO gisPipeAnalysisPO =new GisPipeAnalysisPO();
             gisPipeAnalysisPO.setCode(recordDTO.getCode()) ;
-            gisPipeAnalysisPO.setPointgeom(recordDTO.getPointgeom());
-            gisPipeAnalysisPO.setAreaFirst(recordDTO.getArea_first());
+            gisPipeAnalysisPO.setX(BigDecimal.valueOf(recordDTO.getPoint()[0]));
+            gisPipeAnalysisPO.setY(BigDecimal.valueOf(recordDTO.getPoint()[1]));
+            gisPipeAnalysisPO.setArea(recordDTO.getArea());
+
             gisPipeAnalysisPOMapper.insertSelective(gisPipeAnalysisPO);
             //回填id
             Long id = gisPipeAnalysisPO.getId();
 
-            //获取第一次关阀方案
-            List<NodeDTO> valve = recordDTO.getValves_first();
-            for (NodeDTO dto : valve){
+            //获取关阀成功列表
+            List<String> valve = recordDTO.getValve();
+            for (String code : valve){
                 GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
-                valvePO.setValveFirst(dto.getDev_id().toString());
+                valvePO.setValve(code);
                 valvePO.setRid(id);
                 //保存
                 valvePOMapper.insertSelective(valvePO);
             }
-            //判断是否有二次关阀
-            if(!(recordDTO.getValve_failed() ==null ||(recordDTO.getValve_failed().size() ==0))){
-                List<String> failedValveList = recordDTO.getValve_failed();
+            //判断是否有关阀失败的 有就保存
+            if(!(recordDTO.getValveFailed() ==null ||(recordDTO.getValveFailed().size() ==0))){
+                List<String> failedValveList = recordDTO.getValveFailed();
                 for (String str:failedValveList){
+                    if (str.equals("")){
+                        continue;
+                    }
                     GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
-                    valvePO.setValveFirst(str);
+                    valvePO.setValveFailed(str);
                     valvePO.setRid(id);
                     //保存
                     valvePOMapper.insertSelective(valvePO);
                 }
-                List<NodeDTO> valve_second = recordDTO.getValve_second();
-                for (NodeDTO secondDto : valve_second){
-                    GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
-                    valvePO.setValveFirst(secondDto.getCode());
-                    valvePO.setRid(id);
-                    //保存
-                    valvePOMapper.insertSelective(valvePO);
-                }
+
             }
 
         }catch (Exception e){
@@ -540,6 +540,22 @@ public class NetsAnalysisService {
             throw new BizException("保存爆管记录!");
         }
        return true;
+    }
+
+    /**
+     * 获取爆管记录列表
+     * @return
+     */
+    public List<GisPipeAnalysisPO> getAnalysisRecondList(){
+        List<GisPipeAnalysisPO> recordVOList = new ArrayList<>();
+        recordVOList =gisPipeAnalysisPOMapper.selectAll();
+        return recordVOList;
+    }
+
+    public List<GisPipeAnalysisValvePO> getValveById(Long id){
+        List<GisPipeAnalysisValvePO> valvePOS = new ArrayList<>();
+        return valvePOS;
+
     }
 
 
