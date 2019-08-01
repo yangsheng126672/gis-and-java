@@ -2,6 +2,7 @@ package com.jdrx.gis.api.analysis;
 
 import com.jdrx.gis.api.basic.BasciDevApi;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
+import com.jdrx.gis.beans.dto.analysis.RecondParamasDTO;
 import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -68,9 +69,9 @@ public class NetsAnalysisApi {
 
     @ApiOperation(value = "获取爆管历史记录列表")
     @RequestMapping(value ="getAnalysisiReconds" )
-    public ResposeVO getAnalysisiReconds() throws Exception{
+    public ResposeVO getAnalysisiReconds(@ApiParam(name = "dto", required = true) @RequestBody @Valid RecondParamasDTO recondParamasDTO) throws Exception{
         Logger.debug("api/0/analysis/getAnalysisiReconds 获取爆管历史记录列表");
-        return  ResponseFactory.ok(netsAnalysisService.getAnalysisRecondList());
+        return  ResponseFactory.ok(netsAnalysisService.getAnalysisRecondList(recondParamasDTO));
 
     }
 

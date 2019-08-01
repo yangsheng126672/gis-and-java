@@ -21,6 +21,7 @@ import org.neo4j.driver.v1.types.Node;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -546,11 +547,21 @@ public class NetsAnalysisService {
      * 获取爆管记录列表
      * @return
      */
-    public List<GisPipeAnalysisPO> getAnalysisRecondList(){
+    public List<GisPipeAnalysisPO> getAnalysisRecondList(RecondParamasDTO recondParamasDTO){
         List<GisPipeAnalysisPO> recordVOList = new ArrayList<>();
-        recordVOList =gisPipeAnalysisPOMapper.selectAll();
+        String code = null;
+        String datetime = null;
+        if (recondParamasDTO != null){
+            code = recondParamasDTO.getCode();
+            datetime = recondParamasDTO.getDatetime();
+        }
+        if ((recondParamasDTO ==null)||(StringUtils.isEmpty(code)&&(StringUtils.isEmpty(datetime)))){
+            recordVOList =gisPipeAnalysisPOMapper.selectAll();
+        }
+
         return recordVOList;
     }
+
 
     public List<GisPipeAnalysisValvePO> getValveById(Long id){
         List<GisPipeAnalysisValvePO> valvePOS = new ArrayList<>();
