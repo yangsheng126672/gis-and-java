@@ -135,25 +135,27 @@
     </trim>
   </insert>
 
-  <select id="selectAll" resultMap="BaseResultMap">
+  <select id="selectById" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from gis_pipe_analysis
     WHERE delete_flag = FALSE
+    AND
+    id = #{id}
   </select>
 
-  <select id="selectByParamas" parameterType="com.jdrx.gis.beans.dto.analysis.RecondParamasDTO" resultMap="BaseResultMap">
+  <select id="selectByParamas"  resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from gis_pipe_analysis
     WHERE delete_flag = FALSE
-    <if test="code != null and code != ''">
+    <if test="dto.code != null and dto.code != ''">
       AND
-      code = #{code}
+      code = #{dto.code}
     </if>
-    <if test="datetime != null and datetime != ''">
+    <if test="dto.datetime != null " >
       AND
-      (CAST(create_at AS DATE)) =  #{datetime}
+      to_date(create_at :: text,'YYYY-MM-DD')= to_date(#{dto.datetime} :: text,'YYYY-MM-DD')
     </if>
 
   </select>

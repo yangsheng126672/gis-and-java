@@ -7,14 +7,20 @@ import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisPO;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
 import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
+import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
 import com.jdrx.gis.beans.vo.analysis.RecondValveVO;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisPOMapper;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
 import com.jdrx.gis.dao.analysis.GisWaterUserInfoPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
+import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
@@ -25,7 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -572,7 +582,6 @@ public class NetsAnalysisService {
         return recordVOList;
     }
 
-
     /**
      * 获取某条详细爆管记录
      * @param idDTO
@@ -583,6 +592,14 @@ public class NetsAnalysisService {
         List<NodeDTO>valves = new ArrayList<>();
         List<NodeDTO>failedValves = new ArrayList<>();
         Long id = idDTO.getId();
+        //获取主记录爆管信息
+        GisPipeAnalysisPO gisPipeAnalysisPO = gisPipeAnalysisPOMapper.selectById(id);
+        if(gisPipeAnalysisPO != null){
+            valveVOS.setCode(gisPipeAnalysisPO.getCode());
+            BigDecimal[] point = {gisPipeAnalysisPO.getX(),gisPipeAnalysisPO.getY()};
+            valveVOS.setPoint(point);
+            valveVOS.setArea(gisPipeAnalysisPO.getArea().toString());
+        }
         List<GisPipeAnalysisValvePO> valvePOS = valvePOMapper.selectByPrimaryKey(id);
         for(GisPipeAnalysisValvePO po:valvePOS){
             if (!StringUtils.isEmpty(po.getValve())){
@@ -597,6 +614,42 @@ public class NetsAnalysisService {
         valveVOS.setFailedValves(failedValves);
         return valveVOS;
 
+    }
+
+    /**
+     * 导出某条爆管记录
+     * @param recordDTO
+     * @return
+     * @throws BizException
+     */
+    public String exportAnalysisResult(AnalysisRecordDTO recordDTO) throws BizException{
+        OutputStream os = null;
+        try {
+            SXSSFWorkbook workbook;
+            workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
+//            ShareDevTypePO shareDevTypePO = shareDevTypeService.getByPrimaryKey(dto.getTypeId());
+            String title = "Sheet1";
+
+            SXSSFSheet sheet = workbook.createSheet(title);
+            sheet.setDefaultColumnWidth((short) 12); // 设置列宽
+            CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
+            CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+
+            Row row = sheet.createRow(0);
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new BizException("导出空间数据信息失败！");
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return null;
     }
 
 

@@ -3,7 +3,7 @@ package com.jdrx.gis.beans.dto.analysis;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.sql.Date;
+import java.util.Date;
 
 
 /**

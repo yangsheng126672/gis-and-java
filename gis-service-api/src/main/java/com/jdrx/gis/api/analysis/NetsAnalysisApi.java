@@ -79,8 +79,15 @@ public class NetsAnalysisApi {
     public ResposeVO getAnalysisiValveByID(@ApiParam(name = "dto", required = true) @RequestBody @Valid IdDTO<Long> idDTO) throws Exception{
         Logger.debug("api/0/analysis/getAnalysisiValveByID 获取某条爆管记录详细关阀信息");
         return  ResponseFactory.ok(netsAnalysisService.getValveById(idDTO));
-
     }
 
-
+    @ApiOperation(value = "导出关阀分析结果")
+    @RequestMapping(value ="exportAnalysisiResult" )
+    public ResposeVO exportAnalysisiResult(@ApiParam(name = "dto", required = true) @RequestBody @Valid AnalysisRecordDTO recordDTO) throws Exception{
+        if (recordDTO == null){
+            return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
+        }
+        Logger.debug("api/0/analysis/exportAnalysisiResult 导出关阀分析结果");
+        return  ResponseFactory.ok(netsAnalysisService.exportAnalysisResult(recordDTO));
+    }
 }
