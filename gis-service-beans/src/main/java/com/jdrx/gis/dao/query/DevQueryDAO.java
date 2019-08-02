@@ -72,4 +72,11 @@ public interface DevQueryDAO {
 	 */
 	List<SpaceInfTotalPO> findSpaceInfoByDevIds(@Param("devIds") String devIds);
 
+	/**
+	 * 根据设备ID获取模板的字段列表
+	 * @param devId
+	 * @return
+	 */
+	List<FieldNameVO> findFieldNamesByDevID(Long devId);
+
 }

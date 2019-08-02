@@ -217,4 +217,15 @@
         ) fff group by firsttypeId,firsttypename
     </select>
 
+    <select id="findFieldNamesByDevID" parameterType="java.lang.Long" resultMap="BaseResultMap4">
+        SELECT
+            field_name AS fieldName,
+            field_desc AS fieldDesc
+        FROM gis_dev_tpl_attr
+        WHERE type_id = (
+            SELECT tpl_type_id
+            FROM gis_dev_ext
+            WHERE dev_id = #{devId}
+        )
+    </select>
 </mapper>
