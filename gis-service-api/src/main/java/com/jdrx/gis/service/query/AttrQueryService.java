@@ -18,6 +18,7 @@ import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
@@ -76,6 +77,9 @@ public class AttrQueryService {
 
 	@Autowired
 	private PathConfig pathConfig;
+
+	@Autowired
+	private DevQueryDAO devQueryDAO;
 
 	/**
 	 * 根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类，
@@ -374,6 +378,19 @@ public class AttrQueryService {
 		return caliberLyerUrl;
 	}
 
-
+	/**
+	 * 根据设备ID获取模板字段
+	 * @param devId
+	 * @return
+	 * @throws BizException
+	 */
+	public List<FieldNameVO> getFieldNames(Long devId) throws BizException {
+		try {
+			return devQueryDAO.findFieldNamesByDevID(devId);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException(e);
+		}
+	}
 
 }
