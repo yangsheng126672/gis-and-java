@@ -2,7 +2,12 @@ package com.jdrx.gis.service.analysis;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.*;
+import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
+import com.jdrx.gis.beans.entry.analysis.ExportValveDTO;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisPO;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
 import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
@@ -10,33 +15,47 @@ import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
 import com.jdrx.gis.beans.vo.analysis.RecondValveVO;
+import com.jdrx.gis.beans.vo.query.FieldNameVO;
+import com.jdrx.gis.beans.vo.query.SpaceInfoVO;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisPOMapper;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
 import com.jdrx.gis.dao.analysis.GisWaterUserInfoPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
+import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.service.query.QueryDevService;
+import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
+import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -72,6 +91,12 @@ public class NetsAnalysisService {
     private GisPipeAnalysisValvePOMapper valvePOMapper;
     @Autowired
     private GisWaterUserInfoPOMapper waterUserInfoPOMapper;
+    @Autowired
+    private QueryDevService queryDevService;
+    @Autowired
+    private DevQueryDAO devQueryDAO;
+    @Autowired
+    private PathConfig pathConfig;
 
 
 
@@ -616,27 +641,172 @@ public class NetsAnalysisService {
 
     }
 
+    public List<FieldNameVO> setExportValveFields(){
+        List<FieldNameVO>list = new ArrayList<>();
+        return list;
+    }
     /**
      * 导出某条爆管记录
-     * @param recordDTO
+     * @param dto
      * @return
      * @throws BizException
      */
-    public String exportAnalysisResult(AnalysisRecordDTO recordDTO) throws BizException{
+    public String exportAnalysisResult(ExportValveDTO dto) throws BizException{
         OutputStream os = null;
         try {
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
-//            ShareDevTypePO shareDevTypePO = shareDevTypeService.getByPrimaryKey(dto.getTypeId());
-            String title = "Sheet1";
-
+            String title = "爆管详细信息";
             SXSSFSheet sheet = workbook.createSheet(title);
             sheet.setDefaultColumnWidth((short) 12); // 设置列宽
             CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
             CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
-
             Row row = sheet.createRow(0);
-        }catch (Exception e) {
+            List<FieldNameVO> headerList =new ArrayList<>();
+            FieldNameVO tmpVO = new FieldNameVO();
+            tmpVO.setFieldDesc("阀门状态");
+            tmpVO.setFieldName("fmstatu");
+            headerList.add(tmpVO);
+            headerList.addAll(queryDevService.findFieldNamesByTypeID(19L));
+            if (Objects.isNull(headerList)) {
+                Logger.error("空间查询的表头信息为空");
+                throw new BizException("设备列表的title为空");
+            }
+            for (int i = 0; i < headerList.size(); i++) {
+                FieldNameVO fieldNameVO = headerList.get(i);
+                Cell cell = row.createCell(i);
+                cell.setCellStyle(style);
+                String txt = fieldNameVO.getFieldDesc();
+                XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+                cell.setCellValue(text);
+            }
+
+            int pageSize = GISConstants.EXPORT_PAGESIZE;
+            int pageTotal = 1;
+            String[] filedNames = headerList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
+
+            int body_i = 2; // body 行索引
+            int pageNum = 1;
+            while (pageTotal-- > 0) {
+                DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
+                DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
+                devIDsForTypeDTO.setTypeId(19L);
+                devIDsForTypeDTO.setDevIds(dto.getValveDevIds());
+                devIDsForTypeDTO.setPageSize(pageSize);
+                devIDsForTypeDTO.setPageNum(pageNum);
+                PageVO<SpaceInfoVO> pageVO = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
+                List<SpaceInfoVO> subDevList = pageVO.getData();
+
+                List<SpaceInfoVO> subDevList2 = new ArrayList<>();
+                if (!(dto.getFailedDevIds().length == 0)){
+                    devIDsForTypeDTO2.setTypeId(19L);
+                    devIDsForTypeDTO2.setDevIds(dto.getFailedDevIds());
+                    devIDsForTypeDTO2.setPageSize(pageSize);
+                    devIDsForTypeDTO2.setPageNum(pageNum);
+                    PageVO<SpaceInfoVO> pageVO2 = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
+                    subDevList2 = pageVO2.getData();
+                }
+
+                if (Objects.nonNull(subDevList)) {
+                    subDevList.stream().map(vo -> {
+                        Object obj = vo.getDataInfo();
+                        if (Objects.isNull(obj)) {
+                            return vo;
+                        }
+                        try {
+                            Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+                            vo.setDataMap(map);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return vo;
+                    }).collect(Collectors.toList());
+                    //设置第一行  爆管点经纬度
+                    Row xssfRow1 = sheet.createRow(1);
+                    Cell cell1 = xssfRow1.createCell(0);
+                    cell1.setCellValue("爆管点经纬度： "+dto.getPoint()[0]+" , "+dto.getPoint()[1]+" ; 爆管编号："+dto.getLineId());
+                    cell1.setCellStyle(style2);
+                    for (SpaceInfoVO spaceInfoVO : subDevList) {
+                        Map<String, String> map = spaceInfoVO.getDataMap();
+                        if (Objects.isNull(map)) {
+                            continue;
+                        }
+                        Row xssfRow = sheet.createRow(body_i++);
+                        for (int i = 0; i < headerList.size(); i++) {
+                            Cell cell = xssfRow.createCell(i);
+                            XSSFRichTextString text;
+                            FieldNameVO fieldNameVO = headerList.get(i);
+                            String txt = null;
+                            if (Objects.nonNull(fieldNameVO)) {
+                                String fieldName = fieldNameVO.getFieldName();
+                                if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+                                    txt = spaceInfoVO.getTypeName();
+                                } else {
+                                    txt = map.get(fieldName);
+                                }
+                                if (fieldName.equals("fmstatu")){
+                                    txt = "关阀成功";
+                                }
+                            }
+                            text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+                            cell.setCellValue(text);
+                            cell.setCellStyle(style2);
+                        }
+                    }
+                }
+                if (Objects.nonNull(subDevList2)) {
+                    subDevList.stream().map(vo -> {
+                        Object obj = vo.getDataInfo();
+                        if (Objects.isNull(obj)) {
+                            return vo;
+                        }
+                        try {
+                            Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+                            vo.setDataMap(map);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return vo;
+                    }).collect(Collectors.toList());
+
+                    for (SpaceInfoVO spaceInfoVO : subDevList2) {
+                        Map<String, String> map = spaceInfoVO.getDataMap();
+                        if (Objects.isNull(map)) {
+                            continue;
+                        }
+                        Row xssfRow = sheet.createRow(body_i++);
+                        for (int i = 0; i < headerList.size(); i++) {
+                            Cell cell = xssfRow.createCell(i);
+                            XSSFRichTextString text;
+                            FieldNameVO fieldNameVO = headerList.get(i);
+                            String txt = null;
+                            if (Objects.nonNull(fieldNameVO)) {
+                                String fieldName = fieldNameVO.getFieldName();
+                                if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+                                    txt = spaceInfoVO.getTypeName();
+                                } else {
+                                    txt = map.get(fieldName);
+                                }
+                                if (fieldName.equals("fmstatu")){
+                                    txt = "关阀失败";
+                                }
+                            }
+                            text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+                            cell.setCellValue(text);
+                            cell.setCellStyle(style2);
+                        }
+                    }
+                }
+                subDevList.clear();
+                pageNum ++;
+            }
+            String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
+            os = new FileOutputStream(new File(filePath));
+            workbook.write(os);
+            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+            return result;
+
+        } catch (Exception e) {
             e.printStackTrace();
             throw new BizException("导出空间数据信息失败！");
         } finally {
@@ -649,7 +819,6 @@ public class NetsAnalysisService {
             }
         }
 
-        return null;
     }
 
 
