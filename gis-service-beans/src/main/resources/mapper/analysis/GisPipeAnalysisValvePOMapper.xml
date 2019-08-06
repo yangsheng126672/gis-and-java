@@ -213,4 +213,11 @@
       update_at = #{updateAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="getDevIdsByCode" parameterType="string" resultType="long">
+    select dev_id from gis_dev_ext where code in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
 </mapper>

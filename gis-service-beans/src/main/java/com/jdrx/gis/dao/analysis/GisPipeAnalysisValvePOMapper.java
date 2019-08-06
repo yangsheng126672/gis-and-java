@@ -1,10 +1,6 @@
 package com.jdrx.gis.dao.analysis;
 
-
-import com.jdrx.gis.beans.entry.analysis.ExportValveDTO;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 
 public interface GisPipeAnalysisValvePOMapper {
@@ -20,4 +16,6 @@ public interface GisPipeAnalysisValvePOMapper {
     int updateByPrimaryKeySelective(GisPipeAnalysisValvePO record);
 
     int updateByPrimaryKey(GisPipeAnalysisValvePO record);
+
+    List<Long> getDevIdsByCode(List<String>list);
 }

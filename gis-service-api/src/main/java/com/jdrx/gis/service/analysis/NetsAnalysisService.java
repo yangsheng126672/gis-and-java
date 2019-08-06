@@ -329,6 +329,23 @@ public class NetsAnalysisService {
 
 
     /**
+     * 判断list列表中是否有某个字符串
+     * @param s
+     * @param list
+     * @return
+     */
+    public boolean findStringInNodeList(String s,List<NodeDTO> list){
+        if (StringUtils.isEmpty(s) ||list ==null){
+            return false;
+        }
+        for (NodeDTO nodeDTO:list){
+            if (nodeDTO.getCode().equals(s)){
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
      * 从一级关阀的所有阀门中筛选必须关闭的阀门
      * @param list
      */
@@ -367,7 +384,7 @@ public class NetsAnalysisService {
                     }
                     iterator.remove();
                     //首先判断这个节点是不是在阀门列表
-                    if (list.contains(tmpNodeName)){
+                    if (findStringInNodeList(tmpNodeName,list)){
                         continue;
                     }else if ((waterSourceList.contains(tmpNodeName))&&(!famenList.contains(tmpNodeName))){
                         famenList.add(dto);
@@ -483,7 +500,9 @@ public class NetsAnalysisService {
      */
     public AnalysisResultVO getAnalysisResult(Long id) throws Exception{
         AnalysisResultVO analysisResultDTO = new AnalysisResultVO();
+        //获取所有阀门列表
         List<NodeDTO> fmlist_all = findAllFamens(id);
+        //获取必须关闭的阀门
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
         List<Long>idList = findInfluenceArea(id,fmlist_final);
         if (idList == null){
@@ -685,25 +704,32 @@ public class NetsAnalysisService {
             int pageTotal = 1;
             String[] filedNames = headerList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
 
+            //获取设备id
+            List<Long> devIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getValveDevIds())) ;
+            List<Long>faileddevIdList = null;
+            if (!(dto.getFailedDevIds().length == 0||dto.getFailedDevIds() == null)){
+                faileddevIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFailedDevIds())) ;
+            }
+
             int body_i = 2; // body 行索引
             int pageNum = 1;
             while (pageTotal-- > 0) {
                 DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
                 DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
                 devIDsForTypeDTO.setTypeId(19L);
-                devIDsForTypeDTO.setDevIds(dto.getValveDevIds());
+                devIDsForTypeDTO.setDevIds(devIdList.toArray(new Long[devIdList.size()]));
                 devIDsForTypeDTO.setPageSize(pageSize);
                 devIDsForTypeDTO.setPageNum(pageNum);
                 PageVO<SpaceInfoVO> pageVO = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
                 List<SpaceInfoVO> subDevList = pageVO.getData();
 
                 List<SpaceInfoVO> subDevList2 = new ArrayList<>();
-                if (!(dto.getFailedDevIds().length == 0)){
+                if (faileddevIdList != null){
                     devIDsForTypeDTO2.setTypeId(19L);
-                    devIDsForTypeDTO2.setDevIds(dto.getFailedDevIds());
+                    devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
                     devIDsForTypeDTO2.setPageSize(pageSize);
                     devIDsForTypeDTO2.setPageNum(pageNum);
-                    PageVO<SpaceInfoVO> pageVO2 = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
+                    PageVO<SpaceInfoVO> pageVO2 = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO2);
                     subDevList2 = pageVO2.getData();
                 }
 
@@ -755,7 +781,7 @@ public class NetsAnalysisService {
                     }
                 }
                 if (Objects.nonNull(subDevList2)) {
-                    subDevList.stream().map(vo -> {
+                    subDevList2.stream().map(vo -> {
                         Object obj = vo.getDataInfo();
                         if (Objects.isNull(obj)) {
                             return vo;
@@ -803,8 +829,9 @@ public class NetsAnalysisService {
             String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
             os = new FileOutputStream(new File(filePath));
             workbook.write(os);
-            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
-            return result;
+//            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+//            return result;
+            return "";
 
         } catch (Exception e) {
             e.printStackTrace();
