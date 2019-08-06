@@ -829,10 +829,8 @@ public class NetsAnalysisService {
             String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
             os = new FileOutputStream(new File(filePath));
             workbook.write(os);
-//            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
-//            return result;
-            return "";
-
+            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
             throw new BizException("导出空间数据信息失败！");

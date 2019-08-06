@@ -99,5 +99,12 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getAllFeaturesUrl());
 	}
 
+	@ApiOperation(value = "获取巡检系统所有资源url")
+	@RequestMapping(value = "getAllSourceUrl")
+	public ResposeVO getAllSourceUrl() throws BizException{
+		Logger.debug("api/0/basic/getAllSourceUrl 获取巡检系统所有资源url");
+		return ResponseFactory.ok(basicDevQuery.getXjLayerSourceUrl());
+	}
+
 
 }

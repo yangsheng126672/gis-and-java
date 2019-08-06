@@ -31,4 +31,7 @@ public class DictConfig {
 
 	/** 管材对应的URL */
 	private String meterialUrl;
+
+	/** 巡检系统图层资源URL */
+	private String xjSourceUrl;
 }

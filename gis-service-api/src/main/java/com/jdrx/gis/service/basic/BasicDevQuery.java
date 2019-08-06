@@ -3,20 +3,24 @@ package com.jdrx.gis.service.basic;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
+import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +53,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private LayerService layerService;
+
+	@Autowired
+	private DictConfig dictConfig;
 
 
 	/**
@@ -281,6 +288,27 @@ public class BasicDevQuery {
 			Logger.error("获取所有要素信息失败，{}", e.getMessage());
 			throw new BizException("获取所有要素信息失败！");
 		}
+	}
+
+	/**
+	 * 获取巡检系统所需图层url
+	 * @return
+	 */
+	public List<Map<String,String>>getXjLayerSourceUrl(){
+		String layerUrl = null;
+		List<Map<String,String>>mapList = new ArrayList<>();
+		try {
+			layerUrl = dictConfig.getXjSourceUrl();
+			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
+			for (DictDetailPO dictDetail:detailPOs){
+				Map<String,String> map = new HashMap<>();
+				map.put(dictDetail.getName(),dictDetail.getVal());
+				mapList.add(map);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mapList;
 	}
 
 }
