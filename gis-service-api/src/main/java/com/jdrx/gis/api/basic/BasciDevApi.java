@@ -1,5 +1,6 @@
 package com.jdrx.gis.api.basic;
 
+import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
@@ -72,9 +73,9 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "获取所有测量列表")
 	@RequestMapping(value = "findMeasurementList")
-	public ResposeVO findMeasurementList() throws BizException{
+	public ResposeVO findMeasurementList(@ApiParam(name = "dto", required = true)@RequestBody @Valid PageDTO dto) throws BizException{
 		Logger.debug("api/0/basic/findMeasurementList 获取所有测量列表");
-		return ResponseFactory.ok(basicDevQuery.findMeasurementList());
+		return ResponseFactory.ok(basicDevQuery.findMeasurementList(dto));
 	}
 
 	@ApiOperation(value = "保存测量结果")

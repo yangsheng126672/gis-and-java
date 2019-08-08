@@ -9,7 +9,7 @@
     -->
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="meatured_value" jdbcType="NUMERIC" property="meaturedValue" />
+    <result column="meatured_value" jdbcType="VARCHAR" property="meaturedValue" />
     <result column="remark" jdbcType="VARCHAR" property="remark" />
     <result column="geom" jdbcType="VARCHAR" property="geom" typeHandler="GeomStrHandler"/>
     <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
@@ -106,7 +106,7 @@
         #{name,jdbcType=VARCHAR},
       </if>
       <if test="meaturedValue != null">
-        #{meaturedValue,jdbcType=NUMERIC},
+        #{meaturedValue,jdbcType=VARCHAR},
       </if>
       <if test="remark != null">
         #{remark,jdbcType=VARCHAR},

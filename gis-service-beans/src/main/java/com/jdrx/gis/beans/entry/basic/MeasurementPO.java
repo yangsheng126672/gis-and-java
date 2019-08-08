@@ -1,8 +1,6 @@
 package com.jdrx.gis.beans.entry.basic;
 
 import lombok.Data;
-
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -20,7 +18,7 @@ public class MeasurementPO {
     /**
      * 测量值
      */
-    private BigDecimal meaturedValue;
+    private String meaturedValue;
 
     /**
      * 备注

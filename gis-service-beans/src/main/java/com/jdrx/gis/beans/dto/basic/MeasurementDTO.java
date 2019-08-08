@@ -13,7 +13,7 @@ public class MeasurementDTO {
     @ApiModelProperty("名称")
     protected String name;
     @ApiModelProperty("测量值")
-    protected Double meaturedValue ;
+    protected String meaturedValue ;
     @ApiModelProperty("备注信息")
     protected String remark;
     @ApiModelProperty("空间信息")

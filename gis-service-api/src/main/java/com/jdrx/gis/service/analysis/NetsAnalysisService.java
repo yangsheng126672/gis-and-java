@@ -2,6 +2,7 @@ package com.jdrx.gis.service.analysis;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
@@ -620,9 +621,10 @@ public class NetsAnalysisService {
      * 获取爆管记录列表
      * @return
      */
-    public List<GisPipeAnalysisPO> getAnalysisRecondList(RecondParamasDTO recondParamasDTO){
+    public List<GisPipeAnalysisPO> getAnalysisRecondList(RecondParamasDTO dto){
         List<GisPipeAnalysisPO> recordVOList = new ArrayList<>();
-        recordVOList = gisPipeAnalysisPOMapper.selectByParamas(recondParamasDTO);
+        PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+        recordVOList = gisPipeAnalysisPOMapper.selectByParamas(dto);
         return recordVOList;
     }
 
@@ -707,7 +709,7 @@ public class NetsAnalysisService {
             //获取设备id
             List<Long> devIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getValveDevIds())) ;
             List<Long>faileddevIdList = null;
-            if (!(dto.getFailedDevIds().length == 0||dto.getFailedDevIds() == null)){
+            if (!((dto.getFailedDevIds() == null)||(dto.getFailedDevIds().length == 0))){
                 faileddevIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFailedDevIds())) ;
             }
 

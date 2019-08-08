@@ -1,5 +1,6 @@
 package com.jdrx.gis.beans.dto.analysis;
 
+import com.jdrx.gis.beans.dto.base.PageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import java.util.Date;
  */
 
 @Data
-public class RecondParamasDTO {
+public class RecondParamasDTO extends PageDTO{
     @ApiModelProperty("爆管点编号")
     String code;
     @ApiModelProperty("爆管时间")

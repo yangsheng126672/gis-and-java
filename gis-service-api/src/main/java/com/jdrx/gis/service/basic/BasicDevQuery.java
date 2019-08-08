@@ -2,6 +2,8 @@ package com.jdrx.gis.service.basic;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
+import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
@@ -77,6 +79,7 @@ public class BasicDevQuery {
 			//当前层级当前点下的所有子节点
 			List<ShareDevTypePO> childList = getChildNodes(id,list);
 			for (ShareDevTypePO node : childList) {
+				layerUrl = null;
 				Long[] ids = new Long[1];
 				JSONObject o = new JSONObject();
 				o.put("id",node.getId());
@@ -135,7 +138,6 @@ public class BasicDevQuery {
 			o.put("id",node.getId());
 			o.put("name", node.getName());
 			o.put("type", node.getLimbLeaf());
-//			o.put("level",level);
 			o.put("iconUrl",iconUrl);
 
 			//递归调用该方法
@@ -216,8 +218,9 @@ public class BasicDevQuery {
 	 * 获取所有测量列表
 	 * @return
 	 */
-	public List<MeasurementPO> findMeasurementList() throws BizException {
+	public List<MeasurementPO> findMeasurementList(PageDTO dto) throws BizException {
 		try {
+			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 			List<MeasurementPO> list = measurementPOMapper.findMeasurementList();
 			return list;
 		} catch (Exception e) {
