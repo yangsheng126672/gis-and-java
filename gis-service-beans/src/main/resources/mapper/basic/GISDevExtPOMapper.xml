@@ -32,6 +32,7 @@
         <result column="type_id" jdbcType="BIGINT" property="typeId"/>
         <result column="geom" jdbcType="VARCHAR" property="geom"/>
         <result column="type_name" jdbcType="VARCHAR" property="typeName"/>
+        <result column="p_id" jdbcType="BIGINT" property="pId"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -143,7 +144,7 @@
     </select>
 
     <select id="findDevListAttTypeByDevIds" resultType="java.lang.String" resultMap="BaseResultMap3" >
-        SELECT t4.*, t5.name AS type_name
+        SELECT t4.*, t5.name AS type_name, t5.p_id
             FROM (
                 SELECT id, dev_id, type_id
                     , ST_AsText(st_transform(geom, 4326)) AS geom

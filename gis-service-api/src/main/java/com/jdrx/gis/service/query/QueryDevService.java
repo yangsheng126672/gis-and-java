@@ -1,5 +1,6 @@
 package com.jdrx.gis.service.query;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
@@ -620,5 +621,20 @@ public class QueryDevService {
 			e.printStackTrace();
 			throw new BizException(e);
 		}
+	}
+
+	public Object findDevListByTypeIdAndDevIds(DevIDsForTypeDTO dto) throws BizException {
+		DevIDsForTypesDTO typesDTO = new DevIDsForTypesDTO();
+		typesDTO.setDevIds(dto.getDevIds());
+		typesDTO.setTypeIds(new Long[]{dto.getTypeId()});
+		List<GISDevExt2VO> devListByTypeIdsAndDevIds = findDevListByTypeIdsAndDevIds(typesDTO);
+		Map<Long, List<GISDevExt2VO>> collect = devListByTypeIdsAndDevIds.stream().collect(Collectors.groupingBy(GISDevExt2VO::getTypeId));
+		List<GISDevExt2VO> t = Lists.newArrayList();
+		for (Map.Entry<Long, List<GISDevExt2VO>>  entry : collect.entrySet()) {
+			GISDevExt2VO gisDevExt2VO = new GISDevExt2VO().setTypeId(entry.getKey()).setTypeName(entry.getValue().get(0).getTypeName());
+			gisDevExt2VO.setChildren(entry.getValue());
+			t.add(gisDevExt2VO);
+		}
+		return JSON.parseArray(JSON.toJSON(t).toString());
 	}
 }

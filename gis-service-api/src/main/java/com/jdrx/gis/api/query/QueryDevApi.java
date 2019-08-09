@@ -154,4 +154,11 @@ public class QueryDevApi {
 		Logger.debug("根据传来的设备类型和设备ID筛选设备类型下的设备列表信息 dto={}", dto.toString());
 		return ResponseFactory.ok(queryDevService.findDevListByTypeIdsAndDevIds(dto));
 	}
+
+	@ApiOperation(value = "根据传来的设备类型和设备ID集合筛选设备列表（层级）")
+	@RequestMapping(value = "findDevListByTypeIdAndDevIds")
+	public ResposeVO findDevListByTypeIdAndDevIds(@RequestBody DevIDsForTypeDTO dto) throws BizException {
+		Logger.debug("根据传来的设备类型和设备ID集合筛选设备列表（层级） dto = {}", dto.toString());
+		return ResponseFactory.ok(queryDevService.findDevListByTypeIdAndDevIds(dto));
+	}
 }
