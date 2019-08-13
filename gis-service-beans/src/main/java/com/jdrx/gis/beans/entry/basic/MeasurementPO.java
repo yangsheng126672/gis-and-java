@@ -55,4 +55,9 @@ public class MeasurementPO {
      */
     private Date updateAt;
 
+    /**
+     * 地图显示级别
+     */
+    private Integer zoom;
+
 }

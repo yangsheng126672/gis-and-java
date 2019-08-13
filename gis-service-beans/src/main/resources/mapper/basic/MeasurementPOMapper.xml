@@ -17,6 +17,7 @@
     <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
     <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
     <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+    <result column="zoom" jdbcType="INTEGER" property="zoom" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -59,7 +60,7 @@
       This element was generated on Wed Jul 17 11:35:51 CST 2019.
     -->
     id, name, meatured_value, remark, geom, delete_flag, create_by, create_at, update_by,
-    update_at
+    update_at,zoom
   </sql>
 
 
@@ -100,6 +101,9 @@
       <if test="geom != null">
         geom,
       </if>
+      <if test="zoom != null">
+        zoom,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="name != null">
@@ -114,6 +118,9 @@
       <if test="geom != null">
         #{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler},
       </if>
+    <if test="zoom != null">
+      #{zoom,jdbcType=INTEGER},
+    </if>
     </trim>
   </insert>
 

@@ -18,4 +18,6 @@ public class MeasurementDTO {
     protected String remark;
     @ApiModelProperty("空间信息")
     protected  String geom;
+    @ApiModelProperty("地图显示级别")
+    protected  Integer zoom;
 }
