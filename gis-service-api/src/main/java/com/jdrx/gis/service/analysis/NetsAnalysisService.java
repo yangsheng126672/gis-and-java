@@ -263,8 +263,9 @@ public class NetsAnalysisService {
     /**
      * 查找二级关阀列表
      * @param code
+     * @param fmlist
      * */
-    public List<NodeDTO> findSecondAnalysisResult(String code){
+    public List<NodeDTO> findSecondAnalysisResult(String code,List<String>fmlist){
         List<Value> values = getNextNode(code,ljgdLable);
         if(values == null){
             Logger.info("查询失败，无关系数据！"+ code);
@@ -292,11 +293,12 @@ public class NetsAnalysisService {
                 }
                 //从待访问列表中移除节点
                 iterator.remove();
-                //判断nodetype是否为阀门类型
+                //判断是不是在第一次关阀列表中
                 nodeName = tmpValue.asNode().get("name").asString();
-                if (nodeName.equals(code)){
+                if (fmlist.contains(nodeName)){
                     continue;
                 }
+                //判断nodetype是否为阀门类型
                 nodetype = tmpValue.asNode().get("nodetype").asString();
                 if (fmType.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
@@ -537,7 +539,7 @@ public class NetsAnalysisService {
                fmList.add(nodeDTO.getCode());
            }
            for(String string:dtoList){
-               List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string);
+               List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string,fmList);
                for(NodeDTO innerDto:tmpNodeList){
                    if ((!fmList.contains(innerDto.getCode()))){
                         resultDtoList.add(innerDto);
