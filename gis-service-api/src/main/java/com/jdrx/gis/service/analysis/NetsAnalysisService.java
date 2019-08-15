@@ -527,10 +527,15 @@ public class NetsAnalysisService {
     public AnalysisResultVO getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
         AnalysisResultVO vo = new AnalysisResultVO();
         List<String>dtoList = secondAnalysisDTO.getFealtureList();
-        List<String>fmList = secondAnalysisDTO.getFmlist();
+        List<String>fmList = new ArrayList<>();
+        List<NodeDTO> fmlistNode = findAllFamens(secondAnalysisDTO.getDev_id());
         Long dev_id =secondAnalysisDTO.getDev_id();
         List<NodeDTO> resultDtoList = new ArrayList<>();
        try {
+           for (NodeDTO nodeDTO : fmlistNode){
+               if (!StringUtils.isEmpty(nodeDTO.getCode()))
+               fmList.add(nodeDTO.getCode());
+           }
            for(String string:dtoList){
                List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string);
                for(NodeDTO innerDto:tmpNodeList){
