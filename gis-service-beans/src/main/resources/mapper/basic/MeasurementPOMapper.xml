@@ -18,6 +18,7 @@
     <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
     <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
     <result column="zoom" jdbcType="INTEGER" property="zoom" />
+    <result column="center_point" jdbcType="VARCHAR" property="centerPoint"/>
   </resultMap>
   <sql id="Example_Where_Clause">
     <!--
@@ -126,7 +127,8 @@
 
   <select id="findMeasurementList" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List" />
+    <include refid="Base_Column_List" />,
+    st_astext(ST_Centroid(geom)) as center_point
     from gis_measurement
     WHERE delete_flag = FALSE
   </select>
