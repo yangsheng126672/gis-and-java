@@ -60,4 +60,9 @@ public class MeasurementPO {
      */
     private Integer zoom;
 
+    /**
+     * 中心点信息
+     */
+    private String centerPoint;
+
 }
