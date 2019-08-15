@@ -18,8 +18,10 @@
     <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
     <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
     <result column="zoom" jdbcType="INTEGER" property="zoom" />
-    <result column="center_point" jdbcType="VARCHAR" property="centerPoint"/>
+    <result column="x" jdbcType="VARCHAR" property="centerPointX"/>
+    <result column="y" jdbcType="VARCHAR" property="centerPointY"/>
   </resultMap>
+
   <sql id="Example_Where_Clause">
     <!--
       WARNING - @mbg.generated
@@ -128,7 +130,8 @@
   <select id="findMeasurementList" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
-    st_astext(ST_Centroid(geom)) as center_point
+    st_x(ST_Centroid(geom)) as x,
+    st_y(ST_Centroid(geom)) as y
     from gis_measurement
     WHERE delete_flag = FALSE
   </select>

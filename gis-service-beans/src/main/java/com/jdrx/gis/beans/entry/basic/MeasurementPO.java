@@ -2,6 +2,7 @@ package com.jdrx.gis.beans.entry.basic;
 
 import lombok.Data;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class MeasurementPO {
@@ -61,8 +62,13 @@ public class MeasurementPO {
     private Integer zoom;
 
     /**
-     * 中心点信息
+     * 中心点信息x坐标
      */
-    private String centerPoint;
+    private String centerPointX;
+
+    /**
+     * 中心点信息y坐标
+     */
+    private String centerPointY;
 
 }
