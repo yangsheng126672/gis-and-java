@@ -99,6 +99,19 @@ public class QueryDevService {
 				devStr = Joiner.on(",").join(ids);
 			}
 			List<SpaceInfTotalPO> list = devQueryDAO.findSpaceInfoByDevIds(devStr);
+
+			// 对list排序，其他放在最后面
+			Collections.sort(list, new Comparator<SpaceInfTotalPO>() {
+				@Override
+				public int compare(SpaceInfTotalPO o1, SpaceInfTotalPO o2) {
+					if(o1.getCoverageName().equalsIgnoreCase("其他")){
+						return 1;
+					}else {
+						return -1;
+					}
+				}
+			});
+
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();

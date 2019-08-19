@@ -46,7 +46,7 @@
 
 
     <select id="findFirstHierarchyDevType" resultMap="BaseResultMap2">
-        select * from share_dev_type where p_id = -1 and del_flag = 0
+        select * from share_dev_type where p_id = -1 and del_flag = 0 order by sort_by
     </select>
 
     <select id="findDevTypeByPID" resultMap="BaseResultMap2">
