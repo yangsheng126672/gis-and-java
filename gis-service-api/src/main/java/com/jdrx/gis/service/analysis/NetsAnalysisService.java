@@ -689,7 +689,7 @@ public class NetsAnalysisService {
         try {
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
-            String title = dto.getName();
+            String title = "爆管详细记录";
             SXSSFSheet sheet = workbook.createSheet(title);
             sheet.setDefaultColumnWidth((short) 12); // 设置列宽
             CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
