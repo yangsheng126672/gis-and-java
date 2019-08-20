@@ -66,7 +66,7 @@ public class NetsAnalysisApi {
         if (recordDTO == null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }
-        Logger.debug("api/0/analysis/getSecondAnalysisiResult 获取二次关阀分析结果");
+        Logger.debug("api/0/analysis/saveSecondAnalysisiResult 保存关阀分析结果");
         return  ResponseFactory.ok(netsAnalysisService.saveAnalysisRecond(recordDTO));
     }
 

@@ -15,6 +15,8 @@ import java.util.List;
 @Data
 public class AnalysisRecordDTO {
     @ApiModelProperty("爆管点编号")
+    protected String name;
+    @ApiModelProperty("爆管点编号")
     protected String code;
     @ApiModelProperty("爆管点空间信息")
     protected Double[] point;

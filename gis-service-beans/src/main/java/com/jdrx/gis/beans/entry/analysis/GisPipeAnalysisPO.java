@@ -15,6 +15,11 @@ public class GisPipeAnalysisPO {
     /**
      * 爆管编号
      */
+    private String name;
+
+    /**
+     * 爆管编号
+     */
     private String code;
 
     /**

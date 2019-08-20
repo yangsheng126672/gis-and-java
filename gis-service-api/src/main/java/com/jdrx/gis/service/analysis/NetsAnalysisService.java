@@ -587,6 +587,7 @@ public class NetsAnalysisService {
             gisPipeAnalysisPO.setX(BigDecimal.valueOf(recordDTO.getPoint()[0]));
             gisPipeAnalysisPO.setY(BigDecimal.valueOf(recordDTO.getPoint()[1]));
             gisPipeAnalysisPO.setArea(recordDTO.getArea());
+            gisPipeAnalysisPO.setName(recordDTO.getName());
 
             gisPipeAnalysisPOMapper.insertSelective(gisPipeAnalysisPO);
             //回填id
@@ -684,7 +685,7 @@ public class NetsAnalysisService {
         try {
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
-            String title = "爆管详细信息";
+            String title = dto.getName();
             SXSSFSheet sheet = workbook.createSheet(title);
             sheet.setDefaultColumnWidth((short) 12); // 设置列宽
             CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
@@ -780,7 +781,7 @@ public class NetsAnalysisService {
                                     txt = map.get(fieldName);
                                 }
                                 if (fieldName.equals("fmstatu")){
-                                    txt = "关阀成功";
+                                    txt = "可关阀门";
                                 }
                             }
                             text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
