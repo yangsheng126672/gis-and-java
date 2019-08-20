@@ -533,16 +533,20 @@ public class NetsAnalysisService {
         List<NodeDTO> fmlistNode = findAllFamens(secondAnalysisDTO.getDev_id());
         Long dev_id =secondAnalysisDTO.getDev_id();
         List<NodeDTO> resultDtoList = new ArrayList<>();
+        List<String>tmpList = new ArrayList<>();
        try {
            for (NodeDTO nodeDTO : fmlistNode){
-               if (!StringUtils.isEmpty(nodeDTO.getCode()))
+               if ((!StringUtils.isEmpty(nodeDTO.getCode())&&(!fmList.contains(nodeDTO.getCode()))))
                fmList.add(nodeDTO.getCode());
            }
            for(String string:dtoList){
                List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string,fmList);
                for(NodeDTO innerDto:tmpNodeList){
-                   if ((!fmList.contains(innerDto.getCode()))){
-                        resultDtoList.add(innerDto);
+                   if ((!fmList.contains(innerDto.getCode()))&&(!dtoList.contains(innerDto.getCode()))){
+                       if (!tmpList.contains(innerDto.getCode())){
+                           tmpList.add(innerDto.getCode());
+                           resultDtoList.add(innerDto);
+                       }
                    }
                }
            }
