@@ -29,4 +29,11 @@ public interface GisDevTplAttrPOMapper {
 	 * @return
 	 */
 	List<GisDevTplAttrPO> findAttrListByTypeId(Long typeId);
+
+	/**
+	 * 根据数据类型查typcategory Code
+	 * @param dataType
+	 * @return
+	 */
+	String getCategoryCodeByDataType(String dataType);
 }

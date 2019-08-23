@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @Description: 属性查询DTO
@@ -20,12 +21,12 @@ public class AttrQeuryDTO extends PageDTO {
 	@ApiModelProperty("设备类型ID，也是模板表中的类型ID")
 	private Long typeId;
 
-	@NotNull(message = "属性字段名不能为空")
-	@ApiModelProperty("属性名")
-	private String fieldName;
-
-	@ApiModelProperty("参数内容")
-	private String paramVal;
+//	@NotNull(message = "属性字段名不能为空")
+//	@ApiModelProperty("属性名")
+//	private String fieldName;
+//
+//	@ApiModelProperty("参数内容")
+//	private String paramVal;
 
 //	@ApiModelProperty("投影坐标系编号")
 //	@NotNull(message = "投影坐标系编号不能为空")
@@ -39,4 +40,7 @@ public class AttrQeuryDTO extends PageDTO {
 
 	@ApiModelProperty("时间戳")
 	private String time;
+
+	@ApiModelProperty("条件集合")
+	private List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList;
 }

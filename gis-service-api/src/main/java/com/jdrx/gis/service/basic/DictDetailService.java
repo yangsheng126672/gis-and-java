@@ -13,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -107,6 +108,7 @@ public class DictDetailService {
 			if (Objects.nonNull(dictDetailDTO)) {
 				BeanUtils.copyProperties(dictDetailDTO, dictDetailPO);
 			}
+			dictDetailPO.setUpdateAt(new Date());
 			int affectedRows = dictDetailPOMapper.updateByPrimaryKeySelective(dictDetailPO);
 			Boolean bool = affectedRows > 0 ? true : false;
 			if (!bool) {

@@ -64,6 +64,7 @@
         </where>
     </select>
 
+    <!-- 属性查询,导出和展示列表 -->
     <select id="findDevListByAreaOrInputVal" resultMap="BaseResultMap2">
         select ext.*,dt.name typeName from (
             select id, dev_id, tpl_type_id,data_info
@@ -87,9 +88,11 @@
                       )
                     )
                 </if>
-                <if test="dto.paramVal != null and dto.paramVal != ''">
-                    and data_info :: jsonb ->> #{dto.fieldName, jdbcType=VARCHAR}
-                    like concat('%', #{dto.paramVal, jdbcType=VARCHAR}, '%')
+                <if test="dto.criteriaList != null and dto.criteriaList.size > 0">
+                    and
+                    <foreach collection="dto.criteriaList" index="index" item="item" open=" " separator=" " close=" ">
+                        ${item.assemblyStr}
+                    </foreach>
                 </if>
                 <if test="devIds != null and devIds != ''">
                     and EXISTS (select 1 from
@@ -124,9 +127,11 @@
                 )
                 )
             </if>
-            <if test="dto.paramVal != null and dto.paramVal != ''">
-                and data_info :: jsonb ->> #{dto.fieldName, jdbcType=VARCHAR}
-                like concat('%', #{dto.paramVal, jdbcType=VARCHAR}, '%')
+            <if test="dto.criteriaList != null and dto.criteriaList.size > 0">
+                and
+                <foreach collection="dto.criteriaList" index="index" item="item" open=" " separator=" " close=" ">
+                    ${item.assemblyStr}
+                </foreach>
             </if>
             <if test="devIds != null and devIds != ''">
                 and EXISTS (select 1 from

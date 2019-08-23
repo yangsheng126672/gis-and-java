@@ -173,4 +173,8 @@
          and type_id = #{typeId,jdbcType=BIGINT}
          order by idx
     </select>
+
+    <select id="getCategoryCodeByDataType" parameterType="java.lang.String" resultType="java.lang.String">
+        select typcategory from pg_catalog.pg_type where typname = #{dataType}
+    </select>
 </mapper>
