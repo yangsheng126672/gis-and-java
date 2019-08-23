@@ -12,6 +12,8 @@ import lombok.Data;
 
 @Data
 public class ExportValveDTO  {
+    @ApiModelProperty("名称")
+    String name;
     @ApiModelProperty("爆管点编号")
     Long lineId;
     @ApiModelProperty("爆管点经纬度")

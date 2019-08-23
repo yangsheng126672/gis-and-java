@@ -694,7 +694,7 @@ public class NetsAnalysisService {
             sheet.setDefaultColumnWidth((short) 12); // 设置列宽
             CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
             CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
-            Row row = sheet.createRow(0);
+            Row row = sheet.createRow(1);
             List<FieldNameVO> headerList =new ArrayList<>();
             FieldNameVO tmpVO = new FieldNameVO();
             tmpVO.setFieldDesc("阀门状态");
@@ -762,8 +762,8 @@ public class NetsAnalysisService {
                         return vo;
                     }).collect(Collectors.toList());
                     //设置第一行  爆管点经纬度
-                    Row xssfRow1 = sheet.createRow(1);
-                    Cell cell1 = xssfRow1.createCell(0);
+                    Row xssfRow0 = sheet.createRow(0);
+                    Cell cell1 = xssfRow0.createCell(0);
                     cell1.setCellValue("爆管点经纬度： "+dto.getPoint()[0]+" , "+dto.getPoint()[1]+" ; 爆管编号："+dto.getLineId());
                     cell1.setCellStyle(style2);
                     for (SpaceInfoVO spaceInfoVO : subDevList) {
