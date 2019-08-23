@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.dto.query.CaliberDTO;
+import com.jdrx.gis.beans.dto.query.CriteriaWithDataTypeCategoryCodeDTO;
 import com.jdrx.gis.beans.dto.query.MeterialDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
@@ -118,6 +119,10 @@ public class AttrQueryService {
 				list.stream().forEach(gisDevTplAttrPO -> {
 					FieldNameVO vo = new FieldNameVO();
 					BeanUtils.copyProperties(gisDevTplAttrPO, vo);
+					if (Objects.nonNull(gisDevTplAttrPO.getDataType())) {
+						String dataType = gisDevTplAttrPOMapper.getCategoryCodeByDataType(gisDevTplAttrPO.getDataType());
+						vo.setDataType(dataType);
+					}
 					fieldNameVOS.add(vo);
 				});
 				// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
@@ -169,9 +174,20 @@ public class AttrQueryService {
 				devStr = Joiner.on(",").join(ids);
 			}
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = dto.getCriteriaList();
+			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
+				criteriaList.stream().forEach(cri -> {
+					try {
+						String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
+						cri.setAssemblyStr(rp);
+					} catch (BizException e) {
+						e.printStackTrace();
+					}
+				});
+			}
 			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
 			Long end = System.currentTimeMillis();
-			Logger.debug("请求图层和数据库总耗时： " + (end - start) + " ms");
+			Logger.debug("数据库耗时： " + (end - start) + " ms");
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -232,6 +248,17 @@ public class AttrQueryService {
 			List<Long> ids = Arrays.asList(devIds);
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
+			}
+			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = dto.getCriteriaList();
+			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
+				criteriaList.stream().forEach(cri -> {
+					try {
+						String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
+						cri.setAssemblyStr(rp);
+					} catch (BizException e) {
+						e.printStackTrace();
+					}
+				});
 			}
 			int total = gisDevExtPOMapper.findDevListByAreaOrInputValCount(dto, devStr);
 			int pageSize = GISConstants.EXPORT_PAGESIZE;
@@ -390,6 +417,33 @@ public class AttrQueryService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException(e);
+		}
+	}
+
+	/**
+	 * 验证一下查询条件是否正确
+	 * @param dto
+	 * @return
+	 */
+	public Boolean validateCriteria(AttrQeuryDTO dto){
+		try {
+			PageHelper.startPage(1, 10, null);
+			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = dto.getCriteriaList();
+			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
+				criteriaList.stream().forEach(cri -> {
+					try {
+						String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
+						cri.setAssemblyStr(rp);
+					} catch (BizException e) {
+						e.printStackTrace();
+					}
+				});
+			}
+			gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, null);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 

@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.jdrx.gis.beans.constants.basic.EPGDataTypeCategory;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -216,4 +217,38 @@ public class ComUtil {
 		Response response = httpClient.newCall(request).execute();
 		return response.body().string();
 	}
+
+	/**
+	 * 把条件值转换成jsonb，依赖于gis_dev_ext表的data_info字段固定
+	 * @param fieldName 属性查询的英文字段名称
+	 * @param criteria 条件值
+	 * @param categoryCode 数据类型的分类
+	 * @return
+	 * @throws BizException
+	 */
+	public static String processAttrField(String fieldName, String criteria, String categoryCode) throws BizException{
+		try {
+			if (Objects.nonNull(criteria)) {
+				criteria = criteria.trim();
+			}
+			StringBuffer pz = new StringBuffer().append(" (data_info :: jsonb ->> '" + fieldName + "') :: ");
+			String temp = null;
+			if (EPGDataTypeCategory.N.getCode().equals(categoryCode)) {
+				temp = String.valueOf(pz.append(" numeric "));
+			} else if (EPGDataTypeCategory.S.getCode().equals(categoryCode)) {
+				temp = String.valueOf(pz.append(" varchar "));
+			} else if (EPGDataTypeCategory.D.getCode().equals(categoryCode)) {
+				temp = String.valueOf(pz.append(" timestamp "));
+			} else {
+				throw new BizException("属性的筛选条件格式不支持！");
+			}
+
+			criteria = criteria.replaceAll(fieldName, temp);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("属性的筛选条件格式不正确！");
+		}
+		return criteria;
+	}
+
 }

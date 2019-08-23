@@ -15,4 +15,7 @@ public class FieldNameVO {
 
 	/** 字段名称 */
 	private String fieldName;
+
+	/** 数据类型分类 */
+	private String dataType;
 }

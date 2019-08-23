@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -87,6 +88,7 @@ public class DictTypeService {
 			if (Objects.nonNull(dictTypeDTO)) {
 				BeanUtils.copyProperties(dictTypeDTO, dictTypePO);
 			}
+			dictTypePO.setUpdateAt(new Date());
 			int affectedRows = dictTypePOMapper.updateByPrimaryKeySelective(dictTypePO);
 			Boolean bool = affectedRows > 0 ? true : false;
 			if (!bool) {

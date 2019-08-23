@@ -1,10 +1,15 @@
 package com.jdrx.gis.api.query;
 
 import com.jdrx.gis.beans.constants.basic.GISConstants;
+import com.jdrx.gis.beans.dto.base.InsertDTO;
+import com.jdrx.gis.beans.dto.base.UpdateDTO;
+import com.jdrx.gis.beans.dto.basic.CriteriaDTO;
+import com.jdrx.gis.beans.dto.basic.CriteriaQueryDTO;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.dto.query.CaliberDTO;
 import com.jdrx.gis.beans.dto.query.MeterialDTO;
 import com.jdrx.gis.config.PathConfig;
+import com.jdrx.gis.service.basic.AttCriteriaService;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -17,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,6 +51,9 @@ public class AttrQueryApi {
 
 	@Autowired
 	PathConfig pathConfig;
+
+	@Autowired
+	AttCriteriaService attCriteriaService;
 
 	@ApiOperation(value = "根据设备类型ID递归查询所有配置了模板的子类")
 	@RequestMapping(value = "findHasTplDevTypeListById")
@@ -138,4 +147,46 @@ public class AttrQueryApi {
 		Logger.debug("根据设备ID获取模板信息, 设备ID = {}", idDTO.getId());
 		return ResponseFactory.ok(attrQueryService.getFieldNames(idDTO.getId()));
 	}
+
+	@ApiOperation(value = "保存属性的筛选条件")
+	@RequestMapping(value = "saveCriteriaRecord")
+	public ResposeVO saveCriteriaRecord(@RequestBody @Validated({InsertDTO.class}) CriteriaDTO criteriaDTO) throws BizException {
+		Logger.debug("筛选条件需存信息：{}", criteriaDTO.toString());
+		return ResponseFactory.ok(attCriteriaService.saveCriteriaRecord(criteriaDTO));
+	}
+
+	@ApiOperation(value = "通过主键更新属性的筛选条件")
+	@RequestMapping(value = "updateCriteriaRecordById")
+	public ResposeVO updateCriteriaRecordById(@RequestBody @Validated({UpdateDTO.class}) CriteriaDTO criteriaDTO) throws BizException {
+		Logger.debug("筛选条件更新信息：{}", criteriaDTO.toString());
+		return ResponseFactory.ok(attCriteriaService.updateCriteriaRecord(criteriaDTO));
+	}
+
+
+	@ApiOperation(value = "物理删除属性的筛选条件")
+	@RequestMapping(value = "deleteCriteriaRecordById")
+	public ResposeVO deleteCriteriaRecordById(@RequestBody @Valid IdDTO<Long> idDTO) throws BizException {
+		Logger.debug("物理删除属性的筛选条件的ID={}", idDTO.getId());
+		return ResponseFactory.ok(attCriteriaService.deleteCriteriaRecordById(idDTO.getId()));
+	}
+
+	@ApiOperation(value = "查询属性的筛选条件")
+	@RequestMapping(value = "findCriteriaRecords")
+	public ResposeVO findCriteriaRecords(@RequestBody @Valid CriteriaQueryDTO criteriaQueryDTO) throws BizException {
+		Logger.debug("查询属性的筛选条件入参：{}", criteriaQueryDTO.toString());
+		return ResponseFactory.ok(attCriteriaService.findConditionRecords(criteriaQueryDTO));
+	}
+
+	@ApiOperation(value = "验证筛选条件")
+	@RequestMapping(value = "validateCriteria")
+	public ResposeVO validateCriteria(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
+		try {
+			Logger.debug("验证查询属性的筛选条件入参：{}", dto.toString());
+			return ResponseFactory.ok(attrQueryService.validateCriteria(dto));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("验证失败！");
+		}
+	}
+
 }
