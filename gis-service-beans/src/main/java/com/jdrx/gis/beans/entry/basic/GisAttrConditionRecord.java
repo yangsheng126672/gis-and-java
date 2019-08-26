@@ -9,6 +9,11 @@ public class GisAttrConditionRecord {
     private Long id;
 
     /**
+     * 名称
+     */
+    private String name;
+
+    /**
      * 类型ID
      */
     private Long typeId;
@@ -59,6 +64,14 @@ public class GisAttrConditionRecord {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
     }
 
     public Long getTypeId() {
