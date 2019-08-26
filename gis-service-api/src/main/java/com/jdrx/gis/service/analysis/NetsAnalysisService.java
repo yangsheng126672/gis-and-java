@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.*;
+import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entry.analysis.ExportValveDTO;
 import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisPO;
@@ -31,8 +32,10 @@ import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
+import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -54,9 +57,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jdrx.gis.util.ExcelStyleUtil.createBodyStyle;
 
 /**
  * @Description
@@ -489,7 +493,8 @@ public class NetsAnalysisService {
      * @return
      * @throws Exception
      */
-    public List<GisWaterUserInfoPO>findInfluenceUser() throws Exception{
+    public List<GisWaterUserInfoPO>findInfluenceUser(PageDTO dto) throws Exception{
+        PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
         List<GisWaterUserInfoPO> userInfoDTOS = new ArrayList<>();
         userInfoDTOS =  waterUserInfoPOMapper.selectAll();
         return userInfoDTOS;
@@ -497,17 +502,17 @@ public class NetsAnalysisService {
 
     /**
      * 获取爆管分析结果
-     * @param id
+     * @param dto
      * @return
      * @throws Exception
      */
-    public AnalysisResultVO getAnalysisResult(Long id) throws Exception{
+    public AnalysisResultVO getAnalysisResult(AnalysisDTO dto) throws Exception{
         AnalysisResultVO analysisResultDTO = new AnalysisResultVO();
         //获取所有阀门列表
-        List<NodeDTO> fmlist_all = findAllFamens(id);
+        List<NodeDTO> fmlist_all = findAllFamens(dto.getDev_id());
         //获取必须关闭的阀门
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
-        List<Long>idList = findInfluenceArea(id,fmlist_final);
+        List<Long>idList = findInfluenceArea(dto.getDev_id(),fmlist_final);
         if (idList == null){
             return analysisResultDTO;
         }
@@ -516,7 +521,11 @@ public class NetsAnalysisService {
             String geom = measurementPOMapper.getExtendArea(idList);
             analysisResultDTO.setGeom(geom);
         }
-        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
+        PageDTO pageDTO = new PageDTO();
+        pageDTO.setPageNum(dto.getPageNum());
+        pageDTO.setPageSize(dto.getPageSize());
+        pageDTO.setOrderBy(dto.getOrderBy());
+        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser(pageDTO);
         analysisResultDTO.setUserInfoPOS(userInfoPOS);
         return analysisResultDTO;
     }
@@ -531,6 +540,7 @@ public class NetsAnalysisService {
         List<String>dtoList = secondAnalysisDTO.getFealtureList();
         List<String>fmList = new ArrayList<>();
         List<NodeDTO> fmlistNode = findAllFamens(secondAnalysisDTO.getDev_id());
+        List<String> fmlistTmp = secondAnalysisDTO.getFmlist();
         Long dev_id =secondAnalysisDTO.getDev_id();
         List<NodeDTO> resultDtoList = new ArrayList<>();
         List<String>tmpList = new ArrayList<>();
@@ -553,7 +563,7 @@ public class NetsAnalysisService {
            vo.setFmlist(resultDtoList);
            List<NodeDTO> fmlist_all = new ArrayList<>();
           for (String s:fmList){
-              if (dtoList.contains(s)){
+              if (dtoList.contains(s)||(fmlistTmp.contains(s))){
                   continue;
               }
               NodeDTO node = new NodeDTO();
@@ -567,8 +577,12 @@ public class NetsAnalysisService {
                String area = measurementPOMapper.getExtendArea(ids);
                vo.setGeom(area);
            }
+           PageDTO pageDTO = new PageDTO();
+           pageDTO.setPageNum(secondAnalysisDTO.getPageNum());
+           pageDTO.setPageSize(secondAnalysisDTO.getPageSize());
+           pageDTO.setOrderBy(secondAnalysisDTO.getOrderBy());
            //添加影响用户
-           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser();
+           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser(pageDTO);
            vo.setUserInfoPOS(userInfoDTOS);
        }catch (Exception e){
            Logger.error("二次关阀分析失败： "+e.getMessage());
@@ -686,14 +700,24 @@ public class NetsAnalysisService {
      */
     public String exportAnalysisResult(ExportValveDTO dto) throws BizException{
         OutputStream os = null;
+        String title = null;
         try {
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
-            String title = "爆管详细记录";
+            if (dto.getName() == null || StringUtils.isEmpty(dto.getName())){
+                title = "爆管详细记录";
+            }else {
+                title = dto.getName();
+            }
             SXSSFSheet sheet = workbook.createSheet(title);
             sheet.setDefaultColumnWidth((short) 12); // 设置列宽
             CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
-            CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+            CellStyle style2 = createBodyStyle(workbook);
+            CellStyle style3 = createBodyStyle(workbook);
+            Font font = workbook.createFont();
+            font.setFontHeightInPoints((short) 12);//设置字体大小
+            style3.setFont(font);
+
             Row row = sheet.createRow(1);
             List<FieldNameVO> headerList =new ArrayList<>();
             FieldNameVO tmpVO = new FieldNameVO();
@@ -765,7 +789,7 @@ public class NetsAnalysisService {
                     Row xssfRow0 = sheet.createRow(0);
                     Cell cell1 = xssfRow0.createCell(0);
                     cell1.setCellValue("爆管点经纬度： "+dto.getPoint()[0]+" , "+dto.getPoint()[1]+" ; 爆管编号："+dto.getLineId());
-                    cell1.setCellStyle(style2);
+                    cell1.setCellStyle(style3);
                     for (SpaceInfoVO spaceInfoVO : subDevList) {
                         Map<String, String> map = spaceInfoVO.getDataMap();
                         if (Objects.isNull(map)) {
