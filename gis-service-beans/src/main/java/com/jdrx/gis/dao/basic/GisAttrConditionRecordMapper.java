@@ -27,4 +27,5 @@ public interface GisAttrConditionRecordMapper {
 	 * @return
 	 */
 	List<GisAttrConditionRecord> findConditionRecords(@Param("typeId") Long typeId, @Param("tplId") Long tplId, @Param("fieldName") String fieldName);
+
 }

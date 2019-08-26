@@ -232,7 +232,7 @@ public class ComUtil {
 				criteria = criteria.trim();
 			}
 			StringBuffer pz = new StringBuffer().append(" (data_info :: jsonb ->> '" + fieldName + "') :: ");
-			String temp = null;
+			String temp;
 			if (EPGDataTypeCategory.N.getCode().equals(categoryCode)) {
 				temp = String.valueOf(pz.append(" numeric "));
 			} else if (EPGDataTypeCategory.S.getCode().equals(categoryCode)) {
