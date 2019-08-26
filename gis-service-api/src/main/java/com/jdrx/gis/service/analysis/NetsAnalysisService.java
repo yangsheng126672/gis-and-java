@@ -509,10 +509,10 @@ public class NetsAnalysisService {
     public AnalysisResultVO getAnalysisResult(AnalysisDTO dto) throws Exception{
         AnalysisResultVO analysisResultDTO = new AnalysisResultVO();
         //获取所有阀门列表
-        List<NodeDTO> fmlist_all = findAllFamens(dto.getDev_id());
+        List<NodeDTO> fmlist_all = findAllFamens(dto.getId());
         //获取必须关闭的阀门
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
-        List<Long>idList = findInfluenceArea(dto.getDev_id(),fmlist_final);
+        List<Long>idList = findInfluenceArea(dto.getId(),fmlist_final);
         if (idList == null){
             return analysisResultDTO;
         }

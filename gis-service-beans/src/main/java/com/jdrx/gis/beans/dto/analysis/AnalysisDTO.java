@@ -12,5 +12,5 @@ import lombok.Data;
 @Data
 public class AnalysisDTO extends PageDTO{
     @ApiModelProperty("爆管线设备id")
-    private Long dev_id;
+    private Long id;
 }
