@@ -563,7 +563,7 @@ public class NetsAnalysisService {
            vo.setFmlist(resultDtoList);
            List<NodeDTO> fmlist_all = new ArrayList<>();
           for (String s:fmList){
-              if (dtoList.contains(s)||(fmlistTmp.contains(s))){
+              if (dtoList.contains(s)||(!fmlistTmp.contains(s))){
                   continue;
               }
               NodeDTO node = new NodeDTO();
