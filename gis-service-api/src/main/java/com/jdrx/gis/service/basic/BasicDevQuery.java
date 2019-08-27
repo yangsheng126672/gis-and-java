@@ -2,6 +2,7 @@ package com.jdrx.gis.service.basic;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
@@ -16,6 +17,7 @@ import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,11 +220,11 @@ public class BasicDevQuery {
 	 * 获取所有测量列表
 	 * @return
 	 */
-	public List<MeasurementPO> findMeasurementList(PageDTO dto) throws BizException {
+	public PageVO<MeasurementPO> findMeasurementList(PageDTO dto) throws BizException {
 		try {
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-			List<MeasurementPO> list = measurementPOMapper.findMeasurementList();
-			return list;
+			Page<MeasurementPO> list = (Page<MeasurementPO>)measurementPOMapper.findMeasurementList();
+			return new PageVO<>(list);
 		} catch (Exception e) {
 			Logger.error("获取测量列表失败！", e.getMessage());
 			throw new BizException("获取测量列表失败!");

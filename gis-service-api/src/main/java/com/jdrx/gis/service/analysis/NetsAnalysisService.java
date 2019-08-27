@@ -2,6 +2,7 @@ package com.jdrx.gis.service.analysis;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -46,7 +47,6 @@ import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -493,11 +493,10 @@ public class NetsAnalysisService {
      * @return
      * @throws Exception
      */
-    public List<GisWaterUserInfoPO>findInfluenceUser(PageDTO dto) throws Exception{
+    public PageVO<GisWaterUserInfoPO>findInfluenceUser(PageDTO dto) throws Exception{
         PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-        List<GisWaterUserInfoPO> userInfoDTOS = new ArrayList<>();
-        userInfoDTOS =  waterUserInfoPOMapper.selectAll();
-        return userInfoDTOS;
+        Page<GisWaterUserInfoPO> list = (Page<GisWaterUserInfoPO>) waterUserInfoPOMapper.selectAll();
+        return new PageVO<>(list);
     }
 
     /**
@@ -525,8 +524,8 @@ public class NetsAnalysisService {
         pageDTO.setPageNum(dto.getPageNum());
         pageDTO.setPageSize(dto.getPageSize());
         pageDTO.setOrderBy(dto.getOrderBy());
-        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser(pageDTO);
-        analysisResultDTO.setUserInfoPOS(userInfoPOS);
+        PageVO<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser(pageDTO);
+        analysisResultDTO.setUserInfoPOS( userInfoPOS);
         return analysisResultDTO;
     }
 
@@ -582,8 +581,8 @@ public class NetsAnalysisService {
            pageDTO.setPageSize(secondAnalysisDTO.getPageSize());
            pageDTO.setOrderBy(secondAnalysisDTO.getOrderBy());
            //添加影响用户
-           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser(pageDTO);
-           vo.setUserInfoPOS(userInfoDTOS);
+           PageVO<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser(pageDTO);
+           vo.setUserInfoPOS((List<GisWaterUserInfoPO>) userInfoDTOS);
        }catch (Exception e){
            Logger.error("二次关阀分析失败： "+e.getMessage());
            throw new BizException("二次关阀分析失败!");
@@ -647,11 +646,10 @@ public class NetsAnalysisService {
      * 获取爆管记录列表
      * @return
      */
-    public List<GisPipeAnalysisPO> getAnalysisRecondList(RecondParamasDTO dto){
-        List<GisPipeAnalysisPO> recordVOList = new ArrayList<>();
+    public PageVO<GisPipeAnalysisPO> getAnalysisRecondList(RecondParamasDTO dto) throws BizException{
         PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-        recordVOList = gisPipeAnalysisPOMapper.selectByParamas(dto);
-        return recordVOList;
+        Page<GisPipeAnalysisPO> recordVOList = (Page<GisPipeAnalysisPO>)gisPipeAnalysisPOMapper.selectByParamas(dto);
+        return new PageVO<>(recordVOList);
     }
 
     /**
@@ -688,10 +686,6 @@ public class NetsAnalysisService {
 
     }
 
-    public List<FieldNameVO> setExportValveFields(){
-        List<FieldNameVO>list = new ArrayList<>();
-        return list;
-    }
     /**
      * 导出某条爆管记录
      * @param dto

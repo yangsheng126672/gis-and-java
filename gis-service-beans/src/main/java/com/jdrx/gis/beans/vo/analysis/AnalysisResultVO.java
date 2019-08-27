@@ -20,5 +20,5 @@ public class AnalysisResultVO {
     @ApiModelProperty("影响区域范围空间信息")
     protected String geom;
     @ApiModelProperty("影响用户")
-    protected List<GisWaterUserInfoPO> userInfoPOS;
+    protected Object userInfoPOS;
 }
