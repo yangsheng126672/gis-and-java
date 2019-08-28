@@ -1,7 +1,6 @@
 package com.jdrx.gis.api.analysis;
 
 import com.jdrx.gis.api.basic.BasciDevApi;
-import com.jdrx.gis.beans.dto.analysis.AnalysisDTO;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
 import com.jdrx.gis.beans.dto.analysis.RecondParamasDTO;
 import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
@@ -42,7 +41,7 @@ public class NetsAnalysisApi {
 
     @ApiOperation(value = "获取爆管分析结果")
     @RequestMapping(value ="getAnalysisiResult" )
-    public ResposeVO getAnalysisiResult(@ApiParam(name = "iddto", required = true) @RequestBody @Valid AnalysisDTO dto) throws Exception{
+    public ResposeVO getAnalysisiResult(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
         if (dto == null || dto.getId() ==null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }

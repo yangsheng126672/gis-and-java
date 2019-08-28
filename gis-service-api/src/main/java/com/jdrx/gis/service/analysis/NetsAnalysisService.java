@@ -493,8 +493,7 @@ public class NetsAnalysisService {
      * @return
      * @throws Exception
      */
-    public List<GisWaterUserInfoPO>findInfluenceUser(PageDTO dto) throws Exception{
-        PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+    public List<GisWaterUserInfoPO>findInfluenceUser() throws Exception{
         List<GisWaterUserInfoPO> list =  waterUserInfoPOMapper.selectAll();
         return list;
     }
@@ -505,28 +504,25 @@ public class NetsAnalysisService {
      * @return
      * @throws Exception
      */
-    public AnalysisResultVO getAnalysisResult(AnalysisDTO dto) throws Exception{
-        AnalysisResultVO analysisResultDTO = new AnalysisResultVO();
+    public AnalysisResultVO getAnalysisResult(IdDTO<Long> dto) throws Exception{
+        AnalysisResultVO analysisResultVO = new AnalysisResultVO();
         //获取所有阀门列表
         List<NodeDTO> fmlist_all = findAllFamens(dto.getId());
         //获取必须关闭的阀门
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
         List<Long>idList = findInfluenceArea(dto.getId(),fmlist_final);
         if (idList == null){
-            return analysisResultDTO;
+            return analysisResultVO;
         }
         if (fmlist_final != null){
-            analysisResultDTO.setFmlist(fmlist_final);
+            analysisResultVO.setFmlist(fmlist_final);
             String geom = measurementPOMapper.getExtendArea(idList);
-            analysisResultDTO.setGeom(geom);
+            analysisResultVO.setGeom(geom);
         }
-        PageDTO pageDTO = new PageDTO();
-        pageDTO.setPageNum(dto.getPageNum());
-        pageDTO.setPageSize(dto.getPageSize());
-        pageDTO.setOrderBy(dto.getOrderBy());
-        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser(pageDTO);
-        analysisResultDTO.setUserInfoPOS( userInfoPOS);
-        return analysisResultDTO;
+        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
+        analysisResultVO.setUserInfoPOS( userInfoPOS);
+        analysisResultVO.setTotal(userInfoPOS.size());
+        return analysisResultVO;
     }
 
     /**
@@ -576,13 +572,10 @@ public class NetsAnalysisService {
                String area = measurementPOMapper.getExtendArea(ids);
                vo.setGeom(area);
            }
-           PageDTO pageDTO = new PageDTO();
-           pageDTO.setPageNum(secondAnalysisDTO.getPageNum());
-           pageDTO.setPageSize(secondAnalysisDTO.getPageSize());
-           pageDTO.setOrderBy(secondAnalysisDTO.getOrderBy());
            //添加影响用户
-           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser(pageDTO);
+           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser();
            vo.setUserInfoPOS(userInfoDTOS);
+           vo.setTotal(userInfoDTOS.size());
        }catch (Exception e){
            Logger.error("二次关阀分析失败： "+e.getMessage());
            throw new BizException("二次关阀分析失败!");

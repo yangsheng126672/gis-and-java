@@ -19,4 +19,6 @@ public class AnalysisResultVO {
     protected String geom;
     @ApiModelProperty("影响用户")
     protected List userInfoPOS;
+    @ApiModelProperty("影响用户总条数")
+    protected int total;
 }
