@@ -493,10 +493,10 @@ public class NetsAnalysisService {
      * @return
      * @throws Exception
      */
-    public PageVO<GisWaterUserInfoPO>findInfluenceUser(PageDTO dto) throws Exception{
+    public List<GisWaterUserInfoPO>findInfluenceUser(PageDTO dto) throws Exception{
         PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-        Page<GisWaterUserInfoPO> list = (Page<GisWaterUserInfoPO>) waterUserInfoPOMapper.selectAll();
-        return new PageVO<>(list);
+        List<GisWaterUserInfoPO> list =  waterUserInfoPOMapper.selectAll();
+        return list;
     }
 
     /**
@@ -524,7 +524,7 @@ public class NetsAnalysisService {
         pageDTO.setPageNum(dto.getPageNum());
         pageDTO.setPageSize(dto.getPageSize());
         pageDTO.setOrderBy(dto.getOrderBy());
-        PageVO<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser(pageDTO);
+        List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser(pageDTO);
         analysisResultDTO.setUserInfoPOS( userInfoPOS);
         return analysisResultDTO;
     }
@@ -581,8 +581,8 @@ public class NetsAnalysisService {
            pageDTO.setPageSize(secondAnalysisDTO.getPageSize());
            pageDTO.setOrderBy(secondAnalysisDTO.getOrderBy());
            //添加影响用户
-           PageVO<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser(pageDTO);
-           vo.setUserInfoPOS((List<GisWaterUserInfoPO>) userInfoDTOS);
+           List<GisWaterUserInfoPO> userInfoDTOS = findInfluenceUser(pageDTO);
+           vo.setUserInfoPOS(userInfoDTOS);
        }catch (Exception e){
            Logger.error("二次关阀分析失败： "+e.getMessage());
            throw new BizException("二次关阀分析失败!");

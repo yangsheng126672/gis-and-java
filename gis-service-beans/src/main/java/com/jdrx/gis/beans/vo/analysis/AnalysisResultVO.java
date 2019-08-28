@@ -1,12 +1,10 @@
 package com.jdrx.gis.beans.vo.analysis;
 
 import com.jdrx.gis.beans.dto.analysis.NodeDTO;
-import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @Description
@@ -20,5 +18,5 @@ public class AnalysisResultVO {
     @ApiModelProperty("影响区域范围空间信息")
     protected String geom;
     @ApiModelProperty("影响用户")
-    protected Object userInfoPOS;
+    protected List userInfoPOS;
 }
