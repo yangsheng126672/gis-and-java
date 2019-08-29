@@ -21,7 +21,9 @@ public class RecondValveVO {
     @ApiModelProperty("影响范围")
     String area;
     @ApiModelProperty("关阀成功的阀门")
-    List<NodeDTO> valves;
+    List<NodeDTO> valveFirst;
+    @ApiModelProperty("关阀成功的阀门")
+    List<NodeDTO> valveSecond;
     @ApiModelProperty("关阀失败的阀门")
-    List<NodeDTO> failedValves;
+    List<NodeDTO> valveFailed;
 }

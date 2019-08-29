@@ -14,9 +14,9 @@ public class GisPipeAnalysisValvePO {
     private Long rid;
 
     /**
-     * 爆管可关关阀
+     * 一次关阀列表
      */
-    private String valve;
+    private String valveFirst;
 
     /**
      * 关阀失败阀门
@@ -48,6 +48,11 @@ public class GisPipeAnalysisValvePO {
      */
     private Date updateAt;
 
+    /**
+     * 二次关阀列表
+     */
+    private String valveSecond;
+
     public Long getId() {
         return id;
     }
@@ -64,12 +69,12 @@ public class GisPipeAnalysisValvePO {
         this.rid = rid;
     }
 
-    public String getValve() {
-        return valve;
+    public String getValveFirst() {
+        return valveFirst;
     }
 
-    public void setValve(String valve) {
-        this.valve = valve == null ? null : valve.trim();
+    public void setValveFirst(String valveFirst) {
+        this.valveFirst = valveFirst == null ? null : valveFirst.trim();
     }
 
     public String getValveFailed() {
@@ -118,5 +123,13 @@ public class GisPipeAnalysisValvePO {
 
     public void setUpdateAt(Date updateAt) {
         this.updateAt = updateAt;
+    }
+
+    public String getValveSecond() {
+        return valveSecond;
+    }
+
+    public void setValveSecond(String valveSecond) {
+        this.valveSecond = valveSecond == null ? null : valveSecond.trim();
     }
 }

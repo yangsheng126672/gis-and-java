@@ -13,9 +13,5 @@ public interface GisPipeAnalysisValvePOMapper {
 
     List<GisPipeAnalysisValvePO> selectByPrimaryKey(Long id);
 
-    int updateByPrimaryKeySelective(GisPipeAnalysisValvePO record);
-
-    int updateByPrimaryKey(GisPipeAnalysisValvePO record);
-
     List<Long> getDevIdsByCode(List<String>list);
 }

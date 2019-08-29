@@ -603,11 +603,20 @@ public class NetsAnalysisService {
             //回填id
             Long id = gisPipeAnalysisPO.getId();
 
-            //获取关阀成功列表
-            List<String> valve = recordDTO.getValve();
-            for (String code : valve){
+            //获取一次关阀列表
+            List<String> valveFirst = recordDTO.getValveFirst();
+            for (String code : valveFirst){
                 GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
-                valvePO.setValve(code);
+                valvePO.setValveFirst(code);
+                valvePO.setRid(id);
+                //保存
+                valvePOMapper.insertSelective(valvePO);
+            }
+            //获取二次关阀列表
+            List<String> valveSecond = recordDTO.getValveSecond();
+            for (String code : valveSecond){
+                GisPipeAnalysisValvePO valvePO = new GisPipeAnalysisValvePO();
+                valvePO.setValveSecond(code);
                 valvePO.setRid(id);
                 //保存
                 valvePOMapper.insertSelective(valvePO);
@@ -625,7 +634,6 @@ public class NetsAnalysisService {
                     //保存
                     valvePOMapper.insertSelective(valvePO);
                 }
-
             }
 
         }catch (Exception e){
@@ -652,8 +660,9 @@ public class NetsAnalysisService {
      */
     public RecondValveVO getValveById(IdDTO<Long> idDTO){
         RecondValveVO valveVOS = new RecondValveVO();
-        List<NodeDTO>valves = new ArrayList<>();
-        List<NodeDTO>failedValves = new ArrayList<>();
+        List<NodeDTO>valveFirst = new ArrayList<>();
+        List<NodeDTO>valveSecond = new ArrayList<>();
+        List<NodeDTO>valveFailed = new ArrayList<>();
         Long id = idDTO.getId();
         //获取主记录爆管信息
         GisPipeAnalysisPO gisPipeAnalysisPO = gisPipeAnalysisPOMapper.selectById(id);
@@ -665,16 +674,20 @@ public class NetsAnalysisService {
         }
         List<GisPipeAnalysisValvePO> valvePOS = valvePOMapper.selectByPrimaryKey(id);
         for(GisPipeAnalysisValvePO po:valvePOS){
-            if (!StringUtils.isEmpty(po.getValve())){
-                NodeDTO node = getValveNode(po.getValve());
-                valves.add(node);
+            if (!StringUtils.isEmpty(po.getValveFirst())){
+                NodeDTO node = getValveNode(po.getValveFirst());
+                valveFirst.add(node);
             }else if(!StringUtils.isEmpty(po.getValveFailed())){
                 NodeDTO node = getValveNode(po.getValveFailed());
-                failedValves.add(node);
+                valveFailed.add(node);
+            }else if(!StringUtils.isEmpty(po.getValveSecond())){
+                NodeDTO node = getValveNode(po.getValveSecond());
+                valveSecond.add(node);
             }
         }
-        valveVOS.setValves(valves);
-        valveVOS.setFailedValves(failedValves);
+        valveVOS.setValveFailed(valveFailed);
+        valveVOS.setValveFirst(valveFirst);
+        valveVOS.setValveSecond(valveSecond);
         return valveVOS;
 
     }
