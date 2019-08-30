@@ -17,9 +17,9 @@ public class ExportValveRecondDTO {
     @ApiModelProperty("爆管点经纬度")
     Double[] point;
     @ApiModelProperty("成功阀门设备ID集合")
-    private String[] firstDevids;
+    private String[] firstDevIds;
     @ApiModelProperty("成功阀门设备ID集合")
-    private String[] secondDevids;
+    private String[] secondDevIds;
     @ApiModelProperty("失败阀门设备ID集合")
     private String[] failedDevIds;
 }
