@@ -14,6 +14,8 @@ import java.util.List;
  */
 @Data
 public class RecondValveVO {
+    @ApiModelProperty("爆管名称")
+    String name;
     @ApiModelProperty("爆管点编号")
     String code;
     @ApiModelProperty("爆管点经纬度")

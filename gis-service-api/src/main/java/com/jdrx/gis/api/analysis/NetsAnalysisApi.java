@@ -7,6 +7,7 @@ import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entry.analysis.ExportValveDTO;
+import com.jdrx.gis.beans.entry.analysis.ExportValveRecondDTO;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
@@ -93,4 +94,16 @@ public class NetsAnalysisApi {
         Logger.debug("api/0/analysis/exportAnalysisiResult 导出关阀分析结果");
         return  ResponseFactory.ok(netsAnalysisService.exportAnalysisResult(dto));
     }
+
+    @ApiOperation(value = "导出历史关阀分析结果")
+    @RequestMapping(value ="exportAnalysisiRecond" )
+    public ResposeVO exportAnalysisiRecond(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExportValveRecondDTO dto) throws Exception{
+        if (dto == null){
+            return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
+        }
+        Logger.debug("api/0/analysis/exportAnalysisiRecond 导出历史关阀分析结果");
+        return  ResponseFactory.ok(netsAnalysisService.exportAnalysisRecond(dto));
+    }
+
+
 }
