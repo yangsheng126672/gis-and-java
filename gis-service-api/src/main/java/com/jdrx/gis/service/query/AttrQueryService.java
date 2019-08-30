@@ -204,7 +204,7 @@ public class AttrQueryService {
 	 */
 	public PageVO<GISDevExtVO> findDevListPageByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
 		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByAreaOrInputVal(dto);
-		return new PageVO<>(list);
+		return new PageVO<GISDevExtVO>(list);
 	}
 
 	/**

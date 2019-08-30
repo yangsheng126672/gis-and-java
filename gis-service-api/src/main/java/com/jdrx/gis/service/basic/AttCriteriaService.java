@@ -78,7 +78,7 @@ public class AttCriteriaService {
 	 */
 	public List<GisAttrConditionRecord> findConditionRecords(CriteriaQueryDTO criteriaQueryDTO) throws BizException {
 		try {
-			return gisAttrConditionRecordMapper.findConditionRecords(criteriaQueryDTO.getTypeId(), criteriaQueryDTO.getTplId(), criteriaQueryDTO.getFieldName());
+			return gisAttrConditionRecordMapper.findConditionRecords(criteriaQueryDTO.getTypeId(), criteriaQueryDTO.getTplId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException("查询属性筛选条件记录失败！");
