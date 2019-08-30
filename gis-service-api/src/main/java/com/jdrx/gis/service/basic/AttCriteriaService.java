@@ -2,8 +2,10 @@ package com.jdrx.gis.service.basic;
 
 import com.jdrx.gis.beans.dto.basic.CriteriaDTO;
 import com.jdrx.gis.beans.dto.basic.CriteriaQueryDTO;
+import com.jdrx.gis.beans.dto.query.CriteriaWithDataTypeCategoryCodeDTO;
 import com.jdrx.gis.beans.entry.basic.GisAttrConditionRecord;
 import com.jdrx.gis.dao.basic.GisAttrConditionRecordMapper;
+import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 属性的筛选条件
@@ -36,6 +39,20 @@ public class AttCriteriaService {
 		try {
 			GisAttrConditionRecord gisAttrConditionRecord = new GisAttrConditionRecord();
 			BeanUtils.copyProperties(criteriaDTO, gisAttrConditionRecord);
+
+            List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = criteriaDTO.getCriteriaList();
+            StringBuffer sb = new StringBuffer();
+            if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
+                criteriaList.stream().forEach(cri -> {
+                    try {
+                        String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
+                        sb.append(rp);
+                    } catch (BizException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+            gisAttrConditionRecord.setCriteria(String.valueOf(sb));
 			int affectRows = gisAttrConditionRecordMapper.insertSelective(gisAttrConditionRecord);
 			if (affectRows > 0) {
 				return true;
@@ -107,5 +124,15 @@ public class AttCriteriaService {
 			Logger.error("更新ID={}的属性筛选条件记录失败！", criteriaDTO.getId());
 			throw new BizException("更新属性筛选条件记录失败！");
 		}
+	}
+
+    /**
+     *  根据主键获取查询条件
+     * @param id
+     * @return
+     * @throws BizException
+     */
+    public GisAttrConditionRecord getCriteriaByPrimaryKey(Long id) throws BizException {
+        return gisAttrConditionRecordMapper.selectByPrimaryKey(id);
 	}
 }

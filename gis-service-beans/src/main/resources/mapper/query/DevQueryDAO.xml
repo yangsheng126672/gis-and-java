@@ -201,7 +201,7 @@
                             (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
                         </if>
                     </where>
-                ) a INNER JOIN share_dev b on a.dev_id = b.id
+                ) a INNER JOIN share_dev b on a.dev_id = b.idsaveCriteriaRecord
             ) ccc left join (
                 select bcd.*,tc.name firstTypeName from (
                     select id,name,path,path[1] firstTypeId from (

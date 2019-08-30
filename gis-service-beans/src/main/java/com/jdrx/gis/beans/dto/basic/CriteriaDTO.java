@@ -2,10 +2,12 @@ package com.jdrx.gis.beans.dto.basic;
 
 import com.jdrx.gis.beans.dto.base.InsertDTO;
 import com.jdrx.gis.beans.dto.base.UpdateDTO;
+import com.jdrx.gis.beans.dto.query.CriteriaWithDataTypeCategoryCodeDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @Description: TODO
@@ -27,7 +29,7 @@ public class CriteriaDTO {
 	@NotNull(message = "模板的类型ID不能为空", groups = {InsertDTO.class})
 	private Long tplId;
 
-	@ApiModelProperty("查询条件")
-	@NotNull(message = "查询条件不能为空", groups = {InsertDTO.class})
-	private String criteria;
+	@NotNull(message = "条件集合不能为空", groups = {InsertDTO.class})
+	@ApiModelProperty("条件集合")
+	private List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList;
 }

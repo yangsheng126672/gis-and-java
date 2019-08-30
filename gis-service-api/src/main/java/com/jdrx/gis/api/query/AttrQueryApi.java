@@ -189,4 +189,9 @@ public class AttrQueryApi {
 		}
 	}
 
+    @ApiOperation(value = "根据主键获取筛选条件")
+    @RequestMapping(value = "getCriteriaByPrimaryKey")
+	public ResposeVO getCriteriaByPrimaryKey(@RequestBody @Valid IdDTO<Long> idDTO) throws BizException {
+	    return ResponseFactory.ok(attCriteriaService.getCriteriaByPrimaryKey(idDTO.getId()));
+    }
 }
