@@ -43,4 +43,7 @@ public class AttrQeuryDTO extends PageDTO {
 
 	@ApiModelProperty("条件集合")
 	private List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList;
+
+	@ApiModelProperty("拼接的可执行SQL条件")
+	private String assemblyStr;
 }

@@ -94,6 +94,9 @@
                         ${item.assemblyStr}
                     </foreach>
                 </if>
+                <if test="dto.assemblyStr != null and dto.assemblyStr != '' ">
+                    and ${dto.assemblyStr}
+                </if>
                 <if test="devIds != null and devIds != ''">
                     and EXISTS (select 1 from
                     (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
@@ -132,6 +135,9 @@
                 <foreach collection="dto.criteriaList" index="index" item="item" open=" " separator=" " close=" ">
                     ${item.assemblyStr}
                 </foreach>
+            </if>
+            <if test="dto.assemblyStr != null and dto.assemblyStr != '' ">
+                and ${dto.assemblyStr}
             </if>
             <if test="devIds != null and devIds != ''">
                 and EXISTS (select 1 from

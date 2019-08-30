@@ -9,9 +9,9 @@ public class GisAttrConditionRecord {
     private Long id;
 
     /**
-     * 名称
+     * 可执行的条件
      */
-    private String name;
+    private String criteriaExe;
 
     /**
      * 类型ID
@@ -24,7 +24,7 @@ public class GisAttrConditionRecord {
     private Long tplId;
 
     /**
-     * 筛选条件
+     * 中文表述的筛选条件
      */
     private String criteria;
 
@@ -61,12 +61,12 @@ public class GisAttrConditionRecord {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getCriteriaExe() {
+        return criteriaExe;
     }
 
-    public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+    public void setCriteriaExe(String criteriaExe) {
+        this.criteriaExe = criteriaExe == null ? null : criteriaExe.trim();
     }
 
     public Long getTypeId() {

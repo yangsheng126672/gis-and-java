@@ -32,4 +32,8 @@ public class CriteriaDTO {
 	@NotNull(message = "条件集合不能为空", groups = {InsertDTO.class})
 	@ApiModelProperty("条件集合")
 	private List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList;
+
+	@NotNull(message = "拼接的可执行SQL条件", groups = {InsertDTO.class})
+	@ApiModelProperty("拼接的可执行SQL条件")
+	private String assemblyStr;
 }

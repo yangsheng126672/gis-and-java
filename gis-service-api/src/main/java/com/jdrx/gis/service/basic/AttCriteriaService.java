@@ -46,13 +46,13 @@ public class AttCriteriaService {
                 criteriaList.stream().forEach(cri -> {
                     try {
                         String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
-                        sb.append(rp);
+                        sb.append(" " + rp);
                     } catch (BizException e) {
                         e.printStackTrace();
                     }
                 });
             }
-            gisAttrConditionRecord.setCriteria(String.valueOf(sb));
+            gisAttrConditionRecord.setCriteriaExe(String.valueOf(sb));
 			int affectRows = gisAttrConditionRecordMapper.insertSelective(gisAttrConditionRecord);
 			if (affectRows > 0) {
 				return true;
