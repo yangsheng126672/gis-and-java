@@ -53,6 +53,7 @@ public class AttCriteriaService {
                 });
             }
             gisAttrConditionRecord.setCriteriaExe(String.valueOf(sb));
+            gisAttrConditionRecord.setCriteria(criteriaDTO.getAssemblyStr());
 			int affectRows = gisAttrConditionRecordMapper.insertSelective(gisAttrConditionRecord);
 			if (affectRows > 0) {
 				return true;
