@@ -936,11 +936,11 @@ public class NetsAnalysisService {
             List<Long>faileddevIdList = new ArrayList<>() ;
             List<Long>seconddevIdList = new ArrayList<>() ;
 
-            if (!((dto.getFirstDevids() == null)||(dto.getFirstDevids().length == 0))){
-                firstdevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFirstDevids()));
+            if (!((dto.getFirstDevIds() == null)||(dto.getFirstDevIds().length == 0))){
+                firstdevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFirstDevIds()));
             }
-            if (!((dto.getSecondDevids() == null)||(dto.getSecondDevids().length == 0))){
-                seconddevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getSecondDevids()));
+            if (!((dto.getSecondDevIds() == null)||(dto.getSecondDevIds().length == 0))){
+                seconddevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getSecondDevIds()));
             }
             if (!((dto.getFailedDevIds() == null)||(dto.getFailedDevIds().length == 0))){
                 faileddevIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFailedDevIds())) ;
