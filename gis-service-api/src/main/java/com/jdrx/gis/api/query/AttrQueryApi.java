@@ -120,7 +120,7 @@ public class AttrQueryApi {
 		if (Objects.isNull(dto)) {
 			throw new BizException("参数为空");
 		}
-		return ResponseFactory.ok(attrQueryService.findDevListPageByAreaOrInputVal(dto));
+		return ResponseFactory.ok(attrQueryService.findDevListByAreaOrInputVal(dto));
 	}
 
 	@ApiOperation(value = "根据管径范围值获取对应的图层url")

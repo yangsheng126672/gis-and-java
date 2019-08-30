@@ -164,7 +164,7 @@ public class AttrQueryService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<GISDevExtVO> findDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
+	public PageVO<GISDevExtVO> findDevListByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
 		try {
 			Long start = System.currentTimeMillis();
 			String devStr = null;
@@ -185,10 +185,10 @@ public class AttrQueryService {
 					}
 				});
 			}
-			List<GISDevExtVO> list = gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
+            Page<GISDevExtVO> list = (Page<GISDevExtVO>) gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
 			Long end = System.currentTimeMillis();
 			Logger.debug("数据库耗时： " + (end - start) + " ms");
-			return list;
+			return new PageVO<GISDevExtVO>(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error("据所选区域或属性键入的参数值查设备列表信息失败，{}", dto.toString());
@@ -202,10 +202,10 @@ public class AttrQueryService {
 	 * @return
 	 * @throws BizException
 	 */
-	public PageVO<GISDevExtVO> findDevListPageByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
-		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByAreaOrInputVal(dto);
-		return new PageVO<GISDevExtVO>(list);
-	}
+//	public PageVO<GISDevExtVO> findDevListPageByAreaOrInputVal(AttrQeuryDTO dto) throws BizException {
+//		Page<GISDevExtVO> list = (Page<GISDevExtVO>) findDevListByAreaOrInputVal(dto);
+//		return new PageVO<GISDevExtVO>(list);
+//	}
 
 	/**
 	 * 导出根据所选区域或属性键入的参数值所查询设备列表信息
