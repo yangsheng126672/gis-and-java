@@ -19,13 +19,11 @@ public interface GisAttrConditionRecordMapper {
 
     int updateByPrimaryKey(GisAttrConditionRecord record);
 
-	/**
-	 * 查属性查询的筛选条件记录
-	 * @param typeId
-	 * @param tplId
-	 * @param fieldName
-	 * @return
-	 */
-	List<GisAttrConditionRecord> findConditionRecords(@Param("typeId") Long typeId, @Param("tplId") Long tplId, @Param("fieldName") String fieldName);
-
+    /**
+     * 查属性查询的筛选条件记录
+     * @param typeId
+     * @param tplId
+     * @return
+     */
+    List<GisAttrConditionRecord> findConditionRecords(@Param("typeId") Long typeId, @Param("tplId") Long tplId);
 }

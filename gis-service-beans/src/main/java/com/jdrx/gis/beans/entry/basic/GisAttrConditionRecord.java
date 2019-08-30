@@ -24,11 +24,6 @@ public class GisAttrConditionRecord {
     private Long tplId;
 
     /**
-     * 字段英文名称
-     */
-    private String fieldName;
-
-    /**
      * 筛选条件
      */
     private String criteria;
@@ -88,14 +83,6 @@ public class GisAttrConditionRecord {
 
     public void setTplId(Long tplId) {
         this.tplId = tplId;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName == null ? null : fieldName.trim();
     }
 
     public String getCriteria() {

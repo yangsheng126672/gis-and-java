@@ -21,8 +21,4 @@ public class CriteriaQueryDTO {
 	@NotNull(message = "模板的类型ID不能为空")
 	private Long tplId;
 
-	@ApiModelProperty("字段名称")
-	@NotNull(message = "字段名称不能为空")
-	private String fieldName;
-
 }
