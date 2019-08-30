@@ -27,10 +27,6 @@ public class CriteriaDTO {
 	@NotNull(message = "模板的类型ID不能为空", groups = {InsertDTO.class})
 	private Long tplId;
 
-	@ApiModelProperty("字段名称")
-	@NotNull(message = "字段名称不能为空", groups = {InsertDTO.class})
-	private String fieldName;
-
 	@ApiModelProperty("查询条件")
 	@NotNull(message = "查询条件不能为空", groups = {InsertDTO.class})
 	private String criteria;
