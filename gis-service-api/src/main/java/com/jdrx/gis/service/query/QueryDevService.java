@@ -169,8 +169,10 @@ public class QueryDevService {
 						Collections.swap(list, i, 0);
 						continue;
 					}
-					if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
-						Collections.swap(list, i, 1);
+					if (list.size() > 1) {
+						if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+							Collections.swap(list, i, 1);
+						}
 					}
 				}
 			}

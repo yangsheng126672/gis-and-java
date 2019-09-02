@@ -245,7 +245,7 @@ public class AttrQueryService {
 			}
 			String devStr = null;
 			Long[] devIds = dto.getDevIds();
-			List<Long> ids = Arrays.asList(devIds);
+			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
