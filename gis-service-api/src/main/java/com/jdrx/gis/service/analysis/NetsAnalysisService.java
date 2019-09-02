@@ -988,7 +988,7 @@ public class NetsAnalysisService {
                 cell1.setCellValue("爆管点经纬度： "+dto.getPoint()[0]+" , "+dto.getPoint()[1]+" ; 爆管编号："+dto.getLineId());
                 cell1.setCellStyle(style3);
 
-                if ((Objects.nonNull(firstList)) && (failedList.size()>0)) {
+                if ((Objects.nonNull(firstList)) && (firstList.size()>0)) {
                     firstList.stream().map(vo -> {
                         Object obj = vo.getDataInfo();
                         if (Objects.isNull(obj)) {
