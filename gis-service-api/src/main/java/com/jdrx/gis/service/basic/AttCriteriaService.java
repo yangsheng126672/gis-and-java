@@ -52,6 +52,9 @@ public class AttCriteriaService {
                     }
                 });
             }
+            if (String.valueOf(sb).length() > 512) {
+            	throw new BizException("保存属性查询的筛选条件失败: 条件的值超过数据库的长度！");
+            }
             gisAttrConditionRecord.setCriteriaExe(String.valueOf(sb));
             gisAttrConditionRecord.setCriteria(criteriaDTO.getAssemblyStr());
 			int affectRows = gisAttrConditionRecordMapper.insertSelective(gisAttrConditionRecord);
