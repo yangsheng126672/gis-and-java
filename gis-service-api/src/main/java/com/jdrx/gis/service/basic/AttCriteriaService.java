@@ -40,31 +40,36 @@ public class AttCriteriaService {
 			GisAttrConditionRecord gisAttrConditionRecord = new GisAttrConditionRecord();
 			BeanUtils.copyProperties(criteriaDTO, gisAttrConditionRecord);
 
-            List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = criteriaDTO.getCriteriaList();
-            StringBuffer sb = new StringBuffer();
-            if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
-                criteriaList.stream().forEach(cri -> {
-                    try {
-                        String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
-                        sb.append(" " + rp);
-                    } catch (BizException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-            if (String.valueOf(sb).length() > 512) {
-            	throw new BizException("保存属性查询的筛选条件失败: 条件的值超过数据库的长度！");
-            }
-            gisAttrConditionRecord.setCriteriaExe(String.valueOf(sb));
-            gisAttrConditionRecord.setCriteria(criteriaDTO.getAssemblyStr());
+			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = criteriaDTO.getCriteriaList();
+			StringBuffer sb = new StringBuffer();
+			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
+				criteriaList.stream().forEach(cri -> {
+					try {
+						String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
+						sb.append(" " + rp);
+					} catch (BizException e) {
+						e.printStackTrace();
+					}
+				});
+			}
+			if (String.valueOf(sb).length() > 512) {
+				throw new BizException("保存属性查询的筛选条件失败: 条件的值超过数据库的长度！");
+			}
+			gisAttrConditionRecord.setCriteriaExe(String.valueOf(sb));
+			gisAttrConditionRecord.setCriteria(criteriaDTO.getAssemblyStr());
 			int affectRows = gisAttrConditionRecordMapper.insertSelective(gisAttrConditionRecord);
 			if (affectRows > 0) {
 				return true;
 			} else {
 				return false;
 			}
+		} catch (BizException e) {
+			e.printStackTrace();
+			Logger.error("保存属性查询的筛选条件失败！", e);
+			throw new BizException(e);
 		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.error("保存属性查询的筛选条件失败！", e);
 			throw new BizException("保存属性查询的筛选条件失败！");
 		}
 
