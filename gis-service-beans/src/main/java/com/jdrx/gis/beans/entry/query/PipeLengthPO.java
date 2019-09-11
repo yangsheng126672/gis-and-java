@@ -13,7 +13,7 @@ import lombok.ToString;
 public class PipeLengthPO {
 
 	/** 总长度 */
-	private Integer totalLength;
+	private Double totalLength;
 
 	/** 日期 */
 	private String calDate;
