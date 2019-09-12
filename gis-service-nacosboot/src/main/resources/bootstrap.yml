@@ -4,7 +4,7 @@ spring:
   cloud:
     nacos:
       config:
-        server-addr: 192.168.40.250:8848,192.168.40.251:8848,192.168.40.252:8848
+        server-addr: ms-cc-00:8848
         file-extension: properties
         group: sw-biz
   profiles:
