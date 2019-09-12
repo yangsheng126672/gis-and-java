@@ -425,22 +425,32 @@ public class AttrQueryService {
 	 * @param dto
 	 * @return
 	 */
-	public Boolean validateCriteria(AttrQeuryDTO dto){
+	public Boolean validateCriteria(AttrQeuryDTO dto) throws BizException{
 		try {
 			PageHelper.startPage(1, 10, null);
 			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = dto.getCriteriaList();
+			StringBuffer sb = new StringBuffer();
 			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
 				criteriaList.stream().forEach(cri -> {
 					try {
 						String rp = ComUtil.processAttrField(cri.getFieldName(), cri.getCriteria(), cri.getDataTypeCategoryCode());
 						cri.setAssemblyStr(rp);
+						sb.append(" " + rp);
 					} catch (BizException e) {
 						e.printStackTrace();
 					}
 				});
 			}
+
+			if (String.valueOf(sb).length() > 512) {
+				throw new BizException("保存属性查询的筛选条件失败: 条件的值超过数据库的长度！");
+			}
+
 			gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, null);
 			return true;
+		} catch (BizException e) {
+			e.printStackTrace();
+			throw new BizException(e);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
