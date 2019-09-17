@@ -722,7 +722,7 @@ public class NetsAnalysisService {
             tmpVO.setFieldDesc("阀门状态");
             tmpVO.setFieldName("fmstatu");
             headerList.add(tmpVO);
-            headerList.addAll(queryDevService.findFieldNamesByTypeID(19L));
+            headerList.addAll(queryDevService.findFieldNamesByTypeID(5L));
             if (Objects.isNull(headerList)) {
                 Logger.error("空间查询的表头信息为空");
                 throw new BizException("设备列表的title为空");
@@ -752,7 +752,7 @@ public class NetsAnalysisService {
             while (pageTotal-- > 0) {
                 DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
                 DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
-                devIDsForTypeDTO.setTypeId(19L);
+                devIDsForTypeDTO.setTypeId(5L);
                 devIDsForTypeDTO.setDevIds(devIdList.toArray(new Long[devIdList.size()]));
                 devIDsForTypeDTO.setPageSize(pageSize);
                 devIDsForTypeDTO.setPageNum(pageNum);
@@ -761,7 +761,7 @@ public class NetsAnalysisService {
 
                 List<SpaceInfoVO> subDevList2 = new ArrayList<>();
                 if (faileddevIdList != null){
-                    devIDsForTypeDTO2.setTypeId(19L);
+                    devIDsForTypeDTO2.setTypeId(5L);
                     devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
                     devIDsForTypeDTO2.setPageSize(pageSize);
                     devIDsForTypeDTO2.setPageNum(pageNum);
@@ -914,7 +914,7 @@ public class NetsAnalysisService {
             tmpVO.setFieldDesc("阀门状态");
             tmpVO.setFieldName("fmstatu");
             headerList.add(tmpVO);
-            headerList.addAll(queryDevService.findFieldNamesByTypeID(19L));
+            headerList.addAll(queryDevService.findFieldNamesByTypeID(5L));
             if (Objects.isNull(headerList)) {
                 Logger.error("空间查询的表头信息为空");
                 throw new BizException("设备列表的title为空");
@@ -958,7 +958,7 @@ public class NetsAnalysisService {
                 List<SpaceInfoVO> secondList = new ArrayList<>();
 
                 if ((firstdevIdList != null) && (firstdevIdList.size()>0)){
-                    devIDsFirst.setTypeId(19L);
+                    devIDsFirst.setTypeId(5L);
                     devIDsFirst.setDevIds(firstdevIdList.toArray(new Long[firstdevIdList.size()]));
                     devIDsFirst.setPageSize(pageSize);
                     devIDsFirst.setPageNum(pageNum);
@@ -966,7 +966,7 @@ public class NetsAnalysisService {
                     firstList = firstPageVO.getData();
                 }
                 if ((seconddevIdList != null) && (seconddevIdList.size()>0)){
-                    devIDsSecond.setTypeId(19L);
+                    devIDsSecond.setTypeId(5L);
                     devIDsSecond.setDevIds(seconddevIdList.toArray(new Long[seconddevIdList.size()]));
                     devIDsSecond.setPageSize(pageSize);
                     devIDsSecond.setPageNum(pageNum);
@@ -974,7 +974,7 @@ public class NetsAnalysisService {
                     secondList = secondPageVO.getData();
                 }
                 if ((faileddevIdList != null) && (faileddevIdList.size()>0)){
-                    devIDsFailed.setTypeId(19L);
+                    devIDsFailed.setTypeId(5L);
                     devIDsFailed.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
                     devIDsFailed.setPageSize(pageSize);
                     devIDsFailed.setPageNum(pageNum);
