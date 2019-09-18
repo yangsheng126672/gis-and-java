@@ -12,17 +12,20 @@ import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entry.analysis.*;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
+import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
 import com.jdrx.gis.beans.vo.analysis.RecondValveVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.beans.vo.query.SpaceInfoVO;
+import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisPOMapper;
 import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
 import com.jdrx.gis.dao.analysis.GisWaterUserInfoPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
@@ -99,11 +102,13 @@ public class NetsAnalysisService {
     private DevQueryDAO devQueryDAO;
     @Autowired
     private PathConfig pathConfig;
+    @Autowired
+    private DictConfig dictConfig;
+
+    @Autowired
+    private DictDetailService detailService;
 
 
-
-//    @Autowired
-//    private Connection connection;
     //逻辑管点标签
     final private String ljgdLable = "ljgd";
     //管点标签
@@ -430,7 +435,7 @@ public class NetsAnalysisService {
      * @param lineID
      * @param dtoList
      */
-    public List<Long> findInfluenceArea(Long lineID,List<NodeDTO>dtoList) throws Exception{
+    public String findInfluenceArea(Long lineID,List<NodeDTO>dtoList) throws Exception{
         if (dtoList == null){
             return null;
         }
@@ -481,7 +486,15 @@ public class NetsAnalysisService {
             }
         }
         System.out.println("影响区域范围：total = "+influenceLines.size()+","+influenceLines.toString());
-        return influenceLines;
+        Long[] devIds = influenceLines.toArray(new Long[influenceLines.size()]);
+
+        String devStr = null;
+        List<Long> ids = null;
+        if (Objects.nonNull(devIds) && devIds.length > 0) {
+            ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+            devStr = Joiner.on(",").join(ids);
+        }
+        return devStr;
 
     }
 
@@ -502,18 +515,20 @@ public class NetsAnalysisService {
      * @throws Exception
      */
     public AnalysisResultVO getAnalysisResult(IdDTO<Long> dto) throws Exception{
+        //获取管网坐标系srid
+        String srid = getValByDictString(dictConfig.getWATER_PIPE_SRID());
         AnalysisResultVO analysisResultVO = new AnalysisResultVO();
         //获取所有阀门列表
         List<NodeDTO> fmlist_all = findAllFamens(dto.getId());
         //获取必须关闭的阀门
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
-        List<Long>idList = findInfluenceArea(dto.getId(),fmlist_final);
-        if (idList == null){
+        String devIds = findInfluenceArea(dto.getId(),fmlist_final);
+        if (devIds == null){
             return analysisResultVO;
         }
         if (fmlist_final != null){
             analysisResultVO.setFmlist(fmlist_final);
-            String geom = measurementPOMapper.getExtendArea(idList);
+            String geom = gisPipeAnalysisPOMapper.getExtendArea(devIds,srid);
             analysisResultVO.setGeom(geom);
         }
         List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
@@ -528,6 +543,8 @@ public class NetsAnalysisService {
      * @return
      */
     public AnalysisResultVO getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
+        //获取管网坐标系srid
+        String srid = getValByDictString(dictConfig.getWATER_PIPE_SRID());
         AnalysisResultVO vo = new AnalysisResultVO();
         List<String>dtoList = secondAnalysisDTO.getFealtureList();
         List<String>fmList = new ArrayList<>();
@@ -564,9 +581,9 @@ public class NetsAnalysisService {
           }
           fmlist_all.addAll(resultDtoList);
            //获取影响区域范围
-           List<Long> ids = findInfluenceArea(dev_id,fmlist_all);
-           if (ids !=null){
-               String area = measurementPOMapper.getExtendArea(ids);
+           String devIds = findInfluenceArea(dev_id,fmlist_all);
+           if (devIds != null){
+               String area = gisPipeAnalysisPOMapper.getExtendArea(devIds,srid);
                vo.setGeom(area);
            }
            //添加影响用户
@@ -697,9 +714,12 @@ public class NetsAnalysisService {
      * @throws BizException
      */
     public String exportAnalysisResult(ExportValveDTO dto) throws BizException{
+        Long valve_typeid = -1L;
         OutputStream os = null;
         String title = null;
         try {
+            String typeIdDictStr =dictConfig.getVALVE_TYPE_ID();
+            valve_typeid = Long.valueOf(getValByDictString(typeIdDictStr));
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
             if (dto.getName() == null || StringUtils.isEmpty(dto.getName())){
@@ -722,7 +742,7 @@ public class NetsAnalysisService {
             tmpVO.setFieldDesc("阀门状态");
             tmpVO.setFieldName("fmstatu");
             headerList.add(tmpVO);
-            headerList.addAll(queryDevService.findFieldNamesByTypeID(5L));
+            headerList.addAll(queryDevService.findFieldNamesByTypeID(valve_typeid));
             if (Objects.isNull(headerList)) {
                 Logger.error("空间查询的表头信息为空");
                 throw new BizException("设备列表的title为空");
@@ -752,7 +772,7 @@ public class NetsAnalysisService {
             while (pageTotal-- > 0) {
                 DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
                 DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
-                devIDsForTypeDTO.setTypeId(5L);
+                devIDsForTypeDTO.setTypeId(valve_typeid);
                 devIDsForTypeDTO.setDevIds(devIdList.toArray(new Long[devIdList.size()]));
                 devIDsForTypeDTO.setPageSize(pageSize);
                 devIDsForTypeDTO.setPageNum(pageNum);
@@ -761,7 +781,7 @@ public class NetsAnalysisService {
 
                 List<SpaceInfoVO> subDevList2 = new ArrayList<>();
                 if (faileddevIdList != null){
-                    devIDsForTypeDTO2.setTypeId(5L);
+                    devIDsForTypeDTO2.setTypeId(valve_typeid);
                     devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
                     devIDsForTypeDTO2.setPageSize(pageSize);
                     devIDsForTypeDTO2.setPageNum(pageNum);
@@ -889,9 +909,12 @@ public class NetsAnalysisService {
      * @throws BizException
      */
     public String exportAnalysisRecond(ExportValveRecondDTO dto) throws BizException{
+        Long valve_typeid = -1L;
         OutputStream os = null;
         String title = null;
         try {
+            String typeIdDictStr =dictConfig.getVALVE_TYPE_ID();
+            valve_typeid = Long.valueOf(getValByDictString(typeIdDictStr));
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
             if (dto.getName() == null || StringUtils.isEmpty(dto.getName())){
@@ -914,7 +937,7 @@ public class NetsAnalysisService {
             tmpVO.setFieldDesc("阀门状态");
             tmpVO.setFieldName("fmstatu");
             headerList.add(tmpVO);
-            headerList.addAll(queryDevService.findFieldNamesByTypeID(5L));
+            headerList.addAll(queryDevService.findFieldNamesByTypeID(valve_typeid));
             if (Objects.isNull(headerList)) {
                 Logger.error("空间查询的表头信息为空");
                 throw new BizException("设备列表的title为空");
@@ -958,7 +981,7 @@ public class NetsAnalysisService {
                 List<SpaceInfoVO> secondList = new ArrayList<>();
 
                 if ((firstdevIdList != null) && (firstdevIdList.size()>0)){
-                    devIDsFirst.setTypeId(5L);
+                    devIDsFirst.setTypeId(valve_typeid);
                     devIDsFirst.setDevIds(firstdevIdList.toArray(new Long[firstdevIdList.size()]));
                     devIDsFirst.setPageSize(pageSize);
                     devIDsFirst.setPageNum(pageNum);
@@ -966,7 +989,7 @@ public class NetsAnalysisService {
                     firstList = firstPageVO.getData();
                 }
                 if ((seconddevIdList != null) && (seconddevIdList.size()>0)){
-                    devIDsSecond.setTypeId(5L);
+                    devIDsSecond.setTypeId(valve_typeid);
                     devIDsSecond.setDevIds(seconddevIdList.toArray(new Long[seconddevIdList.size()]));
                     devIDsSecond.setPageSize(pageSize);
                     devIDsSecond.setPageNum(pageNum);
@@ -974,7 +997,7 @@ public class NetsAnalysisService {
                     secondList = secondPageVO.getData();
                 }
                 if ((faileddevIdList != null) && (faileddevIdList.size()>0)){
-                    devIDsFailed.setTypeId(5L);
+                    devIDsFailed.setTypeId(valve_typeid);
                     devIDsFailed.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
                     devIDsFailed.setPageSize(pageSize);
                     devIDsFailed.setPageNum(pageNum);
@@ -1139,6 +1162,27 @@ public class NetsAnalysisService {
             }
         }
 
+    }
+
+    /**
+     * 根据数据字典获取内容
+     * @param dictStr
+     * @return
+     */
+    public String getValByDictString(String dictStr){
+        if (StringUtils.isEmpty(dictStr)){
+            return null;
+        }
+        String caliberLyerUrl = null;
+        try {
+            List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(dictStr);
+            for (DictDetailPO dictDetail:detailPOs){
+                caliberLyerUrl = dictDetail.getVal();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return caliberLyerUrl;
     }
 
 

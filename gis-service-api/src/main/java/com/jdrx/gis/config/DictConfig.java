@@ -34,4 +34,11 @@ public class DictConfig {
 
 	/** 巡检系统图层资源URL */
 	private String xjSourceUrl;
+
+	/** 管网数据坐标系编号 */
+	private String WATER_PIPE_SRID;
+
+	/** 阀门类型ID */
+	private String VALVE_TYPE_ID;
+
 }

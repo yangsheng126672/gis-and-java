@@ -15,4 +15,12 @@ public interface GisPipeAnalysisPOMapper {
 
     List<GisPipeAnalysisPO> selectByParamas(@Param("dto") RecondParamasDTO recondDTO);
 
+    /**
+     * 获取外接多边形
+     * @param devIds
+     * @param srid
+     * @return
+     */
+    String getExtendArea(@Param("devIds") String devIds,@Param("srid") String srid);
+
 }

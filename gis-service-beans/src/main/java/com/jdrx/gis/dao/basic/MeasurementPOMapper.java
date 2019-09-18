@@ -27,11 +27,4 @@ public interface MeasurementPOMapper {
      */
     int insertSelective(MeasurementDTO record);
 
-    /**
-     * 获取外接多边形
-     * @param list
-     * @return
-     */
-    String getExtendArea(List<Long>list);
-
 }

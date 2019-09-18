@@ -168,4 +168,12 @@
     </if>
 
   </select>
+
+  <select id="getExtendArea"  resultType="java.lang.String">
+    SELECT ST_AsText(ST_Transform(ST_GeomFromText(
+    (select st_Astext(ST_ConvexHull(ST_Union(geom))) from gis_dev_ext where dev_id in (
+    ${devIds}
+    ))
+    ,${srid}),4326)) As wgs_geom;
+  </select>
 </mapper>
