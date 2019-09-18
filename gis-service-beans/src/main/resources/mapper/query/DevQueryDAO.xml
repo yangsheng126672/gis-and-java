@@ -155,7 +155,7 @@
                             WHERE ID = #{id,jdbcType=BIGINT}
                             AND del_flag = 0
                             UNION ALL
-                            SELECT b.*  FROM share_dev_type b, A  WHERE A.ID = b.p_id
+                            SELECT b.*  FROM share_dev_type b, A  WHERE A.P_ID = b.id
                             AND b.del_flag = 0
                             ) SELECT ID FROM A
                         )

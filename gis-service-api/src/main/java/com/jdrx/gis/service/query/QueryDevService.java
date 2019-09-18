@@ -104,7 +104,7 @@ public class QueryDevService {
 			Collections.sort(list, new Comparator<SpaceInfTotalPO>() {
 				@Override
 				public int compare(SpaceInfTotalPO o1, SpaceInfTotalPO o2) {
-					if(o1.getCoverageName().equalsIgnoreCase("其他")){
+					if(o1.getCoverageName().equalsIgnoreCase(GISConstants.OTHER_NAME)){
 						return 1;
 					}else {
 						return -1;
