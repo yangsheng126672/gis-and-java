@@ -117,7 +117,7 @@ public class NetsAnalysisService {
     final private String gdlineLable = "gdline";
     //逻辑管线标签
     final private String ljgdlineLable = "ljgdline";
-    //节点类型  1位阀门
+    //节点类型  0普通节点  1阀门节点  2水源节点
     final private String fmType = "1";
 
     /**

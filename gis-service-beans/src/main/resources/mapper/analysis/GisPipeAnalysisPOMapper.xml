@@ -158,13 +158,17 @@
     WHERE delete_flag = FALSE
     <if test="dto.code != null and dto.code != ''">
       AND
-      (code = #{dto.code}
+      code like   '%${dto.code}%'
       OR
-      name = #{dto.code})
+      name like  '%${dto.code}%'
     </if>
-    <if test="dto.datetime != null " >
+    <if test="dto.startTime != null ">
       AND
-      to_date(create_at :: text,'YYYY-MM-DD')= to_date(#{dto.datetime} :: text,'YYYY-MM-DD')
+      to_date(create_at :: text,'YYYY-MM-DD') &gt; to_date(#{dto.startTime} :: text,'YYYY-MM-DD')
+    </if>
+    <if test="dto.endTime != null ">
+      AND
+      to_date(create_at :: text,'YYYY-MM-DD') &lt; to_date(#{dto.endTime} :: text,'YYYY-MM-DD')
     </if>
 
   </select>

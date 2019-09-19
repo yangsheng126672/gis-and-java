@@ -17,6 +17,8 @@ import java.util.Date;
 public class RecondParamasDTO extends PageDTO{
     @ApiModelProperty("爆管点编号")
     String code;
-    @ApiModelProperty("爆管时间")
-    Date datetime;
+    @ApiModelProperty("开始时间")
+    Date startTime;
+    @ApiModelProperty("结束时间")
+    Date endTime;
 }
