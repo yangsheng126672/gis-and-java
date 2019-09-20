@@ -10,6 +10,7 @@ import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
@@ -319,24 +320,37 @@ public class BasicDevQuery {
 
 
 	/**
-	 * 获取默认隐藏加载的图层及CAD图层
+	 * 获取默认地图相关配置
 	 * @return
 	 */
-	public List<Map<String,String>>getDefaultLayers(){
+	public DefaultLayersVO getDefaultLayers(){
+		DefaultLayersVO vo = new DefaultLayersVO();
 		String layerUrl = null;
 		List<Map<String,String>>mapList = new ArrayList<>();
+		Map<String,String> map = new HashMap<>();
 		try {
 			layerUrl = dictConfig.getDefaultLayerUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
-				Map<String,String> map = new HashMap<>();
 				map.put(dictDetail.getName(),dictDetail.getVal());
-				mapList.add(map);
+				if (dictDetail.getName().equals("cad")){
+					vo.setCad(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("point")){
+					vo.setPoint(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("line")){
+					vo.setLine(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("x")){
+					vo.setX(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("y")){
+					vo.setY(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("title")){
+					vo.setTitle(dictDetail.getVal());
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return mapList;
+		return vo;
 	}
 
 
