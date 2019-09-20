@@ -516,7 +516,7 @@ public class NetsAnalysisService {
      */
     public AnalysisResultVO getAnalysisResult(IdDTO<Long> dto) throws Exception{
         //获取管网坐标系srid
-        String srid = getValByDictString(dictConfig.getWATER_PIPE_SRID());
+        String srid = getValByDictString(dictConfig.getWaterPipeSrid());
         AnalysisResultVO analysisResultVO = new AnalysisResultVO();
         //获取所有阀门列表
         List<NodeDTO> fmlist_all = findAllFamens(dto.getId());
@@ -544,7 +544,7 @@ public class NetsAnalysisService {
      */
     public AnalysisResultVO getSecondAnalysisResult(SecondAnalysisDTO secondAnalysisDTO) throws BizException {
         //获取管网坐标系srid
-        String srid = getValByDictString(dictConfig.getWATER_PIPE_SRID());
+        String srid = getValByDictString(dictConfig.getWaterPipeSrid());
         AnalysisResultVO vo = new AnalysisResultVO();
         List<String>dtoList = secondAnalysisDTO.getFealtureList();
         List<String>fmList = new ArrayList<>();
@@ -718,7 +718,7 @@ public class NetsAnalysisService {
         OutputStream os = null;
         String title = null;
         try {
-            String typeIdDictStr =dictConfig.getVALVE_TYPE_ID();
+            String typeIdDictStr =dictConfig.getValveTypeId();
             valve_typeid = Long.valueOf(getValByDictString(typeIdDictStr));
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
@@ -913,7 +913,7 @@ public class NetsAnalysisService {
         OutputStream os = null;
         String title = null;
         try {
-            String typeIdDictStr =dictConfig.getVALVE_TYPE_ID();
+            String typeIdDictStr =dictConfig.getValveTypeId();
             valve_typeid = Long.valueOf(getValByDictString(typeIdDictStr));
             SXSSFWorkbook workbook;
             workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘

@@ -36,9 +36,18 @@ public class DictConfig {
 	private String xjSourceUrl;
 
 	/** 管网数据坐标系编号 */
-	private String WATER_PIPE_SRID;
+	private String waterPipeSrid;
 
 	/** 阀门类型ID */
-	private String VALVE_TYPE_ID;
+	private String valveTypeId;
+
+	/** 地图中心点 */
+	private String mapCenterVal;
+
+	/** 默认隐藏加载图层 */
+	private String defaultLayerUrl;
+
+	/** 项目名称 */
+	private String projectName;
 
 }

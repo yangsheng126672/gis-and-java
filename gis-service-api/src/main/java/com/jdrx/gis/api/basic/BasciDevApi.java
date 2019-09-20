@@ -107,5 +107,27 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getXjLayerSourceUrl());
 	}
 
+	@ApiOperation(value = "获取地图中心点位置")
+	@RequestMapping(value = "getMapCenter")
+	public ResposeVO getMapCenter() throws BizException{
+		Logger.debug("api/0/basic/getMapCenter获取地图中心点位置");
+		return ResponseFactory.ok(basicDevQuery.getMapCenterVal());
+	}
+
+	@ApiOperation(value = "获取默认隐藏加载的图层及CAD图层")
+	@RequestMapping(value = "getDefaultLayers")
+	public ResposeVO getDefaultLayers() throws BizException{
+		Logger.debug("api/0/basic/getDefaultLayers获取默认隐藏加载的图层及CAD图层");
+		return ResponseFactory.ok(basicDevQuery.getDefaultLayers());
+	}
+
+	@ApiOperation(value = "获取项目名称")
+	@RequestMapping(value = "getProjName")
+	public ResposeVO getProjName() throws BizException{
+		Logger.debug("api/0/basic/getProjName获取项目名称");
+		return ResponseFactory.ok(basicDevQuery.getProjNameVal());
+	}
+
+
 
 }
