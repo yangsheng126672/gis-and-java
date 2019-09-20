@@ -41,4 +41,14 @@ public class DefaultLayersVO {
      */
     String y;
 
+    /**
+     * 地图范围
+     */
+    String extent;
+
+    /**
+     * 地图分辨率
+     */
+    String resolutions;
+
 }

@@ -326,7 +326,6 @@ public class BasicDevQuery {
 	public DefaultLayersVO getDefaultLayers(){
 		DefaultLayersVO vo = new DefaultLayersVO();
 		String layerUrl = null;
-		List<Map<String,String>>mapList = new ArrayList<>();
 		Map<String,String> map = new HashMap<>();
 		try {
 			layerUrl = dictConfig.getDefaultLayerUrl();
@@ -345,6 +344,10 @@ public class BasicDevQuery {
 					vo.setY(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("title")){
 					vo.setTitle(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("extent")){
+					vo.setExtent(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("resolutions")){
+					vo.setResolutions(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {
