@@ -18,4 +18,7 @@ public class FieldNameVO {
 
 	/** 数据类型分类 */
 	private String dataType;
+
+	/** 展示单个设备数据时，把展示的字段排序，增加排序序号 */
+	private Short idx;
 }

@@ -31,6 +31,7 @@
     <resultMap id="BaseResultMap4" type="com.jdrx.gis.beans.vo.query.FieldNameVO">
         <result column="fieldDesc" jdbcType="VARCHAR" property="fieldDesc"/>
         <result column="fieldName" jdbcType="VARCHAR" property="fieldName"/>
+        <result column="idx" jdbcType="SMALLINT" property="idx"/>
     </resultMap>
 
     <resultMap id="BaseResultMap5" type="com.jdrx.gis.beans.vo.query.SonsNumVO">
@@ -220,7 +221,8 @@
     <select id="findFieldNamesByDevID" parameterType="java.lang.Long" resultMap="BaseResultMap4">
         SELECT
             field_name AS fieldName,
-            field_desc AS fieldDesc
+            field_desc AS fieldDesc,
+            idx
         FROM gis_dev_tpl_attr
         WHERE type_id = (
             SELECT tpl_type_id
