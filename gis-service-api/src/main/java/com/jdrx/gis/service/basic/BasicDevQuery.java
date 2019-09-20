@@ -317,27 +317,6 @@ public class BasicDevQuery {
 		return mapList;
 	}
 
-	/**
-	 * get map center
-	 * @return
-	 */
-	public Double[] getMapCenterVal(){
-		Double[] point = new Double[2];
-		try {
-			String dictType = dictConfig.getMapCenterVal();
-			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(dictType);
-			for (DictDetailPO dictDetail:detailPOs){
-				//106.23,23.11 格式
-				String val = dictDetail.getVal();
-				String[] strings = val.split(",");
-				point[0] = Double.valueOf(strings[0].trim());
-				point[1] = Double.valueOf(strings[1].trim());
-			}
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		return point;
-	}
 
 	/**
 	 * 获取默认隐藏加载的图层及CAD图层
@@ -360,22 +339,6 @@ public class BasicDevQuery {
 		return mapList;
 	}
 
-	/**
-	 * 获取项目名称
-	 * @return
-	 */
-	public String getProjNameVal(){
-		String projectName = null;
-		try {
-			String dictType = dictConfig.getProjectName();
-			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(dictType);
-			for (DictDetailPO dictDetail:detailPOs){
-				projectName = dictDetail.getVal();
-			}
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		return projectName;
-	}
+
 
 }
