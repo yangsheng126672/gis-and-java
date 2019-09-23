@@ -11,6 +11,7 @@ import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
+import com.jdrx.gis.beans.vo.basic.InspectionVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
@@ -301,21 +302,33 @@ public class BasicDevQuery {
 	 * 获取巡检系统所需图层url
 	 * @return
 	 */
-	public List<Map<String,String>>getXjLayerSourceUrl(){
+	public InspectionVO getXjLayerSourceUrl(){
+		InspectionVO vo = new InspectionVO();
 		String layerUrl = null;
-		List<Map<String,String>>mapList = new ArrayList<>();
+		Map<String,String> map = new HashMap<>();
 		try {
 			layerUrl = dictConfig.getXjSourceUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
-				Map<String,String> map = new HashMap<>();
 				map.put(dictDetail.getName(),dictDetail.getVal());
-				mapList.add(map);
+				if (dictDetail.getName().equals("wms")){
+					vo.setWms(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("point")){
+					vo.setPoint(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("line")){
+					vo.setLine(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("x")){
+					vo.setX(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("y")){
+					vo.setY(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("title")){
+					vo.setTitle(dictDetail.getVal());
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return mapList;
+		return vo;
 	}
 
 
