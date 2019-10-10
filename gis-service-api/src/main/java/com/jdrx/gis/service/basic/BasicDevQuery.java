@@ -11,6 +11,7 @@ import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
+import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.InspectionVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
@@ -361,12 +362,30 @@ public class BasicDevQuery {
 					vo.setExtent(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("resolutions")){
 					vo.setResolutions(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("logo")){
+					vo.setLogo(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("favicon")){
+					vo.setFavicon(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return vo;
+	}
+
+	/**
+	 * 根据关键字搜索设备
+	 * @param val
+	 */
+	public List<FeatureVO> getFeaturesByString(String val)throws BizException{
+		List<FeatureVO> list = new ArrayList<>();
+		try {
+			list = gisDevExtPOMapper.findFeaturesByString(val);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 

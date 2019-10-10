@@ -1,5 +1,6 @@
 package com.jdrx.gis.api.basic;
 
+import com.jdrx.gis.beans.dto.base.KeyWordDTO;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
@@ -113,5 +114,13 @@ public class BasciDevApi {
 		Logger.debug("api/0/basic/getDefaultLayers获取默认地图相关配置");
 		return ResponseFactory.ok(basicDevQuery.getDefaultLayers());
 	}
+
+	@ApiOperation(value = "根据关键字搜索设备")
+	@RequestMapping(value = "findObjectByString")
+	public ResposeVO findObjectByString(@ApiParam(name = "dto", required = true) @RequestBody @Valid KeyWordDTO dto) throws BizException{
+		Logger.debug("api/0/basic/findObjectByString根据关键字搜索设备");
+		return ResponseFactory.ok(basicDevQuery.getFeaturesByString(dto.getKey()));
+	}
+
 
 }
