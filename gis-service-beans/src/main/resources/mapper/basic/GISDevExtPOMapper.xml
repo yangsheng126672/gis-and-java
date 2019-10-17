@@ -184,6 +184,6 @@
     </select>
     <select id="findFeaturesByString"  resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
         select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
-        where data_info->>'dlm' like '%${val}%' or data_info->>'code' like '%${val}%'
+        where data_info->>'dlm' like '%${val}%' or data_info->>'code' like '%${val}%' or data_info->>'address' like '%${val}%'
     </select>
 </mapper>
