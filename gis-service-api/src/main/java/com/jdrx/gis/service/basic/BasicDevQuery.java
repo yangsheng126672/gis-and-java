@@ -324,6 +324,8 @@ public class BasicDevQuery {
 					vo.setY(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("title")){
 					vo.setTitle(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("extent")){
+					vo.setExtent(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {
