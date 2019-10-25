@@ -53,4 +53,11 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<FeatureVO> findFeaturesByString(@Param("val") String val);
+
+	/**
+	 * 根据devIds获取要素基础信息
+	 * @param devIds
+	 * @return
+	 */
+	List<FeatureVO> findFeaturesByDevIds(@Param("devIds") String devIds);
 }
