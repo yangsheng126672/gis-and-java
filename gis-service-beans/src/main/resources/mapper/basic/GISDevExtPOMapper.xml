@@ -182,4 +182,13 @@
             ) t4
                 LEFT JOIN share_dev_type t5 ON t4.type_id = t5.id
     </select>
+    <select id="findFeaturesByString"  resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
+        select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
+        where data_info->>'dlm' like '%${val}%' or data_info->>'code' like '%${val}%' or data_info->>'address' like '%${val}%'
+    </select>
+
+    <select id="findFeaturesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
+        select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
+        where dev_id in (${devIds})
+    </select>
 </mapper>

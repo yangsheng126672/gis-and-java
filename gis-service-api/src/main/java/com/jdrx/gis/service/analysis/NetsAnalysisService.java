@@ -110,15 +110,16 @@ public class NetsAnalysisService {
 
 
     //逻辑管点标签
-    final private String ljgdLable = "ljgd";
+    final private String GIS_LABLE_LJGD = "ljgd";
     //管点标签
-    final private String gdLable = "gd";
+    final private String GIS_LABLE_GD = "gd";
     //管线标签
-    final private String gdlineLable = "gdline";
+    final private String GIS_LABLE_GX = "gdline";
     //逻辑管线标签
-    final private String ljgdlineLable = "ljgdline";
+    final private String GIS_LABLE_LJGX = "ljgdline";
+
     //节点类型  0普通节点  1阀门节点  2水源节点
-    final private String fmType = "1";
+    final private String GIS_TYPE_VALVE = "1";
 
     /**
      * 获取节点详细信息
@@ -206,7 +207,7 @@ public class NetsAnalysisService {
 
     public List<NodeDTO> findAllFamens(Long relationID){
         Long rid  = relationID;
-        List<Value> values = getNodesFromRel(rid,gdlineLable);
+        List<Value> values = getNodesFromRel(rid,GIS_LABLE_GX);
         if(values == null){
             Logger.info("查询失败，无关系数据！"+ relationID);
             return null;
@@ -236,7 +237,7 @@ public class NetsAnalysisService {
                 //判断nodetype是否为阀门类型
                 nodeName = tmpValue.asNode().get("name").asString();
                 nodetype = tmpValue.asNode().get("nodetype").asString();
-                if (fmType.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
+                if (GIS_TYPE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
                     NodeDTO dto = new NodeDTO();
                     dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
@@ -247,7 +248,7 @@ public class NetsAnalysisService {
                     continue;
                 }else {
                     //不是阀门节点，继续遍历其关联节点
-                    tmpList =getNextNode(nodeName,gdLable);
+                    tmpList =getNextNode(nodeName,GIS_LABLE_GD);
                     for (Value invalue:tmpList){
                         //不在待访问和访问过的节点，添加
                         if(!(lookedSet.contains(invalue))&&(!(lookingSet.contains(invalue)))){
@@ -272,7 +273,7 @@ public class NetsAnalysisService {
      * @param fmlist
      * */
     public List<NodeDTO> findSecondAnalysisResult(String code,List<String>fmlist){
-        List<Value> values = getNextNode(code,ljgdLable);
+        List<Value> values = getNextNode(code,GIS_LABLE_LJGD);
         if(values == null){
             Logger.info("查询失败，无关系数据！"+ code);
             return null;
@@ -306,7 +307,7 @@ public class NetsAnalysisService {
                 }
                 //判断nodetype是否为阀门类型
                 nodetype = tmpValue.asNode().get("nodetype").asString();
-                if (fmType.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
+                if (GIS_TYPE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
                     NodeDTO dto = new NodeDTO();
                     dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
@@ -317,7 +318,7 @@ public class NetsAnalysisService {
                     continue;
                 }else {
                     //不是阀门节点，继续遍历其关联节点
-                    tmpList =getNextNode(nodeName,gdLable);
+                    tmpList =getNextNode(nodeName,GIS_LABLE_GD);
                     for (Value invalue:tmpList){
                         //不在待访问和访问过的节点，添加
                         if(!(lookedSet.contains(invalue))&&(!(lookingSet.contains(invalue)))){
@@ -334,6 +335,60 @@ public class NetsAnalysisService {
             e.printStackTrace();
             return null;
         }
+    }
+
+
+    /**
+     * 获取点连通的线
+     * @param devId
+     * @return
+     */
+    public List<Long> getNodeConnectionLine(Long devId){
+        List<Long> list = new ArrayList<>();
+        try {
+            String cypherSql = String.format("MATCH (n:%s{dev_id:%d})-[r]-(b) return r",GIS_LABLE_GD,devId);
+            StatementResult result = session.run(cypherSql);
+            while (result.hasNext()) {
+                Record record = result.next();
+                list.add(Long.valueOf(record.get(0).asMap().get("relationID").toString()));
+            }
+
+        }catch (Exception e){
+            Logger.error("获取点连通的线失败！"+e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * 获取线连通的点和线
+     * @param devId
+     * @return
+     */
+    public List<Long> getNodeConnectionPointAndLine(Long devId){
+        List<Long> list = new ArrayList<>();
+        try {
+            //查找关联的点
+            String cypherSql = String.format("MATCH (a)-[r:%s{relationID:%d}]-(b) return a,b",GIS_LABLE_GX,devId);
+            System.out.println(cypherSql);
+            StatementResult result = session.run(cypherSql);
+            while (result.hasNext()) {
+                Record record = result.next();
+                list.add(Long.valueOf(record.get(0).asMap().get("dev_id").toString()));
+            }
+            //查找关联的线
+            String cypherSqlLine = String.format("match (a)-[re:%s{relationID:%d}]-(b)-[re2]-(c) return re2",GIS_LABLE_GX,devId);
+            System.out.println(cypherSqlLine);
+            StatementResult result1 = session.run(cypherSqlLine);
+            while (result1.hasNext()) {
+                Record record = result1.next();
+                System.out.println(record.get(0).asMap().toString());
+                list.add(Long.valueOf(record.get(0).asMap().get("relationID").toString()));
+            }
+
+        }catch (Exception e){
+            Logger.error("获取点连通的线失败！"+e.getMessage());
+        }
+        return list;
     }
 
 
@@ -379,7 +434,7 @@ public class NetsAnalysisService {
             for (NodeDTO dto :list){
                 String famenName = dto.getCode();
                 //以阀门为起点遍历相邻节点
-                tmpList =  getNextNode(famenName,ljgdLable);
+                tmpList =  getNextNode(famenName,GIS_LABLE_LJGD);
                 lookingSet.clear();
                 lookedSet.clear();
                 lookingSet.addAll(tmpList);
@@ -400,7 +455,7 @@ public class NetsAnalysisService {
                         break;
                     }
                     //获取这个节点的相邻节点
-                    tmpList = getNextNode(tmpNodeName,ljgdLable);
+                    tmpList = getNextNode(tmpNodeName,GIS_LABLE_LJGD);
                     for (Value nodeValue:tmpList ){
                         tmpNodeName = nodeValue.get("name").asString();
                         //首先判断这个节点是不是在阀门列表
@@ -449,7 +504,7 @@ public class NetsAnalysisService {
         influenceLines.add(lineID);
         Long nextPathID ;
         String nextNodeName = null;
-        List<Value> valueList = getNodesFromRel(lineID,gdlineLable);
+        List<Value> valueList = getNodesFromRel(lineID,GIS_LABLE_GX);
         for(Value value:valueList){
             Node node = value.asNode();
             String nodeName = node.asMap().get("name").toString();
@@ -467,7 +522,7 @@ public class NetsAnalysisService {
             }
             if (!famenList.contains(tmpNodeName)){
                 //如果不是必须关闭的阀门，查找相邻的边和点
-                List<Record> nextNodeAndPath= getNextNodeAndPath(tmpNodeName,gdLable);
+                List<Record> nextNodeAndPath= getNextNodeAndPath(tmpNodeName,GIS_LABLE_GD);
                 for(Record record:nextNodeAndPath){
                     nextNodeName = record.get(0).asNode().asMap().get("name").toString();
                     nextPathID = Long.valueOf(record.get(1).asMap().get("relationID").toString());

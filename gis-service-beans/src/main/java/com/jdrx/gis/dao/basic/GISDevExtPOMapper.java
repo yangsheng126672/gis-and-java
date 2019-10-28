@@ -3,6 +3,7 @@ package com.jdrx.gis.dao.basic;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
+import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import org.apache.ibatis.annotations.Param;
@@ -45,4 +46,18 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<GISDevExt2VO> findDevListAttTypeByDevIds(@Param("devIds") String devIds);
+
+	/**
+	 * 根据关键字搜索相关设备要素
+	 * @param val
+	 * @return
+	 */
+	List<FeatureVO> findFeaturesByString(@Param("val") String val);
+
+	/**
+	 * 根据devIds获取要素基础信息
+	 * @param devIds
+	 * @return
+	 */
+	List<FeatureVO> findFeaturesByDevIds(@Param("devIds") String devIds);
 }

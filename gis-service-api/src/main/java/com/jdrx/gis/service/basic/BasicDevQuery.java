@@ -11,6 +11,7 @@ import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.MeasurementPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
+import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.InspectionVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
@@ -20,16 +21,12 @@ import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.channels.spi.SelectorProvider;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.jdrx.gis.util.ComUtil.getChildNodes;
 
@@ -64,6 +61,9 @@ public class BasicDevQuery {
 	@Autowired
 	private DictConfig dictConfig;
 
+	public final static String SHARE_DEV_TYPE_NAME_PIPE = "水管";
+
+	public final static String SHARE_DEV_TYPE_NAME_OTHER = "其他";
 
 	/**
 	 * 递归处理   数据库树结构数据->树形json
@@ -167,7 +167,6 @@ public class BasicDevQuery {
 				}
 			}
 		}
-//		}
 		return childTree;
 	}
 	/**
@@ -176,7 +175,6 @@ public class BasicDevQuery {
 	 */
 	public JSONArray findDevTypeList() throws BizException{
 		try {
-
 			List<ShareDevTypePO> list = shareDevTypePOMapper.findDevTypeList();
 			JSONArray jsonArray = getNodeJson(-1L, list,0);
 			return jsonArray;
@@ -196,6 +194,16 @@ public class BasicDevQuery {
 		try {
 			List<ShareDevTypePO> list = shareDevTypePOMapper.findDevTypeList();
 			JSONArray jsonArray = getIconJsonTree(-1L, list,0);
+			jsonArray.sort(Comparator.comparing(obj -> {
+				String name = ((JSONObject) obj).getString("name");
+				if(name.equals(SHARE_DEV_TYPE_NAME_PIPE)) {
+					return -1;
+				}
+				if(name.equals(SHARE_DEV_TYPE_NAME_OTHER)) {
+					return 1;
+				}
+				return 0;
+			}));
 			return jsonArray;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -323,6 +331,8 @@ public class BasicDevQuery {
 					vo.setY(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("title")){
 					vo.setTitle(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("extent")){
+					vo.setExtent(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {
@@ -361,12 +371,30 @@ public class BasicDevQuery {
 					vo.setExtent(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("resolutions")){
 					vo.setResolutions(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("logo")){
+					vo.setLogo(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("favicon")){
+					vo.setFavicon(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return vo;
+	}
+
+	/**
+	 * 根据关键字搜索设备
+	 * @param val
+	 */
+	public List<FeatureVO> getFeaturesByString(String val)throws BizException{
+		List<FeatureVO> list = new ArrayList<>();
+		try {
+			list = gisDevExtPOMapper.findFeaturesByString(val);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 

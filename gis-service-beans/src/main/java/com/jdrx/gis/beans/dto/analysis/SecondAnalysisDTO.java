@@ -13,7 +13,7 @@ import java.util.List;
  */
 
 @Data
-public class SecondAnalysisDTO extends PageDTO{
+public class SecondAnalysisDTO {
     @ApiModelProperty("爆管线dev_id")
     private Long dev_id;
     @ApiModelProperty("第一次关阀列表")

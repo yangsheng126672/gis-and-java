@@ -41,6 +41,11 @@ public class InspectionVO {
      */
     String wms;
 
+    /**
+     *城市经纬度范围
+     */
+    String extent;
+
 
 
 }
