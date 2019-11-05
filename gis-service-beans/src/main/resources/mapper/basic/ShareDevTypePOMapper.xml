@@ -143,4 +143,11 @@
             </foreach>
         </if>
     </select>
+
+    <select id="findPointTypeByIds" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from share_dev_type
+        where del_flag = 0  and  p_id in ( ${devIds}) and limb_leaf = 2
+    </select>
 </mapper>

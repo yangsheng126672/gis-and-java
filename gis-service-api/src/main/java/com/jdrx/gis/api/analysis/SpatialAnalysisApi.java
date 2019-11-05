@@ -43,4 +43,24 @@ public class SpatialAnalysisApi {
 
     }
 
+    @ApiOperation(value = "获取管点类型")
+    @RequestMapping(value ="getSharePointType")
+    public ResposeVO getSharePointType() throws Exception{
+        Logger.debug("api/0/analysis/getSharePointType 获取管点类型");
+        return  ResponseFactory.ok(spatialAnalysisService.getAllPointType());
+    }
+
+    @ApiOperation(value = "根据设备id获取管点属性模板")
+    @RequestMapping(value ="getDevExtByTopid")
+    public ResposeVO getDevExtByTopid(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
+        if (dto == null || dto.getId() ==null){
+            return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
+        }
+        Logger.debug("api/0/analysis/getDevExtByTopid 获取管点属性模板");
+        return  ResponseFactory.ok(spatialAnalysisService.getDevExtByTopPid(dto.getId()));
+
+    }
+
+
+
 }

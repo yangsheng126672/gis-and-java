@@ -50,4 +50,8 @@ public class DictConfig {
 	/** 项目名称 */
 	private String projectName;
 
+	/** 管点类型 */
+	private String pointType;
+
+
 }

@@ -1,3 +1,6 @@
+--创建空间信息存储扩展
+CREATE extension postgis;
+
 -- [表1] 设备信息表
 DROP TABLE IF EXISTS share_dev;
 CREATE TABLE share_dev (
@@ -179,14 +182,20 @@ COMMENT ON TABLE dict_type is '系统参数类型表';
 
 
 -- [表7] 空间测量记录
+DROP TABLE IF EXISTS gis_measurement;
 CREATE TABLE gis_measurement
 (
-  id bigint NOT NULL DEFAULT nextval('gis_measurement_id_seq'::regclass), -- id
+  id serial8 primary key, -- id
   name character varying(32) NOT NULL DEFAULT ''::character varying, -- 名称
-  meatured_value numeric NOT NULL DEFAULT (-1), -- 测量值
+  meatured_value character varying(32) NOT NULL DEFAULT ''::character varying, -- 测量值
   remark character varying(254) NOT NULL DEFAULT ''::character varying, -- 备注
   geom geometry NOT NULL, -- 空间信息
-  CONSTRAINT gis_measurement_pkey PRIMARY KEY (id)
+  delete_flag boolean NOT NULL DEFAULT false, -- 是否删除
+  create_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 创建人
+  create_at timestamp without time zone NOT NULL DEFAULT now(), -- 创建时间
+  update_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 修改人
+  update_at timestamp without time zone NOT NULL DEFAULT now(), -- 修改时间
+  zoom integer NOT NULL DEFAULT 14
 )
 WITH (
   OIDS=FALSE
@@ -200,6 +209,11 @@ COMMENT ON COLUMN gis_measurement.name IS '名称';
 COMMENT ON COLUMN gis_measurement.meatured_value IS '测量值';
 COMMENT ON COLUMN gis_measurement.remark IS '备注';
 COMMENT ON COLUMN gis_measurement.geom IS '空间信息';
+COMMENT ON COLUMN gis_measurement.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_measurement.create_by IS '创建人';
+COMMENT ON COLUMN gis_measurement.create_at IS '创建时间';
+COMMENT ON COLUMN gis_measurement.update_by IS '修改人';
+COMMENT ON COLUMN gis_measurement.update_at IS '修改时间';
 
 -- [表8] 属性查询条件记录表
 DROP TABLE IF EXISTS gis_attr_condition_record;
@@ -255,6 +269,111 @@ COMMENT ON COLUMN gis_share_dev_type_ext.create_at IS '创建时间';
 COMMENT ON COLUMN gis_share_dev_type_ext.update_by IS '修改人';
 COMMENT ON COLUMN gis_share_dev_type_ext.update_at IS '修改时间';
 COMMENT ON TABLE gis_share_dev_type_ext is '设备类型扩展表';
+
+-- [表10] 爆管历史记录表
+DROP TABLE IF EXISTS gis_pipe_analysis;
+CREATE TABLE gis_pipe_analysis
+(
+  id serial8 primary key,
+  code character varying(32) NOT NULL, -- 爆管编号
+  name character varying(200) NOT NULL DEFAULT ''::character varying, -- 爆管记录名称
+  x numeric NOT NULL, -- 经纬
+  y numeric NOT NULL, -- 纬度
+  area geometry NOT NULL, -- 爆管影响范围空间信息
+  delete_flag boolean NOT NULL DEFAULT false, -- 是否删除
+  create_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 创建人
+  create_at timestamp without time zone NOT NULL DEFAULT now(), -- 创建时间
+  update_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 修改人
+  update_at timestamp without time zone NOT NULL DEFAULT now() -- 修改时间
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE gis_pipe_analysis
+  OWNER TO postgres;
+COMMENT ON TABLE gis_pipe_analysis
+  IS '爆管历史记录';
+COMMENT ON COLUMN gis_pipe_analysis.code IS '爆管编号';
+COMMENT ON COLUMN gis_pipe_analysis.name IS '爆管记录名称';
+COMMENT ON COLUMN gis_pipe_analysis.x IS '经纬';
+COMMENT ON COLUMN gis_pipe_analysis.y IS '纬度';
+COMMENT ON COLUMN gis_pipe_analysis.area IS '爆管影响范围空间信息';
+COMMENT ON COLUMN gis_pipe_analysis.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_pipe_analysis.create_by IS '创建人';
+COMMENT ON COLUMN gis_pipe_analysis.create_at IS '创建时间';
+COMMENT ON COLUMN gis_pipe_analysis.update_by IS '修改人';
+COMMENT ON COLUMN gis_pipe_analysis.update_at IS '修改时间';
+
+-- [表11] 爆管历史记录关阀详情表
+DROP TABLE IF EXISTS gis_pipe_analysis_valve;
+CREATE TABLE gis_pipe_analysis_valve
+(
+  id serial8 primary key,
+  rid bigint NOT NULL, -- 关联爆管记录id
+  valve_first character varying(32) NOT NULL DEFAULT ''::character varying, -- 一次关阀列表
+  valve_second character varying(32) NOT NULL DEFAULT ''::character varying, -- 二次关阀列表
+  valve_failed character varying(32) NOT NULL DEFAULT ''::character varying, -- 关阀失败阀门
+  delete_flag boolean NOT NULL DEFAULT false, -- 是否删除
+  create_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 创建人
+  create_at timestamp without time zone NOT NULL DEFAULT now(), -- 创建时间
+  update_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 修改人
+  update_at timestamp without time zone NOT NULL DEFAULT now() -- 修改时间
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE gis_pipe_analysis_valve
+  OWNER TO postgres;
+COMMENT ON TABLE gis_pipe_analysis_valve
+  IS '爆管历史记录关阀详情';
+COMMENT ON COLUMN gis_pipe_analysis_valve.rid IS '关联爆管记录id';
+COMMENT ON COLUMN gis_pipe_analysis_valve.valve_first IS '一次关阀列表';
+COMMENT ON COLUMN gis_pipe_analysis_valve.valve_second IS '二次关阀列表';
+COMMENT ON COLUMN gis_pipe_analysis_valve.valve_failed IS '关阀失败阀门';
+COMMENT ON COLUMN gis_pipe_analysis_valve.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_pipe_analysis_valve.create_by IS '创建人';
+COMMENT ON COLUMN gis_pipe_analysis_valve.create_at IS '创建时间';
+COMMENT ON COLUMN gis_pipe_analysis_valve.update_by IS '修改人';
+COMMENT ON COLUMN gis_pipe_analysis_valve.update_at IS '修改时间';
+
+
+-- [表12] 供水用户表
+DROP TABLE IF EXISTS gis_water_userinfo;
+CREATE TABLE gis_water_userinfo
+(
+  id serial8 primary key,
+  userid bigint NOT NULL, -- 用户编号
+  usertype character varying(32) NOT NULL DEFAULT ''::character varying, -- 用户类型
+  username character varying(32) NOT NULL DEFAULT ''::character varying, -- 用户姓名
+  tel character varying(11) NOT NULL DEFAULT ''::character varying, -- 电话
+  address character varying(200) NOT NULL DEFAULT ''::character varying, -- 地址
+  meterid bigint NOT NULL, -- 绑定水表id
+  delete_flag boolean NOT NULL DEFAULT false, -- 是否删除
+  create_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 创建人
+  create_at timestamp without time zone NOT NULL DEFAULT now(), -- 创建时间
+  update_by character varying(32) NOT NULL DEFAULT ''::character varying, -- 修改人
+  update_at timestamp without time zone NOT NULL DEFAULT now(), -- 修改时间
+  lineid bigint -- 关联线dev_id
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE gis_water_userinfo
+  OWNER TO postgres;
+COMMENT ON TABLE gis_water_userinfo
+  IS '供水用户表';
+COMMENT ON COLUMN gis_water_userinfo.userid IS '用户编号';
+COMMENT ON COLUMN gis_water_userinfo.usertype IS '用户类型';
+COMMENT ON COLUMN gis_water_userinfo.username IS '用户姓名';
+COMMENT ON COLUMN gis_water_userinfo.tel IS '电话';
+COMMENT ON COLUMN gis_water_userinfo.address IS '地址';
+COMMENT ON COLUMN gis_water_userinfo.meterid IS '绑定水表id';
+COMMENT ON COLUMN gis_water_userinfo.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_water_userinfo.create_by IS '创建人';
+COMMENT ON COLUMN gis_water_userinfo.create_at IS '创建时间';
+COMMENT ON COLUMN gis_water_userinfo.update_by IS '修改人';
+COMMENT ON COLUMN gis_water_userinfo.update_at IS '修改时间';
+COMMENT ON COLUMN gis_water_userinfo.lineid IS '关联线dev_id';
 
 
 ------------------------------增加外键约束begin-------------------------

@@ -66,4 +66,11 @@ public interface ShareDevTypePOMapper {
 	 * @return
 	 */
 	List<ShareDevTypePO> findDevTypeListByIds(@Param("ids") List<Long> ids);
+
+	/**
+	 * 获取所有管点类型
+	 * @param devIds
+	 * @return
+	 */
+	List<ShareDevTypePO> findPointTypeByIds(@Param("devIds") String devIds);
 }
