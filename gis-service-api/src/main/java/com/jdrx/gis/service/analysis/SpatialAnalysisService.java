@@ -40,12 +40,6 @@ public class SpatialAnalysisService {
     private NetsAnalysisService netsAnalysisService;
 
     @Autowired
-    private DictConfig dictConfig;
-
-    @Autowired
-    private DictDetailService detailService;
-
-    @Autowired
     ShareDevTypePOMapper shareDevTypePOMapper;
 
     @Autowired
@@ -82,60 +76,6 @@ public class SpatialAnalysisService {
         return featureVOList;
     }
 
-    /**
-     * 获取所有点类型
-     * @return
-     */
-    public List<ShareDevTypePO> getAllPointType(){
-        List<ShareDevTypePO> shareDevTypePOS = new ArrayList<>();
-        try {
-            String layerUrl = dictConfig.getPointType();
-            List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
-            String stringIds = null;
-            if (detailPOs != null){
-                stringIds = detailPOs.get(0).getVal();
-                shareDevTypePOS = shareDevTypePOMapper.findPointTypeByIds(stringIds);
-            }
 
-        }catch (Exception e){
-            Logger.error(e.getMessage());
-        }
-        return shareDevTypePOS;
-    }
-
-    /**
-     * 通过類型id查詢最顶端父id，获取设备属性模板
-     * @param typeId
-     * @return
-     */
-    public List<FieldNameVO> getDevExtByTopPid(Long typeId){
-        List<FieldNameVO> fieldNameVOS = new ArrayList<>();
-        try {
-            Long pid = getShareDevTypePid(typeId);
-            Long id = pid;
-            if (id != -1){
-                id = getShareDevTypePid(pid);
-            }
-            fieldNameVOS =  attrQueryService.findAttrListByTypeId(pid);
-        }catch (Exception e){
-            Logger.error(e.getMessage());
-        }
-        return fieldNameVOS;
-    }
-
-    /**
-     * 获取类型PID
-     * @return
-     */
-    public Long getShareDevTypePid(Long id){
-        Long pid = null;
-        try {
-            ShareDevTypePO shareDevTypePO  = shareDevTypePOMapper.getByPrimaryKey(id);
-            pid = shareDevTypePO.getPId();
-        }catch (Exception e){
-            Logger.error(e.getMessage());
-        }
-        return pid;
-    }
 
 }
