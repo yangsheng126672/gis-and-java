@@ -50,4 +50,17 @@ public class DictConfig {
 	/** 项目名称 */
 	private String projectName;
 
+	/** 管点类型 */
+	private String pointType;
+
+	/** 管线类型 */
+	private String lineType;
+	/** 管点模板 */
+	private String pointTpl;
+
+	/** 管段模板 */
+	private String lineTpl;
+
+	/** 权限ID集合 */
+	private String authId;
 }

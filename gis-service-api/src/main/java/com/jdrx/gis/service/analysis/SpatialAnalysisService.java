@@ -1,9 +1,17 @@
 package com.jdrx.gis.service.analysis;
 
 import com.google.common.base.Joiner;
+import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
+import com.jdrx.gis.beans.vo.query.FieldNameVO;
+import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.service.basic.BasicDevQuery;
+import com.jdrx.gis.service.basic.DictDetailService;
+import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +38,12 @@ public class SpatialAnalysisService {
 
     @Autowired
     private NetsAnalysisService netsAnalysisService;
+
+    @Autowired
+    ShareDevTypePOMapper shareDevTypePOMapper;
+
+    @Autowired
+    AttrQueryService attrQueryService;
 
 
 
@@ -61,4 +75,7 @@ public class SpatialAnalysisService {
         }
         return featureVOList;
     }
+
+
+
 }

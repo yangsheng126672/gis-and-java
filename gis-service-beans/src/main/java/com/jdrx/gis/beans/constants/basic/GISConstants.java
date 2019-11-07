@@ -68,4 +68,40 @@ public class GISConstants {
 
 	/** redis 导出文件的key加下划线 */
 	public final static String UNDER_LINE = "_";
+
+	/** 数据归属 */
+	public final static String BELONG_TO_IDS = "belongToIds";
+
+	/** 导入设备数据模板的Excel名称*/
+	public final static String TEMPLATE_EXCEL_NAME = "templateForImport.xls";
+
+	/** 导入数据的Excle 第一个sheet名称*/
+	public final static String IMPORT_SHEET0_NAME = "管点表";
+
+	/** 导入数据的Excel 第二个sheet名称*/
+	public final static String IMPORT_SHEET1_NAME = "管段表";
+
+	/** 一次最多导入条数*/
+	public final static int IMPORT_MAX_ROWS = 30000;
+
+	/** 设备数据导入中表头需要验证之一： 类别名称 */
+	public final static String DEV_TYPE_NAME_CHN = "类别名称";
+
+	/** 设备数据导入中表头需要验证之二： 材质 */
+	public final static String MATERIAL_CHN = "材质";
+
+	/** 设备数据导入中表头需要验证之三：管点编码 */
+	public final static String POINT_CODE_CHN = "管点编码";
+
+	/** 设备数据导入中表头需要验证之四：起点编码 */
+	public final static String LINE_START_CODE_CHN = "起点编码";
+
+	/** 设备数据导入中表头需要验证之五：终点编码 */
+	public final static String LINE_END_CODE_CHN = "终点编码";
+
+	/** 设备数据导入中表头需要验证之六：管径 */
+	public final static String CALIBER_CHN = "管径";
+
+	/** 设备数据导入中表头需要验证之七：权属单位 */
+	public final static String DATA_AUTH_CHN = "权属单位";
 }

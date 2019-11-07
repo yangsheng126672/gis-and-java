@@ -251,4 +251,29 @@ public class ComUtil {
 		return criteria;
 	}
 
+	/**
+	 * 验证是否为数字
+	 * @param target
+	 * @return
+	 */
+	public static boolean verifyNumber(String target) {
+		String regex = "\\-?\\d*\\.?\\d*";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(target);
+		return matcher.matches();
+	}
+
+	/**
+	 * 验证数据导入时，Excel里面的日期或时间格式是否正确，只做格式验证，不做数据准确性验证
+	 * 格式为规定为 yyyy-mm-dd hh:mm:ss或yyyy/mm/dd hh:mm:ss，其它格式一概让他们更改后再传
+	 * @param target
+	 * @return
+	 */
+	public static boolean verifyExcelInputDateTime(String target) {
+		String regex = "\\d{4}[/-]\\d{1,2}[/-]\\d{1,2}( \\d{1,2}:\\d{1,2}:\\d{1,2})?";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(target);
+		return matcher.matches();
+	}
+
 }

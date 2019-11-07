@@ -17,4 +17,7 @@ public class PathConfig {
 	private String downloadPath;
 
 	private String uploadFileUrl;
+
+	/** 模板存放的目录 */
+	private String templatePath;
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jdrx.gis.dao.pgSys.PgTypeDAO">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.pgSys.PgTypePO">
+        <result column="typname" property="typName" jdbcType="VARCHAR"/>
+        <result column="typcategory" property="typeCategory" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <select id="selectCategoryByTypname" resultType="java.lang.String">
+        SELECT typcategory FROM pg_catalog.pg_type WHERE typname  =  #{typName}
+    </select>
+
+</mapper>

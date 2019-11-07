@@ -14,7 +14,7 @@ public enum EPGDataTypeCategory {
 	G("G", "Geometric types"),
 	I("I", "Network address types"),
 	N("N", "Numeric types"),
-	P("P", "Numeric types"),
+	P("P", "Pseudo-types"),
 	R("R", "Range types"),
 	S("S", "String types"),
 	T("T", "Timespan types"),

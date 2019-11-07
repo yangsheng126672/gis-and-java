@@ -371,10 +371,6 @@ public class BasicDevQuery {
 					vo.setExtent(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("resolutions")){
 					vo.setResolutions(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("logo")){
-					vo.setLogo(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("favicon")){
-					vo.setFavicon(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {

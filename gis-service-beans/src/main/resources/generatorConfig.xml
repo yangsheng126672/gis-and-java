@@ -48,7 +48,7 @@
         </javaClientGenerator>
 
         <!-- 生成哪些表，tableName对应数据库表，domainObjectName对应实体类名 -->
-        <table tableName="gis_attr_condition_record" domainObjectName="GisAttrConditionRecord" enableCountByExample="true"
+        <table tableName="gis_share_dev_type_ext" domainObjectName="GISShareDevTypeExtPO" enableCountByExample="true"
                enableUpdateByExample="false"
                enableDeleteByExample="false"
                enableSelectByExample="false"

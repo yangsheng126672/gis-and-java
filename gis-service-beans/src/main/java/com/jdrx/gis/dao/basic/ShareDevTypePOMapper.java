@@ -66,4 +66,31 @@ public interface ShareDevTypePOMapper {
 	 * @return
 	 */
 	List<ShareDevTypePO> findDevTypeListByIds(@Param("ids") List<Long> ids);
+
+	/**
+	 * 获取所有管点类型
+	 * @param ids
+	 * @return
+	 */
+	List<ShareDevTypePO> findPointTypeByIds(@Param("ids") String ids);
+
+	/**
+	 * 获取所有管线类型
+	 * @param ids
+	 * @return
+	 */
+	List<ShareDevTypePO> findLineTypeByIds(@Param("ids") String ids);
+	/**
+	 * 判断类型名称是否存在
+	 * @param name      类型名称
+	 * @return
+	 */
+	ShareDevTypePO selectByTypeName(@Param("name") String name);
+
+	/**
+	 * 获取所有叶子类型
+	 * @return
+	 */
+	List<ShareDevTypePO> findAllDevLeafType();
+
 }

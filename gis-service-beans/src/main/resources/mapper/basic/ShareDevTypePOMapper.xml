@@ -143,4 +143,37 @@
             </foreach>
         </if>
     </select>
+
+    <select id="findPointTypeByIds" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from share_dev_type
+        where del_flag = 0  and  p_id in ( ${ids}) and limb_leaf = 2
+    </select>
+
+    <select id="findLineTypeByIds" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from share_dev_type
+        where del_flag = 0  and  p_id in ( ${ids})
+    </select>
+
+    <!-- 根据名称获取某条-->
+    <select id="selectByTypeName" parameterType="string" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_dev_type
+        WHERE del_flag = 0
+          AND name = #{name}
+        LIMIT 1
+    </select>
+
+    <!-- 获取所有叶子类别-->
+    <select id="findAllDevLeafType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM share_dev_type
+        WHERE del_flag = 0
+        AND limb_leaf = 2
+    </select>
 </mapper>

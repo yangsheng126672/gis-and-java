@@ -189,7 +189,9 @@
         from dict_detail where type_id = (
             select id from dict_type where val = #{val,jdbcType=VARCHAR}
             and delete_flag = false limit 1
-        ) order by sort_by
+        )
+        and delete_flag = false
+        order by sort_by
     </select>
 
     <!-- 根据ID逻辑删除类型数据 -->

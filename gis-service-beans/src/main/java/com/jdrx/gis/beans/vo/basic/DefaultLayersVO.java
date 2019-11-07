@@ -51,14 +51,5 @@ public class DefaultLayersVO {
      */
     String resolutions;
 
-    /**
-     * logo
-     */
-    String logo;
-
-    /**
-     * 图标
-     */
-    String favicon;
 
 }
