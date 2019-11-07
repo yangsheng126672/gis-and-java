@@ -375,6 +375,32 @@ COMMENT ON COLUMN gis_water_userinfo.update_by IS '修改人';
 COMMENT ON COLUMN gis_water_userinfo.update_at IS '修改时间';
 COMMENT ON COLUMN gis_water_userinfo.lineid IS '关联线dev_id';
 
+-- [13] GIS日志记录
+DROP TABLE IF EXISTS gis_trans_log;
+CREATE table gis_trans_log(
+		id serial8 primary key,
+		trans_id char(32) not null default '',
+		api_name varchar(64) not null default '',
+		api varchar(128) not null default '',
+		req_params VARCHAR(512) not null default '',
+		return_code int2 not null default -1,
+		req_host varchar(16) not null default '',
+		operator varchar(16) not null default '',
+		cost int4 not null default -1,
+		create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN gis_trans_log.id IS '主键';
+COMMENT ON COLUMN gis_trans_log.trans_id IS '交易ID';
+COMMENT ON COLUMN gis_trans_log.api_name IS '接口名称';
+COMMENT ON COLUMN gis_trans_log.api IS '接口';
+COMMENT ON COLUMN gis_trans_log.req_params IS '接口的请求参数';
+COMMENT ON COLUMN gis_trans_log.return_code IS '响应码，0-成功，其它失败';
+COMMENT ON COLUMN gis_trans_log.req_host IS '客户端host';
+COMMENT ON COLUMN gis_trans_log.operator IS '操作人员';
+COMMENT ON COLUMN gis_trans_log.cost IS '接口消耗时间，单位ms';
+COMMENT ON COLUMN gis_trans_log.create_at IS '创建时间';
+COMMENT ON TABLE  gis_trans_log is 'GIS日志记录';
 
 ------------------------------增加外键约束begin-------------------------
 ------------------------------增加外键约束end---------------------------
