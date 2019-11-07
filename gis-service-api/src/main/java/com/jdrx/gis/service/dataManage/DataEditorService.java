@@ -81,13 +81,18 @@ public class DataEditorService {
      */
     public List<FieldNameVO> getDevExtByTopPid(Long typeId){
         List<FieldNameVO> fieldNameVOS = new ArrayList<>();
+        Long tmpId = typeId;
         try {
-            Long pid = getShareDevTypePid(typeId);
-            Long id = pid;
-            if (id != -1){
-                id = getShareDevTypePid(pid);
+            Long pid = typeId;
+            while (true){
+                if ( pid == -1){
+                    break;
+                }else {
+                    tmpId = pid;
+                    pid =getShareDevTypePid(pid);
+                }
             }
-            fieldNameVOS =  attrQueryService.findAttrListByTypeId(pid);
+            fieldNameVOS =  attrQueryService.findSubAttrListByTypeId(tmpId);
         }catch (Exception e){
             Logger.error(e.getMessage());
         }

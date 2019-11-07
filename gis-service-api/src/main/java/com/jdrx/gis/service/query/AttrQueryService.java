@@ -159,6 +159,38 @@ public class AttrQueryService {
 	}
 
 	/**
+	 * 根据设备类型查模板信息（去除类型和设备id）
+	 * @param typeId  设备类型ID
+	 * @return
+	 * @throws BizException
+	 */
+	public List<FieldNameVO> findSubAttrListByTypeId(Long typeId) throws BizException {
+		try {
+			List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.findAttrListByTypeId(typeId);
+			List<FieldNameVO> fieldNameVOS = Lists.newArrayList();
+			if (Objects.nonNull(list)) {
+				list.stream().forEach(gisDevTplAttrPO -> {
+					FieldNameVO vo = new FieldNameVO();
+					BeanUtils.copyProperties(gisDevTplAttrPO, vo);
+					if (Objects.nonNull(gisDevTplAttrPO.getDataType())) {
+						String dataType = gisDevTplAttrPOMapper.getCategoryCodeByDataType(gisDevTplAttrPO.getDataType());
+						vo.setDataType(dataType);
+					}
+					if (!((vo.getFieldName().equals(GISConstants.DEV_ID))||(vo.getFieldName().equals(GISConstants.DEV_TYPE_NAME)))){
+						fieldNameVOS.add(vo);
+					}
+				});
+
+			}
+			return fieldNameVOS;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("根据设备类型查模板信息（去除类型和设备id）失败！", typeId);
+			throw new BizException("根据设备类型查模板信息（去除类型和设备id）失败！");
+		}
+	}
+
+	/**
 	 * 根据所选区域或属性键入的参数值查设备列表信息
 	 * @param dto
 	 * @return
