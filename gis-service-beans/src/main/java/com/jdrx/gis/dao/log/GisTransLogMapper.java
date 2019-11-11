@@ -1,6 +1,5 @@
 package com.jdrx.gis.dao.log;
 
-
 import com.jdrx.gis.beans.entry.log.GisTransLog;
 
 public interface GisTransLogMapper {

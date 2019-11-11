@@ -14,6 +14,11 @@ public class GisTransLog {
     private String transId;
 
     /**
+     * 交易编码
+     */
+    private String transCode;
+
+    /**
      * 接口名称
      */
     private String apiName;
@@ -29,9 +34,14 @@ public class GisTransLog {
     private String reqParams;
 
     /**
-     * 响应码，0-成功，其它失败
+     * 响应提示，success-成功，失败-相应提示
      */
-    private Short returnCode;
+    private String returnCode;
+
+    /**
+     * null
+     */
+    private String returnMsg;
 
     /**
      * 客户端host
@@ -69,6 +79,14 @@ public class GisTransLog {
         this.transId = transId == null ? null : transId.trim();
     }
 
+    public String getTransCode() {
+        return transCode;
+    }
+
+    public void setTransCode(String transCode) {
+        this.transCode = transCode == null ? null : transCode.trim();
+    }
+
     public String getApiName() {
         return apiName;
     }
@@ -93,12 +111,20 @@ public class GisTransLog {
         this.reqParams = reqParams == null ? null : reqParams.trim();
     }
 
-    public Short getReturnCode() {
+    public String getReturnCode() {
         return returnCode;
     }
 
-    public void setReturnCode(Short returnCode) {
-        this.returnCode = returnCode;
+    public void setReturnCode(String returnCode) {
+        this.returnCode = returnCode == null ? null : returnCode.trim();
+    }
+
+    public String getReturnMsg() {
+        return returnMsg;
+    }
+
+    public void setReturnMsg(String returnMsg) {
+        this.returnMsg = returnMsg == null ? null : returnMsg.trim();
     }
 
     public String getReqHost() {
@@ -138,10 +164,12 @@ public class GisTransLog {
 		return "GisTransLog{" +
 				"id=" + id +
 				", transId='" + transId + '\'' +
+				", transCode='" + transCode + '\'' +
 				", apiName='" + apiName + '\'' +
 				", api='" + api + '\'' +
 				", reqParams='" + reqParams + '\'' +
-				", returnCode=" + returnCode +
+				", returnCode='" + returnCode + '\'' +
+				", returnMsg='" + returnMsg + '\'' +
 				", reqHost='" + reqHost + '\'' +
 				", operator='" + operator + '\'' +
 				", cost=" + cost +

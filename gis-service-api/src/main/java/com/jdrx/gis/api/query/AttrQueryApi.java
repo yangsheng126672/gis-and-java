@@ -8,6 +8,7 @@ import com.jdrx.gis.beans.dto.basic.CriteriaQueryDTO;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.dto.query.CaliberDTO;
 import com.jdrx.gis.beans.dto.query.MeterialDTO;
+import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.service.basic.AttCriteriaService;
 import com.jdrx.gis.service.query.AttrQueryService;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -72,7 +74,7 @@ public class AttrQueryApi {
 	}
 
 
-	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息")
+	@ApiOperation(value = "根据所选区域或键入的参数值查设备列表信息")
 	@RequestMapping(value = "findDevListByAreaOrInputVal")
 	public ResposeVO findDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException
 	{
@@ -83,7 +85,7 @@ public class AttrQueryApi {
 		return ResponseFactory.ok(attrQueryService.findDevListByAreaOrInputVal(dto));
 	}
 
-	@ApiOperation(value = "导出根据所选区域或属性键入的参数值所查询设备列表信息")
+	@ApiOperation(value = "导出根据所选区域或键入的参数值所查询的设备列表信息")
 	@RequestMapping(value = "exportDevListByAreaOrInputVal")
 	public ResposeVO exportDevListByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) {
 		Logger.debug("api/0/query/exportDevListByAreaOrInputVal 导出根据所选区域或属性键入的参数值所查询设备列表信息，参数值 = {}", dto.toString());
@@ -113,7 +115,7 @@ public class AttrQueryApi {
 	}
 
 
-	@ApiOperation(value = "根据所选区域或属性键入的参数值查设备列表信息(分页)")
+	@ApiOperation(value = "根据所选区域或键入的参数值查设备列表信息(分页)")
 	@RequestMapping(value = "findDevListPageByAreaOrInputVal")
 	public ResposeVO findDevListPageByAreaOrInputVal(@RequestBody @Valid AttrQeuryDTO dto) throws BizException {
 		Logger.debug("api/0/query/findDevListPageByAreaOrInputVal 根据所选区域或属性键入的参数值查设备列表信息，分页，参数值 = {}", dto.toString());
