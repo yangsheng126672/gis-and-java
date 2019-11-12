@@ -1,5 +1,6 @@
 package com.jdrx.gis.aop;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.entry.log.GisTransLog;
@@ -15,6 +16,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @Author: liaosijun
@@ -49,6 +52,8 @@ public class LoggerAop {
 
 	private static final ThreadLocal<GisTransLog> gisTransLogLocal = new ThreadLocal<>();
 
+	private static volatile boolean isSave = false;
+
 	@Autowired
 	private GisTransLogMapper gisTransLogMapper;
 
@@ -56,7 +61,7 @@ public class LoggerAop {
 	private DictDetailPOMapper dictDetailPOMapper;
 
 
-	// 拦截api接口下面的所有类所有方法
+	// 拦截api接口下面的所有类所有方法，所有要求api目录下不要包含其他方法
 	@Pointcut("execution(* com.jdrx.gis.api..*(..))")
 	public void logcut() {
 	}
@@ -69,6 +74,8 @@ public class LoggerAop {
 	 */
 	@Around(value = "logcut()")
 	public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+		Class<?> targetClass = AopUtils.getTargetClass(proceedingJoinPoint.getTarget());
+		Logger.debug("被代理的目标类 ：" + targetClass);
 		Long start = System.currentTimeMillis();
 		// 交易ID
 		String transId = String.valueOf(UUID.randomUUID()).replaceAll("-","");
@@ -82,8 +89,11 @@ public class LoggerAop {
 		MethodSignature signature = ((MethodSignature) proceedingJoinPoint.getSignature());
 		Method targetMethod = signature.getMethod();
 		ApiOperation apiOperation = targetMethod.getAnnotation(ApiOperation.class);
-		//获取方法上@ApiOperation注解的value值
-		String apiName = apiOperation.value();
+		//获取方法上@ApiOperation注解的value值,
+		String apiName = "";
+		if (Objects.nonNull(apiOperation)) {
+			apiOperation.value();
+		}
 
 		// 获取接口请求
 		RequestMapping methodRm = targetMethod.getAnnotation(RequestMapping.class);
@@ -96,11 +106,24 @@ public class LoggerAop {
 			api.append(classRms[0]).append(seprator).append(methodRms[0]); // gis系统都是配置一个请求path
 		}
 
-		String reqParams = "";
 		String transCode = dictDetailPOMapper.getTransCodeByApiPath(String.valueOf(api));
+
+		GisTransLog gisTransLog = new GisTransLog();
+		gisTransLog.setTransId(transId);
+
+		gisTransLog.setApiName(apiName);
+		gisTransLog.setReqHost(ip);
+		gisTransLog.setApi(String.valueOf(api));
+		gisTransLog.setCreateAt(new Date());
+		gisTransLog.setTransCode(transCode);
+		gisTransLog.setCost(start.intValue()); // 异常时用
+		gisTransLogLocal.set(gisTransLog);
+		String reqParams = "";
 		if (Objects.nonNull(argObjs) && argObjs.length > 0) {
 			try {
-				reqParams = JSONObject.toJSONString(argObjs);
+				if (isValidJsonObject(argObjs)) {
+					reqParams = JSONObject.toJSONString(argObjs);
+				}
 				synchronized (Logger) {
 					Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "\n"
 							+ JsonFormatUtil.formatJson(reqParams));
@@ -109,17 +132,8 @@ public class LoggerAop {
 				Logger.debug("转换请求参数为JSON字符串失败！参数类型 ： " + e.getMessage());
 			}
 		}
-
-		GisTransLog gisTransLog = new GisTransLog();
-		gisTransLog.setTransId(transId);
 		gisTransLog.setReqParams(reqParams);
-		gisTransLog.setApiName(apiName);
-		gisTransLog.setReqHost(ip);
-		gisTransLog.setApi(String.valueOf(api));
-		gisTransLog.setCreateAt(new Date());
-		gisTransLog.setTransCode(transCode);
-		gisTransLog.setCost(start.intValue()); // 异常时用
-		gisTransLogLocal.set(gisTransLog);
+
 		ResposeVO resposeVO = (ResposeVO) proceedingJoinPoint.proceed(argObjs);
 		Long end = System.currentTimeMillis();
 		Long cost = end - start;
@@ -129,20 +143,22 @@ public class LoggerAop {
 		gisTransLog.setReturnCode(returnCode);
 		gisTransLog.setReturnMsg(returnMsg);
 
-		System.out.println("return---" + gisTransLogLocal.get());
 		logExecutorService.execute(() -> {
 			synchronized (Logger) {
 				Logger.debug("Response-----------------" + transId + "-----------------" + transCode + "\n"
 						+ JsonFormatUtil.formatJson(JSONObject.toJSONString(resposeVO)));
 			}
 			try {
-				gisTransLogMapper.insertSelective(gisTransLog);
+				if (!isSave) {
+					gisTransLogMapper.insertSelective(gisTransLog);
+					isSave = true;
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.error("保存GIS日志记录失败！");
 			}
 		});
-		return proceedingJoinPoint.proceed(argObjs);
+		return resposeVO;
 	}
 
 	@AfterThrowing(value = "logcut()", throwing = "exception")
@@ -154,7 +170,6 @@ public class LoggerAop {
 		if (Objects.nonNull(gisTransLog)) {
 			gisTransLog.setCost(cost.intValue());
 			gisTransLog.setReturnCode("1");
-			System.out.println(exception.getMessage()+"sssss");
 			gisTransLog.setReturnMsg(exception.getMessage());
 		}
 		logExecutorService.execute(() -> {
@@ -165,5 +180,14 @@ public class LoggerAop {
 				Logger.error("保存GIS日志记录失败！");
 			}
 		});
+	}
+
+	public boolean isValidJsonObject(Object[] argObjs) {
+		try {
+			JSONObject.toJSONString(argObjs);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 }
