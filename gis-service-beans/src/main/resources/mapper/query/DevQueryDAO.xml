@@ -218,7 +218,7 @@
         ) fff group by firsttypeId,firsttypename
     </select>
 
-    <select id="findFieldNamesByDevID" parameterType="java.lang.Long" resultMap="BaseResultMap4">
+    <select id="findFieldNamesByDevID" parameterType="java.lang.String" resultMap="BaseResultMap4">
        SELECT field_name AS fieldName, field_desc AS fieldDesc, idx
             FROM gis_dev_tpl_attr
             WHERE type_id = (

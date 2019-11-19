@@ -77,11 +77,11 @@ public class DataEditorService {
     }
 
     /**
-     * 通过類型id查詢最顶端父id，获取设备属性模板
+     * 通过设备id查詢最顶端父id，获取设备属性模板
      * @param typeId
      * @return
      */
-    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
+    public List<FieldNameVO> getDevExtByTopPid(String typeId) throws BizException{
         try {
             return devQueryDAO.findFieldNamesByDevID(typeId);
         }catch (Exception e) {

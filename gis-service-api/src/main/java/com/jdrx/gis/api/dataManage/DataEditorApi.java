@@ -51,7 +51,7 @@ public class DataEditorApi {
 
     @ApiOperation(value = "根据类型id获取属性模板")
     @RequestMapping(value ="getDevExtByTopid")
-    public ResposeVO getDevExtByTopid(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
+    public ResposeVO getDevExtByTopid(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) throws Exception{
         if (dto == null || dto.getId() ==null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }

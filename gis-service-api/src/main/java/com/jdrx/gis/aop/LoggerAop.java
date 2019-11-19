@@ -1,15 +1,12 @@
 package com.jdrx.gis.aop;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.entry.log.GisTransLog;
 import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.gis.dao.log.GisTransLogMapper;
 import com.jdrx.gis.util.HttpUtil;
 import com.jdrx.gis.util.JsonFormatUtil;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
-import com.jdrx.platform.commons.rest.exception.BizException;
 import io.swagger.annotations.ApiOperation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,22 +15,17 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @Author: liaosijun

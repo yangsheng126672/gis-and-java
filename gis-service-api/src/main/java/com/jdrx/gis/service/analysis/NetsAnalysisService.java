@@ -1290,6 +1290,4 @@ public class NetsAnalysisService {
         return caliberLyerUrl;
     }
 
-
-
 }
