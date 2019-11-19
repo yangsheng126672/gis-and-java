@@ -177,4 +177,77 @@
     <select id="getCategoryCodeByDataType" parameterType="java.lang.String" resultType="java.lang.String">
         select typcategory from pg_catalog.pg_type where typname = #{dataType}
     </select>
+
+    <insert id="batchInsertSelective" parameterType="java.util.List">
+        insert into gis_dev_tpl_attr
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="typeId != null">
+                type_id,
+            </if>
+            <if test="fieldDesc != null">
+                field_desc,
+            </if>
+            <if test="fieldName != null">
+                field_name,
+            </if>
+            <if test="dataType != null">
+                data_type,
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createAt != null">
+                create_at,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateAt != null">
+                update_at,
+            </if>
+        </trim>
+        <foreach collection="tplAttrPOList" item="item" index="i" separator=",">
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="item.id != null">
+                    #{item.id,jdbcType=BIGINT},
+                </if>
+                <if test="item.typeId != null">
+                    #{item.typeId,jdbcType=BIGINT},
+                </if>
+                <if test="item.fieldDesc != null">
+                    #{item.fieldDesc,jdbcType=VARCHAR},
+                </if>
+                <if test="item.fieldName != null">
+                    #{item.fieldName,jdbcType=VARCHAR},
+                </if>
+                <if test="item.dataType != null">
+                    #{item.dataType,jdbcType=VARCHAR},
+                </if>
+                <if test="item.idx != null">
+                    #{item.idx,jdbcType=SMALLINT},
+                </if>
+                <if test="item.deleteFlag != null">
+                    #{item.deleteFlag,jdbcType=BIT},
+                </if>
+                <if test="item.createBy != null">
+                    #{item.createBy,jdbcType=VARCHAR},
+                </if>
+                <if test="item.createAt != null">
+                    #{item.createAt,jdbcType=TIMESTAMP},
+                </if>
+                <if test="item.updateBy != null">
+                    #{item.updateBy,jdbcType=VARCHAR},
+                </if>
+                <if test="item.updateAt != null">
+                    #{item.updateAt,jdbcType=TIMESTAMP},
+                </if>
+            </trim>
+        </foreach>
+    </insert>
 </mapper>

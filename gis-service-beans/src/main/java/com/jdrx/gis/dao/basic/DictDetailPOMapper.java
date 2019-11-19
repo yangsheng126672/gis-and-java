@@ -40,4 +40,10 @@ public interface DictDetailPOMapper {
 	 */
 	List<DictDetailPO> findDictDetailListByTypeId(Long typeId);
 
+	/**
+	 * 根据接口地址获取接口交易编码
+	 * @param apiPath
+	 * @return
+	 */
+	String getTransCodeByApiPath(String apiPath);
 }

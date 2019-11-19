@@ -1,9 +1,8 @@
-package com.jdrx.gis.api.dataManage;
+package com.jdrx.gis.service.dataManage;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.jdrx.gis.api.query.AttrQueryApi;
 import com.jdrx.gis.beans.constants.basic.EPGDataTypeCategory;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
@@ -16,15 +15,16 @@ import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
 import java.util.*;
 
 /**
@@ -47,6 +47,9 @@ public class ExcelProcessor {
 
 	@Autowired
 	private ShareDevTypePOMapper shareDevTypePOMapper;
+
+	@Autowired
+	private GisDevTplAttrService gisDevTplAttrService;
 
 	// 需要判断是否为空的列
 	private static List<String>  validHeader = Lists.newArrayList();
@@ -231,18 +234,16 @@ public class ExcelProcessor {
 		map.put("cellIdxHeaderMap", cellIdxHeaderMap);
 		map.put("allDevTypeNames", allDevTypeNames);
 		map.put("authIdMap", authIdMap);
-		return (Map<String, HashMap>) map;
+		return map;
 	}
 
 	/**
 	 * 验证当前单元格的数据类型是否和模板中配置的数据类型是否匹配
-	 * @param cellIndex             表格中的第cellIndex列，起始0
 	 * @param cellStringVal         表格中单元格中的数据
 	 * @return
 	 * @throws BizException
 	 */
-	boolean validCellDataType(int cellIndex, String cellStringVal,
-	                          String category) throws BizException {
+	boolean validCellDataType(String cellStringVal, String category) throws BizException {
 		boolean bool = true;
 		try {
 			if (EPGDataTypeCategory.N.getCode().equals(category)) {
@@ -354,7 +355,7 @@ public class ExcelProcessor {
 				}
 
 				// 验证单元格值的数据类型是否正确：数值型 | 字符型 | 日期时间型
-				boolean dataTypeStat = validCellDataType(j, cellStringVal, category);
+				boolean dataTypeStat = validCellDataType(cellStringVal, category);
 				if (!dataTypeStat) {
 					throw new BizException(cellAddrDesc + "的数据格式不正确，请确认！");
 				}
@@ -419,5 +420,44 @@ public class ExcelProcessor {
 		return null;
 	}
 
+	/**
+	 * 保存设备数据
+	 * @param workbook
+	 * @return
+	 * @throws BizException
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
+	public Boolean saveDevData(Workbook workbook) throws BizException {
+		getExcelDataList(workbook, GISConstants.IMPORT_SHEET0_NAME);
 
+		return false;
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
+	public void saveTplAttr(String tplConfigVal) throws BizException {
+		try{
+			tplConfigVal = dictConfig.getPointTpl();
+			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(tplConfigVal);
+			List<GisDevTplAttrPO> tplAttrPOList = Lists.newArrayList();
+			if (Objects.nonNull(dictDetailPOS) && dictDetailPOS.size() > 0) {
+				dictDetailPOS.stream().forEach(dictDetailPO -> {
+					GisDevTplAttrPO gisDevTplAttrPO = new GisDevTplAttrPO();
+					String confVal = dictDetailPO.getVal();
+					String[] confValArray = confVal.split(",");
+					int i = 0;
+					gisDevTplAttrPO.setFieldDesc(confValArray[i++]);
+					gisDevTplAttrPO.setFieldName(confValArray[i++]);
+					gisDevTplAttrPO.setDataType(confValArray[i++]);
+					gisDevTplAttrPO.setIdx(Short.parseShort(confValArray[i]));
+					gisDevTplAttrPO.setTypeId(dictDetailPO.getTypeId());
+					tplAttrPOList.add(gisDevTplAttrPO);
+				});
+			}
+			gisDevTplAttrService.batchInsertSelective(tplAttrPOList);
+		} catch (Exception e) {
+			Logger.error("保存字段模板信息失败！");
+			e.printStackTrace();
+			throw new BizException(e);
+		}
+	}
 }

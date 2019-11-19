@@ -383,7 +383,7 @@ CREATE table gis_trans_log(
 		api_name varchar(64) not null default '',
 		api varchar(128) not null default '',
 		req_params VARCHAR(512) not null default '',
-		return_code int2 not null default -1,
+		return_code varchar(8) not null default -1,
 		req_host varchar(16) not null default '',
 		operator varchar(16) not null default '',
 		cost int4 not null default -1,
@@ -402,14 +402,12 @@ COMMENT ON COLUMN gis_trans_log.cost IS '接口消耗时间，单位ms';
 COMMENT ON COLUMN gis_trans_log.create_at IS '创建时间';
 COMMENT ON TABLE  gis_trans_log is 'GIS日志记录';
 
-------------------------------增加外键约束begin-------------------------
-------------------------------增加外键约束end---------------------------
-
 
 ------------------------------增加唯一性约束begin-----------------------
---- 数据字典中，同一类型下不能有重复的名称
+-- 数据字典中，同一类型下不能有重复的名称和值
 alter table dict_detail add constraint uk_t_n_v unique(type_id,name,val);
-alter table gis_dev_tpl_attr add constraint uk_tpl_idx unique(type_id,idx);
+-- 数据字典类型表中，val不能重复
+alter table dict_type add constraint uk_dict_type_v unique (val);
 ------------------------------增加唯一性约束end-------------------------
 
 

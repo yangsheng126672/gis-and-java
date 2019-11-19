@@ -36,4 +36,11 @@ public interface GisDevTplAttrPOMapper {
 	 * @return
 	 */
 	String getCategoryCodeByDataType(String dataType);
+
+	/**
+	 * 批量插入模板数据
+	 * @param tplAttrPOList
+	 * @return
+	 */
+	int batchInsertSelective(List<GisDevTplAttrPO> tplAttrPOList);
 }

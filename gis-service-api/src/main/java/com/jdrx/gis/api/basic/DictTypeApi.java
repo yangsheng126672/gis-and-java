@@ -78,8 +78,6 @@ public class DictTypeApi {
 	@RequestMapping(value = "findAllDictTypes")
 	public ResposeVO findAllDictTypes(@ApiParam(name = "dto", required = true) @RequestBody DictTypeQueryDTO dto) throws BizException {
 		Logger.debug("api/0/dictType/findAllDictTypes 查询所有字典类型");
-		System.out.println("00sdfad");
-		System.out.println("接口线程：" + Thread.currentThread().getId() + " = " + Thread.currentThread().getName());
 		return ResponseFactory.ok(dictTypeService.findAllDictTypes(dto));
 	}
 }

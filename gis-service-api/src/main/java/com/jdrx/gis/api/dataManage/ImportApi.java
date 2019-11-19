@@ -4,6 +4,7 @@ import com.jdrx.gis.api.query.AttrQueryApi;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.config.PathConfig;
+import com.jdrx.gis.service.dataManage.ExcelProcessor;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -109,10 +110,11 @@ public class ImportApi {
 		try {
 			inputStream = file.getInputStream();
 			workbook = WorkbookFactory.create(inputStream);
-			excelProcessor.validSheetName(workbook);
-			excelProcessor.validTotalRows(workbook,GISConstants.IMPORT_SHEET0_NAME);
-			excelProcessor.validTotalRows(workbook,GISConstants.IMPORT_SHEET1_NAME);
-			excelProcessor.getExcelDataList(workbook, workbook.getSheetAt(1).getSheetName());
+//			excelProcessor.validSheetName(workbook);
+//			excelProcessor.validTotalRows(workbook,GISConstants.IMPORT_SHEET0_NAME);
+//			excelProcessor.validTotalRows(workbook,GISConstants.IMPORT_SHEET1_NAME);
+//			excelProcessor.getExcelDataList(workbook, workbook.getSheetAt(1).getSheetName());
+			excelProcessor.saveTplAttr(GISConstants.IMPORT_SHEET0_NAME);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidFormatException e) {
