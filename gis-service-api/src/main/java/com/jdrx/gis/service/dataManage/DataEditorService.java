@@ -5,8 +5,10 @@ import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.query.AttrQueryService;
+import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class DataEditorService {
     ShareDevTypePOMapper shareDevTypePOMapper;
 
     @Autowired
-    AttrQueryService attrQueryService;
+    DevQueryDAO devQueryDAO;
     /**
      * 获取所有点类型
      * @return
@@ -79,26 +81,15 @@ public class DataEditorService {
      * @param typeId
      * @return
      */
-    public List<FieldNameVO> getDevExtByTopPid(Long typeId){
-        List<FieldNameVO> fieldNameVOS = new ArrayList<>();
-        Long tmpId = typeId;
+    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
         try {
-            Long pid = typeId;
-            while (true){
-                if ( pid == -1){
-                    break;
-                }else {
-                    tmpId = pid;
-                    pid =getShareDevTypePid(pid);
-                }
-            }
-            fieldNameVOS =  attrQueryService.findSubAttrListByTypeId(tmpId);
-        }catch (Exception e){
-            Logger.error(e.getMessage());
-        }
-        return fieldNameVOS;
-    }
+            return devQueryDAO.findFieldNamesByDevID(typeId);
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new BizException(e);
+         }
 
+    }
 
     /**
      * 获取类型PID
@@ -113,5 +104,12 @@ public class DataEditorService {
             Logger.error(e.getMessage());
         }
         return pid;
+    }
+
+    /**
+     * 创建逻辑管网
+     */
+    public void createLogicNets(){
+
     }
 }

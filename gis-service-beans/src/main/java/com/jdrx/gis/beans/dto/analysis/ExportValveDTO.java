@@ -1,15 +1,17 @@
-package com.jdrx.gis.beans.entry.analysis;
+package com.jdrx.gis.beans.dto.analysis;
 
+import com.jdrx.gis.beans.dto.base.PageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
  * @Description
  * @Author lr
- * @Time 2019/8/29 0029 下午 5:11
+ * @Time 2019/8/2 0002 下午 5:24
  */
+
 @Data
-public class ExportValveRecondDTO {
+public class ExportValveDTO  {
     @ApiModelProperty("名称")
     String name;
     @ApiModelProperty("爆管点编号")
@@ -17,9 +19,7 @@ public class ExportValveRecondDTO {
     @ApiModelProperty("爆管点经纬度")
     Double[] point;
     @ApiModelProperty("成功阀门设备ID集合")
-    private String[] firstDevIds;
-    @ApiModelProperty("成功阀门设备ID集合")
-    private String[] secondDevIds;
+    private String[] valveDevIds;
     @ApiModelProperty("失败阀门设备ID集合")
     private String[] failedDevIds;
 }

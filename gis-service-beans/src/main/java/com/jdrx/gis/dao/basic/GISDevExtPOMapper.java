@@ -4,6 +4,8 @@ import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
+import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
+import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import org.apache.ibatis.annotations.Param;
@@ -60,4 +62,20 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<FeatureVO> findFeaturesByDevIds(@Param("devIds") String devIds);
+
+	/**
+	 * 获取管点数据
+	 * @return
+	 */
+	List<NeoPointVO> getPointDevExt();
+
+	/**
+	 * 获取管线数据
+	 * @return
+	 */
+	List<NeoLineVO> getLineDevExt();
+
+
+
+
 }

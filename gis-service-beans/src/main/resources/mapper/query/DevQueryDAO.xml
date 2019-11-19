@@ -219,15 +219,50 @@
     </select>
 
     <select id="findFieldNamesByDevID" parameterType="java.lang.Long" resultMap="BaseResultMap4">
-        SELECT
-            field_name AS fieldName,
-            field_desc AS fieldDesc,
-            idx
-        FROM gis_dev_tpl_attr
-        WHERE type_id = (
-            SELECT tpl_type_id
-            FROM gis_dev_ext
-            WHERE dev_id = #{devId}
-        )
+       SELECT field_name AS fieldName, field_desc AS fieldDesc, idx
+            FROM gis_dev_tpl_attr
+            WHERE type_id = (
+                SELECT type_id
+                FROM (
+                    SELECT * FROM (
+                        SELECT DISTINCT type_id FROM gis_dev_tpl_attr
+                    ) att
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM (
+                            WITH RECURSIVE a AS (
+                                    SELECT a.id, a.p_id
+                                    FROM share_dev_type a
+                                    WHERE del_flag = 0
+                                        AND id = (SELECT type_id from share_dev where id = #{devId} limit 1)
+                                    UNION ALL
+                                    SELECT b.id, b.p_id
+                                    FROM share_dev_type b, a
+                                    WHERE b.id = a.p_id
+                                )
+                            SELECT * FROM a
+                        ) bc
+                        WHERE bc.id = att.type_id
+                    )
+                ) exi
+                    INNER JOIN (
+                        SELECT *
+                        FROM (
+                            WITH RECURSIVE t (id, p_id, depth) AS (
+                                    SELECT a.id, a.p_id, 1
+                                    FROM share_dev_type a
+                                    WHERE del_flag = 0
+                                        AND id =(SELECT type_id from share_dev where id = #{devId} limit 1)
+                                    UNION ALL
+                                    SELECT b.id, b.p_id, c.DEPTH + 1
+                                    FROM share_dev_type b, t c
+                                    WHERE c.p_id = b.id
+                                )
+                            SELECT * FROM t
+                        ) por ORDER BY depth ASC
+                    ) pathOrd
+                    ON exi.type_id = pathOrd.id
+                LIMIT 1
+            )
     </select>
 </mapper>

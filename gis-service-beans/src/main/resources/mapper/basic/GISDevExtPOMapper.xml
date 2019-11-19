@@ -185,10 +185,20 @@
     <select id="findFeaturesByString"  resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
         select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
         where data_info->>'dlm' like '%${val}%' or data_info->>'code' like '%${val}%' or data_info->>'address' like '%${val}%'
+        AND delete_flag = false
     </select>
 
     <select id="findFeaturesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
         select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
-        where dev_id in (${devIds})
+        where dev_id in (${devIds}) AND delete_flag = false
+    </select>
+
+    <select id="getPointDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoPointVO">
+        select dev_id,code,name,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y,belong_to from public.gis_dev_ext
+        WHERE  caliber is  null AND delete_flag = false
+    </select>
+
+    <select id="getLineDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoLineVO">
+        select dev_id,code,caliber,material,belong_to,data_info from public.gis_dev_ext WHERE  caliber is not null  AND delete_flag = false
     </select>
 </mapper>
