@@ -104,4 +104,25 @@ public class GISConstants {
 
 	/** 设备数据导入中表头需要验证之七：权属单位 */
 	public final static String DATA_AUTH_CHN = "权属单位";
+
+	/** 设备数据导入中表头需要验证之八：横坐标 */
+	public final static String X_CHN = "横坐标";
+
+	/** 设备数据导入中表头需要验证之九：纵坐标 */
+	public final static String Y_CHN = "纵坐标";
+
+	/** 平台编码 */
+	public final static String PLATFORM_CODE = "02";
+
+	/** 道路名称 */
+	public final static String DEV_ADDR_CHN = "道路名称";
+
+	/** 管件，导入的Excel的管点的模板根据管件去查模板 ID */
+	public final static String TOP_TPL_1_CHN = "管件";
+
+	/** 水管，导入的Excel的管段的模板根据水管去查模板ID */
+	public final static String TOP_TPL_2_CHN = "水管";
+
+	/** data_info */
+	public final static String DATA_INFO = "data_info";
 }

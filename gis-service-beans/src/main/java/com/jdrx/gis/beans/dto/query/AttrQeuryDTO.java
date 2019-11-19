@@ -36,7 +36,7 @@ public class AttrQeuryDTO extends PageDTO {
 //	private String range;
 
 	@ApiModelProperty("设备ID集合")
-	private Long[] devIds;
+	private String[] devIds;
 
 	@ApiModelProperty("时间戳")
 	private String time;

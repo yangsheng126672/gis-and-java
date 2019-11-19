@@ -216,7 +216,7 @@ public class BasicDevQuery {
 	 * 根据设备ID查当前设备的属性信息
 	 * @param devId
 	 */
-	public GISDevExtPO getDevExtByDevId(Long devId) throws BizException {
+	public GISDevExtPO getDevExtByDevId(String devId) throws BizException {
 		try {
 			GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
 			return gisDevExtPO;

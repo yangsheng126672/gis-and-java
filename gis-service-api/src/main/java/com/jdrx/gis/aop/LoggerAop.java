@@ -52,8 +52,6 @@ public class LoggerAop {
 
 	private static final ThreadLocal<GisTransLog> gisTransLogLocal = new ThreadLocal<>();
 
-	private static volatile boolean isSave = false;
-
 	@Autowired
 	private GisTransLogMapper gisTransLogMapper;
 
@@ -92,7 +90,7 @@ public class LoggerAop {
 		//获取方法上@ApiOperation注解的value值,
 		String apiName = "";
 		if (Objects.nonNull(apiOperation)) {
-			apiOperation.value();
+			apiName = apiOperation.value();
 		}
 
 		// 获取接口请求
@@ -149,10 +147,7 @@ public class LoggerAop {
 						+ JsonFormatUtil.formatJson(JSONObject.toJSONString(resposeVO)));
 			}
 			try {
-				if (!isSave) {
-					gisTransLogMapper.insertSelective(gisTransLog);
-					isSave = true;
-				}
+				gisTransLogMapper.insertSelective(gisTransLog);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.error("保存GIS日志记录失败！");

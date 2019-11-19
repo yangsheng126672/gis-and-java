@@ -1,6 +1,7 @@
 package com.jdrx.gis.dao.basic;
 
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
+import com.jdrx.gis.beans.entry.basic.CodeXYPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
@@ -11,15 +12,16 @@ import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GISDevExtPOMapper {
 
-    GISDevExtPO getDevExtByDevId(Long devId);
+    GISDevExtPO getDevExtByDevId(String devId);
 
 	/**
 	 * 根据ID集合查询设备列表信息
 	 */
-	List<GISDevExtVO> findDevListByDevIds(@Param("devIds") List<Long> devIds);
+	List<GISDevExtVO> findDevListByDevIds(@Param("devIds") List<String> devIds);
 
 	/**
 	 * 根据所选区域或属性键入的参数值查设备列表信息
@@ -75,7 +77,18 @@ public interface GISDevExtPOMapper {
 	 */
 	List<NeoLineVO> getLineDevExt();
 
+	/*
+	 * 根据设备的编码获取设备信息
+	 * @param code
+	 * @return
+	 */
+	GISDevExtPO selectByCode(@Param("code") String code);
 
 
+	Map<String, String> findGeomMapByPointCode(@Param("codeXYPO") CodeXYPO codeXYPO, @Param("srid") String srid);
+
+
+	Integer batchInsertSelective(@Param("gisDevExtPOList") List<GISDevExtPO> gisDevExtPOList);
 
 }
+

@@ -17,7 +17,7 @@ public class DevIDsForTypesDTO {
 
 	@ApiModelProperty("设备ID集合")
 	@NotNull(message = "设备ID列表不能为空")
-	private Long[] devIds;
+	private String[] devIds;
 
 	@ApiModelProperty("类型ID集合")
 	@NotNull(message = "类型ID列表不能为空")

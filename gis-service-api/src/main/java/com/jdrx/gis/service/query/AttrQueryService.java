@@ -200,8 +200,8 @@ public class AttrQueryService {
 		try {
 			Long start = System.currentTimeMillis();
 			String devStr = null;
-			Long[] devIds = dto.getDevIds();
-			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			String[] devIds = dto.getDevIds();
+			List<String> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
@@ -276,8 +276,8 @@ public class AttrQueryService {
 				cell.setCellValue(text);
 			}
 			String devStr = null;
-			Long[] devIds = dto.getDevIds();
-			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			String[] devIds = dto.getDevIds();
+			List<String> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
@@ -443,7 +443,7 @@ public class AttrQueryService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<FieldNameVO> getFieldNames(Long devId) throws BizException {
+	public List<FieldNameVO> getFieldNames(String devId) throws BizException {
 		try {
 			return devQueryDAO.findFieldNamesByDevID(devId);
 		} catch (Exception e) {
@@ -488,5 +488,6 @@ public class AttrQueryService {
 			return false;
 		}
 	}
+
 
 }

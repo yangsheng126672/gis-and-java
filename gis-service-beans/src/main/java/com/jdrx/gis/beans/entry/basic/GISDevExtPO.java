@@ -15,7 +15,7 @@ public class GISDevExtPO {
 	/**
 	 * 设备ID
 	 */
-	private Long devId;
+	private String devId;
 
 	/**
 	 * 设备名称
@@ -76,4 +76,9 @@ public class GISDevExtPO {
 	 * 修改时间
 	 */
 	private Date updateAt;
+
+	/**
+	 * 数据权限
+	 */
+	private Long belongTo;
 }

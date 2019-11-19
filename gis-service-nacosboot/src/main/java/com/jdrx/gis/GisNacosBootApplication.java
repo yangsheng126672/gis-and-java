@@ -14,7 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "com.jdrx")
 @EnableCaching
 @SpringBootApplication
-@MapperScan("com.jdrx.gis.dao.*")
+@MapperScan({"com.jdrx.gis.dao.*","com.jdrx.share.*"})
 @ImportAutoConfiguration({PGConfigProperties.class})
 public class GisNacosBootApplication {
 

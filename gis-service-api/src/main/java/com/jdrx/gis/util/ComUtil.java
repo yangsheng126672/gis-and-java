@@ -2,6 +2,7 @@ package com.jdrx.gis.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -274,6 +275,20 @@ public class ComUtil {
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(target);
 		return matcher.matches();
+	}
+
+	/**
+	 * map转换成PGObject
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public static PGobject convertMaptoPGObject(Map<String, String> map) throws Exception {
+		String jsonStr = JSONObject.toJSONString(map,SerializerFeature.WriteMapNullValue);
+		PGobject jsonObject = new PGobject();
+		jsonObject.setValue(jsonStr);
+		jsonObject.setType("json");
+		return jsonObject;
 	}
 
 }

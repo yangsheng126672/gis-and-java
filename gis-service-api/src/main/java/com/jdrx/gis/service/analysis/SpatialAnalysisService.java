@@ -51,9 +51,9 @@ public class SpatialAnalysisService {
      * 获取连通性分析结果
      * @param devId
      */
-    public List<FeatureVO> getConnectivityAnalysis(Long devId) throws BizException {
+    public List<FeatureVO> getConnectivityAnalysis(String devId) throws BizException {
         List<FeatureVO> featureVOList = new ArrayList<>();
-        List<Long> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         try {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
             //判断设备类型是线的话，返回线两端的点设备和连通的线;如果是点，则返回连通的线

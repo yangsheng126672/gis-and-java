@@ -20,7 +20,7 @@ public class GISDevExtVO {
 	/**
 	 * 设备ID
 	 */
-	private Long devId;
+	private String devId;
 
 	/**
 	 * 模板类型ID

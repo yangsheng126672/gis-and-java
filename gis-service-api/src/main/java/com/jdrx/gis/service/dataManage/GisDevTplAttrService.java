@@ -50,7 +50,7 @@ public class GisDevTplAttrService {
 			if (Objects.isNull(tplAttrPOList) | tplAttrPOList.size() == 0) {
 				throw new BizException("模板数据为空！");
 			}
-			return batchInsertSelective(tplAttrPOList);
+			return gisDevTplAttrPOMapper.batchInsertSelective(tplAttrPOList);
 		} catch (Exception e) {
 			Logger.error("批量插入模板数据失败！");
 			e.printStackTrace();

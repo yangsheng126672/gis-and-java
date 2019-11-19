@@ -34,7 +34,7 @@ public class SpatialAnalysisApi {
 
     @ApiOperation(value = "获取连通性分析结果")
     @RequestMapping(value ="getConnectivityAnalysis")
-    public ResposeVO getConnectivityAnalysis(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
+    public ResposeVO getConnectivityAnalysis(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) throws Exception{
         if (dto == null || dto.getId() ==null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }

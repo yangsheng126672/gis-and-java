@@ -77,6 +77,6 @@ public interface DevQueryDAO {
 	 * @param devId
 	 * @return
 	 */
-	List<FieldNameVO> findFieldNamesByDevID(Long devId);
+	List<FieldNameVO> findFieldNamesByDevID(String devId);
 
 }

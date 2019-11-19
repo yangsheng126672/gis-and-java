@@ -93,4 +93,11 @@ public interface ShareDevTypePOMapper {
 	 */
 	List<ShareDevTypePO> findAllDevLeafType();
 
+	/**
+	 * 通过顶层名称获取对应ID
+	 * @param typeName
+	 * @return
+	 */
+	long getIdByNameForTopHierarchy(@Param("name") String typeName);
+
 }

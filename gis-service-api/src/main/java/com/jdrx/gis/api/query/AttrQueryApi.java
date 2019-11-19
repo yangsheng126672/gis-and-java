@@ -145,7 +145,7 @@ public class AttrQueryApi {
 
 	@ApiOperation(value = "根据设备ID获取模板信息")
 	@RequestMapping(value = "getTplByDevId")
-	public ResposeVO getTplByDevId(@RequestBody @Valid IdDTO<Long> idDTO) throws BizException {
+	public ResposeVO getTplByDevId(@RequestBody @Valid IdDTO<String> idDTO) throws BizException {
 		Logger.debug("根据设备ID获取模板信息, 设备ID = {}", idDTO.getId());
 		return ResponseFactory.ok(attrQueryService.getFieldNames(idDTO.getId()));
 	}

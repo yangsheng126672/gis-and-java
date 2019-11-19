@@ -31,24 +31,24 @@
             生成model模型，对应的包路径，以及文件存放路径(targetProject)，targetProject可以指定具体的路径
             也可以使用“MAVEN”来自动生成，这样生成的代码会在target/generatord-source目录下
         -->
-        <javaModelGenerator targetPackage="com.jdrx.gis.beans.entry.log" targetProject="./gis-service-beans/src/test/java/mybatisGen/temp">
+        <javaModelGenerator targetPackage="com.jdrx.gis.beans.entry.basic" targetProject="./gis-service-beans/src/test/java/mybatisGen/temp">
             <property name="enableSubPackages" value="true"/>
             <!-- 从数据库返回的值被清理前后的空格  -->
             <property name="trimStrings" value="true"/>
         </javaModelGenerator>
 
         <!--对应的mapper.xml文件  -->
-        <sqlMapGenerator targetPackage="com.jdrx.gis.dao.log" targetProject="./gis-service-beans/src/test/java/mybatisGen/temp">
+        <sqlMapGenerator targetPackage="com.jdrx.gis.beans.entry.basic" targetProject="./gis-service-beans/src/test/java/mybatisGen/temp">
             <property name="enableSubPackages" value="true"/>
         </sqlMapGenerator>
 
         <!-- 对应的Mapper接口类文件 -->
-        <javaClientGenerator type="XMLMAPPER" targetPackage="com.jdrx.gis.beans.entry.log"  targetProject="./gis-service-beans/src/test/java/mybatisGen/temp">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.jdrx.gis.beans.entry.basic"  targetProject="./gis-service-beans/src/test/java/mybatisGen/temp">
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
         <!-- 生成哪些表，tableName对应数据库表，domainObjectName对应实体类名 -->
-        <table tableName="gis_trans_log" domainObjectName="GisTransLog" enableCountByExample="true"
+        <table tableName="gis_dev_ext" domainObjectName="GISDevExtPO" enableCountByExample="true"
                enableUpdateByExample="false"
                enableDeleteByExample="false"
                enableSelectByExample="false"

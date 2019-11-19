@@ -402,12 +402,34 @@ COMMENT ON COLUMN gis_trans_log.cost IS '接口消耗时间，单位ms';
 COMMENT ON COLUMN gis_trans_log.create_at IS '创建时间';
 COMMENT ON TABLE  gis_trans_log is 'GIS日志记录';
 
+-- [14] 序列生成
+DROP TABLE IF EXISTS share_sequence_define;
+CREATE TABLE share_sequence_define (
+  id serial8 primary key,
+  key varchar(32) NOT NULL DEFAULT ''::character varying,
+	platform_code varchar(32) NOT NULL DEFAULT ''::character varying,
+	val int8 NOT NULL DEFAULT -1,
+	polling_interval varchar(32) NOT NULL DEFAULT 'N',
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	remarks varchar(500) NOT NULL DEFAULT ''::character varying
+)
+;
+COMMENT ON COLUMN share_sequence_define.id IS '主键';
+COMMENT ON COLUMN share_sequence_define.key IS '自增值的KEY定义';
+COMMENT ON COLUMN share_sequence_define.platform_code IS '平台编码（与key建组合唯一约束）';
+COMMENT ON COLUMN share_sequence_define.val IS '自增值';
+COMMENT ON COLUMN share_sequence_define.polling_interval IS 'Y年、M月、D日、W周、N不轮询';
+COMMENT ON COLUMN share_sequence_define.update_at IS '更新时间';
+COMMENT ON COLUMN share_sequence_define.remarks IS '备注';
+COMMENT ON TABLE share_sequence_define is '序列生成';
 
 ------------------------------增加唯一性约束begin-----------------------
 -- 数据字典中，同一类型下不能有重复的名称和值
 alter table dict_detail add constraint uk_t_n_v unique(type_id,name,val);
 -- 数据字典类型表中，val不能重复
 alter table dict_type add constraint uk_dict_type_v unique (val);
+-- 序列表中key 和 platform_code 复合唯一
+alter table share_sequence_define add constraint uk_seq_kp unique (key,platform_code);
 ------------------------------增加唯一性约束end-------------------------
 
 

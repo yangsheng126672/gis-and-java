@@ -92,8 +92,8 @@ public class QueryDevService {
 	public List<SpaceInfTotalPO> findFirstHierarchyDevTypeNum(DevIDsDTO devIDsDTO) throws BizException{
 		try {
 			String devStr = null;
-			Long[] devIds = devIDsDTO.getDevIds();
-			List<Long> ids = null;
+			String[] devIds = devIDsDTO.getDevIds();
+			List<String> ids = null;
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 				devStr = Joiner.on(",").join(ids);
@@ -249,8 +249,8 @@ public class QueryDevService {
 		List<ShareDevTypePO> secondTypeList = shareDevTypeService.findDevTypeListByTypeId(devIDsForTypeDTO.getTypeId());
 
 		String devStr = null;
-		Long[] devIds = devIDsForTypeDTO.getDevIds();
-		List<Long> ids = null;
+		String[] devIds = devIDsForTypeDTO.getDevIds();
+		List<String> ids = null;
 		if (Objects.nonNull(devIds) && devIds.length > 0) {
 			ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			devStr = Joiner.on(",").join(ids);
@@ -349,8 +349,8 @@ public class QueryDevService {
 			}
 
 			String devStr = null;
-			Long[] devIds = dto.getDevIds();
-			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			String[] devIds = dto.getDevIds();
+			List<String> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
@@ -478,8 +478,8 @@ public class QueryDevService {
 	 */
 	public PageVO<SpaceInfoVO> findDevListPageByTypeID(DevIDsForTypeDTO dto) throws BizException {
 		String devStr = null;
-		Long[] devIds = dto.getDevIds();
-		List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+		String[] devIds = dto.getDevIds();
+		List<String> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 		if (Objects.nonNull(devIds) && devIds.length > 0) {
 			devStr = Joiner.on(",").join(ids);
 		}
@@ -494,7 +494,7 @@ public class QueryDevService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<GISDevExtVO> findDevListByDevIDs(List<Long> ids) throws BizException {
+	public List<GISDevExtVO> findDevListByDevIDs(List<String> ids) throws BizException {
 		if (Objects.isNull(ids)) {
 			Logger.error("参数为空");
 			return Lists.newArrayList();
@@ -611,13 +611,13 @@ public class QueryDevService {
 			List<ShareDevPO> shareDevPOS = shareDevPOMapper.findDevListByTypeIds(leafTypeIdsStr);
 
 			// 获取设备列表的属性信息
-			List<Long> devIds;
+			List<String> devIds;
 			List<GISDevExt2VO> gisDevExt2VOS = null;
-			List<Long> devIdsRange = null;
+			List<String> devIdsRange = null;
 			if (Objects.nonNull(dto.getDevIds())) {
 				devIdsRange = Arrays.asList(dto.getDevIds());
 			}
-			List<Long> copyDevIdsRange = Lists.newArrayList();
+			List<String> copyDevIdsRange = Lists.newArrayList();
 			copyDevIdsRange.addAll(devIdsRange);
 			if (Objects.nonNull(shareDevPOS)) {
 				devIds = shareDevPOS.stream().map(ShareDevPO :: getId).collect(Collectors.toList());

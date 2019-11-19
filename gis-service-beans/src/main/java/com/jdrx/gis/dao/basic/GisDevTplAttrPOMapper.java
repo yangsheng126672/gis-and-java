@@ -1,6 +1,7 @@
 package com.jdrx.gis.dao.basic;
 
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -42,5 +43,5 @@ public interface GisDevTplAttrPOMapper {
 	 * @param tplAttrPOList
 	 * @return
 	 */
-	int batchInsertSelective(List<GisDevTplAttrPO> tplAttrPOList);
+	int batchInsertSelective(@Param("tplAttrPOList") List<GisDevTplAttrPO> tplAttrPOList);
 }

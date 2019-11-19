@@ -3,12 +3,12 @@
 <mapper namespace="com.jdrx.gis.dao.basic.GISDevExtPOMapper">
     <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.basic.GISDevExtPO">
         <id column="id" jdbcType="BIGINT" property="id" />
-        <result column="dev_id" jdbcType="BIGINT" property="devId" />
+        <result column="dev_id" jdbcType="CHAR" property="devId" />
         <result column="name" jdbcType="VARCHAR" property="name" />
         <result column="code" jdbcType="VARCHAR" property="code" />
         <result column="caliber" jdbcType="INTEGER" property="caliber" />
         <result column="material" jdbcType="VARCHAR" property="material" />
-        <result column="geom" jdbcType="VARCHAR" property="geom" />
+        <result column="geom" jdbcType="OTHER" property="geom" />
         <result column="tpl_type_id" jdbcType="BIGINT" property="tplTypeId" />
         <result column="data_info" jdbcType="OTHER" property="dataInfo" />
         <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
@@ -16,6 +16,7 @@
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
         <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+        <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
     </resultMap>
 
     <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.vo.query.GISDevExtVO">
@@ -37,15 +38,15 @@
 
     <sql id="Base_Column_List">
     id, dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at
+    create_by, create_at, update_by, update_at, belong_to
     </sql>
 
-    <select id="getDevExtByDevId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="getDevExtByDevId" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         id, dev_id, name, code, caliber, material, st_astext(geom) geom, tpl_type_id, data_info, delete_flag,
     create_by, create_at, update_by, update_at
         from gis_dev_ext
-        where dev_id = #{devId,jdbcType=BIGINT}
+        where dev_id = #{devId,jdbcType=VARCHAR}
         limit 1
     </select>
 
@@ -99,7 +100,7 @@
                 </if>
                 <if test="devIds != null and devIds != ''">
                     and EXISTS (select 1 from
-                    (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
+                    (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
                 </if>
             </where>
         ) ext left join (
@@ -141,7 +142,7 @@
             </if>
             <if test="devIds != null and devIds != ''">
                 and EXISTS (select 1 from
-                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where cast(vir.dev_id as BIGINT) = gdx.dev_id)
+                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
             </if>
         </where>
         ) ext left join (
@@ -170,7 +171,7 @@
                                 FROM (
                                     SELECT regexp_split_to_table(#{devIds}, ',') AS dev_id
                                 ) vir
-                                WHERE CAST(vir.dev_id AS BIGINT) = t1.dev_id
+                                WHERE vir.dev_id = t1.dev_id
                             )
                     ) t2
                         LEFT JOIN (
@@ -201,4 +202,36 @@
     <select id="getLineDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoLineVO">
         select dev_id,code,caliber,material,belong_to,data_info from public.gis_dev_ext WHERE  caliber is not null  AND delete_flag = false
     </select>
+
+    <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT <include refid="Base_Column_List" />
+        FROM gis_dev_ext
+        WHERE delete_flag = false
+        AND code = #{code}
+        LIMIT 1
+    </select>
+
+    <select id="findGeomMapByPointCode" resultType="java.util.Map">
+        SELECT #{codeXYPO.pointCode} as code, ST_GeomFromText(#{codeXYPO.str},4544) as geom
+    </select>
+
+    <insert id="batchInsertSelective" parameterType="java.util.List">
+        INSERT INTO gis_dev_ext (dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, create_by, create_at, belong_to)
+        VALUES
+        <foreach collection="gisDevExtPOList" item="item" index="index" separator=",">
+            (
+                #{item.devId,jdbcType=BIGINT},
+                #{item.name,jdbcType=VARCHAR},
+                #{item.code,jdbcType=VARCHAR},
+                #{item.caliber,jdbcType=INTEGER},
+                #{item.material,jdbcType=VARCHAR},
+                #{item.geom,jdbcType=OTHER},
+                #{item.tplTypeId,jdbcType=BIGINT},
+                #{item.dataInfo,jdbcType=OTHER},
+                #{item.createBy,jdbcType=OTHER},
+                #{item.createAt,jdbcType=TIMESTAMP},
+                #{item.belongTo,jdbcType=BIGINT}
+            )
+        </foreach>
+    </insert>
 </mapper>

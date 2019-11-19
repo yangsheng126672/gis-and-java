@@ -139,7 +139,7 @@ public class NetsAnalysisService {
      * @param relationID
      * @return
      */
-    public List<Value> getNodesFromRel(Long relationID,String lineLable) {
+    public List<Value> getNodesFromRel(String relationID,String lineLable) {
         String cypherSql = String.format("MATCH (n)-[:%s{relationID: %d}]-(b) return n,b  ", lineLable,relationID);
         StatementResult result = session.run(cypherSql);
         List<Value> values = null;
@@ -201,8 +201,8 @@ public class NetsAnalysisService {
      * @param relationID
      * */
 
-    public List<NodeDTO> findAllFamens(Long relationID){
-        Long rid  = relationID;
+    public List<NodeDTO> findAllFamens(String relationID){
+        String rid  = relationID;
         List<Value> values = getNodesFromRel(rid,GIS_LABLE_GX);
         if(values == null){
             Logger.info("查询失败，无关系数据！"+ relationID);
@@ -339,14 +339,14 @@ public class NetsAnalysisService {
      * @param devId
      * @return
      */
-    public List<Long> getNodeConnectionLine(Long devId){
-        List<Long> list = new ArrayList<>();
+    public List<String> getNodeConnectionLine(String devId){
+        List<String> list = new ArrayList<>();
         try {
             String cypherSql = String.format("MATCH (n:%s{dev_id:%d})-[r]-(b) return r",GIS_LABLE_GD,devId);
             StatementResult result = session.run(cypherSql);
             while (result.hasNext()) {
                 Record record = result.next();
-                list.add(Long.valueOf(record.get(0).asMap().get("relationID").toString()));
+                list.add(record.get(0).asMap().get("relationID").toString());
             }
 
         }catch (Exception e){
@@ -360,8 +360,8 @@ public class NetsAnalysisService {
      * @param devId
      * @return
      */
-    public List<Long> getNodeConnectionPointAndLine(Long devId){
-        List<Long> list = new ArrayList<>();
+    public List<String> getNodeConnectionPointAndLine(String devId){
+        List<String> list = new ArrayList<>();
         try {
             //查找关联的点
             String cypherSql = String.format("MATCH (a)-[r:%s{relationID:%d}]-(b) return a,b",GIS_LABLE_GX,devId);
@@ -369,7 +369,7 @@ public class NetsAnalysisService {
             StatementResult result = session.run(cypherSql);
             while (result.hasNext()) {
                 Record record = result.next();
-                list.add(Long.valueOf(record.get(0).asMap().get("dev_id").toString()));
+                list.add(record.get(0).asMap().get("dev_id").toString());
             }
             //查找关联的线
             String cypherSqlLine = String.format("match (a)-[re:%s{relationID:%d}]-(b)-[re2]-(c) return re2",GIS_LABLE_GX,devId);
@@ -378,7 +378,7 @@ public class NetsAnalysisService {
             while (result1.hasNext()) {
                 Record record = result1.next();
                 System.out.println(record.get(0).asMap().toString());
-                list.add(Long.valueOf(record.get(0).asMap().get("relationID").toString()));
+                list.add(record.get(0).asMap().get("relationID").toString());
             }
 
         }catch (Exception e){
@@ -486,7 +486,7 @@ public class NetsAnalysisService {
      * @param lineID
      * @param dtoList
      */
-    public String findInfluenceArea(Long lineID,List<NodeDTO>dtoList) throws Exception{
+    public String findInfluenceArea(String lineID,List<NodeDTO>dtoList) throws Exception{
         if (dtoList == null){
             return null;
         }
@@ -496,9 +496,9 @@ public class NetsAnalysisService {
         }
         List<String>lookingNodes = new ArrayList<>();
         List<String>lookedNodes = new ArrayList<>();
-        List<Long>influenceLines = new ArrayList<>();
+        List<String>influenceLines = new ArrayList<>();
         influenceLines.add(lineID);
-        Long nextPathID ;
+        String nextPathID ;
         String nextNodeName = null;
         List<Value> valueList = getNodesFromRel(lineID,GIS_LABLE_GX);
         for(Value value:valueList){
@@ -521,14 +521,14 @@ public class NetsAnalysisService {
                 List<Record> nextNodeAndPath= getNextNodeAndPath(tmpNodeName,GIS_LABLE_GD);
                 for(Record record:nextNodeAndPath){
                     nextNodeName = record.get(0).asNode().asMap().get("name").toString();
-                    nextPathID = Long.valueOf(record.get(1).asMap().get("relationID").toString());
+                    nextPathID = record.get(1).asMap().get("relationID").toString();
                     if(!famenList.contains(nextNodeName)){
                         if (!lookingNodes.contains(nextNodeName)&&(!lookedNodes.contains(nextNodeName)))
                             //不是阀门，并且不在待访问和已访问列表，添加
                             iterator.add(nextNodeName);
                     }
                     if (!influenceLines.contains(Long.valueOf(nextPathID))){
-                        influenceLines.add(Long.valueOf(nextPathID));
+                        influenceLines.add(nextPathID);
                     }
                 }
                 iterator = lookingNodes.listIterator();
@@ -565,13 +565,13 @@ public class NetsAnalysisService {
      * @return
      * @throws Exception
      */
-    public AnalysisResultVO getAnalysisResult(IdDTO<Long> dto) throws Exception{
+    public AnalysisResultVO getAnalysisResult(IdDTO<String> dto) throws Exception{
         AnalysisResultVO analysisResultVO = new AnalysisResultVO();
         //获取管网坐标系srid
         String srid = getValByDictString(dictConfig.getWaterPipeSrid());
 
         //yuechi
-        if(dto.getId() == 83308L){
+        if( "83308".equals(dto.getId())){
             List<NodeDTO> fmlist_final = new ArrayList<>();
             NodeDTO nodeDTO = new NodeDTO();
             nodeDTO.setDev_id(99419L);
@@ -588,7 +588,7 @@ public class NetsAnalysisService {
             return analysisResultVO;
         }
         //qianfeng
-        if(dto.getId() == 74587L){
+        if("74587".equals(dto.getId())){
             List<NodeDTO> fmlist_final = new ArrayList<>();
             NodeDTO nodeDTO = new NodeDTO();
             nodeDTO.setDev_id(99419L);
@@ -605,7 +605,7 @@ public class NetsAnalysisService {
             return analysisResultVO;
         }
         //wusheng
-        if(dto.getId() == 80840L){
+        if("80840".equals(dto.getId())){
             List<NodeDTO> fmlist_final = new ArrayList<>();
             NodeDTO nodeDTO = new NodeDTO();
             nodeDTO.setDev_id(98657L);
@@ -655,7 +655,7 @@ public class NetsAnalysisService {
         List<String>fmList = new ArrayList<>();
         List<NodeDTO> fmlistNode = findAllFamens(secondAnalysisDTO.getDev_id());
         List<String> fmlistTmp = secondAnalysisDTO.getFmlist();
-        Long dev_id =secondAnalysisDTO.getDev_id();
+        String dev_id =secondAnalysisDTO.getDev_id();
         List<NodeDTO> resultDtoList = new ArrayList<>();
         List<String>tmpList = new ArrayList<>();
        try {
@@ -878,7 +878,7 @@ public class NetsAnalysisService {
                 DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
                 DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
                 devIDsForTypeDTO.setTypeId(valve_typeid);
-                devIDsForTypeDTO.setDevIds(devIdList.toArray(new Long[devIdList.size()]));
+                devIDsForTypeDTO.setDevIds(devIdList.toArray(new String[devIdList.size()]));
                 devIDsForTypeDTO.setPageSize(pageSize);
                 devIDsForTypeDTO.setPageNum(pageNum);
                 PageVO<SpaceInfoVO> pageVO = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
@@ -887,7 +887,7 @@ public class NetsAnalysisService {
                 List<SpaceInfoVO> subDevList2 = new ArrayList<>();
                 if (faileddevIdList != null){
                     devIDsForTypeDTO2.setTypeId(valve_typeid);
-                    devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
+                    devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new String[faileddevIdList.size()]));
                     devIDsForTypeDTO2.setPageSize(pageSize);
                     devIDsForTypeDTO2.setPageNum(pageNum);
                     PageVO<SpaceInfoVO> pageVO2 = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO2);
@@ -1087,7 +1087,7 @@ public class NetsAnalysisService {
 
                 if ((firstdevIdList != null) && (firstdevIdList.size()>0)){
                     devIDsFirst.setTypeId(valve_typeid);
-                    devIDsFirst.setDevIds(firstdevIdList.toArray(new Long[firstdevIdList.size()]));
+                    devIDsFirst.setDevIds(firstdevIdList.toArray(new String[firstdevIdList.size()]));
                     devIDsFirst.setPageSize(pageSize);
                     devIDsFirst.setPageNum(pageNum);
                     PageVO<SpaceInfoVO> firstPageVO = queryDevService.findDevListPageByTypeID(devIDsFirst);
@@ -1095,7 +1095,7 @@ public class NetsAnalysisService {
                 }
                 if ((seconddevIdList != null) && (seconddevIdList.size()>0)){
                     devIDsSecond.setTypeId(valve_typeid);
-                    devIDsSecond.setDevIds(seconddevIdList.toArray(new Long[seconddevIdList.size()]));
+                    devIDsSecond.setDevIds(seconddevIdList.toArray(new String[seconddevIdList.size()]));
                     devIDsSecond.setPageSize(pageSize);
                     devIDsSecond.setPageNum(pageNum);
                     PageVO<SpaceInfoVO> secondPageVO = queryDevService.findDevListPageByTypeID(devIDsSecond);
@@ -1103,7 +1103,7 @@ public class NetsAnalysisService {
                 }
                 if ((faileddevIdList != null) && (faileddevIdList.size()>0)){
                     devIDsFailed.setTypeId(valve_typeid);
-                    devIDsFailed.setDevIds(faileddevIdList.toArray(new Long[faileddevIdList.size()]));
+                    devIDsFailed.setDevIds(faileddevIdList.toArray(new String[faileddevIdList.size()]));
                     devIDsFailed.setPageSize(pageSize);
                     devIDsFailed.setPageNum(pageNum);
                     PageVO<SpaceInfoVO> failedPageVO = queryDevService.findDevListPageByTypeID(devIDsFailed);

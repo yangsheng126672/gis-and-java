@@ -62,7 +62,7 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "根据设备ID查当前设备的属性信息")
 	@RequestMapping(value = "getDevExtByDevId")
-	public ResposeVO getDevExtByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException{
+	public ResposeVO getDevExtByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) throws BizException{
 		if (ObjectUtils.isEmpty(dto.getId())){
 			Logger.debug("设备ID参数为空");
 			return ResponseFactory.err("设备ID参数为空", EApiStatus.ERR_VALIDATE);

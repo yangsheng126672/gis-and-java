@@ -7,15 +7,17 @@ import java.util.List;
 
 public interface ShareDevPOMapper {
 
-    int insert(ShareDevPO record);
+	int deleteByPrimaryKey(String id);
 
-    int insertSelective(ShareDevPO record);
+	int insert(ShareDevPO record);
 
-    ShareDevPO selectByPrimaryKey(Long id);
+	int insertSelective(ShareDevPO record);
 
-    int updateByPrimaryKeySelective(ShareDevPO record);
+	ShareDevPO selectByPrimaryKey(String id);
 
-    int updateByPrimaryKey(ShareDevPO record);
+	int updateByPrimaryKeySelective(ShareDevPO record);
+
+	int updateByPrimaryKey(ShareDevPO record);
 
 	/**
 	 * 根据主键获取type_id
@@ -30,5 +32,12 @@ public interface ShareDevPOMapper {
 	 * @return
 	 */
 	List<ShareDevPO> findDevListByTypeIds(@Param("typeIds") String typeIds);
+
+	/**
+	 * 批量插入设备信息
+	 * @param shareDevPOList
+	 * @return
+	 */
+	int batchInsertSelective(@Param("shareDevPOList") List<ShareDevPO> shareDevPOList);
 
 }

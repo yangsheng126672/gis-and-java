@@ -126,8 +126,8 @@ public class ShareDevTypeService {
 
 
 			String devStr = null;
-			Long[] devIds = dto.getDevIds();
-			List<Long> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+			String[] devIds = dto.getDevIds();
+			List<String> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
