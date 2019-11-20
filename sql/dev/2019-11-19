@@ -1,0 +1,2 @@
+-- 给gis_dev_ext增加批次号字段
+alter table gis_dev_ext add column batch_number varchar(20);
