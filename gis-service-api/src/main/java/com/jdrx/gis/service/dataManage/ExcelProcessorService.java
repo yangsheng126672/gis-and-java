@@ -743,15 +743,15 @@ public class ExcelProcessorService {
 					String endCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 					CodeXYPO codeXYPO = new CodeXYPO();
 					GISDevExtPO start = gisDevExtPOMapper.selectByCode(startCode);
-//					if (Objects.isNull(start)) {
-//						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
-//								"便无法找到对应的坐标，请确认！");
-//					}
+					if (Objects.isNull(start)) {
+						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
+								"便无法找到对应的坐标，请确认！");
+					}
 					GISDevExtPO end = gisDevExtPOMapper.selectByCode(endCode);
-//					if (Objects.isNull(end)) {
-//						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
-//								"便无法找到对应的坐标，请确认！");
-//					}
+					if (Objects.isNull(end)) {
+						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
+								"便无法找到对应的坐标，请确认！");
+					}
 
 					ShareDevPO shareDevPOStart = shareDevPOMapper.selectByPrimaryKey(start.getDevId());
 					ShareDevPO shareDevPOEnd = shareDevPOMapper.selectByPrimaryKey(end.getDevId());
