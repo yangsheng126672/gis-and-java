@@ -24,6 +24,7 @@ import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
 import com.jdrx.share.service.ShareDeviceService;
+import javafx.scene.layout.BackgroundImage;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.postgis.PGgeometry;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import sun.rmi.runtime.Log;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -352,17 +354,21 @@ public class ExcelProcessorService {
 	 * @param cell
 	 * @return
 	 */
-	String handleDateCell(Cell cell) {
-		Date cellValue = cell.getDateCellValue();
-//		Short dateStyle = HSSFDataFormat.getBuiltinFormat("m/d/yy");
-		Short timeStyle = HSSFDataFormat.getBuiltinFormat("h:mm:ss");
-		Short cellStyle = cell.getCellStyle().getDataFormat();
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		if (timeStyle.equals(cellStyle)) {
-			return sdf2.format(cellValue);
-		} else {
+	String handleDateCell(Cell cell) throws BizException{
+		try {
+			Date cellValue = cell.getDateCellValue();
+			Short timeStyle = HSSFDataFormat.getBuiltinFormat("h:mm:ss");
+			Short cellStyle = cell.getCellStyle().getDataFormat();
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			if (timeStyle.equals(cellStyle)) {
+				return sdf2.format(cellValue);
+			}
 			return sdf1.format(cellValue);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("单元格的日期格式不正确！");
+			throw new BizException((cell.getAddress().getRow() + 1) + "行" +  (cell.getAddress().getColumn() + 1) + "列单元格的日期时间格式不正确");
 		}
 	}
 
@@ -463,7 +469,7 @@ public class ExcelProcessorService {
 					Map<Integer, Map<String, String>> allDevTypeNames = headerMap.get("allDevTypeNames");
 					Map<String, String> allDevTypes = allDevTypeNames.get(KEY);
 					if (!allDevTypes.containsKey(cellStringVal)) {
-						throw new BizException(cellAddrDesc + "的设备类型[" + cellStringVal + "]在数据库中不存在，请确认是" +
+						throw new BizException(cellAddrDesc + "的类别名称[" + cellStringVal + "]在数据库中不存在，请确认是" +
 								"否新增类型，如果是，请联系管理员添加；如果不是，请更正数据后重新上传！");
 					}
 					// 把类别名称转为ID

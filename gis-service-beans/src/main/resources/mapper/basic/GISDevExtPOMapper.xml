@@ -231,7 +231,7 @@
     </select>
 
     <insert id="batchInsertSelective" parameterType="java.util.List">
-        INSERT INTO gis_dev_ext (dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, create_by, create_at, belong_to)
+        INSERT INTO gis_dev_ext (dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, create_by, create_at, belong_to, batch_number)
         VALUES
         <foreach collection="gisDevExtPOList" item="item" index="index" separator=",">
             (
@@ -245,7 +245,8 @@
                 #{item.dataInfo,jdbcType=OTHER},
                 #{item.createBy,jdbcType=OTHER},
                 #{item.createAt,jdbcType=TIMESTAMP},
-                #{item.belongTo,jdbcType=BIGINT}
+                #{item.belongTo,jdbcType=BIGINT},
+                #{item.batchNum,jdbcType=VARCHAR}
             )
         </foreach>
     </insert>
