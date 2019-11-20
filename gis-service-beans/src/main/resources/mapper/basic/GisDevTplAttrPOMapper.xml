@@ -2,21 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper">
     <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
-        <id column="id" jdbcType="BIGINT" property="id"/>
-        <result column="type_id" jdbcType="BIGINT" property="typeId"/>
-        <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc"/>
-        <result column="field_name" jdbcType="VARCHAR" property="fieldName"/>
-        <result column="data_type" jdbcType="VARCHAR" property="dataType"/>
-        <result column="idx" jdbcType="SMALLINT" property="idx"/>
-        <result column="delete_flag" jdbcType="BIT" property="deleteFlag"/>
-        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
-        <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
-        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
-        <result column="update_at" jdbcType="TIMESTAMP" property="updateAt"/>
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="type_id" jdbcType="BIGINT" property="typeId" />
+        <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc" />
+        <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
+        <result column="data_type" jdbcType="VARCHAR" property="dataType" />
+        <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+        <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+        <result column="idx" jdbcType="SMALLINT" property="idx" />
+        <result column="fill" jdbcType="BIT" property="fill" />
     </resultMap>
     <sql id="Base_Column_List">
-    id, type_id, field_desc, field_name, data_type, idx, delete_flag, create_by, create_at,
-    update_by, update_at
+        id, type_id, field_desc, field_name, data_type, delete_flag, create_by, create_at,
+        update_by, update_at, idx, fill
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
@@ -25,14 +26,14 @@
         where id = #{id,jdbcType=BIGINT}
     </select>
     <insert id="insert" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
-    insert into gis_dev_tpl_attr (id, type_id, field_desc,
-      field_name, data_type, idx, delete_flag,
-      create_by, create_at, update_by, 
-      update_at)
-    values (#{id,jdbcType=BIGINT}, #{typeId,jdbcType=BIGINT}, #{fieldDesc,jdbcType=VARCHAR}, 
-      #{fieldName,jdbcType=VARCHAR}, #{dataType,jdbcType=VARCHAR}, #{idx,jdbcType=SMALLINT}, #{deleteFlag,jdbcType=BIT},
-      #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
-      #{updateAt,jdbcType=TIMESTAMP})
+        insert into gis_dev_tpl_attr (id, type_id, field_desc,
+          field_name, data_type, delete_flag,
+          create_by, create_at, update_by,
+          update_at, idx, fill)
+        values (#{id,jdbcType=BIGINT}, #{typeId,jdbcType=BIGINT}, #{fieldDesc,jdbcType=VARCHAR},
+           #{fieldName,jdbcType=VARCHAR}, #{dataType,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT},
+           #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR},
+           #{updateAt,jdbcType=TIMESTAMP}, #{idx,jdbcType=SMALLINT}, #{fill,jdbcType=BIT})
   </insert>
     <insert id="insertSelective" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
         insert into gis_dev_tpl_attr
@@ -48,9 +49,6 @@
             </if>
             <if test="fieldName != null">
                 field_name,
-            </if>
-            <if test="idx != null" >
-                idx,
             </if>
             <if test="dataType != null">
                 data_type,
@@ -70,6 +68,12 @@
             <if test="updateAt != null">
                 update_at,
             </if>
+            <if test="idx != null">
+                idx,
+            </if>
+            <if test="fill != null">
+                fill,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -87,9 +91,6 @@
             <if test="dataType != null">
                 #{dataType,jdbcType=VARCHAR},
             </if>
-            <if test="idx != null">
-                #{idx,jdbcType=SMALLINT},
-            </if>
             <if test="deleteFlag != null">
                 #{deleteFlag,jdbcType=BIT},
             </if>
@@ -104,6 +105,12 @@
             </if>
             <if test="updateAt != null">
                 #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="idx != null">
+                #{idx,jdbcType=SMALLINT},
+            </if>
+            <if test="fill != null">
+                #{fill,jdbcType=BIT},
             </if>
         </trim>
     </insert>
@@ -122,9 +129,6 @@
             <if test="dataType != null">
                 data_type = #{dataType,jdbcType=VARCHAR},
             </if>
-            <if test="idx != null">
-                idx = #{idx,jdbcType=SMALLINT},
-            </if>
             <if test="deleteFlag != null">
                 delete_flag = #{deleteFlag,jdbcType=BIT},
             </if>
@@ -140,22 +144,29 @@
             <if test="updateAt != null">
                 update_at = #{updateAt,jdbcType=TIMESTAMP},
             </if>
+            <if test="idx != null">
+                idx = #{idx,jdbcType=SMALLINT},
+            </if>
+            <if test="fill != null">
+                fill = #{fill,jdbcType=BIT},
+            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
-    update gis_dev_tpl_attr
-    set type_id = #{typeId,jdbcType=BIGINT},
-      field_desc = #{fieldDesc,jdbcType=VARCHAR},
-      field_name = #{fieldName,jdbcType=VARCHAR},
-      data_type = #{dataType,jdbcType=VARCHAR},
-      idx = #{idx,jdbcType=SMALLINT},
-      delete_flag = #{deleteFlag,jdbcType=BIT},
-      create_by = #{createBy,jdbcType=VARCHAR},
-      create_at = #{createAt,jdbcType=TIMESTAMP},
-      update_by = #{updateBy,jdbcType=VARCHAR},
-      update_at = #{updateAt,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=BIGINT}
+        update gis_dev_tpl_attr
+        set type_id = #{typeId,jdbcType=BIGINT},
+            field_desc = #{fieldDesc,jdbcType=VARCHAR},
+            field_name = #{fieldName,jdbcType=VARCHAR},
+            data_type = #{dataType,jdbcType=VARCHAR},
+            delete_flag = #{deleteFlag,jdbcType=BIT},
+            create_by = #{createBy,jdbcType=VARCHAR},
+            create_at = #{createAt,jdbcType=TIMESTAMP},
+            update_by = #{updateBy,jdbcType=VARCHAR},
+            update_at = #{updateAt,jdbcType=TIMESTAMP},
+            idx = #{idx,jdbcType=SMALLINT},
+            fill = #{fill,jdbcType=BIT}
+        where id = #{id,jdbcType=BIGINT}
   </update>
 
     <select id="findTplAttrsByDevId" parameterType="java.lang.Long" resultMap="BaseResultMap">

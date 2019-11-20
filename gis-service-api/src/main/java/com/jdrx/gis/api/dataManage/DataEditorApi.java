@@ -1,6 +1,7 @@
 package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
+import com.jdrx.gis.beans.dto.datamanage.SharePointDTO;
 import com.jdrx.gis.service.analysis.SpatialAnalysisService;
 import com.jdrx.gis.service.dataManage.DataEditorService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -42,6 +43,14 @@ public class DataEditorApi {
         Logger.debug("api/0/analysis/getSharePointType 获取管点类型");
         return  ResponseFactory.ok(dataEditorService.getAllPointType());
     }
+
+    @ApiOperation(value = "保存新增管点")
+    @RequestMapping(value ="saveSharePoint")
+    public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid SharePointDTO dto) throws Exception{
+        Logger.debug("api/0/analysis/saveSharePoint 保存新增管点");
+        return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto));
+    }
+
     @ApiOperation(value = "获取管线类型")
     @RequestMapping(value ="getShareLineType")
     public ResposeVO getShareLineType() throws Exception{
@@ -51,7 +60,7 @@ public class DataEditorApi {
 
     @ApiOperation(value = "根据类型id获取属性模板")
     @RequestMapping(value ="getDevExtByTopid")
-    public ResposeVO getDevExtByTopid(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) throws Exception{
+    public ResposeVO getDevExtByTopid(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws Exception{
         if (dto == null || dto.getId() ==null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }

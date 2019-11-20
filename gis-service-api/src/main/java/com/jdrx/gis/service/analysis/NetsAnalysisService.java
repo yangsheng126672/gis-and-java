@@ -28,6 +28,7 @@ import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
+import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
@@ -69,18 +70,18 @@ public class NetsAnalysisService {
 
     private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(NetsAnalysisService.class);
 
-    final static ObjectMapper mapper = new ObjectMapper();
-
-    static {
-        /**
-         * 使用neo4j的session执行条件语句statement，一定要使用这个反序列化对象为json字符串
-         * 下面的设置的作用是，比如对象属性字段name="李二明"，正常反序列化json为 == "name":"李二明"
-         * 如果使用下面的设置后，反序列name就是 == name:"jdrx"
-         * 而session执行语句create (:儿子{"name":"李二明","uuid":3330,"age":12,"height":"165cm"})会报错
-         * 因此,......etc
-         */
-        mapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
-    }
+//    final static ObjectMapper mapper = new ObjectMapper();
+//
+//    static {
+//        /**
+//         * 使用neo4j的session执行条件语句statement，一定要使用这个反序列化对象为json字符串
+//         * 下面的设置的作用是，比如对象属性字段name="李二明"，正常反序列化json为 == "name":"李二明"
+//         * 如果使用下面的设置后，反序列name就是 == name:"jdrx"
+//         * 而session执行语句create (:儿子{"name":"李二明","uuid":3330,"age":12,"height":"165cm"})会报错
+//         * 因此,......etc
+//         */
+//        mapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
+//    }
 
     @Autowired
     private Session session;
@@ -100,101 +101,10 @@ public class NetsAnalysisService {
     private PathConfig pathConfig;
     @Autowired
     private DictConfig dictConfig;
-
+    @Autowired
+    private Neo4jUtil neo4jUtil;
     @Autowired
     private DictDetailService detailService;
-
-
-    //逻辑管点标签
-    final private String GIS_LABLE_LJGD = "ljgd";
-    //管点标签
-    final private String GIS_LABLE_GD = "gd";
-    //管线标签
-    final private String GIS_LABLE_GX = "gdline";
-    //逻辑管线标签
-    final private String GIS_LABLE_LJGX = "ljgdline";
-
-    //节点类型  0普通节点  1阀门节点  2水源节点
-    final private String GIS_TYPE_VALVE = "1";
-
-    /**
-     * 获取节点详细信息
-     * @return
-     */
-    public NodeDTO getValveNode(String code){
-        NodeDTO node = new NodeDTO();
-        String cypherSql = String.format("match (n:gd) where n.name = '%s' return n",code);
-        StatementResult result = session.run(cypherSql);
-        while (result.hasNext()) {
-            Record record = result.next();
-            node.setCode((record.get(0).asMap().get("name").toString()));
-            node.setX(Double.valueOf(record.get(0).asMap().get("x").toString()));
-            node.setY(Double.valueOf(record.get(0).asMap().get("y").toString()));
-            node.setDev_id(Long.valueOf(record.get(0).asMap().get("dev_id").toString()));
-        }
-        return node;
-    }
-    /**
-     * 获取关系中起始节点
-     * @param relationID
-     * @return
-     */
-    public List<Value> getNodesFromRel(String relationID,String lineLable) {
-        String cypherSql = String.format("MATCH (n)-[:%s{relationID: %d}]-(b) return n,b  ", lineLable,relationID);
-        StatementResult result = session.run(cypherSql);
-        List<Value> values = null;
-        while (result.hasNext()) {
-            Record record = result.next();
-            values = record.values();
-        }
-        return values;
-    }
-
-    /**
-     * 获取关联节点
-     * @param nodeName
-     * @return
-     */
-    public List<Value> getNextNode(String nodeName,String nodeLable) {
-        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return b  ", nodeLable,nodeName);
-        StatementResult result = session.run(cypherSql);
-        List<Value> values = new ArrayList<>();
-        while (result.hasNext()) {
-            Record record = result.next();
-            values.addAll(record.values());
-        }
-        return values;
-    }
-
-    /**
-     * 获取关联节点和边
-     * @param nodeName
-     * @return
-     */
-    public List<Record> getNextNodeAndPath(String nodeName,String nodeLable) {
-        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return b,r  ", nodeLable,nodeName);
-        StatementResult result = session.run(cypherSql);
-        List<Record> values = new ArrayList<>();
-        values = result.list();
-        return values;
-    }
-
-    /**
-     * 查找水源列表
-     * @return
-     */
-    public List<String> getWaterSourceList(){
-        List<String>list = new ArrayList<>();
-        String code = null;
-        String cypherSql = String.format("match (n:gd) where n.nodetype = '2' return n");
-        StatementResult result = session.run(cypherSql);
-        while (result.hasNext()) {
-            Record record = result.next();
-            code = (record.get(0).asMap().get("name").toString());
-            list.add(code);
-        }
-        return list;
-    }
 
     /**
      * 查找一级关阀所有点
@@ -203,7 +113,7 @@ public class NetsAnalysisService {
 
     public List<NodeDTO> findAllFamens(String relationID){
         String rid  = relationID;
-        List<Value> values = getNodesFromRel(rid,GIS_LABLE_GX);
+        List<Value> values = neo4jUtil.getNodesFromRel(rid,GISConstants.NEO_LINE);
         if(values == null){
             Logger.info("查询失败，无关系数据！"+ relationID);
             return null;
@@ -233,7 +143,7 @@ public class NetsAnalysisService {
                 //判断nodetype是否为阀门类型
                 nodeName = tmpValue.asNode().get("name").asString();
                 nodetype = tmpValue.asNode().get("nodetype").asString();
-                if (GIS_TYPE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
+                if (GISConstants.NEO_NODE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
                     NodeDTO dto = new NodeDTO();
                     dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
@@ -244,7 +154,7 @@ public class NetsAnalysisService {
                     continue;
                 }else {
                     //不是阀门节点，继续遍历其关联节点
-                    tmpList =getNextNode(nodeName,GIS_LABLE_GD);
+                    tmpList =neo4jUtil.getNextNode(nodeName,GISConstants.NEO_POINT);
                     for (Value invalue:tmpList){
                         //不在待访问和访问过的节点，添加
                         if(!(lookedSet.contains(invalue))&&(!(lookingSet.contains(invalue)))){
@@ -269,7 +179,7 @@ public class NetsAnalysisService {
      * @param fmlist
      * */
     public List<NodeDTO> findSecondAnalysisResult(String code,List<String>fmlist){
-        List<Value> values = getNextNode(code,GIS_LABLE_LJGD);
+        List<Value> values = neo4jUtil.getNextNode(code,GISConstants.NEO_POINT_LJ);
         if(values == null){
             Logger.info("查询失败，无关系数据！"+ code);
             return null;
@@ -303,7 +213,7 @@ public class NetsAnalysisService {
                 }
                 //判断nodetype是否为阀门类型
                 nodetype = tmpValue.asNode().get("nodetype").asString();
-                if (GIS_TYPE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
+                if (GISConstants.NEO_NODE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
                     NodeDTO dto = new NodeDTO();
                     dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
@@ -314,7 +224,7 @@ public class NetsAnalysisService {
                     continue;
                 }else {
                     //不是阀门节点，继续遍历其关联节点
-                    tmpList =getNextNode(nodeName,GIS_LABLE_GD);
+                    tmpList =neo4jUtil.getNextNode(nodeName,GISConstants.NEO_POINT);
                     for (Value invalue:tmpList){
                         //不在待访问和访问过的节点，添加
                         if(!(lookedSet.contains(invalue))&&(!(lookingSet.contains(invalue)))){
@@ -333,61 +243,6 @@ public class NetsAnalysisService {
         }
     }
 
-
-    /**
-     * 获取点连通的线
-     * @param devId
-     * @return
-     */
-    public List<String> getNodeConnectionLine(String devId){
-        List<String> list = new ArrayList<>();
-        try {
-            String cypherSql = String.format("MATCH (n:%s{dev_id:%d})-[r]-(b) return r",GIS_LABLE_GD,devId);
-            StatementResult result = session.run(cypherSql);
-            while (result.hasNext()) {
-                Record record = result.next();
-                list.add(record.get(0).asMap().get("relationID").toString());
-            }
-
-        }catch (Exception e){
-            Logger.error("获取点连通的线失败！"+e.getMessage());
-        }
-        return list;
-    }
-
-    /**
-     * 获取线连通的点和线
-     * @param devId
-     * @return
-     */
-    public List<String> getNodeConnectionPointAndLine(String devId){
-        List<String> list = new ArrayList<>();
-        try {
-            //查找关联的点
-            String cypherSql = String.format("MATCH (a)-[r:%s{relationID:%d}]-(b) return a,b",GIS_LABLE_GX,devId);
-            System.out.println(cypherSql);
-            StatementResult result = session.run(cypherSql);
-            while (result.hasNext()) {
-                Record record = result.next();
-                list.add(record.get(0).asMap().get("dev_id").toString());
-            }
-            //查找关联的线
-            String cypherSqlLine = String.format("match (a)-[re:%s{relationID:%d}]-(b)-[re2]-(c) return re2",GIS_LABLE_GX,devId);
-            System.out.println(cypherSqlLine);
-            StatementResult result1 = session.run(cypherSqlLine);
-            while (result1.hasNext()) {
-                Record record = result1.next();
-                System.out.println(record.get(0).asMap().toString());
-                list.add(record.get(0).asMap().get("relationID").toString());
-            }
-
-        }catch (Exception e){
-            Logger.error("获取点连通的线失败！"+e.getMessage());
-        }
-        return list;
-    }
-
-
     /**
      * 判断list列表中是否有某个字符串
      * @param s
@@ -405,6 +260,7 @@ public class NetsAnalysisService {
         }
         return false;
     }
+
     /**
      * 从一级关阀的所有阀门中筛选必须关闭的阀门
      * @param list
@@ -425,12 +281,12 @@ public class NetsAnalysisService {
         Iterator<Value> iterator = null;
         try {
             //获取水源列表
-            List<String> waterSourceList = getWaterSourceList();
+            List<String> waterSourceList = neo4jUtil.getWaterSourceList();
             //循环所有一级关阀的阀门列表,把每个阀门和所有水源地做连通分析和路径分析
             for (NodeDTO dto :list){
                 String famenName = dto.getCode();
                 //以阀门为起点遍历相邻节点
-                tmpList =  getNextNode(famenName,GIS_LABLE_LJGD);
+                tmpList =  neo4jUtil.getNextNode(famenName,GISConstants.NEO_POINT_LJ);
                 lookingSet.clear();
                 lookedSet.clear();
                 lookingSet.addAll(tmpList);
@@ -451,7 +307,7 @@ public class NetsAnalysisService {
                         break;
                     }
                     //获取这个节点的相邻节点
-                    tmpList = getNextNode(tmpNodeName,GIS_LABLE_LJGD);
+                    tmpList = neo4jUtil.getNextNode(tmpNodeName,GISConstants.NEO_POINT_LJ);
                     for (Value nodeValue:tmpList ){
                         tmpNodeName = nodeValue.get("name").asString();
                         //首先判断这个节点是不是在阀门列表
@@ -500,7 +356,7 @@ public class NetsAnalysisService {
         influenceLines.add(lineID);
         String nextPathID ;
         String nextNodeName = null;
-        List<Value> valueList = getNodesFromRel(lineID,GIS_LABLE_GX);
+        List<Value> valueList = neo4jUtil.getNodesFromRel(lineID,GISConstants.NEO_LINE);
         for(Value value:valueList){
             Node node = value.asNode();
             String nodeName = node.asMap().get("name").toString();
@@ -518,7 +374,7 @@ public class NetsAnalysisService {
             }
             if (!famenList.contains(tmpNodeName)){
                 //如果不是必须关闭的阀门，查找相邻的边和点
-                List<Record> nextNodeAndPath= getNextNodeAndPath(tmpNodeName,GIS_LABLE_GD);
+                List<Record> nextNodeAndPath= neo4jUtil.getNextNodeAndPath(tmpNodeName,GISConstants.NEO_POINT);
                 for(Record record:nextNodeAndPath){
                     nextNodeName = record.get(0).asNode().asMap().get("name").toString();
                     nextPathID = record.get(1).asMap().get("relationID").toString();
@@ -794,13 +650,13 @@ public class NetsAnalysisService {
         List<GisPipeAnalysisValvePO> valvePOS = valvePOMapper.selectByPrimaryKey(id);
         for(GisPipeAnalysisValvePO po:valvePOS){
             if (!StringUtils.isEmpty(po.getValveFirst())){
-                NodeDTO node = getValveNode(po.getValveFirst());
+                NodeDTO node = neo4jUtil.getValveNode(po.getValveFirst());
                 valveFirst.add(node);
             }else if(!StringUtils.isEmpty(po.getValveFailed())){
-                NodeDTO node = getValveNode(po.getValveFailed());
+                NodeDTO node = neo4jUtil.getValveNode(po.getValveFailed());
                 valveFailed.add(node);
             }else if(!StringUtils.isEmpty(po.getValveSecond())){
-                NodeDTO node = getValveNode(po.getValveSecond());
+                NodeDTO node = neo4jUtil.getValveNode(po.getValveSecond());
                 valveSecond.add(node);
             }
         }

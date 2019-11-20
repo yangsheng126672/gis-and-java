@@ -125,4 +125,27 @@ public class GISConstants {
 
 	/** data_info */
 	public final static String DATA_INFO = "data_info";
+
+	/********************************Neo4j图数据库常量字段**********************/
+
+	/** 管点标签 一个标签其实就是代表一张表*/
+	public final static String NEO_POINT = "gd";
+
+	/** 逻辑管点标签 */
+	public final static String NEO_POINT_LJ = "ljgd";
+
+	/** 管线标签 */
+	public final static String NEO_LINE = "gdline";
+
+	/** 逻辑管线标签 */
+	public final static String NEO_LINE_LJ = "ljgdline";
+
+	/** 普通节点 */
+	public final  static String NEO_NODE_NORMAL = "0";
+
+	/** 阀门节点 */
+	public final  static String NEO_NODE_VALVE = "1";
+
+	/** 水源节点 */
+	public final static String NEO_NODE_WATER = "2";
 }

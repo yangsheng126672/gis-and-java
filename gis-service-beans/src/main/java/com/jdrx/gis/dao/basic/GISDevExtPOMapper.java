@@ -69,13 +69,13 @@ public interface GISDevExtPOMapper {
 	 * 获取管点数据
 	 * @return
 	 */
-	List<NeoPointVO> getPointDevExt();
+	List<NeoPointVO> getPointDevExt(String devIds);
 
 	/**
 	 * 获取管线数据
 	 * @return
 	 */
-	List<NeoLineVO> getLineDevExt();
+	List<NeoLineVO> getLineDevExt(String devIds);
 
 	/*
 	 * 根据设备的编码获取设备信息

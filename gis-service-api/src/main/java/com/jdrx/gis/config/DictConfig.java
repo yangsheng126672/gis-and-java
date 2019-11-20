@@ -55,6 +55,7 @@ public class DictConfig {
 
 	/** 管线类型 */
 	private String lineType;
+
 	/** 管点模板 */
 	private String pointTpl;
 
