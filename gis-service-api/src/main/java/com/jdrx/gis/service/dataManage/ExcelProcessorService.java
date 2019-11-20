@@ -1,11 +1,14 @@
 package com.jdrx.gis.service.dataManage;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.jdrx.gis.beans.constants.basic.EPGDataTypeCategory;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.*;
+import com.jdrx.gis.beans.entry.dataManage.DevSaveParam;
 import com.jdrx.gis.beans.entry.user.SysOcpUserPo;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
@@ -22,6 +25,7 @@ import com.jdrx.share.service.SequenceDefineService;
 import com.jdrx.share.service.ShareDeviceService;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
+import org.postgis.PGgeometry;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -95,11 +100,26 @@ public class ExcelProcessorService {
 	private final static Integer KEY = 2464;
 
 	/**
+	 * 验证上传文件是否为Excel文件
+	 * @param file
+	 * @throws BizException
+	 */
+	public void validSuffix(MultipartFile file) throws BizException{
+		String filaName = file.getOriginalFilename();
+		if (Objects.nonNull(filaName)) {
+			String suffix = filaName.substring(filaName.lastIndexOf(".") + 1);
+			if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
+				throw new BizException("只能上传Excel文件");
+			}
+		}
+	}
+
+	/**
 	 * 固定sheet名字，预防或提醒管点和管段数据别放混了
 	 * @param workbook
 	 * @throws BizException
 	 */
-	void validSheetName(Workbook workbook) throws BizException {
+	public void validSheetName(Workbook workbook) throws BizException {
 		Sheet sheet0 = workbook.getSheetAt(0);
 		Sheet sheet1 = workbook.getSheetAt(1);
 		if (!GISConstants.IMPORT_SHEET0_NAME.equals(sheet0.getSheetName().trim())) {
@@ -345,9 +365,18 @@ public class ExcelProcessorService {
 		}
 	}
 
+	/**
+	 * 验证并获取Excel的数据
+	 * @param workbook
+	 * @param sheetName
+	 * @return
+	 * @throws BizException
+	 */
 	public List<Map<String, Object>> getExcelDataList(Workbook workbook, String sheetName) throws BizException {
 		// 验证表头
 		Map<String,HashMap> headerMap = valid_GetExcelHeader(workbook, sheetName);
+		// 验证总条数，防止数据量过大
+		validTotalRows(workbook, sheetName);
 		// Excel中第几列，数据类型分类
 		HashMap<Integer, String> cellDataTypeMap = headerMap.get("cellDataTypeMap");
 		// Excel中第几列，字段中文名
@@ -364,11 +393,11 @@ public class ExcelProcessorService {
 		Set<String> lineCodeSets = Sets.newHashSet();
 		// 存放数据
 		List<Map<String, Object>> excelDevList = Lists.newArrayList();
-
+		// 获取实际列数
+		int cells = sheet.getRow(0).getPhysicalNumberOfCells();
 		// 遍历数据，有非法数据抛出异常信息
 		for (int i = 1; i < total; i ++ ){
 			Row row = sheet.getRow(i);
-			int cells = row.getPhysicalNumberOfCells();
 			Map<String, Object> shareDevDataMap = Maps.newHashMap();
 			Map<String, String> gisExtDataMap = Maps.newHashMap();
 			for (int j = 0; j < cells; j ++) {
@@ -428,17 +457,16 @@ public class ExcelProcessorService {
 				}
 
 				// 验证类别名称是否合法
+				String typeName = null;
 				if (GISConstants.DEV_TYPE_NAME_CHN.equals(headerName)) {
 					Map<Integer, Map<String, String>> allDevTypeNames = headerMap.get("allDevTypeNames");
 					Map<String, String> allDevTypes = allDevTypeNames.get(KEY);
-					noConvertVal = cellStringVal;
-					isTranslate = true;
 					if (!allDevTypes.containsKey(cellStringVal)) {
 						throw new BizException(cellAddrDesc + "的设备类型[" + cellStringVal + "]在数据库中不存在，请确认是" +
 								"否新增类型，如果是，请联系管理员添加；如果不是，请更正数据后重新上传！");
 					}
 					// 把类别名称转为ID
-					cellStringVal = allDevTypes.get(cellStringVal);
+					typeName = allDevTypes.get(cellStringVal);
 				}
 
 				// 验证权属单位是否合法
@@ -486,6 +514,9 @@ public class ExcelProcessorService {
 						e.printStackTrace();
 					}
 				}
+				if (Objects.nonNull(typeName)) {
+					shareDevDataMap.put("typeName", typeName);
+				}
 			}
 			excelDevList.add(shareDevDataMap);
 		}
@@ -504,20 +535,33 @@ public class ExcelProcessorService {
 	}
 
 
-
+	/**
+	 * 保存模板，如果有一模一样的模板，直接返回模板ID，模板ID（管点取的是管件，管段取的是水管）
+	 * @param tplConfigVal
+	 * @param loginUserName
+	 * @param typeName
+	 * @return
+	 * @throws BizException
+	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
 	public Long saveTplAttr(String tplConfigVal, String loginUserName, String typeName) throws BizException {
 		try{
 			Long typeId = shareDevTypePOMapper.getIdByNameForTopHierarchy(typeName);
+			if (Objects.isNull(typeId)) {
+				throw new BizException(typeName + "对应的模板未在数据库表gis_dev_tpl_attr为配置，请先配置！");
+			}
+			List<Map<String, String>> typeDescList = gisDevTplAttrService.selectTypeIdDescMap();
 			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(tplConfigVal);
 			List<GisDevTplAttrPO> tplAttrPOList = Lists.newArrayList();
+			StringBuffer sb = new StringBuffer();
 			if (Objects.nonNull(dictDetailPOS) && dictDetailPOS.size() > 0) {
-				dictDetailPOS.stream().forEach(dictDetailPO -> {
+				for (DictDetailPO dictDetailPO : dictDetailPOS) {
 					GisDevTplAttrPO gisDevTplAttrPO = new GisDevTplAttrPO();
 					String confVal = dictDetailPO.getVal();
 					String[] confValArray = confVal.split(",");
 					int i = 0;
 					gisDevTplAttrPO.setFieldDesc(confValArray[i++]);
+					sb.append(gisDevTplAttrPO.getFieldDesc()).append(",");
 					gisDevTplAttrPO.setFieldName(confValArray[i++]);
 					gisDevTplAttrPO.setDataType(confValArray[i++]);
 					gisDevTplAttrPO.setIdx(Short.parseShort(confValArray[i]));
@@ -525,9 +569,35 @@ public class ExcelProcessorService {
 					gisDevTplAttrPO.setCreateBy(loginUserName);
 					gisDevTplAttrPO.setCreateAt(new Date());
 					tplAttrPOList.add(gisDevTplAttrPO);
-				});
+				}
 			}
-			gisDevTplAttrService.batchInsertSelective(tplAttrPOList);
+			String configDesc = String.valueOf(sb);
+			boolean isExist = false;
+			configDesc = configDesc.substring(0, configDesc.lastIndexOf(","));
+			if(Objects.nonNull(typeDescList) && typeDescList.size() > 0) {
+				for (Map<String, String> map : typeDescList) {
+					String fieldDescArray = "";
+					String tId = "";
+					for(Map.Entry<String, String> entry : map.entrySet()) {
+						String key = entry.getKey();
+						if("fielddescarray".equals(entry.getKey())) {
+							fieldDescArray = entry.getValue();
+						}
+						if("typeid".equals(entry.getKey())) {
+							tId = String.valueOf(entry.getValue());
+						}
+					}
+					if (fieldDescArray.equals(configDesc)) {
+						isExist = true;
+						typeId = Long.parseLong(tId);
+						break;
+					}
+				}
+			}
+			// 如果数据库不存在相同的模板再插入数据库
+			if (!isExist) {
+				gisDevTplAttrService.batchInsertSelective(tplAttrPOList);
+			}
 			return typeId;
 		} catch (Exception e) {
 			Logger.error("保存字段模板信息失败！");
@@ -536,12 +606,67 @@ public class ExcelProcessorService {
 		}
 	}
 
+	/**
+	 * 保存Excel数据
+	 * @param dataMapList
+	 * @param loginUserName
+	 * @param sheetName
+	 * @param tplTypeId
+	 * @return
+	 * @throws BizException
+	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
-	public boolean saveExcelData(List<Map<String, Object>> dataMapList,String loginUserName, String sheetName, Long tplTypeId) throws BizException {
+	public boolean saveExcelData(DevSaveParam devSaveParam) throws BizException {
 		boolean result = false;
+		Map<String, List> buildMap = buildDevPO(devSaveParam);
+		try {
+			int e1 = shareDevPOMapper.batchInsertSelective(buildMap.get("shareDev"));
+			int e2 = gisDevExtPOMapper.batchInsertSelective(buildMap.get("gisDevExt"));
+			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows", " total " + (e1 + e2) + "rows");
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error(e.getMessage());
+			new BizException("保存设备数据失败！");
+		}
+		return result;
+	}
+
+	/**
+	 * 更新数据
+	 * @param excelDataList
+	 * @param loginUserName
+	 * @param importSheet0Name
+	 * @param typeId
+	 * @param existsRecords
+	 * @return
+	 * @throws BizException
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
+	public boolean updateDBData(DevSaveParam devSaveParam) throws BizException {
+		return false;
+	}
+
+	/**
+	 * 创建PO对象，包含gis_dev_ext和share_dev的
+	 * @param devSaveParam
+	 * @return
+	 * @throws BizException
+	 */
+	public Map<String, List> buildDevPO(DevSaveParam devSaveParam) throws BizException {
 		List<ShareDevPO> shareDevPOList = Lists.newArrayList();
 		List<GISDevExtPO> gisDevExtPOList = Lists.newArrayList();
-		Map<String, String> codeGeomMap = Maps.newHashMap();
+		Map<String, Object> codeGeomMap = Maps.newHashMap();
+		Map<String, List> buildMap = Maps.newHashMap();
+		List<Map<String, Object>> dataMapList = devSaveParam.getDataMapList();
+		String sheetName = devSaveParam.getSheetName();
+		List<GISDevExtPO> existsExtPOs = devSaveParam.getExistsCodes();
+		Set<String> existsCodes = Sets.newHashSet();
+		if (Objects.nonNull(existsExtPOs) && existsExtPOs.size() > 0) {
+			existsExtPOs.stream().forEach(gisDevExtPO -> {
+				existsCodes.add(gisDevExtPO.getCode());
+			});
+		}
 		if (Objects.nonNull(dataMapList) && dataMapList.size() > 0) {
 			List<CodeXYPO> codeXYPOList = Lists.newArrayList();
 			for (Map<String, Object> map : dataMapList) {
@@ -553,22 +678,26 @@ public class ExcelProcessorService {
 					CodeXYPO codeXYPO = new CodeXYPO();
 					codeXYPO.setPointX(x)
 							.setPointY(y)
-							.setPointCode(pointCode);
-					codeGeomMap.putAll(geomConvertFromExt(codeXYPO,1));
+							.setPointCode(pointCode)
+							.setCode(pointCode);
+					codeXYPOList.add(codeXYPO);
+
 				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
 					lineCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
-					String[] line = lineCode.split("-");
+//					String[] line = lineCode.split("-");
+					String startCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN));
+					String endCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 					CodeXYPO codeXYPO = new CodeXYPO();
-					GISDevExtPO start = gisDevExtPOMapper.selectByCode(line[0]);
-					if (Objects.isNull(start)) {
-						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
-								"便无法找到对应的坐标，请确认！");
-					}
-					GISDevExtPO end = gisDevExtPOMapper.selectByCode(line[1]);
-					if (Objects.isNull(end)) {
-						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
-								"便无法找到对应的坐标，请确认！");
-					}
+					GISDevExtPO start = gisDevExtPOMapper.selectByCode(startCode);
+//					if (Objects.isNull(start)) {
+//						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
+//								"便无法找到对应的坐标，请确认！");
+//					}
+					GISDevExtPO end = gisDevExtPOMapper.selectByCode(endCode);
+//					if (Objects.isNull(end)) {
+//						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
+//								"便无法找到对应的坐标，请确认！");
+//					}
 
 					ShareDevPO shareDevPOStart = shareDevPOMapper.selectByPrimaryKey(start.getDevId());
 					ShareDevPO shareDevPOEnd = shareDevPOMapper.selectByPrimaryKey(end.getDevId());
@@ -576,16 +705,30 @@ public class ExcelProcessorService {
 							.setLineStartX(shareDevPOStart.getLat())
 							.setLineStartY(shareDevPOStart.getLng())
 							.setLineEndX(shareDevPOEnd.getLat())
-							.setLineEndY(shareDevPOEnd.getLng());
+							.setLineEndY(shareDevPOEnd.getLng())
+							.setCode(lineCode);
 					codeXYPOList.add(codeXYPO);
-					codeGeomMap.putAll(geomConvertFromExt(codeXYPO,2));
+				}
+
+			}
+			List<Map<String, Object>> codeGeomList = null;
+			if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
+				codeGeomList = geomConvertFromExt(codeXYPOList, 1);
+			} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
+				codeGeomList = geomConvertFromExt(codeXYPOList, 2);
+			}
+			if (Objects.nonNull(codeGeomList)) {
+				for (Map<String, Object> map : codeGeomList) {
+					codeGeomMap.put(String.valueOf(map.get("code")), map.get("geom"));
 				}
 			}
-
-
 			for (Map<String, Object> map : dataMapList) {
 				ShareDevPO shareDevPO = new ShareDevPO();
-				Long typeId = shareDevPO.getTypeId();
+				Long typeId = null;
+				String typeIdStr = Objects.nonNull(map.get(GISConstants.DEV_TYPE_NAME_EN)) ? String.valueOf(map.get(GISConstants.DEV_TYPE_NAME_EN)) : null;
+				if (Objects.nonNull(typeIdStr)) {
+					typeId = Long.parseLong(typeIdStr);
+				}
 				Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
 				String devId = String.format("%04d%s%06d",typeId, GISConstants.PLATFORM_CODE, seq);
 				String name = String.valueOf(map.get(GISConstants.DEV_TYPE_NAME_CHN));
@@ -593,26 +736,42 @@ public class ExcelProcessorService {
 				int p_l = 0;
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
 					pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
+					if (Objects.nonNull(existsCodes) && existsCodes.contains(pointCode)) {
+						continue;
+					}
 					p_l = 1;
 				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
 					lineCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
+					if (Objects.nonNull(existsCodes) && existsCodes.contains(lineCode)) {
+						continue;
+					}
 					p_l = 2;
 				}
-				String caliber = String.valueOf(map.get(GISConstants.CALIBER_CHN));
-				String material = String.valueOf(map.get(GISConstants.MATERIAL_CHN));
-				String belongTo = String.valueOf(map.get(GISConstants.DATA_AUTH_CHN));
-				PGobject pGobject = (PGobject) map.get(GISConstants.DATA_INFO);
+				String caliber = Objects.nonNull(map.get(GISConstants.CALIBER_CHN)) ? String.valueOf(map.get(GISConstants.CALIBER_CHN)) : null;
+				String material = Objects.nonNull(map.get(GISConstants.MATERIAL_CHN)) ? String.valueOf(map.get(GISConstants.MATERIAL_CHN)) : null;
+				String belongTo = Objects.nonNull(map.get(GISConstants.DATA_AUTH_CHN)) ? String.valueOf(map.get(GISConstants.DATA_AUTH_CHN)) : null;
+				HashMap dataInfoTempMap = (HashMap) map.get(GISConstants.DATA_INFO);
+				Object dataInfoStr =  dataInfoTempMap.get("value");
+				PGobject jsonObject = new PGobject();
+				try {
+					jsonObject.setValue(String.valueOf(dataInfoStr));
+					jsonObject.setType("jsonb");
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+
 				Date creatAt = new Date();
-				String geom = "";
+				PGgeometry geom = null;
 
 				shareDevPO.setId(String.valueOf(devId));
+
 				shareDevPO.setTypeId(typeId);
 				shareDevPO.setName(name);
 				shareDevPO.setLng(String.valueOf(map.get(GISConstants.Y_CHN)));
 				shareDevPO.setLat(String.valueOf(map.get(GISConstants.X_CHN)));
 				shareDevPO.setAddr(String.valueOf(map.get(GISConstants.DEV_ADDR_CHN)));
 				shareDevPO.setCreateAt(creatAt);
-				shareDevPO.setCreateBy(loginUserName);
+				shareDevPO.setCreateBy(devSaveParam.getLoginUserName());
 				shareDevPO.setPlatformCode(GISConstants.PLATFORM_CODE);
 				shareDevPOList.add(shareDevPO);
 
@@ -621,81 +780,110 @@ public class ExcelProcessorService {
 				gisDevExtPO.setName(name);
 				if (p_l == 1) {
 					gisDevExtPO.setCode(pointCode);
-					geom = codeGeomMap.get(pointCode);
+					geom = (PGgeometry) codeGeomMap.get(pointCode);
 				} else if (p_l == 2) {
 					gisDevExtPO.setCode(lineCode);
-					geom = codeGeomMap.get(lineCode);
+					geom = (PGgeometry) codeGeomMap.get(lineCode);
 				}
-				gisDevExtPO.setCaliber(Integer.parseInt(caliber));
+				if (Objects.nonNull(caliber)) {
+					gisDevExtPO.setCaliber(Integer.parseInt(caliber));
+				}
 				gisDevExtPO.setMaterial(material);
-				gisDevExtPO.setGeom(geom);
-				gisDevExtPO.setTplTypeId(tplTypeId);
-				gisDevExtPO.setDataInfo(pGobject);
+				gisDevExtPO.setGeom(geom.getValue());
+				gisDevExtPO.setTplTypeId(devSaveParam.getTplTypeId());
+				gisDevExtPO.setDataInfo(jsonObject);
 				gisDevExtPO.setCreateAt(creatAt);
-				gisDevExtPO.setCreateBy(loginUserName);
-				gisDevExtPO.setBelongTo(Long.parseLong(belongTo));
+				gisDevExtPO.setCreateBy(devSaveParam.getLoginUserName());
+				gisDevExtPO.setBatchNum(devSaveParam.getBatchNum());
+				if (Objects.nonNull(belongTo)) {
+					gisDevExtPO.setBelongTo(Long.parseLong(belongTo));
+				} else {
+				}
 				gisDevExtPOList.add(gisDevExtPO);
 			}
+
 		}
-		try {
-			int e1 = shareDevPOMapper.batchInsertSelective(shareDevPOList);
-			int e2 = gisDevExtPOMapper.batchInsertSelective(gisDevExtPOList);
-			Logger.debug("share_dev add " + e1 + "rows, and gis_dev_ext add " + e2 + "rows");
-			result = true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.error(e.getMessage());
-			new BizException("保存设备数据失败！");
-		}
-		return result;
+		buildMap.put("shareDev", shareDevPOList);
+		buildMap.put("gisDevExt", gisDevExtPOList);
+		return buildMap;
 	}
 
-	public Map<String, String> geomConvertFromExt(CodeXYPO codeXYPO, int isPoint) throws BizException {
+	public List<Map<String, Object>> geomConvertFromExt(List<CodeXYPO> codeXYPOs, int isPoint) throws BizException {
+		if (Objects.isNull(codeXYPOs)) {
+			return Lists.newArrayList();
+		}
 		String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
-		if(1==isPoint) {
-			StringBuffer str = new StringBuffer();
-			str.append("POINT(")
-					.append(codeXYPO.getPointX() + " ")
-					.append(codeXYPO.getPointY() + ")");
-			codeXYPO.setStr(String.valueOf(str));
-
+		if (1 == isPoint) {
+			codeXYPOs.stream().forEach(codeXYPO -> {
+				StringBuffer str = new StringBuffer();
+				str.append("POINT(")
+						.append(codeXYPO.getPointX() + " ")
+						.append(codeXYPO.getPointY() + ")");
+				codeXYPO.setStr(String.valueOf(str));
+			});
 		} else if (2 == isPoint) {
-			StringBuffer sb = new StringBuffer();
-			sb.append("LINESTRING(")
-					.append(codeXYPO.getLineStartX() + " ")
-					.append(codeXYPO.getLineStartY())
-					.append(",")
-					.append(codeXYPO.getLineEndX() + " ")
-					.append(codeXYPO.getLineEndY() + ")");
-			codeXYPO.setStr(String.valueOf(sb));
+			codeXYPOs.stream().forEach(codeXYPO -> {
+				StringBuffer sb = new StringBuffer();
+				sb.append("LINESTRING(")
+						.append(codeXYPO.getLineStartX() + " ")
+						.append(codeXYPO.getLineStartY())
+						.append(",")
+						.append(codeXYPO.getLineEndX() + " ")
+						.append(codeXYPO.getLineEndY() + ")");
+				codeXYPO.setStr(String.valueOf(sb));
+			});
 		}
-		Map<String, String> map = gisDevExtPOMapper.findGeomMapByPointCode(codeXYPO, srid);
-		return map;
+		int sridInt = Integer.parseInt(srid);
+		List<Map<String,Object>> codeGeomList = gisDevExtPOMapper.findGeomMapByPointCode(codeXYPOs, sridInt);
+		return codeGeomList;
 	}
 
+	/**
+	 * 根据解析出来的Excel数据，导入到数据库中
+	 * @param dataMap           解析的Excel数据
+	 * @param userId            登录用户的ID
+	 * @param token             token
+	 * @param batchNum          导入的批次号
+	 * @return
+	 * @throws BizException
+	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
-	public Boolean saveExcelData(Workbook workbook, Long userId, String token, int flag) throws BizException {
+	public Boolean saveExcelData(Map<String, List> dataMap, Long userId, String token, String batchNum) throws BizException {
 		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 		String loginUserName = sysOcpUserPo.getName();
-		// 校验sheetName
-		validSheetName(workbook);
-		List<Map<String, Object>> excelDataList;
-		boolean result;
-		if (1 == flag) { // 点
-			// 验证总条数，防止数据量过大
-			validTotalRows(workbook,GISConstants.IMPORT_SHEET0_NAME);
-			// 获取表格数据
-			excelDataList = getExcelDataList(workbook, GISConstants.IMPORT_SHEET0_NAME);
+		List<Map<String, Object>> pointDataList = dataMap.get("pointList");
+		List<Map<String, Object>> lineDataList = dataMap.get("lineList");
+		List<GISDevExtPO> existRecords = gisDevExtPOMapper.selectExistRecords(batchNum);
+
+		boolean result = false;
+		DevSaveParam devSaveParam = new DevSaveParam();
+		devSaveParam.setLoginUserName(loginUserName);
+		devSaveParam.setExistsCodes(existRecords);
+		devSaveParam.setBatchNum(batchNum);
+		if (Objects.nonNull(pointDataList)) { // 点
 			long typeId = saveTplAttr(dictConfig.getPointTpl(), loginUserName, GISConstants.TOP_TPL_1_CHN);
-			result = saveExcelData(excelDataList,loginUserName, GISConstants.IMPORT_SHEET0_NAME, typeId);
-		} else if (2 == flag) {
-			validTotalRows(workbook, GISConstants.IMPORT_SHEET1_NAME);
-			excelDataList = getExcelDataList(workbook, GISConstants.IMPORT_SHEET1_NAME);
-			long typeId = saveTplAttr(dictConfig.getPointTpl(), loginUserName, GISConstants.TOP_TPL_1_CHN);
-			result = saveExcelData(excelDataList,loginUserName, GISConstants.IMPORT_SHEET1_NAME, typeId);
-		} else {
-			throw new BizException("无此类型！");
+			devSaveParam.setDataMapList(pointDataList);
+			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET0_NAME);
+			devSaveParam.setTplTypeId(typeId);
+
+			if (Objects.nonNull(existRecords) && existRecords.size() > 0) {
+				updateDBData(devSaveParam);
+			}
+			result = saveExcelData(devSaveParam);
 		}
+
+		if (Objects.nonNull(lineDataList)) { // 线
+			long typeId = saveTplAttr(dictConfig.getLineTpl(), loginUserName, GISConstants.TOP_TPL_2_CHN);
+			devSaveParam.setDataMapList(lineDataList);
+			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET1_NAME);
+			devSaveParam.setTplTypeId(typeId);
+			if (Objects.nonNull(existRecords) && existRecords.size() > 0) {
+				updateDBData(devSaveParam);
+			}
+			result = saveExcelData(devSaveParam);
+		}
+
 		return result;
 	}
+
 }

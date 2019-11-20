@@ -1,6 +1,7 @@
 package com.jdrx.gis.beans.entry.basic;
 
 import lombok.Data;
+import org.postgis.PGgeometry;
 
 import java.util.Date;
 
@@ -38,7 +39,7 @@ public class GISDevExtPO {
 	private String material;
 
 	/**
-	 * 空间信息
+	 * 空间信息字符串形式
 	 */
 	private String geom;
 
@@ -81,4 +82,14 @@ public class GISDevExtPO {
 	 * 数据权限
 	 */
 	private Long belongTo;
+
+	/**
+	 * 批次号
+	 */
+	private String batchNum;
+
+	/**
+	 * geom对象
+	 */
+	private PGgeometry geomObj;
 }

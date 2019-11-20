@@ -77,18 +77,34 @@ public interface GISDevExtPOMapper {
 	 */
 	List<NeoLineVO> getLineDevExt(String devIds);
 
-	/*
+	/**
 	 * 根据设备的编码获取设备信息
 	 * @param code
 	 * @return
 	 */
 	GISDevExtPO selectByCode(@Param("code") String code);
 
+	/**
+	 * 根据传入的坐标列表转换成geometry的文本形式
+	 * @param codeXYPOs
+	 * @param srid
+	 * @return
+	 */
+	List<Map<String, Object>> findGeomMapByPointCode(@Param("codeXYPOs") List<CodeXYPO> codeXYPOs, @Param("srid") Integer srid);
 
-	Map<String, String> findGeomMapByPointCode(@Param("codeXYPO") CodeXYPO codeXYPO, @Param("srid") String srid);
-
-
+	/**
+	 * 批量插入
+	 * @param gisDevExtPOList
+	 * @return
+	 */
 	Integer batchInsertSelective(@Param("gisDevExtPOList") List<GISDevExtPO> gisDevExtPOList);
+
+	/**
+	 * 根据批次号查询该批数据
+	 * @param batchNum
+	 * @return
+	 */
+	List<GISDevExtPO> selectExistRecords(@Param("batchNum") String batchNum);
 
 }
 

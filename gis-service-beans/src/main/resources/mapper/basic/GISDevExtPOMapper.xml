@@ -17,6 +17,7 @@
         <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
         <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
+        <result column="batchNum" jdbcType="VARCHAR" property="batchNum" />
     </resultMap>
 
     <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.vo.query.GISDevExtVO">
@@ -38,13 +39,13 @@
 
     <sql id="Base_Column_List">
     id, dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at, belong_to
+    create_by, create_at, update_by, update_at, belong_to, batch_number
     </sql>
 
     <select id="getDevExtByDevId" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         id, dev_id, name, code, caliber, material, st_astext(geom) geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at
+    create_by, create_at, update_by, update_at,belong_to, batch_number
         from gis_dev_ext
         where dev_id = #{devId,jdbcType=VARCHAR}
         limit 1
@@ -220,7 +221,13 @@
     </select>
 
     <select id="findGeomMapByPointCode" resultType="java.util.Map">
-        SELECT #{codeXYPO.pointCode} as code, ST_GeomFromText(#{codeXYPO.str},4544) as geom
+        SELECT * FROM (
+            <foreach collection="codeXYPOs" item="codeXYPO" index="index" separator="union">
+                SELECT
+                #{codeXYPO.code} as code,
+                ST_GeomFromText(#{codeXYPO.str},#{srid}) as geom
+            </foreach>
+        ) AS temp
     </select>
 
     <insert id="batchInsertSelective" parameterType="java.util.List">
@@ -233,7 +240,7 @@
                 #{item.code,jdbcType=VARCHAR},
                 #{item.caliber,jdbcType=INTEGER},
                 #{item.material,jdbcType=VARCHAR},
-                #{item.geom,jdbcType=OTHER},
+                #{item.geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler},
                 #{item.tplTypeId,jdbcType=BIGINT},
                 #{item.dataInfo,jdbcType=OTHER},
                 #{item.createBy,jdbcType=OTHER},
@@ -242,4 +249,11 @@
             )
         </foreach>
     </insert>
+
+    <select id="selectExistRecords" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM gis_dev_ext
+        WHERE delete_flag = false
+        AND batch_number = #{batchNum}
+    </select>
 </mapper>

@@ -37,4 +37,7 @@ public class CodeXYPO {
 
 	/** 拼接串 */
 	private String str;
+
+	/** code */
+	private String code;
 }

@@ -4,6 +4,7 @@ import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GisDevTplAttrPOMapper {
 
@@ -44,4 +45,10 @@ public interface GisDevTplAttrPOMapper {
 	 * @return
 	 */
 	int batchInsertSelective(@Param("tplAttrPOList") List<GisDevTplAttrPO> tplAttrPOList);
+
+	/**
+	 * 获取每个type_id对应的模板（列转行）
+	 * @return
+	 */
+	List<Map<String, String>> selectTypeIdDescMap();
 }

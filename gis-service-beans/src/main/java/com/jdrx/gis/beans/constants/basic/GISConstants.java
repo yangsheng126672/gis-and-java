@@ -148,4 +148,6 @@ public class GISConstants {
 
 	/** 水源节点 */
 	public final static String NEO_NODE_WATER = "2";
+	/** typeName */
+	public final static String DEV_TYPE_NAME_EN = "typeName";
 }

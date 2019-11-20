@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -55,6 +56,21 @@ public class GisDevTplAttrService {
 			Logger.error("批量插入模板数据失败！");
 			e.printStackTrace();
 			throw new BizException(e);
+		}
+	}
+
+	/**
+	 * 获取所有type_id对应的模板（列转行）
+	 * @return
+	 * @throws BizException
+	 */
+	public List<Map<String, String>> selectTypeIdDescMap() throws BizException {
+		try {
+			return gisDevTplAttrPOMapper.selectTypeIdDescMap();
+		} catch (Exception e) {
+			Logger.error("获取所有type_id对应的模板（列转行）失败！");
+			e.printStackTrace();
+			throw new BizException();
 		}
 	}
 }

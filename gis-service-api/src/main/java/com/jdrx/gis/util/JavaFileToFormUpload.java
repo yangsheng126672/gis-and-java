@@ -86,7 +86,7 @@ public class JavaFileToFormUpload {
             if (reader != null) {  
                 reader.close();  
             }  
-            file.delete();
+//            file.delete();
         }  
         return result;  
     }  

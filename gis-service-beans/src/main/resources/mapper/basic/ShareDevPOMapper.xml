@@ -289,10 +289,11 @@
 
 
     <insert id="batchInsertSelective" parameterType="java.util.List">
-        INSERT INTO share_dev (type_id, name, lng, lat, addr, platform_code, create_by,create_at)
+        INSERT INTO share_dev (id, type_id, name, lng, lat, addr, platform_code, create_by,create_at)
         VALUES
         <foreach collection="shareDevPOList" item="item" index="index" separator=",">
             (
+                #{item.id,jdbcType=BIGINT},
                 #{item.typeId,jdbcType=BIGINT},
                 #{item.name,jdbcType=VARCHAR},
                 #{item.lng,jdbcType=VARCHAR},

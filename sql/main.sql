@@ -4,7 +4,7 @@ CREATE extension postgis;
 -- [表1] 设备信息表
 DROP TABLE IF EXISTS share_dev;
 CREATE TABLE share_dev (
-  id serial8 primary key,
+  id char(12) primary key,
   type_id int8 NOT NULL,
   name varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
   status int2 NOT NULL DEFAULT -1,
@@ -68,7 +68,7 @@ COMMENT ON TABLE share_dev_type is '设备类型表';
 DROP TABLE IF EXISTS gis_dev_ext;
 CREATE TABLE gis_dev_ext (
   id serial8 primary key,
-  dev_id int8 NOT NULL,
+  dev_id char(12) NOT NULL,
   name varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
   code varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
   caliber int4,
@@ -422,6 +422,22 @@ COMMENT ON COLUMN share_sequence_define.polling_interval IS 'Y年、M月、D日�
 COMMENT ON COLUMN share_sequence_define.update_at IS '更新时间';
 COMMENT ON COLUMN share_sequence_define.remarks IS '备注';
 COMMENT ON TABLE share_sequence_define is '序列生成';
+
+-- [15] 导入数据的日志表
+DROP TABLE IF EXISTS data_import_log;
+CREATE TABLE data_import_log(
+	id serial8 primary key,
+	dev_id char(12) NOT NULL,
+	code varchar(32) not null default '',
+	belong_to int8 NOT NULL,
+	batch_number  varchar(20) not null default ''
+);
+COMMENT ON COLUMN data_import_log.id IS '主键';
+COMMENT ON COLUMN data_import_log.dev_id IS '设备编号';
+COMMENT ON COLUMN data_import_log.code IS '编号';
+COMMENT ON COLUMN data_import_log.belong_to IS '数据权限ID';
+COMMENT ON COLUMN data_import_log.batch_number IS '批次号';
+COMMENT ON TABLE data_import_log IS '导入数据的日志表';
 
 ------------------------------增加唯一性约束begin-----------------------
 -- 数据字典中，同一类型下不能有重复的名称和值
