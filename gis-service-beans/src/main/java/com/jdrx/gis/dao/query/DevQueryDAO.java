@@ -79,4 +79,11 @@ public interface DevQueryDAO {
 	 */
 	List<FieldNameVO> findFieldNamesByDevID(String devId);
 
+	/**
+	 * 根据设备类型ID获取模板的字段列表
+	 * @param typeId
+	 * @return
+	 */
+	List<FieldNameVO> findFieldNamesByDevTypeId(Long typeId);
+
 }

@@ -83,12 +83,10 @@ public class DataEditorService {
      * @param typeId
      * @return
      */
-    public List<FieldNameVO> getDevExtByTopPid(String typeId) throws BizException{
+    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
         try {
-            List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevID(typeId);
-
+            List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevTypeId(typeId);
             for (int i = 0;i<fieldNameVOS.size();i++){
-                System.out.println(fieldNameVOS.get(i).getFieldName());
                 if (fieldNameVOS.get(i).getFieldName().equals("code")||(fieldNameVOS.get(i).getFieldName().equals("mer_type_code"))||(fieldNameVOS.get(i).getFieldName().equals("caliber"))){
                     fieldNameVOS.get(i).setDataType("1");
                 }
