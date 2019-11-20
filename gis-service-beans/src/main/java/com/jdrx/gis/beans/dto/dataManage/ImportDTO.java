@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.dto.dataManage;
+package com.jdrx.gis.beans.dto.datamanage;
 
 import lombok.Data;
 
