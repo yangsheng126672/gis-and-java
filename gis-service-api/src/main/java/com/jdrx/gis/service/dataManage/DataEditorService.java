@@ -8,12 +8,14 @@ import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.query.AttrQueryService;
+import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -77,13 +79,26 @@ public class DataEditorService {
     }
 
     /**
-     * 通过设备id查詢最顶端父id，获取设备属性模板
+     * 通过设备类型id查詢最顶端父id，获取设备属性模板
      * @param typeId
      * @return
      */
     public List<FieldNameVO> getDevExtByTopPid(String typeId) throws BizException{
         try {
-            return devQueryDAO.findFieldNamesByDevID(typeId);
+            List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevID(typeId);
+
+            for (int i = 0;i<fieldNameVOS.size();i++){
+                System.out.println(fieldNameVOS.get(i).getFieldName());
+                if (fieldNameVOS.get(i).getFieldName().equals("code")||(fieldNameVOS.get(i).getFieldName().equals("mer_type_code"))||(fieldNameVOS.get(i).getFieldName().equals("caliber"))){
+                    fieldNameVOS.get(i).setDataType("1");
+                }
+                if ((fieldNameVOS.get(i).getFieldName().equals("dev_id"))||(fieldNameVOS.get(i).getFieldName().equals("pipe_length"))){
+                    fieldNameVOS.remove(i);
+                    i--;
+                }
+
+            }
+            return fieldNameVOS;
         }catch (Exception e) {
             e.printStackTrace();
             throw new BizException(e);
@@ -91,25 +106,4 @@ public class DataEditorService {
 
     }
 
-    /**
-     * 获取类型PID
-     * @return
-     */
-    public Long getShareDevTypePid(Long id){
-        Long pid = null;
-        try {
-            ShareDevTypePO shareDevTypePO  = shareDevTypePOMapper.getByPrimaryKey(id);
-            pid = shareDevTypePO.getPId();
-        }catch (Exception e){
-            Logger.error(e.getMessage());
-        }
-        return pid;
-    }
-
-    /**
-     * 创建逻辑管网
-     */
-    public void createLogicNets(){
-
-    }
 }

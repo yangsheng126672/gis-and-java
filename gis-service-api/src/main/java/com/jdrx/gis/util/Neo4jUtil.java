@@ -3,18 +3,25 @@ package com.jdrx.gis.util;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
+import com.jdrx.gis.beans.dto.analysis.NodeDTO;
+import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.datamanage.REdge;
 import com.jdrx.gis.beans.vo.datamanage.RNode;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,17 +31,13 @@ import java.util.Map;
  * @Time 2019/11/18 0018 下午 2:41
  */
 
+@Service
 public class Neo4jUtil {
     @Autowired
     private Session session;
 
     @Autowired
     GISDevExtPOMapper gisDevExtPOMapper;
-
-    //节点类型  0普通节点  1阀门节点  2水源节点
-    final private String NODE_FM = "1";
-
-    final private String NODE_TYPE = "0";
 
     final static ObjectMapper mapper = new ObjectMapper();
 
@@ -54,14 +57,14 @@ public class Neo4jUtil {
      * @param lableType
      * lableType = gd or lableType = ljgd
      */
-    public void createNeoNodes(String lableType){
+    public  void createNeoNodes(String lableType,String devIds){
         try {
             String nodeType;
-            List<NeoPointVO> pointVOList = gisDevExtPOMapper.getPointDevExt();
+            List<NeoPointVO> pointVOList = gisDevExtPOMapper.getPointDevExt(devIds);
             for (NeoPointVO pointVO:pointVOList){
-                nodeType = NODE_TYPE;
+                nodeType = GISConstants.NEO_NODE_NORMAL;
                 if(pointVO.getName().contains("阀")){
-                    nodeType = NODE_FM;
+                    nodeType = GISConstants.NEO_NODE_VALVE;
                 }
                 // 1.首先创线首节点
                 RNode firstNode = new RNode();
@@ -79,23 +82,19 @@ public class Neo4jUtil {
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
-
 
     /**
      * 创建管线
      * @param pointLable
-     * pointLable = gd or pointLable = ljgd
      * @param lineLable
-     * lineLable = gdline or lineLable = ljgdline
      */
-    public void createNeoLine(String pointLable,String lineLable){
+    public  void createNeoLine(String pointLable,String lineLable,String devIds){
         String startNodeNme;    //起点编码
         String endNodeName;     //终点编码
         Object dataInfo;
         try {
-            List<NeoLineVO> lineVOList = gisDevExtPOMapper.getLineDevExt();
+            List<NeoLineVO> lineVOList = gisDevExtPOMapper.getLineDevExt(devIds);
             for (NeoLineVO lineVO: lineVOList){
                 dataInfo = lineVO.getData_info();
                 JSONObject jb = JSONObject.parseObject(dataInfo.toString());
@@ -105,16 +104,16 @@ public class Neo4jUtil {
 
                 REdge edge = new REdge();
                 edge.setRelationID( lineVO.getDev_id());
-                edge.setName(lineVO.getCode() );
-                edge.setGj(lineVO.getCaliber() );
-                edge.setCztype(lineVO.getMaterial() );
+                edge.setName(lineVO.getCode());
+                edge.setGj(lineVO.getCaliber());
+                edge.setCztype(lineVO.getMaterial());
                 edge.setBelong_to(lineVO.getBelong_to());
 
                 edge.addProperty("relationID", lineVO.getDev_id());
-                edge.addProperty("name",lineVO.getCode() );
-                edge.addProperty("gj",lineVO.getCaliber() );
-                edge.addProperty("cztype",lineVO.getMaterial() );
-                edge.addProperty("belong_to",lineVO.getBelong_to() );
+                edge.addProperty("name",lineVO.getCode());
+                edge.addProperty("gj",lineVO.getCaliber());
+                edge.addProperty("cztype",lineVO.getMaterial());
+                edge.addProperty("belong_to",lineVO.getBelong_to());
 
                 //创建管线
                 createRelation(edge,startNodeNme,endNodeName,pointLable,lineLable);
@@ -212,7 +211,7 @@ public class Neo4jUtil {
      * @param lable
      * @return
      */
-    public Boolean deleteNeoNodes(String lable){
+    public  Boolean deleteNeoAllNodes(String lable){
         try {
             String cypherSql =String.format("match (n:%s)  delete n",
                     lable);
@@ -229,7 +228,24 @@ public class Neo4jUtil {
      * @param lable
      * @return
      */
-    public Boolean deleteNeoLines(String lable){
+    public  Boolean deleteNeoLineById(String lable,String rid){
+        try {
+            String cypherSql =String.format("match (n)-[r:%s]-(b) where r.relationID='%s'  delete r",
+                    lable,rid);
+            session.run(cypherSql);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 删除所有管点
+     * @param lable
+     * @return
+     */
+    public  Boolean deleteNeoAllLines(String lable){
         try {
             String cypherSql =String.format("match (n)-[r:%s]-(b)  delete r",
                     lable);
@@ -239,6 +255,182 @@ public class Neo4jUtil {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 线上加点
+     * @param po
+     * @param devId 管线设备id
+     * @return
+     */
+    public  Boolean addNeoPointOnLine(GISDevExtPO po,String devId,String addDevIds){
+        try {
+            //创建管点
+            createNeoNodes(GISConstants.NEO_POINT,po.getDevId());
+            //删除管线
+            deleteNeoLineById(GISConstants.NEO_LINE,devId);
+            //创建新的两条管线
+            createNeoLine(GISConstants.NEO_POINT,GISConstants.NEO_LINE,addDevIds);
+            //创建逻辑管网
+            //......
+
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 根据设备编码集合创建图数据库管网数据
+     * @param devIds
+     * @return
+     */
+    public  Boolean addNeoNets(String devIds){
+        if (StringUtils.isEmpty(devIds)) {
+            return false;
+        }
+        try {
+            //创建管点数据
+            createNeoNodes(GISConstants.NEO_POINT,devIds);
+            //创建管线数据
+            createNeoLine(GISConstants.NEO_POINT,GISConstants.NEO_LINE,devIds);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 获取节点详细信息
+     * @return
+     */
+    public NodeDTO getValveNode(String code){
+        NodeDTO node = new NodeDTO();
+        String cypherSql = String.format("match (n:gd) where n.name = '%s' return n",code);
+        StatementResult result = session.run(cypherSql);
+        while (result.hasNext()) {
+            Record record = result.next();
+            node.setCode((record.get(0).asMap().get("name").toString()));
+            node.setX(Double.valueOf(record.get(0).asMap().get("x").toString()));
+            node.setY(Double.valueOf(record.get(0).asMap().get("y").toString()));
+            node.setDev_id(Long.valueOf(record.get(0).asMap().get("dev_id").toString()));
+        }
+        return node;
+    }
+    /**
+     * 获取关系中起始节点
+     * @param relationID
+     * @return
+     */
+    public List<Value> getNodesFromRel(String relationID,String lineLable) {
+        String cypherSql = String.format("MATCH (n)-[:%s{relationID: %d}]-(b) return n,b  ", lineLable,relationID);
+        StatementResult result = session.run(cypherSql);
+        List<Value> values = null;
+        while (result.hasNext()) {
+            Record record = result.next();
+            values = record.values();
+        }
+        return values;
+    }
+
+    /**
+     * 获取关联节点
+     * @param nodeName
+     * @return
+     */
+    public List<Value> getNextNode(String nodeName,String nodeLable) {
+        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return b  ", nodeLable,nodeName);
+        StatementResult result = session.run(cypherSql);
+        List<Value> values = new ArrayList<>();
+        while (result.hasNext()) {
+            Record record = result.next();
+            values.addAll(record.values());
+        }
+        return values;
+    }
+
+    /**
+     * 获取关联节点和边
+     * @param nodeName
+     * @return
+     */
+    public List<Record> getNextNodeAndPath(String nodeName,String nodeLable) {
+        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return b,r  ", nodeLable,nodeName);
+        StatementResult result = session.run(cypherSql);
+        List<Record> values = result.list();
+        return values;
+    }
+
+    /**
+     * 查找水源列表
+     * @return
+     */
+    public List<String> getWaterSourceList(){
+        List<String>list = new ArrayList<>();
+        String code = null;
+        String cypherSql = String.format("match (n:gd) where n.nodetype = '2' return n");
+        StatementResult result = session.run(cypherSql);
+        while (result.hasNext()) {
+            Record record = result.next();
+            code = (record.get(0).asMap().get("name").toString());
+            list.add(code);
+        }
+        return list;
+    }
+
+    /**
+     * 获取点连通的线
+     * @param devId
+     * @return
+     */
+    public List<String> getNodeConnectionLine(String devId){
+        List<String> list = new ArrayList<>();
+        try {
+            String cypherSql = String.format("MATCH (n:%s{dev_id:%d})-[r]-(b) return r",GISConstants.NEO_POINT,devId);
+            StatementResult result = session.run(cypherSql);
+            while (result.hasNext()) {
+                Record record = result.next();
+                list.add(record.get(0).asMap().get("relationID").toString());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * 获取线连通的点和线
+     * @param devId
+     * @return
+     */
+    public List<String> getNodeConnectionPointAndLine(String devId){
+        List<String> list = new ArrayList<>();
+        try {
+            //查找关联的点
+            String cypherSql = String.format("MATCH (a)-[r:%s{relationID:%d}]-(b) return a,b",GISConstants.NEO_LINE,devId);
+            System.out.println(cypherSql);
+            StatementResult result = session.run(cypherSql);
+            while (result.hasNext()) {
+                Record record = result.next();
+                list.add(record.get(0).asMap().get("dev_id").toString());
+            }
+            //查找关联的线
+            String cypherSqlLine = String.format("match (a)-[re:%s{relationID:%d}]-(b)-[re2]-(c) return re2",GISConstants.NEO_LINE,devId);
+            System.out.println(cypherSqlLine);
+            StatementResult result1 = session.run(cypherSqlLine);
+            while (result1.hasNext()) {
+                Record record = result1.next();
+                System.out.println(record.get(0).asMap().toString());
+                list.add(record.get(0).asMap().get("relationID").toString());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return list;
     }
 
 }

@@ -197,10 +197,18 @@
     <select id="getPointDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoPointVO">
         select dev_id,code,name,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y,belong_to from public.gis_dev_ext
         WHERE  caliber is  null AND delete_flag = false
+        <if test="devIds != null ">
+            AND
+            dev_id in #{devIds}
+        </if>
     </select>
 
     <select id="getLineDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoLineVO">
         select dev_id,code,caliber,material,belong_to,data_info from public.gis_dev_ext WHERE  caliber is not null  AND delete_flag = false
+        <if test="devIds != null ">
+            AND
+            dev_id in #{devIds}
+        </if>
     </select>
 
     <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">

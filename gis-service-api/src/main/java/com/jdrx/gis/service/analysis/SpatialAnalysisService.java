@@ -12,6 +12,7 @@ import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.service.basic.BasicDevQuery;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.query.AttrQueryService;
+import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class SpatialAnalysisService {
     @Autowired
     AttrQueryService attrQueryService;
 
+    @Autowired
+    Neo4jUtil neo4jUtil;
+
 
 
     /**
@@ -58,9 +62,9 @@ public class SpatialAnalysisService {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
             //判断设备类型是线的话，返回线两端的点设备和连通的线;如果是点，则返回连通的线
             if(gisDevExtPO.getGeom().contains("POINT")){
-                list = netsAnalysisService.getNodeConnectionLine(gisDevExtPO.getDevId());
+                list = neo4jUtil.getNodeConnectionLine(gisDevExtPO.getDevId());
             }else{
-                list = netsAnalysisService.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
+                list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
             if(list.size() == 0){
                 return null;

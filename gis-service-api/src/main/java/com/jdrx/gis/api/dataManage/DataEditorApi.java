@@ -42,6 +42,7 @@ public class DataEditorApi {
         Logger.debug("api/0/analysis/getSharePointType 获取管点类型");
         return  ResponseFactory.ok(dataEditorService.getAllPointType());
     }
+
     @ApiOperation(value = "获取管线类型")
     @RequestMapping(value ="getShareLineType")
     public ResposeVO getShareLineType() throws Exception{
