@@ -356,19 +356,18 @@ public class ExcelProcessorService {
 	 */
 	String handleDateCell(Cell cell) throws BizException{
 		try {
-			Date cellValue = cell.getDateCellValue();
-			Short timeStyle = HSSFDataFormat.getBuiltinFormat("h:mm:ss");
-			Short cellStyle = cell.getCellStyle().getDataFormat();
-			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-			if (timeStyle.equals(cellStyle)) {
-				return sdf2.format(cellValue);
+			String addr = "第" + (cell.getAddress().getRow() + 1) + "行" +  (cell.getAddress().getColumn() + 1) + "列";
+			boolean isDate = DateUtil.isCellDateFormatted(cell);
+			if (!isDate) {
+				throw new BizException(addr + "不是日期格式，请更改单元格格式！");
 			}
-			return sdf1.format(cellValue);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date cellDate = cell.getDateCellValue();
+			return sdf.format(cellDate);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error("单元格的日期格式不正确！");
-			throw new BizException((cell.getAddress().getRow() + 1) + "行" +  (cell.getAddress().getColumn() + 1) + "列单元格的日期时间格式不正确");
+			throw new BizException("单元格的日期时间格式不正确");
 		}
 	}
 
@@ -415,12 +414,13 @@ public class ExcelProcessorService {
 				boolean isTranslate = false;
 				String noConvertVal = "";
 				if (Objects.nonNull(cell)) {
-					cell.setCellType(CellType.STRING);
 					if (EPGDataTypeCategory.N.getCode().equals(category)) {
+						cell.setCellType(CellType.STRING);
 						cellStringVal = cell.getStringCellValue();
 					} else if (EPGDataTypeCategory.D.getCode().equals(category)) {
 						cellStringVal = handleDateCell(cell);
 					} else {
+						cell.setCellType(CellType.STRING);
 						cellStringVal = cell.getStringCellValue();
 					}
 				}
