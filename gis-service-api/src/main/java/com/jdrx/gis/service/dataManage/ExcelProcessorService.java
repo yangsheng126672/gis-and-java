@@ -516,7 +516,7 @@ public class ExcelProcessorService {
 					}
 				}
 				if (Objects.nonNull(typeName)) {
-					shareDevDataMap.put("typeName", typeName);
+					shareDevDataMap.put(GISConstants.DEV_TYPE_NAME_EN, typeName);
 				}
 			}
 			excelDevList.add(shareDevDataMap);
@@ -634,8 +634,8 @@ public class ExcelProcessorService {
 		boolean result = false;
 		Map<String, List> buildMap = buildDevPO(devSaveParam);
 		try {
-			int e1 = shareDevPOMapper.batchInsertSelective(buildMap.get("shareDev"));
-			int e2 = gisDevExtPOMapper.batchInsertSelective(buildMap.get("gisDevExt"));
+			int e1 = shareDevPOMapper.batchInsertSelective(buildMap.get(GISConstants.SHARE_DEV_S));
+			int e2 = gisDevExtPOMapper.batchInsertSelective(buildMap.get(GISConstants.GIS_DEV_EXT_S));
 			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows", " total " + (e1 + e2) + "rows");
 			result = true;
 		} catch (Exception e) {
@@ -817,11 +817,18 @@ public class ExcelProcessorService {
 			}
 
 		}
-		buildMap.put("shareDev", shareDevPOList);
-		buildMap.put("gisDevExt", gisDevExtPOList);
+		buildMap.put(GISConstants.SHARE_DEV_S, shareDevPOList);
+		buildMap.put(GISConstants.GIS_DEV_EXT_S, gisDevExtPOList);
 		return buildMap;
 	}
 
+	/**
+	 * geom转换成文本（批量）
+	 * @param codeXYPOs
+	 * @param isPoint
+	 * @return
+	 * @throws BizException
+	 */
 	public List<Map<String, Object>> geomConvertFromExt(List<CodeXYPO> codeXYPOs, int isPoint) throws BizException {
 		if (Objects.isNull(codeXYPOs)) {
 			return Lists.newArrayList();
@@ -865,8 +872,8 @@ public class ExcelProcessorService {
 	public Boolean saveExcelData(Map<String, List> dataMap, Long userId, String token, String batchNum) throws BizException {
 		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 		String loginUserName = sysOcpUserPo.getName();
-		List<Map<String, Object>> pointDataList = dataMap.get("pointList");
-		List<Map<String, Object>> lineDataList = dataMap.get("lineList");
+		List<Map<String, Object>> pointDataList = dataMap.get(GISConstants.POINT_LIST_S);
+		List<Map<String, Object>> lineDataList = dataMap.get(GISConstants.LINE_LIST_S);
 		List<GISDevExtPO> existRecords = gisDevExtPOMapper.selectExistRecords(batchNum);
 
 		boolean result = false;

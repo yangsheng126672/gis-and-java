@@ -76,8 +76,8 @@ public class ImportApi {
 			excelProcessorService.validSheetName(workbook);
 			List<Map<String, Object>> pointList = excelProcessorService.getExcelDataList(workbook, GISConstants.IMPORT_SHEET0_NAME);
 			List<Map<String, Object>> lineList = excelProcessorService.getExcelDataList(workbook, GISConstants.IMPORT_SHEET1_NAME);
-			map.put("pointList", pointList);
-			map.put("lineList", lineList);
+			map.put(GISConstants.POINT_LIST_S, pointList);
+			map.put(GISConstants.LINE_LIST_S, lineList);
 		} catch (IOException | InvalidFormatException e) {
 			e.printStackTrace();
 		}
