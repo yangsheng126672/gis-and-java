@@ -409,8 +409,8 @@ public class ExcelProcessorService {
 				boolean isTranslate = false;
 				String noConvertVal = "";
 				if (Objects.nonNull(cell)) {
+					cell.setCellType(CellType.STRING);
 					if (EPGDataTypeCategory.N.getCode().equals(category)) {
-						cell.setCellType(CellType.STRING);
 						cellStringVal = cell.getStringCellValue();
 					} else if (EPGDataTypeCategory.D.getCode().equals(category)) {
 						cellStringVal = handleDateCell(cell);
