@@ -2,6 +2,7 @@ package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -420,7 +421,7 @@ public class ExcelProcessorService {
 				if (!StringUtils.isEmpty(cellStringVal)) {
 					cellStringVal.trim();
 				}
-				String cellAddrDesc = "第[" + ( i + 1 ) + "]行第[" + ( j + 1 ) + "]列";
+				String cellAddrDesc = sheetName + " 第[" + ( i + 1 ) + "]行第[" + ( j + 1 ) + "]列";
 				// 表头的中文名称
 				String headerName = cellIdxHeaderMap.get(j);
 
@@ -547,8 +548,11 @@ public class ExcelProcessorService {
 	public Long saveTplAttr(String tplConfigVal, String loginUserName, String typeName) throws BizException {
 		try{
 			Long typeId = shareDevTypePOMapper.getIdByNameForTopHierarchy(typeName);
+			boolean hasTypeId = false;
 			if (Objects.isNull(typeId)) {
-				throw new BizException(typeName + "对应的模板未在数据库表gis_dev_tpl_attr为配置，请先配置！");
+				throw new BizException(typeName + "对应的模板未在数据库表gis_dev_tpl_attr配置，请先配置！");
+			} else {
+				hasTypeId = true;
 			}
 			List<Map<String, String>> typeDescList = gisDevTplAttrService.selectTypeIdDescMap();
 			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(tplConfigVal);
@@ -587,15 +591,25 @@ public class ExcelProcessorService {
 							tId = String.valueOf(entry.getValue());
 						}
 					}
+					String[] fieldsDB = fieldDescArray.split(",");
+					String[] configFields = configDesc.split(",");
+					Collections.sort(Arrays.asList(fieldsDB));
+					Collections.sort(Arrays.asList(configFields));
+					fieldDescArray = Joiner.on(",").join(fieldsDB);
+					configDesc = Joiner.on(",").join(configFields);
 					if (fieldDescArray.equals(configDesc)) {
 						isExist = true;
 						typeId = Long.parseLong(tId);
 						break;
 					}
+
 				}
 			}
 			// 如果数据库不存在相同的模板再插入数据库
 			if (!isExist) {
+				if (hasTypeId) {
+					gisDevTplAttrService.delByTypeId(typeId);
+				}
 				gisDevTplAttrService.batchInsertSelective(tplAttrPOList);
 			}
 			return typeId;

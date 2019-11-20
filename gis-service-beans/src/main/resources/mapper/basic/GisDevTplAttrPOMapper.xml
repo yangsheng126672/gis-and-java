@@ -215,4 +215,10 @@
         WHERE delete_flag = false
         GROUP BY type_id
     </select>
+
+    <update id="delByTypeId" parameterType="java.lang.Long">
+        UPDATE gis_dev_tpl_attr
+        SET delete_flag = true
+        WHERE type_id = #{typeId}
+    </update>
 </mapper>
