@@ -1,6 +1,7 @@
 package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
+import com.jdrx.gis.beans.dto.datamanage.SharePointDTO;
 import com.jdrx.gis.service.analysis.SpatialAnalysisService;
 import com.jdrx.gis.service.dataManage.DataEditorService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -41,6 +42,13 @@ public class DataEditorApi {
     public ResposeVO getSharePointType() throws Exception{
         Logger.debug("api/0/analysis/getSharePointType 获取管点类型");
         return  ResponseFactory.ok(dataEditorService.getAllPointType());
+    }
+
+    @ApiOperation(value = "保存新增管点")
+    @RequestMapping(value ="saveSharePoint")
+    public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid SharePointDTO dto) throws Exception{
+        Logger.debug("api/0/analysis/saveSharePoint 保存新增管点");
+        return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto));
     }
 
     @ApiOperation(value = "获取管线类型")

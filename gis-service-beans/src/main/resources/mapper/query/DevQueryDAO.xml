@@ -267,7 +267,7 @@
     </select>
 
     <select id="findFieldNamesByDevTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap4">
-         SELECT field_name AS fieldName, field_desc AS fieldDesc, idx
+         SELECT field_name AS fieldName, field_desc AS fieldDesc, idx,data_type as dataType,fill
             FROM gis_dev_tpl_attr
             WHERE type_id = (
                 SELECT type_id

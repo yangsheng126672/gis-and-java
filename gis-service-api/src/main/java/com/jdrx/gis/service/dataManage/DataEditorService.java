@@ -1,5 +1,6 @@
 package com.jdrx.gis.service.dataManage;
 
+import com.jdrx.gis.beans.dto.datamanage.SharePointDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description
@@ -79,6 +81,20 @@ public class DataEditorService {
     }
 
     /**
+     * 保存管点及新增管线信息（线上加点）
+     * @param dto
+     */
+    public Boolean saveAddedSharePoint(SharePointDTO dto){
+        try {
+            Map<String,Object> map = dto.getMap();
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * 通过设备类型id查詢最顶端父id，获取设备属性模板
      * @param typeId
      * @return
@@ -87,14 +103,10 @@ public class DataEditorService {
         try {
             List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevTypeId(typeId);
             for (int i = 0;i<fieldNameVOS.size();i++){
-                if (fieldNameVOS.get(i).getFieldName().equals("code")||(fieldNameVOS.get(i).getFieldName().equals("mer_type_code"))||(fieldNameVOS.get(i).getFieldName().equals("caliber"))){
-                    fieldNameVOS.get(i).setDataType("1");
-                }
                 if ((fieldNameVOS.get(i).getFieldName().equals("dev_id"))||(fieldNameVOS.get(i).getFieldName().equals("pipe_length"))){
                     fieldNameVOS.remove(i);
                     i--;
                 }
-
             }
             return fieldNameVOS;
         }catch (Exception e) {
