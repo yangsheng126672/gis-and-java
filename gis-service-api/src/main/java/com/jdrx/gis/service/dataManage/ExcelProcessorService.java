@@ -21,6 +21,7 @@ import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
 import com.jdrx.gis.service.basic.GisDevExtService;
+import com.jdrx.gis.service.basic.ShareDevService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
@@ -65,7 +66,7 @@ public class ExcelProcessorService {
 	private GisDevTplAttrService gisDevTplAttrService;
 
 	@Autowired
-	private ShareDeviceService shareDeviceService;
+	private ShareDevService shareDevService;
 
 	@Autowired
 	private GISDeviceService gisDeviceService;
@@ -647,10 +648,10 @@ public class ExcelProcessorService {
 			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
 			int e1 = 0, e2 = 0;
 			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
-				e1 = shareDevPOMapper.batchInsertSelective(shareDevPOS);
+				e1 = shareDevService.splitBatchInsert(shareDevPOS);
 			}
 			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
-				e2 = gisDevExtPOMapper.batchInsertSelective(gisDevExtPOS);
+				e2 = gisDevExtService.splitBatchInsert(gisDevExtPOS);
 			}
 			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows");
 			result = true;
@@ -678,10 +679,10 @@ public class ExcelProcessorService {
 			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
 			int e1 = 0, e2 = 0;
 			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
-				e1 = shareDevPOMapper.batchUpdate(shareDevPOS);
+				e1 = shareDevService.splitBatchUpdate(shareDevPOS);
 			}
 			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
-				e2 = gisDevExtPOMapper.batchUpdate(gisDevExtPOS);
+				e2 = gisDevExtService.splitBatchUpdate(gisDevExtPOS);
 			}
 			Logger.debug("share_dev update " + e1 + " rows, and gis_dev_ext update " + e2 + " rows");
 			result = true;
@@ -913,7 +914,7 @@ public class ExcelProcessorService {
 			});
 		}
 		int sridInt = Integer.parseInt(srid);
-		List<Map<String,Object>> codeGeomList = gisDevExtPOMapper.findGeomMapByPointCode(codeXYPOs, sridInt);
+		List<Map<String,Object>> codeGeomList = gisDevExtService.splitFindGeomMapByPointCode(codeXYPOs, sridInt);
 		return codeGeomList;
 	}
 
