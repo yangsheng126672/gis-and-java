@@ -1,7 +1,5 @@
 package com.jdrx.gis.service.dataManage;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -27,20 +25,16 @@ import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
 import com.jdrx.share.service.ShareDeviceService;
-import javafx.scene.layout.BackgroundImage;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.postgis.PGgeometry;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import sun.rmi.runtime.Log;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -561,7 +555,7 @@ public class ExcelProcessorService {
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public Long saveTplAttr(String tplConfigVal, String loginUserName, String typeName) throws BizException {
 		try{
 			Long typeId = shareDevTypePOMapper.getIdByNameForTopHierarchy(typeName);
@@ -639,14 +633,11 @@ public class ExcelProcessorService {
 
 	/**
 	 * 保存Excel数据
-	 * @param dataMapList
-	 * @param loginUserName
-	 * @param sheetName
-	 * @param tplTypeId
+	 * @param devSaveParam
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public boolean saveExcelData(DevSaveParam devSaveParam) throws BizException {
 		boolean result = false;
 		devSaveParam.setSaveFlag(1);
@@ -673,15 +664,11 @@ public class ExcelProcessorService {
 
 	/**
 	 * 更新数据
-	 * @param excelDataList
-	 * @param loginUserName
-	 * @param importSheet0Name
-	 * @param typeId
-	 * @param existsRecords
+	 * @param devSaveParam
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public boolean updateDBData(DevSaveParam devSaveParam) throws BizException {
 		boolean result = false;
 		devSaveParam.setSaveFlag(2);
@@ -732,7 +719,7 @@ public class ExcelProcessorService {
 		if (Objects.nonNull(dataMapList) && dataMapList.size() > 0) {
 			List<CodeXYPO> codeXYPOList = Lists.newArrayList();
 			for (Map<String, Object> map : dataMapList) {
-				String pointCode = pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
+				String pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
 				String lineCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN))
 						+ "-" + String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
@@ -747,7 +734,6 @@ public class ExcelProcessorService {
 					codeXYPOList.add(codeXYPO);
 
 				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
-//					String[] line = lineCode.split("-");
 					String startCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN));
 					String endCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 					CodeXYPO codeXYPO = new CodeXYPO();
@@ -882,7 +868,6 @@ public class ExcelProcessorService {
 					gisDevExtPO.setUpdateBy(devSaveParam.getLoginUserName());
 					gisDevExtPO.setDevId(existsExtMaps2.get(devCode));
 				}
-//				gisDevExtPO.setBatchNum(devSaveParam.getBatchNum());
 				if (Objects.nonNull(belongTo)) {
 					gisDevExtPO.setBelongTo(Long.parseLong(belongTo));
 				}
@@ -937,11 +922,10 @@ public class ExcelProcessorService {
 	 * @param dataMap           解析的Excel数据
 	 * @param userId            登录用户的ID
 	 * @param token             token
-	 * @param batchNum          导入的批次号
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public ImportVO saveExcelData(Map<String, List> dataMap, Long userId, String token, Integer ts) throws BizException {
 		ImportVO importVO = new ImportVO();
 		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
