@@ -249,6 +249,25 @@ public class DataEditorService {
     }
 
     /**
+     * 保存添加管网（管点和管线）
+     * @param dto
+     * @return
+     */
+    public Boolean saveShareNets(ShareAddedNetsDTO dto) throws BizException{
+        try {
+            if(!saveSharePoint(dto.getPointList())){
+                throw new  BizException("保存管点失败！");
+            }
+            if(!savaShareLine(dto.getLineList())){
+                throw new  BizException("保存管点失败！");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    /**
      * 保存管点
      * @param list
      * @return
@@ -265,21 +284,33 @@ public class DataEditorService {
                 String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
                 String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
                 String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
+                PointVO pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
 
-                String jsonStr = JSONObject.toJSONString(dto.getMap());
+                String jsonStr = JSONObject.toJSONString(dto.getMapAttr());
                 PGobject jsonObject = new PGobject();
                 jsonObject.setValue(jsonStr);
                 jsonObject.setType("jsonb");
 
                 GISDevExtPO po = new GISDevExtPO();
                 po.setDevId(devId);
-                po.setCode(dto.getMap().get("code").toString());
-                po.setName(dto.getMap().get("name").toString());
+                po.setCode(dto.getMapAttr().get("code").toString());
+                po.setName(dto.getMapAttr().get("name").toString());
                 po.setGeom(transformGeom);
                 po.setDataInfo(jsonObject);
                 po.setTplTypeId(dto.getTypeId());
 
+                ShareDevPO shareDevPO = new ShareDevPO();
+                shareDevPO.setId(po.getDevId());
+                shareDevPO.setName(po.getName());
+                shareDevPO.setTypeId(po.getTplTypeId());
+                shareDevPO.setLng(String.format("%.8f",pointVO.getX()));
+                shareDevPO.setLat(String.format("%.8f",pointVO.getY()));
+                if(dto.getMapAttr().containsKey("dlm")){
+                    shareDevPO.setAddr(dto.getMapAttr().get("dlm").toString());
+                }
+
                 gisDevExtPOMapper.insertSelective(po);
+                shareDevPOMapper.insertSelective(shareDevPO);
 
             }
 
@@ -296,7 +327,52 @@ public class DataEditorService {
      * @return
      */
     public Boolean savaShareLine(List<ShareLineDTO> list){
+        if (list == null||list.size() == 0 ){
+            return false;
+        }
         try {
+            for (ShareLineDTO dto:list){
+                GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getStartCode());
+                GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getEndCode());
+
+                PointVO startVO = gisDevExtPOMapper.getPointXYFromGeom(startPointPO.getGeom());
+                PointVO endVO = gisDevExtPOMapper.getPointXYFromGeom(endPointPO.getGeom());
+
+                String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
+
+                String lineGeomStr = "LINESTRING("+startVO.getX()+" "+startVO.getY()+","+endVO.getX()+" "+endVO.getY()+")";
+                String transformGeomStr = gisDevExtPOMapper.addGeomWithSrid(lineGeomStr,Integer.parseInt(srid));
+
+                String jsonStr = JSONObject.toJSONString(dto.getMapAttr());
+                PGobject jsonObject = new PGobject();
+                jsonObject.setValue(jsonStr);
+                jsonObject.setType("jsonb");
+
+                Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
+                String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
+                GISDevExtPO gisDevExtPO = new GISDevExtPO();
+                gisDevExtPO.setDevId(devId);
+                gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
+                gisDevExtPO.setCaliber(dto.getCaliber());
+                gisDevExtPO.setMaterial(dto.getMaterial());
+                gisDevExtPO.setTplTypeId(dto.getTypeId());
+                gisDevExtPO.setDataInfo(jsonObject);
+                gisDevExtPO.setGeom(transformGeomStr);
+
+                ShareDevPO shareDevPO = new ShareDevPO();
+                shareDevPO.setId(gisDevExtPO.getDevId());
+                shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
+                //test
+                shareDevPO.setName("DN"+String.valueOf(gisDevExtPO.getCaliber()));
+
+                //保存管线
+                gisDevExtPOMapper.insertSelective(gisDevExtPO);
+                shareDevPOMapper.insertSelective(shareDevPO);
+
+
+
+            }
+
 
             return true;
         }catch (Exception e){

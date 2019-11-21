@@ -1,6 +1,7 @@
 package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
+import com.jdrx.gis.beans.dto.datamanage.ShareAddedNetsDTO;
 import com.jdrx.gis.beans.dto.datamanage.ShareAddedPointDTO;
 import com.jdrx.gis.service.dataManage.DataEditorService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -48,6 +49,13 @@ public class DataEditorApi {
     public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedPointDTO dto) throws Exception{
         Logger.debug("api/0/analysis/saveSharePoint 保存新增管点");
         return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto));
+    }
+
+    @ApiOperation(value = "保存新增管网")
+    @RequestMapping(value ="saveShareNets")
+    public ResposeVO saveShareNets(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedNetsDTO dto) throws Exception{
+        Logger.debug("api/0/analysis/saveShareNets 保存新增管网");
+        return  ResponseFactory.ok(dataEditorService.saveShareNets(dto));
     }
 
     @ApiOperation(value = "获取管线类型")

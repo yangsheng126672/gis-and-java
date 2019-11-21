@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 public class SharePointDTO {
     @ApiModelProperty("管点属性")
-    private Map<String,Object> map;
+    private Map<String,Object> mapAttr;
 
     @ApiModelProperty("设备类型id")
     private Long typeId;

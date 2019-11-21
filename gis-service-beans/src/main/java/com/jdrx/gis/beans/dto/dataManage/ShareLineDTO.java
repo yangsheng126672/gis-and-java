@@ -14,9 +14,21 @@ import java.util.Map;
 @Data
 public class ShareLineDTO {
     @ApiModelProperty("管线属性")
-    private Map<String,Object> map;
+    private Map<String,Object> mapAttr;
 
     @ApiModelProperty("设备类型id")
     private Long typeId;
+
+    @ApiModelProperty("起点编码")
+    String startCode;
+
+    @ApiModelProperty("终点编码")
+    String endCode;
+
+    @ApiModelProperty("材质")
+    String material;
+
+    @ApiModelProperty("管径")
+    Integer caliber;
 
 }
