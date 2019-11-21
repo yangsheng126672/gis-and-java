@@ -860,7 +860,6 @@ public class ExcelProcessorService {
 				gisDevExtPO.setDataInfo(jsonObject);
 				gisDevExtPO.setCreateAt(creatAt);
 				gisDevExtPO.setCreateBy(devSaveParam.getLoginUserName());
-				gisDevExtPO.setBatchNum(devSaveParam.getBatchNum());
 				if (Objects.nonNull(belongTo)) {
 					gisDevExtPO.setBelongTo(Long.parseLong(belongTo));
 				} else {

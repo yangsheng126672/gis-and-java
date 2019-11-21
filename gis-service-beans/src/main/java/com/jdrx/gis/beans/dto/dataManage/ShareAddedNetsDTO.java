@@ -1,6 +1,7 @@
 package com.jdrx.gis.beans.dto.datamanage;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -12,8 +13,9 @@ import java.util.List;
  */
 @Data
 public class ShareAddedNetsDTO {
-    //管点list
+    @ApiModelProperty("管点list")
     List<SharePointDTO> pointList;
-    //管线list
+
+    @ApiModelProperty("管线list")
     List<ShareLineDTO> lineList;
 }

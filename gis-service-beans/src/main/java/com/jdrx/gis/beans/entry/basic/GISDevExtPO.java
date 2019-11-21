@@ -84,11 +84,6 @@ public class GISDevExtPO {
 	private Long belongTo;
 
 	/**
-	 * 批次号
-	 */
-	private String batchNum;
-
-	/**
 	 * geom对象
 	 */
 	private PGgeometry geomObj;

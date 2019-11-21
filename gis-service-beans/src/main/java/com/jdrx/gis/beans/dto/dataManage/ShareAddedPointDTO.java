@@ -12,7 +12,7 @@ import java.util.Map;
  */
 
 @Data
-public class AddSharePointDTO {
+public class ShareAddedPointDTO {
     @ApiModelProperty("管点属性")
     private Map<String,Object> map;
 

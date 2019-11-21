@@ -24,6 +24,5 @@ public class SharePointDTO {
     @ApiModelProperty("y坐标")
     private Double y;
 
-    @ApiModelProperty("管线设备id")
-    private String lineDevId;
+
 }
