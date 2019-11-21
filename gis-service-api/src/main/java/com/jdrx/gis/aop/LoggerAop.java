@@ -141,9 +141,10 @@ public class LoggerAop {
 			}
 			try {
 				String req = gisTransLog.getReqParams();
-				if (Objects.nonNull(req) && req.length() <= 512) {
-					gisTransLogMapper.insertSelective(gisTransLog);
+				if (Objects.nonNull(req) && req.length() > 1024) {
+					req = "请求数据大于1024，请根据trans_id到日志中查看";
 				}
+				gisTransLogMapper.insertSelective(gisTransLog);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.error("保存GIS日志记录失败！");
@@ -166,9 +167,10 @@ public class LoggerAop {
 		logExecutorService.execute(() -> {
 			try {
 				String req = gisTransLog.getReqParams();
-				if (Objects.nonNull(req) && req.length() <= 512) {
-					gisTransLogMapper.insertSelective(gisTransLog);
+				if (Objects.nonNull(req) && req.length() > 1024) {
+					req = "请求数据大于1024，请根据trans_id到日志中查看";
 				}
+				gisTransLogMapper.insertSelective(gisTransLog);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.error("保存GIS日志记录失败！");

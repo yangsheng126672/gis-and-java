@@ -382,8 +382,9 @@ CREATE table gis_trans_log(
 		trans_id char(32) not null default '',
 		api_name varchar(64) not null default '',
 		api varchar(128) not null default '',
-		req_params VARCHAR(512) not null default '',
+		req_params VARCHAR(1024) not null default '',
 		return_code varchar(8) not null default -1,
+		return_msg varchar(512) not null default '',
 		req_host varchar(16) not null default '',
 		operator varchar(16) not null default '',
 		cost int4 not null default -1,
@@ -396,6 +397,7 @@ COMMENT ON COLUMN gis_trans_log.api_name IS '接口名称';
 COMMENT ON COLUMN gis_trans_log.api IS '接口';
 COMMENT ON COLUMN gis_trans_log.req_params IS '接口的请求参数';
 COMMENT ON COLUMN gis_trans_log.return_code IS '响应码，0-成功，其它失败';
+COMMENT ON COLUMN gis_trans_log.return_msg IS '成功与否信息';
 COMMENT ON COLUMN gis_trans_log.req_host IS '客户端host';
 COMMENT ON COLUMN gis_trans_log.operator IS '操作人员';
 COMMENT ON COLUMN gis_trans_log.cost IS '接口消耗时间，单位ms';

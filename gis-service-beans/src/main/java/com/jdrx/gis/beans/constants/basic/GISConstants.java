@@ -82,7 +82,7 @@ public class GISConstants {
 	public final static String IMPORT_SHEET1_NAME = "管段表";
 
 	/** 一次最多导入条数*/
-	public final static int IMPORT_MAX_ROWS = 30000;
+	public final static int IMPORT_MAX_ROWS = 20000;
 
 	/** 设备数据导入中表头需要验证之一： 类别名称 */
 	public final static String DEV_TYPE_NAME_CHN = "类别名称";
