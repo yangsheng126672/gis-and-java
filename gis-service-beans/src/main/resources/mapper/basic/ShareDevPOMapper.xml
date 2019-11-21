@@ -293,7 +293,7 @@
         VALUES
         <foreach collection="shareDevPOList" item="item" index="index" separator=",">
             (
-                #{item.id,jdbcType=BIGINT},
+                #{item.id,jdbcType=VARCHAR},
                 #{item.typeId,jdbcType=BIGINT},
                 #{item.name,jdbcType=VARCHAR},
                 #{item.lng,jdbcType=VARCHAR},
@@ -305,4 +305,68 @@
             )
         </foreach>
     </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE share_dev
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="type_id = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.typeId != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.typeId,jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="name = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.name != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.name,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="lng = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.lng != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.lng,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="lat = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.lat != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.lat,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="addr = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.addr != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.addr,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="platform_code = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.platformCode != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.platformCode,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_by = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    <if test="item.updateBy != null">
+                        when id = #{item.id,jdbcType=VARCHAR} then #{item.updateBy,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_at = CASE" suffix="END,">
+                <foreach collection="shareDevPOList" item="item" index="index">
+                    when id = #{item.id,jdbcType=VARCHAR} then now()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE
+        <foreach collection="shareDevPOList" separator="OR" item="item" index="index" >
+            id = #{item.id,jdbcType=VARCHAR}
+        </foreach>
+    </update>
 </mapper>

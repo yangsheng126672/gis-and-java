@@ -160,4 +160,6 @@ public class GISConstants {
 	public final static String SHARE_DEV_S = "shareDev";
 
 	public final static String GIS_DEV_EXT_S = "gisDevExt";
+
+	public final static String AUTH_ID_S = "authId";
 }

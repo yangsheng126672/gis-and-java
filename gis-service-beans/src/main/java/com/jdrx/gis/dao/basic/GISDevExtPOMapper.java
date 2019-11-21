@@ -106,5 +106,18 @@ public interface GISDevExtPOMapper {
 	 */
 	List<GISDevExtPO> selectExistRecords(@Param("batchNum") String batchNum);
 
+	/**
+	 * 批量更新
+	 * @param gisDevExtPOList
+	 * @return
+	 */
+	Integer batchUpdate(@Param("gisDevExtPOList") List<GISDevExtPO> gisDevExtPOList);
+
+	/**
+	 * 根据code获取ext数据
+	 * @param codes
+	 * @return
+	 */
+	List<GISDevExtPO> selectByCodes(@Param("codes") String codes);
 }
 

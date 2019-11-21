@@ -40,4 +40,11 @@ public interface ShareDevPOMapper {
 	 */
 	int batchInsertSelective(@Param("shareDevPOList") List<ShareDevPO> shareDevPOList);
 
+	/**
+	 * 批量更新设备
+	 * @param shareDevPOList
+	 * @return
+	 */
+	int batchUpdate(@Param("shareDevPOList") List<ShareDevPO> shareDevPOList);
+
 }

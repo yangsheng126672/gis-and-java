@@ -61,7 +61,7 @@ public class ImportApi {
 
 
 
-	@ApiOperation(value = "解析Excle数据")
+	@ApiOperation(value = "解析Excel数据")
 	@RequestMapping(value = "analysisExcel")
 	public ResposeVO analysisExcel(@PathVariable("file") MultipartFile file, @RequestHeader(value = "batchNum") String batchNum) throws BizException {
 		Logger.debug("api/0/dataImport/analysisExcel 解析excel数据");
@@ -94,7 +94,7 @@ public class ImportApi {
 		Map<String, List> dataMap = importDTO.getDataMap();
 		boolean res;
 		try {
-			res = excelProcessorService.saveExcelData(dataMap, userId, token, importDTO.getBatchNum());
+			res = excelProcessorService.saveExcelData(dataMap, userId, token, importDTO.getTs());
 		} catch (BizException e) {
 			e.printStackTrace();
 			throw new BizException(e.getMessage());
