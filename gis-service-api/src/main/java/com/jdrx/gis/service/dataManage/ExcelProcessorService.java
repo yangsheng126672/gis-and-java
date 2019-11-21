@@ -2,6 +2,7 @@ package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,6 +24,7 @@ import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
 import com.jdrx.share.service.ShareDeviceService;
+import javafx.scene.layout.BackgroundImage;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.postgis.PGgeometry;
@@ -35,6 +37,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import sun.rmi.runtime.Log;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -351,17 +354,25 @@ public class ExcelProcessorService {
 	 * @param cell
 	 * @return
 	 */
-	String handleDateCell(Cell cell) {
-		Date cellValue = cell.getDateCellValue();
-//		Short dateStyle = HSSFDataFormat.getBuiltinFormat("m/d/yy");
-		Short timeStyle = HSSFDataFormat.getBuiltinFormat("h:mm:ss");
-		Short cellStyle = cell.getCellStyle().getDataFormat();
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		if (timeStyle.equals(cellStyle)) {
-			return sdf2.format(cellValue);
-		} else {
-			return sdf1.format(cellValue);
+	String handleDateCell(Cell cell) throws BizException{
+		String addr = "第" + (cell.getAddress().getRow() + 1) + "行" +  (cell.getAddress().getColumn() + 1) + "列";
+		try {
+			boolean isDateCell = false;
+			try {
+				isDateCell = DateUtil.isCellDateFormatted(cell);
+			} catch (Exception e) {
+				 throw new BizException(addr + "不是日期格式，请更改单元格格式！");
+			}
+			if (!isDateCell) {
+				throw new BizException(addr + "不是日期格式，请更改单元格格式！");
+			}
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date cellDate = cell.getDateCellValue();
+			return sdf.format(cellDate);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error(addr + "单元格的日期格式不正确！");
+			throw new BizException(e.getMessage());
 		}
 	}
 
@@ -414,13 +425,14 @@ public class ExcelProcessorService {
 					} else if (EPGDataTypeCategory.D.getCode().equals(category)) {
 						cellStringVal = handleDateCell(cell);
 					} else {
+						cell.setCellType(CellType.STRING);
 						cellStringVal = cell.getStringCellValue();
 					}
 				}
 				if (!StringUtils.isEmpty(cellStringVal)) {
 					cellStringVal.trim();
 				}
-				String cellAddrDesc = "第[" + ( i + 1 ) + "]行第[" + ( j + 1 ) + "]列";
+				String cellAddrDesc = sheetName + " 第[" + ( i + 1 ) + "]行第[" + ( j + 1 ) + "]列";
 				// 表头的中文名称
 				String headerName = cellIdxHeaderMap.get(j);
 
@@ -462,7 +474,7 @@ public class ExcelProcessorService {
 					Map<Integer, Map<String, String>> allDevTypeNames = headerMap.get("allDevTypeNames");
 					Map<String, String> allDevTypes = allDevTypeNames.get(KEY);
 					if (!allDevTypes.containsKey(cellStringVal)) {
-						throw new BizException(cellAddrDesc + "的设备类型[" + cellStringVal + "]在数据库中不存在，请确认是" +
+						throw new BizException(cellAddrDesc + "的类别名称[" + cellStringVal + "]在数据库中不存在，请确认是" +
 								"否新增类型，如果是，请联系管理员添加；如果不是，请更正数据后重新上传！");
 					}
 					// 把类别名称转为ID
@@ -515,7 +527,7 @@ public class ExcelProcessorService {
 					}
 				}
 				if (Objects.nonNull(typeName)) {
-					shareDevDataMap.put("typeName", typeName);
+					shareDevDataMap.put(GISConstants.DEV_TYPE_NAME_EN, typeName);
 				}
 			}
 			excelDevList.add(shareDevDataMap);
@@ -547,8 +559,11 @@ public class ExcelProcessorService {
 	public Long saveTplAttr(String tplConfigVal, String loginUserName, String typeName) throws BizException {
 		try{
 			Long typeId = shareDevTypePOMapper.getIdByNameForTopHierarchy(typeName);
+			boolean hasTypeId = false;
 			if (Objects.isNull(typeId)) {
-				throw new BizException(typeName + "对应的模板未在数据库表gis_dev_tpl_attr为配置，请先配置！");
+				throw new BizException(typeName + "对应的模板未在数据库表gis_dev_tpl_attr配置，请先配置！");
+			} else {
+				hasTypeId = true;
 			}
 			List<Map<String, String>> typeDescList = gisDevTplAttrService.selectTypeIdDescMap();
 			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(tplConfigVal);
@@ -587,15 +602,25 @@ public class ExcelProcessorService {
 							tId = String.valueOf(entry.getValue());
 						}
 					}
+					String[] fieldsDB = fieldDescArray.split(",");
+					String[] configFields = configDesc.split(",");
+					Collections.sort(Arrays.asList(fieldsDB));
+					Collections.sort(Arrays.asList(configFields));
+					fieldDescArray = Joiner.on(",").join(fieldsDB);
+					configDesc = Joiner.on(",").join(configFields);
 					if (fieldDescArray.equals(configDesc)) {
 						isExist = true;
 						typeId = Long.parseLong(tId);
 						break;
 					}
+
 				}
 			}
 			// 如果数据库不存在相同的模板再插入数据库
 			if (!isExist) {
+				if (hasTypeId) {
+					gisDevTplAttrService.delByTypeId(typeId);
+				}
 				gisDevTplAttrService.batchInsertSelective(tplAttrPOList);
 			}
 			return typeId;
@@ -618,11 +643,19 @@ public class ExcelProcessorService {
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
 	public boolean saveExcelData(DevSaveParam devSaveParam) throws BizException {
 		boolean result = false;
+		devSaveParam.setSaveFlag(1);
 		Map<String, List> buildMap = buildDevPO(devSaveParam);
 		try {
-			int e1 = shareDevPOMapper.batchInsertSelective(buildMap.get("shareDev"));
-			int e2 = gisDevExtPOMapper.batchInsertSelective(buildMap.get("gisDevExt"));
-			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows", " total " + (e1 + e2) + "rows");
+			List<ShareDevPO> shareDevPOS = buildMap.get(GISConstants.SHARE_DEV_S);
+			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
+			int e1 = 0, e2 = 0;
+			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
+				e1 = shareDevPOMapper.batchInsertSelective(shareDevPOS);
+			}
+			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
+				e2 = gisDevExtPOMapper.batchInsertSelective(gisDevExtPOS);
+			}
+			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows");
 			result = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -644,7 +677,27 @@ public class ExcelProcessorService {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
 	public boolean updateDBData(DevSaveParam devSaveParam) throws BizException {
-		return false;
+		boolean result = false;
+		devSaveParam.setSaveFlag(2);
+		Map<String, List> buildMap = buildDevPO(devSaveParam);
+		try {
+			List<ShareDevPO> shareDevPOS = buildMap.get(GISConstants.SHARE_DEV_S);
+			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
+			int e1 = 0, e2 = 0;
+			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
+//				e1 = shareDevPOMapper.batchUpdate(shareDevPOS);
+			}
+			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
+//				e2 = gisDevExtPOMapper.batchUpdate(gisDevExtPOS);
+			}
+			Logger.debug("share_dev update " + e1 + " rows, and gis_dev_ext update " + e2 + " rows");
+			result = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error(e.getMessage());
+			new BizException("保存设备数据失败！");
+		}
+		return result;
 	}
 
 	/**
@@ -670,7 +723,9 @@ public class ExcelProcessorService {
 		if (Objects.nonNull(dataMapList) && dataMapList.size() > 0) {
 			List<CodeXYPO> codeXYPOList = Lists.newArrayList();
 			for (Map<String, Object> map : dataMapList) {
-				String pointCode, lineCode;
+				String pointCode = pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
+				String lineCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN))
+						+ "-" + String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
 					pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
 					String x = String.valueOf(map.get(GISConstants.X_CHN));
@@ -683,21 +738,20 @@ public class ExcelProcessorService {
 					codeXYPOList.add(codeXYPO);
 
 				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
-					lineCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 //					String[] line = lineCode.split("-");
 					String startCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN));
 					String endCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 					CodeXYPO codeXYPO = new CodeXYPO();
 					GISDevExtPO start = gisDevExtPOMapper.selectByCode(startCode);
-//					if (Objects.isNull(start)) {
-//						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
-//								"便无法找到对应的坐标，请确认！");
-//					}
+					if (Objects.isNull(start)) {
+						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
+								"便无法找到对应的坐标，请确认！");
+					}
 					GISDevExtPO end = gisDevExtPOMapper.selectByCode(endCode);
-//					if (Objects.isNull(end)) {
-//						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
-//								"便无法找到对应的坐标，请确认！");
-//					}
+					if (Objects.isNull(end)) {
+						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
+								"便无法找到对应的坐标，请确认！");
+					}
 
 					ShareDevPO shareDevPOStart = shareDevPOMapper.selectByPrimaryKey(start.getDevId());
 					ShareDevPO shareDevPOEnd = shareDevPOMapper.selectByPrimaryKey(end.getDevId());
@@ -725,6 +779,9 @@ public class ExcelProcessorService {
 			for (Map<String, Object> map : dataMapList) {
 				ShareDevPO shareDevPO = new ShareDevPO();
 				Long typeId = null;
+				String pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
+				String lineCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN))
+						+ "-" + String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 				String typeIdStr = Objects.nonNull(map.get(GISConstants.DEV_TYPE_NAME_EN)) ? String.valueOf(map.get(GISConstants.DEV_TYPE_NAME_EN)) : null;
 				if (Objects.nonNull(typeIdStr)) {
 					typeId = Long.parseLong(typeIdStr);
@@ -732,20 +789,29 @@ public class ExcelProcessorService {
 				Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
 				String devId = String.format("%04d%s%06d",typeId, GISConstants.PLATFORM_CODE, seq);
 				String name = String.valueOf(map.get(GISConstants.DEV_TYPE_NAME_CHN));
-				String pointCode = "", lineCode = "";
 				int p_l = 0;
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
-					pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
-					if (Objects.nonNull(existsCodes) && existsCodes.contains(pointCode)) {
-						continue;
-					}
 					p_l = 1;
-				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
-					lineCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
-					if (Objects.nonNull(existsCodes) && existsCodes.contains(lineCode)) {
-						continue;
+					if (1 == devSaveParam.getSaveFlag()) {
+						if (existsCodes.contains(pointCode)) {
+							continue;
+						}
+					} else if (2 == devSaveParam.getSaveFlag()) {
+						if (!existsCodes.contains(pointCode)) {
+							continue;
+						}
 					}
+				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
 					p_l = 2;
+					if (1 == devSaveParam.getSaveFlag()) {
+						if (existsCodes.contains(lineCode)) {
+							continue;
+						}
+					} else if (2 == devSaveParam.getSaveFlag()) {
+						if (!existsCodes.contains(lineCode)) {
+							continue;
+						}
+					}
 				}
 				String caliber = Objects.nonNull(map.get(GISConstants.CALIBER_CHN)) ? String.valueOf(map.get(GISConstants.CALIBER_CHN)) : null;
 				String material = Objects.nonNull(map.get(GISConstants.MATERIAL_CHN)) ? String.valueOf(map.get(GISConstants.MATERIAL_CHN)) : null;
@@ -803,11 +869,18 @@ public class ExcelProcessorService {
 			}
 
 		}
-		buildMap.put("shareDev", shareDevPOList);
-		buildMap.put("gisDevExt", gisDevExtPOList);
+		buildMap.put(GISConstants.SHARE_DEV_S, shareDevPOList);
+		buildMap.put(GISConstants.GIS_DEV_EXT_S, gisDevExtPOList);
 		return buildMap;
 	}
 
+	/**
+	 * geom转换成文本（批量）
+	 * @param codeXYPOs
+	 * @param isPoint
+	 * @return
+	 * @throws BizException
+	 */
 	public List<Map<String, Object>> geomConvertFromExt(List<CodeXYPO> codeXYPOs, int isPoint) throws BizException {
 		if (Objects.isNull(codeXYPOs)) {
 			return Lists.newArrayList();
@@ -851,8 +924,8 @@ public class ExcelProcessorService {
 	public Boolean saveExcelData(Map<String, List> dataMap, Long userId, String token, String batchNum) throws BizException {
 		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 		String loginUserName = sysOcpUserPo.getName();
-		List<Map<String, Object>> pointDataList = dataMap.get("pointList");
-		List<Map<String, Object>> lineDataList = dataMap.get("lineList");
+		List<Map<String, Object>> pointDataList = dataMap.get(GISConstants.POINT_LIST_S);
+		List<Map<String, Object>> lineDataList = dataMap.get(GISConstants.LINE_LIST_S);
 		List<GISDevExtPO> existRecords = gisDevExtPOMapper.selectExistRecords(batchNum);
 
 		boolean result = false;
@@ -882,7 +955,6 @@ public class ExcelProcessorService {
 			}
 			result = saveExcelData(devSaveParam);
 		}
-
 		return result;
 	}
 

@@ -15,6 +15,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -31,8 +32,8 @@ import java.util.concurrent.Executors;
  * @Author: liaosijun
  * @Time: 2019/11/7 10:22
  */
-//@Aspect
-//@Component
+@Aspect
+@Component
 public class LoggerAop {
 	// 日志
 	private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(LoggerAop.class);
@@ -139,7 +140,10 @@ public class LoggerAop {
 						+ JsonFormatUtil.formatJson(JSONObject.toJSONString(resposeVO)));
 			}
 			try {
-				gisTransLogMapper.insertSelective(gisTransLog);
+				String req = gisTransLog.getReqParams();
+				if (Objects.nonNull(req) && req.length() <= 512) {
+					gisTransLogMapper.insertSelective(gisTransLog);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.error("保存GIS日志记录失败！");
@@ -161,7 +165,10 @@ public class LoggerAop {
 		}
 		logExecutorService.execute(() -> {
 			try {
-				gisTransLogMapper.insertSelective(gisTransLog);
+				String req = gisTransLog.getReqParams();
+				if (Objects.nonNull(req) && req.length() <= 512) {
+					gisTransLogMapper.insertSelective(gisTransLog);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.error("保存GIS日志记录失败！");

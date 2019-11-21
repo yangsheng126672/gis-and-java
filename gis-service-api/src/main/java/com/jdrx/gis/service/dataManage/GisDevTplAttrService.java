@@ -73,4 +73,20 @@ public class GisDevTplAttrService {
 			throw new BizException();
 		}
 	}
+
+	/**
+	 * 逻辑删除typeId对应模板
+	 * @param typeId
+	 * @return
+	 * @throws BizException
+	 */
+	public int delByTypeId(Long typeId) throws BizException {
+		try {
+			return gisDevTplAttrPOMapper.delByTypeId(typeId);
+		}  catch (Exception e) {
+			Logger.error("逻辑删除typeId对应模板失败！");
+			e.printStackTrace();
+			throw new BizException();
+		}
+	}
 }

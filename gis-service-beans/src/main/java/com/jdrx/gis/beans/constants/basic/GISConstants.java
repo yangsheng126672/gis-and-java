@@ -150,4 +150,14 @@ public class GISConstants {
 	public final static String NEO_NODE_WATER = "2";
 	/** typeName */
 	public final static String DEV_TYPE_NAME_EN = "typeName";
+
+	/** 点List */
+	public final static String POINT_LIST_S = "pointList";
+
+	/** 线List */
+	public final static String LINE_LIST_S = "lineList";
+
+	public final static String SHARE_DEV_S = "shareDev";
+
+	public final static String GIS_DEV_EXT_S = "gisDevExt";
 }

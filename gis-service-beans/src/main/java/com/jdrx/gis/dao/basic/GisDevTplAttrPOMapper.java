@@ -51,4 +51,11 @@ public interface GisDevTplAttrPOMapper {
 	 * @return
 	 */
 	List<Map<String, String>> selectTypeIdDescMap();
+
+	/**
+	 * 逻辑删除typeId相应模板
+	 * @param typeId
+	 * @return
+	 */
+	int delByTypeId(@Param("typeId") Long typeId);
 }

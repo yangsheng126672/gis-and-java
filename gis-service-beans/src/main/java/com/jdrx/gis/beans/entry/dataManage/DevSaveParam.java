@@ -30,6 +30,9 @@ public class DevSaveParam {
 	/** 批次号 */
 	private String batchNum;
 
+	/** 1-insert, 2-update */
+	private int saveFlag;
+
 	public List<Map<String, Object>> getDataMapList() {
 		return dataMapList;
 	}
@@ -76,5 +79,13 @@ public class DevSaveParam {
 
 	public void setBatchNum(String batchNum) {
 		this.batchNum = batchNum;
+	}
+
+	public int getSaveFlag() {
+		return saveFlag;
+	}
+
+	public void setSaveFlag(int saveFlag) {
+		this.saveFlag = saveFlag;
 	}
 }
