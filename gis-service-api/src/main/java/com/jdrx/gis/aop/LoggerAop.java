@@ -143,6 +143,7 @@ public class LoggerAop {
 				String req = gisTransLog.getReqParams();
 				if (Objects.nonNull(req) && req.length() > 1024) {
 					req = "请求数据大于1024，请根据trans_id到日志中查看";
+					gisTransLog.setReqParams(req);
 				}
 				gisTransLogMapper.insertSelective(gisTransLog);
 			} catch (Exception e) {
@@ -169,6 +170,7 @@ public class LoggerAop {
 				String req = gisTransLog.getReqParams();
 				if (Objects.nonNull(req) && req.length() > 1024) {
 					req = "请求数据大于1024，请根据trans_id到日志中查看";
+					gisTransLog.setReqParams(req);
 				}
 				gisTransLogMapper.insertSelective(gisTransLog);
 			} catch (Exception e) {
