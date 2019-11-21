@@ -12,6 +12,7 @@ import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.*;
 import com.jdrx.gis.beans.entry.dataManage.DevSaveParam;
 import com.jdrx.gis.beans.entry.user.SysOcpUserPo;
+import com.jdrx.gis.beans.vo.datamanage.ImportVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
@@ -926,8 +927,8 @@ public class ExcelProcessorService {
 				codeXYPO.setStr(String.valueOf(sb));
 			});
 		}
-//		int sridInt = Integer.parseInt(srid);
-		List<Map<String,Object>> codeGeomList = gisDevExtPOMapper.findGeomMapByPointCode(codeXYPOs, 4544);
+		int sridInt = Integer.parseInt(srid);
+		List<Map<String,Object>> codeGeomList = gisDevExtPOMapper.findGeomMapByPointCode(codeXYPOs, sridInt);
 		return codeGeomList;
 	}
 
@@ -941,7 +942,8 @@ public class ExcelProcessorService {
 	 * @throws BizException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
-	public Boolean saveExcelData(Map<String, List> dataMap, Long userId, String token, Integer ts) throws BizException {
+	public ImportVO saveExcelData(Map<String, List> dataMap, Long userId, String token, Integer ts) throws BizException {
+		ImportVO importVO = new ImportVO();
 		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 		String loginUserName = sysOcpUserPo.getName();
 		List<Map<String, Object>> pointDataList = dataMap.get(GISConstants.POINT_LIST_S);
@@ -968,7 +970,10 @@ public class ExcelProcessorService {
 			tsBool = true;
 		}
 		if (tsBool && 1 == ts) {
-			throw new BizException("excel中有[" + existsExtPOs.size() + "]条数据库存在的数据，是否覆盖，请确认");
+			importVO.setMsg("excel中有[" + existsExtPOs.size() + "]条数据在数据库中已存在，是否覆盖，请确认");
+			importVO.setRetStatus(false);
+			importVO.setIsOverride("Y");
+			return importVO;
 		}
 		boolean result = false;
 		DevSaveParam devSaveParam = new DevSaveParam();
@@ -996,7 +1001,10 @@ public class ExcelProcessorService {
 			}
 			result = saveExcelData(devSaveParam);
 		}
-		return result;
+		importVO.setRetStatus(result);
+		importVO.setIsOverride("N");
+		importVO.setMsg("Success");
+		return importVO;
 	}
 
 }
