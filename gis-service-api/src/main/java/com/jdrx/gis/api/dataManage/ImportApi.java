@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.jdrx.gis.api.query.AttrQueryApi;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.datamanage.ImportDTO;
+import com.jdrx.gis.beans.vo.datamanage.ImportVO;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.service.dataManage.ExcelProcessorService;
 import com.jdrx.gis.util.JavaFileToFormUpload;
@@ -61,9 +62,9 @@ public class ImportApi {
 
 
 
-	@ApiOperation(value = "解析Excle数据")
+	@ApiOperation(value = "解析Excel数据")
 	@RequestMapping(value = "analysisExcel")
-	public ResposeVO analysisExcel(@PathVariable("file") MultipartFile file, @RequestHeader(value = "batchNum") String batchNum) throws BizException {
+	public ResposeVO analysisExcel(@PathVariable("file") MultipartFile file) throws BizException {
 		Logger.debug("api/0/dataImport/analysisExcel 解析excel数据");
 		excelProcessorService.validSuffix(file);
 		InputStream inputStream;
@@ -92,14 +93,14 @@ public class ImportApi {
 	                                  @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException {
 		Logger.debug("api/0/dataImport/importDeviceData 导入设备数据");
 		Map<String, List> dataMap = importDTO.getDataMap();
-		boolean res;
+		ImportVO importVO;
 		try {
-			res = excelProcessorService.saveExcelData(dataMap, userId, token, importDTO.getBatchNum());
+			importVO = excelProcessorService.saveExcelData(dataMap, userId, token, importDTO.getTs());
 		} catch (BizException e) {
 			e.printStackTrace();
 			throw new BizException(e.getMessage());
 		}
-		return ResponseFactory.ok(res);
+		return ResponseFactory.ok(importVO);
 	}
 
 }

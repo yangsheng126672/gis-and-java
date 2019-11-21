@@ -7,10 +7,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.jdrx.gis.beans.constants.basic.EPGDataTypeCategory;
+import com.jdrx.gis.beans.constants.basic.EupdateAndInsert;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.basic.*;
 import com.jdrx.gis.beans.entry.dataManage.DevSaveParam;
 import com.jdrx.gis.beans.entry.user.SysOcpUserPo;
+import com.jdrx.gis.beans.vo.datamanage.ImportVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
@@ -20,6 +22,7 @@ import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
+import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
@@ -84,6 +87,9 @@ public class ExcelProcessorService {
 
 	@Autowired
 	private NetsAnalysisService netsAnalysisService;
+
+	@Autowired
+	private GisDevExtService gisDevExtService;
 
 	@Autowired
 	private UserRpc userRpc;
@@ -366,7 +372,7 @@ public class ExcelProcessorService {
 			if (!isDateCell) {
 				throw new BizException(addr + "不是日期格式，请更改单元格格式！");
 			}
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date cellDate = cell.getDateCellValue();
 			return sdf.format(cellDate);
 		} catch (Exception e) {
@@ -416,8 +422,6 @@ public class ExcelProcessorService {
 				String category = cellDataTypeMap.get(j);
 				Cell cell = row.getCell(j);
 				String cellStringVal = "";
-				boolean isTranslate = false;
-				String noConvertVal = "";
 				if (Objects.nonNull(cell)) {
 					if (EPGDataTypeCategory.N.getCode().equals(category)) {
 						cell.setCellType(CellType.STRING);
@@ -482,16 +486,15 @@ public class ExcelProcessorService {
 				}
 
 				// 验证权属单位是否合法
+				String authId = null;
 				if (GISConstants.DATA_AUTH_CHN.equals(headerName)) {
 					Map<Integer,  Map<String, String>> authIdMap = headerMap.get("authIdMap");
 					Map<String, String> authIdNameMap = authIdMap.get(KEY);
-					noConvertVal = cellStringVal;
-					isTranslate = true;
 					if (!authIdNameMap.containsKey(cellStringVal)) {
 						throw new BizException(cellAddrDesc + "的权属单位[" + cellStringVal + "]在数据库中不存在，请确认！");
 					}
 					// 数据权限的所属名称转换为ID
-					cellStringVal = authIdNameMap.get(cellStringVal);
+					authId = authIdNameMap.get(cellStringVal);
 				}
 
 				// 用以验证管点的编码是否重复
@@ -517,7 +520,7 @@ public class ExcelProcessorService {
 				shareDevDataMap.put(headerName,cellStringVal);
 				// 添加gis_dev_ext
 				String en_header = fieldMap.get(headerName);
-				gisExtDataMap.put(en_header, isTranslate ? noConvertVal : cellStringVal);
+				gisExtDataMap.put(en_header, cellStringVal);
 				if (j == (cells - 1)) {
 					try {
 						PGobject dataInfo = ComUtil.convertMaptoPGObject(gisExtDataMap);
@@ -528,6 +531,9 @@ public class ExcelProcessorService {
 				}
 				if (Objects.nonNull(typeName)) {
 					shareDevDataMap.put(GISConstants.DEV_TYPE_NAME_EN, typeName);
+				}
+				if (Objects.nonNull(authId)) {
+					shareDevDataMap.put(GISConstants.AUTH_ID_S, authId);
 				}
 			}
 			excelDevList.add(shareDevDataMap);
@@ -555,7 +561,7 @@ public class ExcelProcessorService {
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
 	public Long saveTplAttr(String tplConfigVal, String loginUserName, String typeName) throws BizException {
 		try{
 			Long typeId = shareDevTypePOMapper.getIdByNameForTopHierarchy(typeName);
@@ -640,7 +646,7 @@ public class ExcelProcessorService {
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
 	public boolean saveExcelData(DevSaveParam devSaveParam) throws BizException {
 		boolean result = false;
 		devSaveParam.setSaveFlag(1);
@@ -675,7 +681,7 @@ public class ExcelProcessorService {
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
 	public boolean updateDBData(DevSaveParam devSaveParam) throws BizException {
 		boolean result = false;
 		devSaveParam.setSaveFlag(2);
@@ -685,10 +691,10 @@ public class ExcelProcessorService {
 			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
 			int e1 = 0, e2 = 0;
 			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
-//				e1 = shareDevPOMapper.batchUpdate(shareDevPOS);
+				e1 = shareDevPOMapper.batchUpdate(shareDevPOS);
 			}
 			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
-//				e2 = gisDevExtPOMapper.batchUpdate(gisDevExtPOS);
+				e2 = gisDevExtPOMapper.batchUpdate(gisDevExtPOS);
 			}
 			Logger.debug("share_dev update " + e1 + " rows, and gis_dev_ext update " + e2 + " rows");
 			result = true;
@@ -713,11 +719,14 @@ public class ExcelProcessorService {
 		Map<String, List> buildMap = Maps.newHashMap();
 		List<Map<String, Object>> dataMapList = devSaveParam.getDataMapList();
 		String sheetName = devSaveParam.getSheetName();
+		Map<String, String> existsExtMaps = Maps.newHashMap();
+		Map<String, String> existsExtMaps2 = Maps.newHashMap();
 		List<GISDevExtPO> existsExtPOs = devSaveParam.getExistsCodes();
-		Set<String> existsCodes = Sets.newHashSet();
 		if (Objects.nonNull(existsExtPOs) && existsExtPOs.size() > 0) {
 			existsExtPOs.stream().forEach(gisDevExtPO -> {
-				existsCodes.add(gisDevExtPO.getCode());
+				String devCode = gisDevExtPO.getCode();
+				existsExtMaps.put(devCode, gisDevExtPO.getDevId());
+				existsExtMaps2.put(devCode, gisDevExtPO.getDevId());
 			});
 		}
 		if (Objects.nonNull(dataMapList) && dataMapList.size() > 0) {
@@ -744,12 +753,12 @@ public class ExcelProcessorService {
 					CodeXYPO codeXYPO = new CodeXYPO();
 					GISDevExtPO start = gisDevExtPOMapper.selectByCode(startCode);
 					if (Objects.isNull(start)) {
-						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "在数据库中不存在！" +
+						throw new BizException(sheetName + "的" + GISConstants.LINE_START_CODE_CHN + "[" + startCode + "]在数据库中不存在！" +
 								"便无法找到对应的坐标，请确认！");
 					}
 					GISDevExtPO end = gisDevExtPOMapper.selectByCode(endCode);
 					if (Objects.isNull(end)) {
-						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "在数据库中不存在！" +
+						throw new BizException(sheetName + "的" + GISConstants.LINE_END_CODE_CHN + "[" + endCode + "]在数据库中不存在！" +
 								"便无法找到对应的坐标，请确认！");
 					}
 
@@ -792,30 +801,30 @@ public class ExcelProcessorService {
 				int p_l = 0;
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
 					p_l = 1;
-					if (1 == devSaveParam.getSaveFlag()) {
-						if (existsCodes.contains(pointCode)) {
+					if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
+						if (existsExtMaps.containsKey(pointCode)) {
 							continue;
 						}
-					} else if (2 == devSaveParam.getSaveFlag()) {
-						if (!existsCodes.contains(pointCode)) {
+					} else if (EupdateAndInsert.UPDATE.getVal() == devSaveParam.getSaveFlag()) {
+						if (!existsExtMaps.containsKey(pointCode)) {
 							continue;
 						}
 					}
 				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
 					p_l = 2;
-					if (1 == devSaveParam.getSaveFlag()) {
-						if (existsCodes.contains(lineCode)) {
+					if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
+						if (existsExtMaps.containsKey(lineCode)) {
 							continue;
 						}
-					} else if (2 == devSaveParam.getSaveFlag()) {
-						if (!existsCodes.contains(lineCode)) {
+					} else if (EupdateAndInsert.UPDATE.getVal() == devSaveParam.getSaveFlag()) {
+						if (!existsExtMaps.containsKey(lineCode)) {
 							continue;
 						}
 					}
 				}
 				String caliber = Objects.nonNull(map.get(GISConstants.CALIBER_CHN)) ? String.valueOf(map.get(GISConstants.CALIBER_CHN)) : null;
 				String material = Objects.nonNull(map.get(GISConstants.MATERIAL_CHN)) ? String.valueOf(map.get(GISConstants.MATERIAL_CHN)) : null;
-				String belongTo = Objects.nonNull(map.get(GISConstants.DATA_AUTH_CHN)) ? String.valueOf(map.get(GISConstants.DATA_AUTH_CHN)) : null;
+				String belongTo = Objects.nonNull(map.get(GISConstants.AUTH_ID_S)) ? String.valueOf(map.get(GISConstants.AUTH_ID_S)) : null;
 				HashMap dataInfoTempMap = (HashMap) map.get(GISConstants.DATA_INFO);
 				Object dataInfoStr =  dataInfoTempMap.get("value");
 				PGobject jsonObject = new PGobject();
@@ -828,29 +837,36 @@ public class ExcelProcessorService {
 
 				Date creatAt = new Date();
 				PGgeometry geom = null;
-
+				String devCode = null;
+				if (p_l == 1) {
+					devCode = pointCode;
+					geom = (PGgeometry) codeGeomMap.get(pointCode);
+				} else if (p_l == 2) {
+					devCode = lineCode;
+					geom = (PGgeometry) codeGeomMap.get(lineCode);
+				}
+				// share_dev数据
 				shareDevPO.setId(String.valueOf(devId));
-
 				shareDevPO.setTypeId(typeId);
 				shareDevPO.setName(name);
-				shareDevPO.setLng(String.valueOf(map.get(GISConstants.Y_CHN)));
-				shareDevPO.setLat(String.valueOf(map.get(GISConstants.X_CHN)));
+				shareDevPO.setLng(Objects.nonNull(map.get(GISConstants.Y_CHN)) ? String.valueOf(map.get(GISConstants.Y_CHN)) : null);
+				shareDevPO.setLat(Objects.nonNull(map.get(GISConstants.X_CHN)) ? String.valueOf(map.get(GISConstants.X_CHN)) : null);
 				shareDevPO.setAddr(String.valueOf(map.get(GISConstants.DEV_ADDR_CHN)));
-				shareDevPO.setCreateAt(creatAt);
-				shareDevPO.setCreateBy(devSaveParam.getLoginUserName());
+				if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
+					shareDevPO.setCreateAt(creatAt);
+					shareDevPO.setCreateBy(devSaveParam.getLoginUserName());
+				} else if (EupdateAndInsert.UPDATE.getVal() == devSaveParam.getSaveFlag()) {
+					shareDevPO.setUpdateAt(creatAt);
+					shareDevPO.setUpdateBy(devSaveParam.getLoginUserName());
+					shareDevPO.setId(existsExtMaps.get(devCode));
+				}
 				shareDevPO.setPlatformCode(GISConstants.PLATFORM_CODE);
 				shareDevPOList.add(shareDevPO);
-
+				// gis_dev_ext数据
 				GISDevExtPO gisDevExtPO = new GISDevExtPO();
 				gisDevExtPO.setDevId(devId);
 				gisDevExtPO.setName(name);
-				if (p_l == 1) {
-					gisDevExtPO.setCode(pointCode);
-					geom = (PGgeometry) codeGeomMap.get(pointCode);
-				} else if (p_l == 2) {
-					gisDevExtPO.setCode(lineCode);
-					geom = (PGgeometry) codeGeomMap.get(lineCode);
-				}
+				gisDevExtPO.setCode(devCode);
 				if (Objects.nonNull(caliber)) {
 					gisDevExtPO.setCaliber(Integer.parseInt(caliber));
 				}
@@ -858,11 +874,17 @@ public class ExcelProcessorService {
 				gisDevExtPO.setGeom(geom.getValue());
 				gisDevExtPO.setTplTypeId(devSaveParam.getTplTypeId());
 				gisDevExtPO.setDataInfo(jsonObject);
-				gisDevExtPO.setCreateAt(creatAt);
-				gisDevExtPO.setCreateBy(devSaveParam.getLoginUserName());
+				if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
+					gisDevExtPO.setCreateAt(creatAt);
+					gisDevExtPO.setCreateBy(devSaveParam.getLoginUserName());
+				} else if (EupdateAndInsert.UPDATE.getVal() == devSaveParam.getSaveFlag()) {
+					gisDevExtPO.setUpdateAt(creatAt);
+					gisDevExtPO.setUpdateBy(devSaveParam.getLoginUserName());
+					gisDevExtPO.setDevId(existsExtMaps2.get(devCode));
+				}
+//				gisDevExtPO.setBatchNum(devSaveParam.getBatchNum());
 				if (Objects.nonNull(belongTo)) {
 					gisDevExtPO.setBelongTo(Long.parseLong(belongTo));
-				} else {
 				}
 				gisDevExtPOList.add(gisDevExtPO);
 			}
@@ -919,26 +941,51 @@ public class ExcelProcessorService {
 	 * @return
 	 * @throws BizException
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.SERIALIZABLE, rollbackFor = RuntimeException.class)
-	public Boolean saveExcelData(Map<String, List> dataMap, Long userId, String token, String batchNum) throws BizException {
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+	public ImportVO saveExcelData(Map<String, List> dataMap, Long userId, String token, Integer ts) throws BizException {
+		ImportVO importVO = new ImportVO();
 		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 		String loginUserName = sysOcpUserPo.getName();
 		List<Map<String, Object>> pointDataList = dataMap.get(GISConstants.POINT_LIST_S);
 		List<Map<String, Object>> lineDataList = dataMap.get(GISConstants.LINE_LIST_S);
-		List<GISDevExtPO> existRecords = gisDevExtPOMapper.selectExistRecords(batchNum);
-
+		Set<String> codesSet = Sets.newHashSet();
+		if (Objects.nonNull(pointDataList) && pointDataList.size() > 0) {
+			for (Map<String, Object> map : pointDataList) {
+				codesSet.add(String.valueOf(map.get(GISConstants.POINT_CODE_CHN)));
+			}
+		}
+		if (Objects.nonNull(lineDataList) && lineDataList.size() > 0) {
+			for (Map<String, Object> map : lineDataList) {
+				String startCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN));
+				String endCode = String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
+				StringBuffer sb = new StringBuffer().append(startCode)
+						.append("-")
+						.append(endCode);
+				codesSet.add(String.valueOf(sb));
+			}
+		}
+		List<GISDevExtPO> existsExtPOs = gisDevExtService.selectByCodes(codesSet);
+		boolean tsBool = false;
+		if (Objects.nonNull(existsExtPOs) && existsExtPOs.size() > 0) {
+			tsBool = true;
+		}
+		if (tsBool && 1 == ts) {
+			importVO.setMsg("excel中有[" + existsExtPOs.size() + "]条数据在数据库中已存在，是否覆盖，请确认");
+			importVO.setRetStatus(false);
+			importVO.setIsOverride("Y");
+			return importVO;
+		}
 		boolean result = false;
 		DevSaveParam devSaveParam = new DevSaveParam();
 		devSaveParam.setLoginUserName(loginUserName);
-		devSaveParam.setExistsCodes(existRecords);
-		devSaveParam.setBatchNum(batchNum);
+		devSaveParam.setExistsCodes(existsExtPOs);
 		if (Objects.nonNull(pointDataList)) { // 点
 			long typeId = saveTplAttr(dictConfig.getPointTpl(), loginUserName, GISConstants.TOP_TPL_1_CHN);
 			devSaveParam.setDataMapList(pointDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET0_NAME);
 			devSaveParam.setTplTypeId(typeId);
 
-			if (Objects.nonNull(existRecords) && existRecords.size() > 0) {
+			if (tsBool) {
 				updateDBData(devSaveParam);
 			}
 			result = saveExcelData(devSaveParam);
@@ -949,12 +996,15 @@ public class ExcelProcessorService {
 			devSaveParam.setDataMapList(lineDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET1_NAME);
 			devSaveParam.setTplTypeId(typeId);
-			if (Objects.nonNull(existRecords) && existRecords.size() > 0) {
+			if (tsBool) {
 				updateDBData(devSaveParam);
 			}
 			result = saveExcelData(devSaveParam);
 		}
-		return result;
+		importVO.setRetStatus(result);
+		importVO.setIsOverride("N");
+		importVO.setMsg("Success");
+		return importVO;
 	}
 
 }

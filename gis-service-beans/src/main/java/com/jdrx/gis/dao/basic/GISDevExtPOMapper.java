@@ -5,7 +5,6 @@ import com.jdrx.gis.beans.entry.basic.CodeXYPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
-import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
@@ -151,5 +150,18 @@ public interface GISDevExtPOMapper {
 	 */
 	Integer deleteDevExtByDevId(@Param("devId")String devId);
 
+	/**
+	 * 批量更新
+	 * @param gisDevExtPOList
+	 * @return
+	 */
+	Integer batchUpdate(@Param("gisDevExtPOList") List<GISDevExtPO> gisDevExtPOList);
+
+	/**
+	 * 根据code获取ext数据
+	 * @param codes
+	 * @return
+	 */
+	List<GISDevExtPO> selectByCodes(@Param("codes") String codes);
 }
 

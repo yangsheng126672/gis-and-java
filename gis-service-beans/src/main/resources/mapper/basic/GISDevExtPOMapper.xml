@@ -17,7 +17,6 @@
         <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
         <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
-        <result column="batchNum" jdbcType="VARCHAR" property="batchNum" />
     </resultMap>
 
     <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.vo.query.GISDevExtVO">
@@ -39,13 +38,13 @@
 
     <sql id="Base_Column_List">
     id, dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at, belong_to, batch_number
+    create_by, create_at, update_by, update_at, belong_to
     </sql>
 
     <select id="getDevExtByDevId" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         id, dev_id, name, code, caliber, material, st_astext(geom) geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at,belong_to, batch_number
+    create_by, create_at, update_by, update_at,belong_to
         from gis_dev_ext
         where dev_id = #{devId,jdbcType=VARCHAR}
         limit 1
@@ -257,128 +256,92 @@
         AND batch_number = #{batchNum}
     </select>
 
-    <select id="transformWgs84ToCustom" resultType="java.lang.String">
-        SELECT   ST_AsText(ST_Transform(geom, #{srid})) AS transformgeom
-        FROM ST_GeomFromText(#{geom}, 4326) AS geom;
-    </select>
-
-    <insert id="insertSelective" parameterType="com.jdrx.gis.beans.entry.basic.GISDevExtPO">
-        insert into gis_dev_ext
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
-            </if>
-            <if test="devId != null">
-                dev_id,
-            </if>
-            <if test="name != null">
-                name,
-            </if>
-            <if test="code != null">
-                code,
-            </if>
-            <if test="caliber != null">
-                caliber,
-            </if>
-            <if test="material != null">
-                material,
-            </if>
-            <if test="geom != null">
-                geom,
-            </if>
-            <if test="tplTypeId != null">
-                tpl_type_id,
-            </if>
-            <if test="dataInfo != null">
-                data_info,
-            </if>
-            <if test="deleteFlag != null">
-                delete_flag,
-            </if>
-            <if test="createBy != null">
-                create_by,
-            </if>
-            <if test="createAt != null">
-                create_at,
-            </if>
-            <if test="updateBy != null">
-                update_by,
-            </if>
-            <if test="updateAt != null">
-                update_at,
-            </if>
-            <if test="belongTo != null">
-                belong_to,
-            </if>
-            <if test="batchNumber != null">
-                batch_number,
-            </if>
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE gis_dev_ext
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="name = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.name != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.name,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="code = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.code != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.code,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="caliber = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.caliber != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.caliber,jdbcType=INTEGER}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="material = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.material != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.material,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="geom = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.geom != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="tpl_type_id = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.tplTypeId != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.tplTypeId,jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="data_info = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.dataInfo != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.dataInfo,jdbcType=OTHER}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_by = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.updateBy != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.updateBy,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_at = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    when dev_id = #{item.devId,jdbcType=VARCHAR} then now()
+                </foreach>
+            </trim>
+            <trim prefix="belong_to = CASE" suffix="END,">
+                <foreach collection="gisDevExtPOList" item="item" index="index">
+                    <if test="item.belongTo != null">
+                        when dev_id = #{item.devId,jdbcType=VARCHAR} then #{item.belongTo,jdbcType=BIGINT}
+                    </if>
+                </foreach>
+            </trim>
         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=BIGINT},
-            </if>
-            <if test="devId != null">
-                #{devId,jdbcType=CHAR},
-            </if>
-            <if test="name != null">
-                #{name,jdbcType=VARCHAR},
-            </if>
-            <if test="code != null">
-                #{code,jdbcType=VARCHAR},
-            </if>
-            <if test="caliber != null">
-                #{caliber,jdbcType=INTEGER},
-            </if>
-            <if test="material != null">
-                #{material,jdbcType=VARCHAR},
-            </if>
-            <if test="geom != null">
-                #{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler},
-            </if>
-            <if test="tplTypeId != null">
-                #{tplTypeId,jdbcType=BIGINT},
-            </if>
-            <if test="dataInfo != null">
-                #{dataInfo,jdbcType=OTHER},
-            </if>
-            <if test="deleteFlag != null">
-                #{deleteFlag,jdbcType=BIT},
-            </if>
-            <if test="createBy != null">
-                #{createBy,jdbcType=VARCHAR},
-            </if>
-            <if test="createAt != null">
-                #{createAt,jdbcType=TIMESTAMP},
-            </if>
-            <if test="updateBy != null">
-                #{updateBy,jdbcType=VARCHAR},
-            </if>
-            <if test="updateAt != null">
-                #{updateAt,jdbcType=TIMESTAMP},
-            </if>
-            <if test="belongTo != null">
-                #{belongTo,jdbcType=BIGINT},
-            </if>
-            <if test="batchNumber != null">
-                #{batchNumber,jdbcType=VARCHAR},
-            </if>
-        </trim>
-    </insert>
+        WHERE
+        <foreach collection="gisDevExtPOList" separator="OR" item="item" index="index" >
+            dev_id = #{item.devId,jdbcType=VARCHAR}
+        </foreach>
+    </update>
 
-    <select id="transformGeomAsText" resultType="java.lang.String">
-        SELECT  st_astext(#{geom});
-    </select>
-
-    <select id="addGeomWithSrid" resultType="java.lang.String">
-        SELECT ST_GeomFromText(#{geom},#{srid})
-    </select>
-
-    <select id="getPointXYFromGeom" resultType="com.jdrx.gis.beans.vo.basic.PointVO">
-        SELECT st_x(#{geom}) as x,st_y(#{geom}) as y;
-    </select>
-
-    <select id="deleteDevExtByDevId" parameterType="java.lang.String" resultType="java.lang.Integer">
-        UPDATE gis_dev_ext set delete_flag = TRUE  where dev_id = #{devId}
+    <select id="selectByCodes" resultMap="BaseResultMap">
+        SELECT code,
+               dev_id
+        FROM gis_dev_ext gdx
+        WHERE delete_flag = false
+        <if test="codes != null and codes != ''">
+            AND EXISTS (SELECT 1 FROM
+            (SELECT regexp_split_to_table(#{codes},',') AS code) AS vir  where vir.code = gdx.code)
+        </if>
     </select>
 </mapper>
