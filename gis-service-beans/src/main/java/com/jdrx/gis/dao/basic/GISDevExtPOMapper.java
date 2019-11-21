@@ -5,6 +5,7 @@ import com.jdrx.gis.beans.entry.basic.CodeXYPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
+import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
@@ -105,6 +106,50 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<GISDevExtPO> selectExistRecords(@Param("batchNum") String batchNum);
+
+	/**
+	 * 经纬度坐标系转自定义坐标系
+	 * @param geom
+	 * @param srid
+	 * @return
+	 */
+	String transformWgs84ToCustom(@Param("geom") String geom,@Param("srid") Integer srid);
+
+	/**
+	 * 保存单个实体对象
+	 * @param record
+	 * @return
+	 */
+	int insertSelective(GISDevExtPO record);
+
+	/**
+	 * 将geom从WKB转为WKT
+	 * @param geom
+	 * @return
+	 */
+	String transformGeomAsText(@Param("geom") String geom);
+
+	/**
+	 * 将geom转为带指定srid的字符串
+	 * @param geom
+	 * @param srid
+	 * @return
+	 */
+	String addGeomWithSrid(@Param("geom") String geom,@Param("srid") Integer srid);
+
+	/**
+	 * 根据geom获取点XY坐标
+	 * @param geom
+	 * @return
+	 */
+	PointVO getPointXYFromGeom(@Param("geom") String geom);
+
+	/**
+	 * 根据设备id逻辑删除
+	 * @param devId
+	 * @return
+	 */
+	Integer deleteDevExtByDevId(@Param("devId")String devId);
 
 }
 

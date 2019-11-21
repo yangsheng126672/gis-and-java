@@ -14,6 +14,16 @@ import java.util.Map;
 public class SharePointDTO {
     @ApiModelProperty("管点属性")
     private Map<String,Object> map;
+
+    @ApiModelProperty("设备类型id")
+    private Long typeId;
+
+    @ApiModelProperty("x坐标")
+    private Double x;
+
+    @ApiModelProperty("y坐标")
+    private Double y;
+
     @ApiModelProperty("管线设备id")
-    private Long lineDevId;
+    private String lineDevId;
 }
