@@ -719,7 +719,7 @@ public class ExcelProcessorService {
 		if (Objects.nonNull(dataMapList) && dataMapList.size() > 0) {
 			List<CodeXYPO> codeXYPOList = Lists.newArrayList();
 			for (Map<String, Object> map : dataMapList) {
-				String pointCode = String.valueOf(map.get(GISConstants.POINT_CODE_CHN));
+				String pointCode = null;
 				String lineCode = String.valueOf(map.get(GISConstants.LINE_START_CODE_CHN))
 						+ "-" + String.valueOf(map.get(GISConstants.LINE_END_CODE_CHN));
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
@@ -835,8 +835,8 @@ public class ExcelProcessorService {
 				shareDevPO.setId(String.valueOf(devId));
 				shareDevPO.setTypeId(typeId);
 				shareDevPO.setName(name);
-				shareDevPO.setLng(Objects.nonNull(map.get(GISConstants.Y_CHN)) ? String.valueOf(map.get(GISConstants.Y_CHN)) : null);
-				shareDevPO.setLat(Objects.nonNull(map.get(GISConstants.X_CHN)) ? String.valueOf(map.get(GISConstants.X_CHN)) : null);
+				shareDevPO.setLng(Objects.nonNull(map.get(GISConstants.Y_CHN)) ? String.valueOf(map.get(GISConstants.Y_CHN)) : "");
+				shareDevPO.setLat(Objects.nonNull(map.get(GISConstants.X_CHN)) ? String.valueOf(map.get(GISConstants.X_CHN)) : "");
 				shareDevPO.setAddr(String.valueOf(map.get(GISConstants.DEV_ADDR_CHN)));
 				if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
 					shareDevPO.setCreateAt(creatAt);
