@@ -5,6 +5,7 @@ import com.jdrx.gis.beans.entry.basic.CodeXYPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
+import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
