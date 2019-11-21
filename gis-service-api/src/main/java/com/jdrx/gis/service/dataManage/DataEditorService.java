@@ -179,9 +179,11 @@ public class DataEditorService {
             shareDevPO.setId(devId);
             shareDevPO.setName(map.get("name").toString());
             shareDevPO.setTypeId(dto.getTypeId());
-            shareDevPO.setLng(String.valueOf(dto.getX()));
-            shareDevPO.setLat(String.valueOf(dto.getY()));
-            shareDevPO.setAddr(map.get("dlm").toString());
+            shareDevPO.setLng(String.format("%.8f",dto.getX()));
+            shareDevPO.setLat(String.format("%.8f",dto.getY()));
+            if (map.containsKey("dlm")){
+                shareDevPO.setAddr(map.get("dlm").toString());
+            }
 
             //保存管点信息
             gisDevExtPOMapper.insertSelective(po);
