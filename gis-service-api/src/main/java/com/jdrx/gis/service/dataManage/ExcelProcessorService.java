@@ -403,6 +403,8 @@ public class ExcelProcessorService {
 		Set<String> pointCodeSets = Sets.newHashSet();
 		// 用以判断管段的编码是否重复，有重复请修改后导入
 		Set<String> lineCodeSets = Sets.newHashSet();
+		Set<String> startCodeSets = Sets.newHashSet();
+		Set<String> endCodeSets = Sets.newHashSet();
 		// 存放数据
 		List<Map<String, Object>> excelDevList = Lists.newArrayList();
 		// 获取实际列数
@@ -412,6 +414,7 @@ public class ExcelProcessorService {
 			Row row = sheet.getRow(i);
 			Map<String, Object> shareDevDataMap = Maps.newHashMap();
 			Map<String, String> gisExtDataMap = Maps.newHashMap();
+			StringBuffer lineCode = new StringBuffer();
 			for (int j = 0; j < cells; j ++) {
 				// PG中对数据类型进行分类，数字类型都是N，字符是S，日期时间是D
 				String category = cellDataTypeMap.get(j);
@@ -497,20 +500,14 @@ public class ExcelProcessorService {
 					pointCodeSets.add(cellStringVal);
 				}
 
-				// 用以验证管段的起点和终点编码是否重复
-				StringBuffer lineCode = new StringBuffer();
 				if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)){
 					if (GISConstants.LINE_START_CODE_CHN.equals(headerName)) {
 						lineCode.append(cellStringVal);
 					} else if (GISConstants.LINE_END_CODE_CHN.equals(headerName)) {
 						lineCode.append(cellStringVal);
-						lineCodeSets.add(String.valueOf(lineCode));
-						// gis_dev_ext的code字段，管段存放在终点编码里
-						cellStringVal = String.valueOf(lineCode);
 					}
 
 				}
-
 				// 添加share_dev数据
 				shareDevDataMap.put(headerName,cellStringVal);
 				// 添加gis_dev_ext
@@ -531,6 +528,7 @@ public class ExcelProcessorService {
 					shareDevDataMap.put(GISConstants.AUTH_ID_S, authId);
 				}
 			}
+			lineCodeSets.add(String.valueOf(lineCode));
 			excelDevList.add(shareDevDataMap);
 		}
 
