@@ -256,4 +256,129 @@
         WHERE delete_flag = false
         AND batch_number = #{batchNum}
     </select>
+
+    <select id="transformWgs84ToCustom" resultType="java.lang.String">
+        SELECT   ST_AsText(ST_Transform(geom, #{srid})) AS transformgeom
+        FROM ST_GeomFromText(#{geom}, 4326) AS geom;
+    </select>
+
+    <insert id="insertSelective" parameterType="com.jdrx.gis.beans.entry.basic.GISDevExtPO">
+        insert into gis_dev_ext
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="devId != null">
+                dev_id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="caliber != null">
+                caliber,
+            </if>
+            <if test="material != null">
+                material,
+            </if>
+            <if test="geom != null">
+                geom,
+            </if>
+            <if test="tplTypeId != null">
+                tpl_type_id,
+            </if>
+            <if test="dataInfo != null">
+                data_info,
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createAt != null">
+                create_at,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateAt != null">
+                update_at,
+            </if>
+            <if test="belongTo != null">
+                belong_to,
+            </if>
+            <if test="batchNumber != null">
+                batch_number,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="devId != null">
+                #{devId,jdbcType=CHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="caliber != null">
+                #{caliber,jdbcType=INTEGER},
+            </if>
+            <if test="material != null">
+                #{material,jdbcType=VARCHAR},
+            </if>
+            <if test="geom != null">
+                #{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler},
+            </if>
+            <if test="tplTypeId != null">
+                #{tplTypeId,jdbcType=BIGINT},
+            </if>
+            <if test="dataInfo != null">
+                #{dataInfo,jdbcType=OTHER},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=BIT},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createAt != null">
+                #{createAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateAt != null">
+                #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="belongTo != null">
+                #{belongTo,jdbcType=BIGINT},
+            </if>
+            <if test="batchNumber != null">
+                #{batchNumber,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="transformGeomAsText" resultType="java.lang.String">
+        SELECT  st_astext(#{geom});
+    </select>
+
+    <select id="addGeomWithSrid" resultType="java.lang.String">
+        SELECT ST_GeomFromText(#{geom},#{srid})
+    </select>
+
+    <select id="getPointXYFromGeom" resultType="com.jdrx.gis.beans.vo.basic.PointVO">
+        SELECT st_x(#{geom}) as x,st_y(#{geom}) as y;
+    </select>
+
+    <select id="deleteDevExtByDevId" parameterType="java.lang.String" resultType="java.lang.Integer">
+        UPDATE gis_dev_ext set delete_flag = TRUE  where dev_id = #{devId}
+    </select>
 </mapper>
