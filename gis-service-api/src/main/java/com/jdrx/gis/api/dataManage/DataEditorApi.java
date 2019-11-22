@@ -73,6 +73,12 @@ public class DataEditorApi {
         }
         Logger.debug("api/0/analysis/getDevExtByTopid 获取管点属性模板");
         return  ResponseFactory.ok(dataEditorService.getDevExtByTopPid(dto.getId()));
+    }
 
+    @ApiOperation(value = "判断管点编号是否存在（true：存在 false：不存在）")
+    @RequestMapping(value ="getCodeExist")
+    public ResposeVO getCodeExist(@ApiParam(name = "code", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
+        Logger.debug("api/0/analysis/getCodeExist 判断管点编号是否重复");
+        return  ResponseFactory.ok(dataEditorService.getCodeExist(dto.getId()));
     }
 }

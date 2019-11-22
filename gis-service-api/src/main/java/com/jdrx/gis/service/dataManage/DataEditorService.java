@@ -255,17 +255,15 @@ public class DataEditorService {
      */
     public Boolean saveShareNets(ShareAddedNetsDTO dto) throws BizException{
         try {
-            if(!saveSharePoint(dto.getPointList())){
-                throw new  BizException("保存管点失败！");
-            }
-            if(!savaShareLine(dto.getLineList())){
-                throw new  BizException("保存管点失败！");
+            if((!saveSharePoint(dto.getPointList())) ||(!savaShareLine(dto.getLineList()))){
+                return false;
+            }else {
+                return true;
             }
         }catch (Exception e){
             e.printStackTrace();
-            return false;
+            throw new  BizException("保存管线失败！");
         }
-        return true;
     }
     /**
      * 保存管点
@@ -332,8 +330,8 @@ public class DataEditorService {
         }
         try {
             for (ShareLineDTO dto:list){
-                GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getStartCode());
-                GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getEndCode());
+                GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getQdbm());
+                GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getZdbm());
 
                 PointVO startVO = gisDevExtPOMapper.getPointXYFromGeom(startPointPO.getGeom());
                 PointVO endVO = gisDevExtPOMapper.getPointXYFromGeom(endPointPO.getGeom());
@@ -352,7 +350,7 @@ public class DataEditorService {
                 String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
                 GISDevExtPO gisDevExtPO = new GISDevExtPO();
                 gisDevExtPO.setDevId(devId);
-                gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
+                gisDevExtPO.setCode(dto.getQdbm()+"-"+dto.getZdbm());
                 gisDevExtPO.setCaliber(dto.getCaliber());
                 gisDevExtPO.setMaterial(dto.getMaterial());
                 gisDevExtPO.setTplTypeId(dto.getTypeId());
@@ -362,23 +360,50 @@ public class DataEditorService {
                 ShareDevPO shareDevPO = new ShareDevPO();
                 shareDevPO.setId(gisDevExtPO.getDevId());
                 shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
-                //test
-                shareDevPO.setName("DN"+String.valueOf(gisDevExtPO.getCaliber()));
+                shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
 
                 //保存管线
                 gisDevExtPOMapper.insertSelective(gisDevExtPO);
                 shareDevPOMapper.insertSelective(shareDevPO);
 
-
-
             }
-
-
             return true;
         }catch (Exception e){
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 判断管点编号是否重复
+     * @param code
+     * @return
+     */
+    public Boolean getCodeExist(String code){
+        GISDevExtPO po = gisDevExtPOMapper.selectByCode(code);
+        return po == null? false: true;
+    }
+
+    /**
+     * 根据管径获取管线设备名称
+     * @param caliber
+     * @return
+     */
+    public String getNameByCaliber(Integer caliber){
+        if (caliber >= 0 && caliber < 100){
+            return GISConstants.CALIBER_0;
+        }else if(caliber >=100 && caliber <200){
+            return GISConstants.CALIBER_100;
+        }else if(caliber >=200 && caliber <400){
+            return GISConstants.CALIBER_200;
+        }else if(caliber >=400 && caliber <600){
+            return GISConstants.CALIBER_400;
+        }else if(caliber >=600 && caliber <900){
+            return GISConstants.CALIBER_600;
+        }else if(caliber >=900){
+            return GISConstants.CALIBER_900;
+        }
+        return null;
     }
 
 }

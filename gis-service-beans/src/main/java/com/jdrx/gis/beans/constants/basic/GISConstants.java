@@ -162,4 +162,16 @@ public class GISConstants {
 	public final static String GIS_DEV_EXT_S = "gisDevExt";
 
 	public final static String AUTH_ID_S = "authId";
+
+	public final static String CALIBER_0 = "DN100（不含）以下管段";
+
+	public final static String CALIBER_100 = "DN100-DN200管段";
+
+	public final static String CALIBER_200 = "DN200-DN400管段";
+
+	public final static String CALIBER_400 = "DN400-DN600管段";
+
+	public final static String CALIBER_600 = "DN600-DN900管段";
+
+	public final static String CALIBER_900 = "DN900（含）以上管段";
 }
