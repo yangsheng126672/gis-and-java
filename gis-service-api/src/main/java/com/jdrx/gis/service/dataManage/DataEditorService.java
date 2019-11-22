@@ -20,6 +20,7 @@ import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
+import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
 import org.postgresql.util.PGobject;
@@ -270,7 +271,7 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean saveSharePoint(List<SharePointDTO> list){
+    public Boolean saveSharePoint(List<SharePointDTO> list) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
@@ -315,7 +316,8 @@ public class DataEditorService {
             return true;
         }catch (Exception e){
             e.printStackTrace();
-            return false;
+            Logger.error("新增管网保存管点失败！"+list.toString());
+            throw new BizException("新增管网保存管点失败！");
         }
     }
 
@@ -324,7 +326,7 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean savaShareLine(List<ShareLineDTO> list){
+    public Boolean savaShareLine(List<ShareLineDTO> list) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
@@ -370,9 +372,11 @@ public class DataEditorService {
             return true;
         }catch (Exception e){
             e.printStackTrace();
-            return false;
+            Logger.error("新增管网保存管线失败！"+list.toString());
+            throw new BizException("保存管线失败！");
         }
     }
+
 
     /**
      * 判断管点编号是否重复
@@ -382,6 +386,22 @@ public class DataEditorService {
     public Boolean getCodeExist(String code){
         GISDevExtPO po = gisDevExtPOMapper.selectByCode(code);
         return po == null? false: true;
+    }
+
+    /**
+     * 根据编码查询设备详细信息
+     * @param code
+     * @return
+     */
+    public GISDevExtPO getGISDevExtByCode(String code) throws BizException{
+        try {
+            return gisDevExtPOMapper.selectByCode(code);
+        }catch (Exception e){
+            e.printStackTrace();
+            Logger.error("根据编码查询设备详细信息失败！"+code);
+            throw new BizException("根据编码查询设备详细信息失败！");
+
+        }
     }
 
     /**

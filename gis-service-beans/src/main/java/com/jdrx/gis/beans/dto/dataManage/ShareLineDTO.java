@@ -20,10 +20,10 @@ public class ShareLineDTO {
     private Long typeId;
 
     @ApiModelProperty("起点编码")
-    String startCode;
+    String qdbm;
 
     @ApiModelProperty("终点编码")
-    String endCode;
+    String zdbm;
 
     @ApiModelProperty("材质")
     String material;

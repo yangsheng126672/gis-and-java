@@ -40,28 +40,28 @@ public class DataEditorApi {
     @ApiOperation(value = "获取管点类型")
     @RequestMapping(value ="getSharePointType")
     public ResposeVO getSharePointType() throws Exception{
-        Logger.debug("api/0/analysis/getSharePointType 获取管点类型");
+        Logger.debug("api/0/dataEditor/getSharePointType 获取管点类型");
         return  ResponseFactory.ok(dataEditorService.getAllPointType());
     }
 
     @ApiOperation(value = "保存新增管点")
     @RequestMapping(value ="saveSharePoint")
     public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedPointDTO dto) throws Exception{
-        Logger.debug("api/0/analysis/saveSharePoint 保存新增管点");
+        Logger.debug("api/0/dataEditor/saveSharePoint 保存新增管点");
         return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto));
     }
 
     @ApiOperation(value = "保存新增管网")
     @RequestMapping(value ="saveShareNets")
     public ResposeVO saveShareNets(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedNetsDTO dto) throws Exception{
-        Logger.debug("api/0/analysis/saveShareNets 保存新增管网");
+        Logger.debug("api/0/dataEditor/saveShareNets 保存新增管网");
         return  ResponseFactory.ok(dataEditorService.saveShareNets(dto));
     }
 
     @ApiOperation(value = "获取管线类型")
     @RequestMapping(value ="getShareLineType")
     public ResposeVO getShareLineType() throws Exception{
-        Logger.debug("api/0/analysis/getShareLineType 获取管线类型");
+        Logger.debug("api/0/dataEditor/getShareLineType 获取管线类型");
         return  ResponseFactory.ok(dataEditorService.getAllLineType());
     }
 
@@ -71,14 +71,25 @@ public class DataEditorApi {
         if (dto == null || dto.getId() ==null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }
-        Logger.debug("api/0/analysis/getDevExtByTopid 获取管点属性模板");
+        Logger.debug("api/0/dataEditor/getDevExtByTopid 获取管点属性模板");
         return  ResponseFactory.ok(dataEditorService.getDevExtByTopPid(dto.getId()));
     }
 
     @ApiOperation(value = "判断管点编号是否存在（true：存在 false：不存在）")
     @RequestMapping(value ="getCodeExist")
     public ResposeVO getCodeExist(@ApiParam(name = "code", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
-        Logger.debug("api/0/analysis/getCodeExist 判断管点编号是否重复");
+        Logger.debug("api/0/dataEditor/getCodeExist 判断管点编号是否重复");
         return  ResponseFactory.ok(dataEditorService.getCodeExist(dto.getId()));
     }
+
+    @ApiOperation(value = "根据设备code精准查询设备")
+    @RequestMapping(value ="getGISDevExtByCode")
+    public ResposeVO getGISDevExtByCode(@ApiParam(name = "code", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
+        Logger.debug("api/0/dataEditor/getGISDevExtByCode 根据设备code精准查询设备");
+        return  ResponseFactory.ok(dataEditorService.getGISDevExtByCode(dto.getId()));
+    }
+
+
+
+
 }
