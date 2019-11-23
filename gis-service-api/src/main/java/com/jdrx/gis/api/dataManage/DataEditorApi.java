@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 /**
  * @Description
@@ -87,6 +88,13 @@ public class DataEditorApi {
     public ResposeVO getGISDevExtByCode(@ApiParam(name = "code", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
         Logger.debug("api/0/dataEditor/getGISDevExtByCode 根据设备code精准查询设备");
         return  ResponseFactory.ok(dataEditorService.getGISDevExtByCode(dto.getId()));
+    }
+
+    @ApiOperation(value = "更新设备属性信息")
+    @RequestMapping(value ="updateShareDataInfo")
+    public ResposeVO updateShareDataInfo(@ApiParam(name = "mapAttr", required = true) @RequestBody @Valid Map<String,Object> mapAttr) throws Exception{
+        Logger.debug("api/0/dataEditor/updateShareDataInfo 更新设备属性信息");
+        return  ResponseFactory.ok(dataEditorService.updateGISDevExtAttr(mapAttr));
     }
 
 

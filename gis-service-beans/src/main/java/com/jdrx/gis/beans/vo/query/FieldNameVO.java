@@ -24,4 +24,7 @@ public class FieldNameVO {
 
 	/** 是否必填 必填：true  */
 	private Boolean fill;
+
+	/** 是否可以编辑 */
+	private Boolean edit;
 }

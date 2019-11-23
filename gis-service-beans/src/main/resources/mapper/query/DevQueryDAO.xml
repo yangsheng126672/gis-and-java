@@ -219,7 +219,7 @@
     </select>
 
     <select id="findFieldNamesByDevID" parameterType="java.lang.String" resultMap="BaseResultMap4">
-       SELECT field_name AS fieldName, field_desc AS fieldDesc, idx
+       SELECT field_name AS fieldName, field_desc AS fieldDesc, idx, fill, edit
             FROM gis_dev_tpl_attr
             WHERE type_id = (
                 SELECT type_id
@@ -263,7 +263,7 @@
                     ) pathOrd
                     ON exi.type_id = pathOrd.id
                 LIMIT 1
-            )
+            )ORDER BY idx asc
     </select>
 
     <select id="findFieldNamesByDevTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap4">

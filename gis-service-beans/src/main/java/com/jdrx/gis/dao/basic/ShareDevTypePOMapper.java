@@ -4,6 +4,7 @@ import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ShareDevTypePOMapper {
 
@@ -99,5 +100,12 @@ public interface ShareDevTypePOMapper {
 	 * @return
 	 */
 	long getIdByNameForTopHierarchy(@Param("name") String typeName);
+
+	/**
+	 * 根据顶层id获取所有子类下面的id
+	 * @param topId
+	 * @return
+	 */
+	List getAllTypeIdByTopId(@Param("topId") Long topId);
 
 }

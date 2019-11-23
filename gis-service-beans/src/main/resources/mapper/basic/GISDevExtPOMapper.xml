@@ -463,4 +463,53 @@
             </if>
         </trim>
     </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.jdrx.gis.beans.entry.basic.GISDevExtPO">
+        update gis_dev_ext
+        <set>
+            <if test="devId != null">
+                dev_id = #{devId,jdbcType=CHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="caliber != null">
+                caliber = #{caliber,jdbcType=INTEGER},
+            </if>
+            <if test="material != null">
+                material = #{material,jdbcType=VARCHAR},
+            </if>
+            <if test="geom != null">
+                geom = #{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler},
+            </if>
+            <if test="tplTypeId != null">
+                tpl_type_id = #{tplTypeId,jdbcType=BIGINT},
+            </if>
+            <if test="dataInfo != null">
+                data_info = #{dataInfo,jdbcType=OTHER},
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag,jdbcType=BIT},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createAt != null">
+                create_at = #{createAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateAt != null">
+                update_at = #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="belongTo != null">
+                belong_to = #{belongTo,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
 </mapper>

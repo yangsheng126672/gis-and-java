@@ -63,6 +63,11 @@ public class GisDevTplAttrPO {
      */
     private Boolean fill;
 
+    /**
+     * 是否可以编辑
+     */
+    private Boolean edit;
+
     public Long getId() {
         return id;
     }
@@ -157,5 +162,13 @@ public class GisDevTplAttrPO {
 
     public void setFill(Boolean fill) {
         this.fill = fill;
+    }
+
+    public Boolean getEdit() {
+        return edit;
+    }
+
+    public void setEdit(Boolean edit) {
+        this.edit = edit;
     }
 }

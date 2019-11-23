@@ -23,15 +23,13 @@ import com.jdrx.gis.service.basic.GISDeviceService;
 import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description
@@ -131,11 +129,18 @@ public class DataEditorService {
      * @param typeId
      * @return
      */
-    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
+    public List<FieldNameVO> getDevTplByTopPidShow(Long typeId) throws BizException{
         try {
+            List<Long> typeIdList = getAllLineTypeIds();
+            Boolean bl = typeIdList.contains(typeId);
+
             List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevTypeId(typeId);
             for (int i = 0;i<fieldNameVOS.size();i++){
-                if ((fieldNameVOS.get(i).getFieldName().equals("dev_id"))||(fieldNameVOS.get(i).getFieldName().equals("pipe_length"))){
+                if ((fieldNameVOS.get(i).getFieldName().equals("dev_id"))){
+                    fieldNameVOS.remove(i);
+                    i--;
+                }
+                if ((bl && (fieldNameVOS.get(i).getFieldName().equals("code")))){
                     fieldNameVOS.remove(i);
                     i--;
                 }
@@ -145,6 +150,29 @@ public class DataEditorService {
             e.printStackTrace();
             throw new BizException(e);
          }
+
+    }
+    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
+        try {
+            List<Long> typeIdList = getAllLineTypeIds();
+            Boolean bl = typeIdList.contains(typeId);
+
+            List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevTypeId(typeId);
+            for (int i = 0;i<fieldNameVOS.size();i++){
+                if ((fieldNameVOS.get(i).getFieldName().equals("dev_id"))){
+                    fieldNameVOS.remove(i);
+                    i--;
+                }
+                if ((bl && (fieldNameVOS.get(i).getFieldName().equals("code")))){
+                    fieldNameVOS.remove(i);
+                    i--;
+                }
+            }
+            return fieldNameVOS;
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new BizException(e);
+        }
 
     }
 
@@ -377,6 +405,57 @@ public class DataEditorService {
         }
     }
 
+    /**
+     * 更新设备属性信息
+     * @param map
+     * @return
+     * @throws BizException
+     */
+    public Boolean updateGISDevExtAttr(Map<String,Object> map) throws BizException{
+        try {
+            String dev_id = map.get("dev_id").toString();
+            GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(dev_id);
+            List<DictDetailPO> dictDetailPOS = detailService.findDetailsByTypeVal(dictConfig.getLineType());
+            List<Long> list = shareDevTypePOMapper.getAllTypeIdByTopId(Long.valueOf(dictDetailPOS.get(0).getVal()));
+            //判断是否是线类型
+            if(list.contains(gisDevExtPO.getTplTypeId())){
+                if (!(Integer.parseInt(map.get("caliber").toString()) == gisDevExtPO.getCaliber())){
+                    gisDevExtPO.setCaliber(Integer.parseInt(map.get("caliber").toString()));
+                    String name = getNameByCaliber(Integer.parseInt(map.get("caliber").toString()));
+                    gisDevExtPO.setName(name);
+                }
+                if (!map.get("material").toString().equals(gisDevExtPO.getMaterial())){
+                    gisDevExtPO.setMaterial(map.get("material").toString());
+                }
+                //判断类型是否改变
+                if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
+                    gisDevExtPO.setTplTypeId(Long.valueOf(map.get("typeId").toString()));
+                }
+            }else {
+                //判断类型是否改变
+                if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
+                    gisDevExtPO.setName(map.get("name").toString());
+                    gisDevExtPO.setTplTypeId(Long.valueOf(map.get("typeId").toString()));
+                }
+
+            }
+
+            String jsonStr = JSONObject.toJSONString(map);
+            PGobject jsonObject = new PGobject();
+            jsonObject.setValue(jsonStr);
+            jsonObject.setType("jsonb");
+            gisDevExtPO.setDataInfo(jsonObject);
+
+            gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
+
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            Logger.error("更新设备属性信息失败！"+map.toString());
+            throw new BizException("更新设备属性信息失败！");
+        }
+    }
+
 
     /**
      * 判断管点编号是否重复
@@ -425,5 +504,21 @@ public class DataEditorService {
         }
         return null;
     }
+
+    /**
+     * 获取所有管线设备类型id
+     * @return
+     */
+    public List<Long> getAllLineTypeIds(){
+        List<Long> list = new ArrayList<>();
+        try {
+            List<DictDetailPO> detailPOS = detailService.findDetailsByTypeVal(dictConfig.getLineType());
+            list = shareDevTypePOMapper.getAllTypeIdByTopId(Long.valueOf(detailPOS.get(0).getVal()));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 
 }

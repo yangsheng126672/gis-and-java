@@ -164,5 +164,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<GISDevExtPO> selectByCodes(@Param("codes") String codes);
+
+	/**
+	 * 选择更细
+	 * @param record
+	 * @return
+	 */
+	int updateByPrimaryKeySelective(GISDevExtPO record);
 }
 
