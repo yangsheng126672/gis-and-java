@@ -1,6 +1,8 @@
 package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
+import com.jdrx.gis.beans.dto.datamanage.MapAttrDTO;
+import com.jdrx.gis.beans.dto.datamanage.MovePointDTO;
 import com.jdrx.gis.beans.dto.datamanage.ShareAddedNetsDTO;
 import com.jdrx.gis.beans.dto.datamanage.ShareAddedPointDTO;
 import com.jdrx.gis.service.dataManage.DataEditorService;
@@ -92,10 +94,28 @@ public class DataEditorApi {
 
     @ApiOperation(value = "更新设备属性信息")
     @RequestMapping(value ="updateShareDataInfo")
-    public ResposeVO updateShareDataInfo(@ApiParam(name = "mapAttr", required = true) @RequestBody @Valid Map<String,Object> mapAttr) throws Exception{
+    public ResposeVO updateShareDataInfo(@ApiParam(name = "dto", required = true) @RequestBody @Valid MapAttrDTO dto) throws Exception{
         Logger.debug("api/0/dataEditor/updateShareDataInfo 更新设备属性信息");
-        return  ResponseFactory.ok(dataEditorService.updateGISDevExtAttr(mapAttr));
+        return  ResponseFactory.ok(dataEditorService.updateGISDevExtAttr(dto.getMapAttr()));
     }
+
+    @ApiOperation(value = "移动管点及关联管线")
+    @RequestMapping(value ="moveSharePointWithLine")
+    public ResposeVO moveSharePointWithLine(@ApiParam(name = "dto", required = true) @RequestBody @Valid MovePointDTO dto) throws Exception{
+        Logger.debug("api/0/dataEditor/moveSharePointWithLine 移动管点及关联管线");
+        return  ResponseFactory.ok(dataEditorService.moveShareDevPoint(dto));
+    }
+
+    @ApiOperation(value = "根据设备id删除设备")
+    @RequestMapping(value ="deleteShareDevByDevId")
+    public ResposeVO deleteShareDevByDevId(@ApiParam(name = "dto", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
+        Logger.debug("api/0/dataEditor/deleteShareDevByDevId 根据设备id删除设备");
+        return  ResponseFactory.ok(dataEditorService.deleteShareDevByDevId(dto.getId()));
+    }
+
+
+
+
 
 
 

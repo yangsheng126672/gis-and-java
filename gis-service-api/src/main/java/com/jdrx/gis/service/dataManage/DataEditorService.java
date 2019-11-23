@@ -2,10 +2,7 @@ package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.dto.datamanage.ShareAddedNetsDTO;
-import com.jdrx.gis.beans.dto.datamanage.ShareAddedPointDTO;
-import com.jdrx.gis.beans.dto.datamanage.ShareLineDTO;
-import com.jdrx.gis.beans.dto.datamanage.SharePointDTO;
+import com.jdrx.gis.beans.dto.datamanage.*;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevPO;
@@ -129,7 +126,7 @@ public class DataEditorService {
      * @param typeId
      * @return
      */
-    public List<FieldNameVO> getDevTplByTopPidShow(Long typeId) throws BizException{
+     public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
         try {
             List<Long> typeIdList = getAllLineTypeIds();
             Boolean bl = typeIdList.contains(typeId);
@@ -140,29 +137,7 @@ public class DataEditorService {
                     fieldNameVOS.remove(i);
                     i--;
                 }
-                if ((bl && (fieldNameVOS.get(i).getFieldName().equals("code")))){
-                    fieldNameVOS.remove(i);
-                    i--;
-                }
-            }
-            return fieldNameVOS;
-        }catch (Exception e) {
-            e.printStackTrace();
-            throw new BizException(e);
-         }
-
-    }
-    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
-        try {
-            List<Long> typeIdList = getAllLineTypeIds();
-            Boolean bl = typeIdList.contains(typeId);
-
-            List<FieldNameVO> fieldNameVOS =  devQueryDAO.findFieldNamesByDevTypeId(typeId);
-            for (int i = 0;i<fieldNameVOS.size();i++){
-                if ((fieldNameVOS.get(i).getFieldName().equals("dev_id"))){
-                    fieldNameVOS.remove(i);
-                    i--;
-                }
+                //如果是线，去掉管线code字段
                 if ((bl && (fieldNameVOS.get(i).getFieldName().equals("code")))){
                     fieldNameVOS.remove(i);
                     i--;
@@ -406,6 +381,25 @@ public class DataEditorService {
     }
 
     /**
+     * 根据设备编码查询模板属性
+     * @param code
+     * @return
+     */
+    public List<FieldNameVO> getAttrByCode(String code) throws BizException{
+        try {
+            GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByCode(code);
+            List<FieldNameVO> fieldNameVOS =  getDevExtByTopPid(gisDevExtPO.getTplTypeId());
+            if(fieldNameVOS.size() == 0 || fieldNameVOS == null){
+                throw new BizException("没有查询到设备信息！");
+            }
+            return fieldNameVOS;
+        }catch (Exception e){
+            e.printStackTrace();
+            Logger.error("根据设备编码查询模板属性失败"+code);
+            throw new BizException("根据设备编码查询模板属性失败!");
+        }
+    }
+    /**
      * 更新设备属性信息
      * @param map
      * @return
@@ -413,8 +407,7 @@ public class DataEditorService {
      */
     public Boolean updateGISDevExtAttr(Map<String,Object> map) throws BizException{
         try {
-            String dev_id = map.get("dev_id").toString();
-            GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(dev_id);
+            GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByCode(map.get("code").toString());
             List<DictDetailPO> dictDetailPOS = detailService.findDetailsByTypeVal(dictConfig.getLineType());
             List<Long> list = shareDevTypePOMapper.getAllTypeIdByTopId(Long.valueOf(dictDetailPOS.get(0).getVal()));
             //判断是否是线类型
@@ -474,12 +467,69 @@ public class DataEditorService {
      */
     public GISDevExtPO getGISDevExtByCode(String code) throws BizException{
         try {
-            return gisDevExtPOMapper.selectByCode(code);
+            GISDevExtPO po =  gisDevExtPOMapper.selectByCode(code);
+            if (po == null){
+                throw new BizException("根据编码查询设备详细信息失败!");
+            }
+            return po;
         }catch (Exception e){
             e.printStackTrace();
             Logger.error("根据编码查询设备详细信息失败！"+code);
             throw new BizException("根据编码查询设备详细信息失败！");
 
+        }
+    }
+
+    /**
+     * 移动管点
+     * @param dto
+     * @return
+     * @throws BizException
+     */
+    public Boolean moveShareDevPoint(MovePointDTO dto)throws BizException{
+        try {
+            GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(dto.getDevId());
+            String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
+            String srid = detailService.findDetailsByTypeVal(dictConfig.getWaterPipeSrid()).get(0).getVal();
+            String transformGeom = gisDevExtPOMapper.addGeomWithSrid(geom,Integer.parseInt(srid));
+            PointVO pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
+
+            //设置更新新的管点空间信息
+            gisDevExtPO.setGeom(transformGeom);
+            gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
+
+            //查找相关联的管线
+            List<GISDevExtPO> gisDevExtPOLines = gisDevExtPOMapper.selectLineByCode(gisDevExtPO.getCode());
+            for(GISDevExtPO po: gisDevExtPOLines ){
+                Object datainfo = po.getDataInfo();
+                JSONObject jb = JSONObject.parseObject(datainfo.toString());
+                Map<String,Object> map = (Map)jb;
+                String lineGeom = po.getGeom();
+                String lineGeomTmp = null;
+                String lineGeomSrid = null;
+                if((map.containsKey("qdbm")) && (map.containsKey("qdbm"))){
+                    if (map.get("qdbm").equals(gisDevExtPO.getCode())){
+                        lineGeomTmp = "LINESTRING("+pointVO.getX()+" "+pointVO.getY()+lineGeom.substring(lineGeom.indexOf(","));
+                        lineGeomSrid = gisDevExtPOMapper.addGeomWithSrid(lineGeomTmp,Integer.parseInt(srid));
+                        po.setGeom(lineGeomSrid);
+                    }
+                    if (map.get("zdbm").equals(gisDevExtPO.getCode())){
+                        lineGeomTmp = lineGeom.substring(0,lineGeom.indexOf(",")+1)+pointVO.getX()+" "+pointVO.getY()+")";
+                        lineGeomSrid = gisDevExtPOMapper.addGeomWithSrid(lineGeomTmp,Integer.parseInt(srid));
+                        po.setGeom(lineGeomSrid);
+                    }
+                    gisDevExtPOMapper.updateByPrimaryKeySelective(po);
+                }
+            }
+
+
+
+
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            Logger.error("移动管点失败！"+dto.toString());
+            throw new BizException("移动管点失败！");
         }
     }
 
@@ -518,6 +568,24 @@ public class DataEditorService {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * 逻辑删除gis_dev_ext 和share_dev设备
+     * @param devId
+     * @return
+     * @throws BizException
+     */
+    public Boolean deleteShareDevByDevId(String devId) throws BizException{
+        try {
+            gisDevExtPOMapper.deleteDevExtByDevId(devId);
+            shareDevPOMapper.deleteByPrimaryKey(devId);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            Logger.error("根据devId删除设备失败！dev_id ="+devId);
+            throw new BizException("根据devId删除设备失败!");
+        }
     }
 
 

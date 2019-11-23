@@ -171,5 +171,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	int updateByPrimaryKeySelective(GISDevExtPO record);
+
+	/**
+	 * 根据管点编码查询关联的管线
+	 * @param val
+	 * @return
+	 */
+	List<GISDevExtPO> selectLineByCode(@Param("val") String val);
 }
 
