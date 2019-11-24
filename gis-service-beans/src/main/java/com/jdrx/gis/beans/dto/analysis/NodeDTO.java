@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class NodeDTO {
     @ApiModelProperty("设备id")
-    private Long dev_id;
+    private String dev_id;
     @ApiModelProperty("编号")
     private String code;
     @ApiModelProperty("x坐标")

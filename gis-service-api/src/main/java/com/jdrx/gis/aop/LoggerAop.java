@@ -1,3 +1,4 @@
+
 package com.jdrx.gis.aop;
 
 import com.alibaba.fastjson.JSONObject;
@@ -32,8 +33,8 @@ import java.util.concurrent.Executors;
  * @Author: liaosijun
  * @Time: 2019/11/7 10:22
  */
-//@Aspect
-//@Component
+@Aspect
+@Component
 public class LoggerAop {
 	// 日志
 	private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(LoggerAop.class);

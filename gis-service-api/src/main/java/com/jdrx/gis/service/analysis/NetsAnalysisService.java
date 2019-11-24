@@ -146,7 +146,7 @@ public class NetsAnalysisService {
                 if (GISConstants.NEO_NODE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
                     NodeDTO dto = new NodeDTO();
-                    dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
+                    dto.setDev_id(tmpValue.asNode().get("dev_id").asString());
                     dto.setX(tmpValue.asNode().get("x").asDouble());
                     dto.setY(tmpValue.asNode().get("y").asDouble());
                     dto.setCode(nodeName);
@@ -216,7 +216,7 @@ public class NetsAnalysisService {
                 if (GISConstants.NEO_NODE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
                     NodeDTO dto = new NodeDTO();
-                    dto.setDev_id(tmpValue.asNode().get("dev_id").asLong());
+                    dto.setDev_id(tmpValue.asNode().get("dev_id").asString());
                     dto.setX(tmpValue.asNode().get("x").asDouble());
                     dto.setY(tmpValue.asNode().get("y").asDouble());
                     dto.setCode(nodeName);
@@ -342,7 +342,7 @@ public class NetsAnalysisService {
      * @param lineID
      * @param dtoList
      */
-    public String findInfluenceArea(String lineID,List<NodeDTO>dtoList) throws Exception{
+    public List<String> findInfluenceArea(String lineID,List<NodeDTO>dtoList) throws Exception{
         if (dtoList == null){
             return null;
         }
@@ -383,7 +383,7 @@ public class NetsAnalysisService {
                             //不是阀门，并且不在待访问和已访问列表，添加
                             iterator.add(nextNodeName);
                     }
-                    if (!influenceLines.contains(Long.valueOf(nextPathID))){
+                    if (!influenceLines.contains(nextPathID)){
                         influenceLines.add(nextPathID);
                     }
                 }
@@ -393,15 +393,15 @@ public class NetsAnalysisService {
             }
         }
         System.out.println("影响区域范围：total = "+influenceLines.size()+","+influenceLines.toString());
-        Long[] devIds = influenceLines.toArray(new Long[influenceLines.size()]);
-
-        String devStr = null;
-        List<Long> ids = null;
-        if (Objects.nonNull(devIds) && devIds.length > 0) {
-            ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
-            devStr = Joiner.on(",").join(ids);
-        }
-        return devStr;
+//        String[] devIds = influenceLines.toArray(new String[influenceLines.size()]);
+//
+//        String devStr = null;
+//        List<String> ids = null;
+//        if (Objects.nonNull(devIds) && devIds.length > 0) {
+//            ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+//            devStr = Joiner.on(",").join(ids);
+//        }
+        return influenceLines;
 
     }
 
@@ -426,64 +426,64 @@ public class NetsAnalysisService {
         //获取管网坐标系srid
         String srid = getValByDictString(dictConfig.getWaterPipeSrid());
 
-        //yuechi
-        if( "83308".equals(dto.getId())){
-            List<NodeDTO> fmlist_final = new ArrayList<>();
-            NodeDTO nodeDTO = new NodeDTO();
-            nodeDTO.setDev_id(99419L);
-            nodeDTO.setX(106.4596);
-            nodeDTO.setY(30.5338);
-            nodeDTO.setCode("2JS128");
-            fmlist_final.add(nodeDTO);
-            analysisResultVO.setFmlist(fmlist_final);
-            String geom = "POLYGON((106.459593149117 30.5338276457265,106.471855569077 30.5330651051196,106.465779925876 30.5331336171525,106.462296023151 30.5334703970648,106.459593149117 30.5338276457265))";
-            analysisResultVO.setGeom(geom);
-            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
-            analysisResultVO.setUserInfoPOS( userInfoPOS);
-            analysisResultVO.setTotal(userInfoPOS.size());
-            return analysisResultVO;
-        }
-        //qianfeng
-        if("74587".equals(dto.getId())){
-            List<NodeDTO> fmlist_final = new ArrayList<>();
-            NodeDTO nodeDTO = new NodeDTO();
-            nodeDTO.setDev_id(99419L);
-            nodeDTO.setX(106.7314);
-            nodeDTO.setY(30.3731);
-            nodeDTO.setCode("1JS974");
-            fmlist_final.add(nodeDTO);
-            analysisResultVO.setFmlist(fmlist_final);
-            String geom = "POLYGON((106.731406291511 30.3730975739014,106.731121656797 30.3720717711355,106.730587742321 30.370923110294,106.730150247105 30.37077851258,106.730788000591 30.3719688624995,106.731406291511 30.3730975739014))";
-            analysisResultVO.setGeom(geom);
-            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
-            analysisResultVO.setUserInfoPOS( userInfoPOS);
-            analysisResultVO.setTotal(userInfoPOS.size());
-            return analysisResultVO;
-        }
-        //wusheng
-        if("80840".equals(dto.getId())){
-            List<NodeDTO> fmlist_final = new ArrayList<>();
-            NodeDTO nodeDTO = new NodeDTO();
-            nodeDTO.setDev_id(98657L);
-            nodeDTO.setX(106.28602739);
-            nodeDTO.setY(30.360879773);
-            nodeDTO.setCode("2J649");
-            fmlist_final.add(nodeDTO);
-            analysisResultVO.setFmlist(fmlist_final);
-            String geom = "POLYGON((106.286031242797 30.3608797537096,106.286027394791 30.3608797735347,106.285262292459 30.3624207846633,106.285107297802 30.3630316042983,106.285359628108 30.3630970658476,106.285997951562 30.361801140805,106.286031316709 30.3616723223547,106.286031242797 30.3608797537096))";
-            analysisResultVO.setGeom(geom);
-            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
-            analysisResultVO.setUserInfoPOS( userInfoPOS);
-            analysisResultVO.setTotal(userInfoPOS.size());
-            return analysisResultVO;
-        }
+//        //yuechi
+//        if( "83308".equals(dto.getId())){
+//            List<NodeDTO> fmlist_final = new ArrayList<>();
+//            NodeDTO nodeDTO = new NodeDTO();
+//            nodeDTO.setDev_id(99419L);
+//            nodeDTO.setX(106.4596);
+//            nodeDTO.setY(30.5338);
+//            nodeDTO.setCode("2JS128");
+//            fmlist_final.add(nodeDTO);
+//            analysisResultVO.setFmlist(fmlist_final);
+//            String geom = "POLYGON((106.459593149117 30.5338276457265,106.471855569077 30.5330651051196,106.465779925876 30.5331336171525,106.462296023151 30.5334703970648,106.459593149117 30.5338276457265))";
+//            analysisResultVO.setGeom(geom);
+//            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
+//            analysisResultVO.setUserInfoPOS( userInfoPOS);
+//            analysisResultVO.setTotal(userInfoPOS.size());
+//            return analysisResultVO;
+//        }
+//        //qianfeng
+//        if("74587".equals(dto.getId())){
+//            List<NodeDTO> fmlist_final = new ArrayList<>();
+//            NodeDTO nodeDTO = new NodeDTO();
+//            nodeDTO.setDev_id(99419L);
+//            nodeDTO.setX(106.7314);
+//            nodeDTO.setY(30.3731);
+//            nodeDTO.setCode("1JS974");
+//            fmlist_final.add(nodeDTO);
+//            analysisResultVO.setFmlist(fmlist_final);
+//            String geom = "POLYGON((106.731406291511 30.3730975739014,106.731121656797 30.3720717711355,106.730587742321 30.370923110294,106.730150247105 30.37077851258,106.730788000591 30.3719688624995,106.731406291511 30.3730975739014))";
+//            analysisResultVO.setGeom(geom);
+//            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
+//            analysisResultVO.setUserInfoPOS( userInfoPOS);
+//            analysisResultVO.setTotal(userInfoPOS.size());
+//            return analysisResultVO;
+//        }
+//        //wusheng
+//        if("80840".equals(dto.getId())){
+//            List<NodeDTO> fmlist_final = new ArrayList<>();
+//            NodeDTO nodeDTO = new NodeDTO();
+//            nodeDTO.setDev_id(98657L);
+//            nodeDTO.setX(106.28602739);
+//            nodeDTO.setY(30.360879773);
+//            nodeDTO.setCode("2J649");
+//            fmlist_final.add(nodeDTO);
+//            analysisResultVO.setFmlist(fmlist_final);
+//            String geom = "POLYGON((106.286031242797 30.3608797537096,106.286027394791 30.3608797735347,106.285262292459 30.3624207846633,106.285107297802 30.3630316042983,106.285359628108 30.3630970658476,106.285997951562 30.361801140805,106.286031316709 30.3616723223547,106.286031242797 30.3608797537096))";
+//            analysisResultVO.setGeom(geom);
+//            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
+//            analysisResultVO.setUserInfoPOS( userInfoPOS);
+//            analysisResultVO.setTotal(userInfoPOS.size());
+//            return analysisResultVO;
+//        }
 
 
         //获取所有阀门列表
         List<NodeDTO> fmlist_all = findAllFamens(dto.getId());
         //获取必须关闭的阀门
         List<NodeDTO> fmlist_final = findFinalFamens(fmlist_all);
-        String devIds = findInfluenceArea(dto.getId(),fmlist_final);
+        List<String> devIds = findInfluenceArea(dto.getId(),fmlist_final);
         if (devIds == null){
             return analysisResultVO;
         }
@@ -542,7 +542,7 @@ public class NetsAnalysisService {
           }
           fmlist_all.addAll(resultDtoList);
            //获取影响区域范围
-           String devIds = findInfluenceArea(dev_id,fmlist_all);
+           List<String> devIds = findInfluenceArea(dev_id,fmlist_all);
            if (devIds != null){
                String area = gisPipeAnalysisPOMapper.getExtendArea(devIds,srid);
                vo.setGeom(area);

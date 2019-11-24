@@ -315,7 +315,7 @@ public class Neo4jUtil {
             node.setCode((record.get(0).asMap().get("name").toString()));
             node.setX(Double.valueOf(record.get(0).asMap().get("x").toString()));
             node.setY(Double.valueOf(record.get(0).asMap().get("y").toString()));
-            node.setDev_id(Long.valueOf(record.get(0).asMap().get("dev_id").toString()));
+            node.setDev_id(record.get(0).asMap().get("dev_id").toString());
         }
         return node;
     }
@@ -325,7 +325,7 @@ public class Neo4jUtil {
      * @return
      */
     public List<Value> getNodesFromRel(String relationID,String lineLable) {
-        String cypherSql = String.format("MATCH (n)-[:%s{relationID: %d}]-(b) return n,b  ", lineLable,relationID);
+        String cypherSql = String.format("MATCH (n)-[:%s{relationID: '%s'}]-(b) return n,b  ", lineLable,relationID);
         StatementResult result = session.run(cypherSql);
         List<Value> values = null;
         while (result.hasNext()) {

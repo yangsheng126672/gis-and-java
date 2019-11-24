@@ -21,6 +21,6 @@ public interface GisPipeAnalysisPOMapper {
      * @param srid
      * @return
      */
-    String getExtendArea(@Param("devIds") String devIds,@Param("srid") String srid);
+    String getExtendArea(@Param("devIds") List<String> devIds,@Param("srid") String srid);
 
 }
