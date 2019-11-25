@@ -409,7 +409,7 @@ public class DataEditorService {
         try {
             String code = null;
             if(!map.containsKey("code")){
-                code = map.get("qdbm").toString()+"-"+map.get("qdbm").toString();
+                code = map.get("qdbm").toString()+"-"+map.get("zdbm").toString();
             }else {
                 code = map.get("code").toString();
             }

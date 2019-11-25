@@ -274,6 +274,7 @@
                 FROM (
                     SELECT * FROM (
                         SELECT DISTINCT type_id FROM gis_dev_tpl_attr
+                        WHERE delete_flag =false
                     ) att
                     WHERE EXISTS (
                         SELECT 1
