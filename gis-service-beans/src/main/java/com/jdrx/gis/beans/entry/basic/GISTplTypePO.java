@@ -2,7 +2,7 @@ package com.jdrx.gis.beans.entry.basic;
 
 import java.util.Date;
 
-public class GisDevTplAttrPO {
+public class GISTplTypePO {
     /**
      * 主键
      */
@@ -14,19 +14,9 @@ public class GisDevTplAttrPO {
     private Long tplId;
 
     /**
-     * 字段中文名称
+     * 设备类型ID
      */
-    private String fieldDesc;
-
-    /**
-     * 字段英文名称
-     */
-    private String fieldName;
-
-    /**
-     * 字段数据类型
-     */
-    private String dataType;
+    private Long typeId;
 
     /**
      * 是否删除
@@ -53,21 +43,6 @@ public class GisDevTplAttrPO {
      */
     private Date updateAt;
 
-    /**
-     * 字段序号
-     */
-    private Short idx;
-
-    /**
-     * 是否必填
-     */
-    private Boolean fill;
-
-    /**
-     * 是否可以编辑
-     */
-    private Boolean edit;
-
     public Long getId() {
         return id;
     }
@@ -76,36 +51,20 @@ public class GisDevTplAttrPO {
         this.id = id;
     }
 
-	public Long getTplId() {
-		return tplId;
-	}
-
-	public void setTplId(Long tplId) {
-		this.tplId = tplId;
-	}
-
-	public String getFieldDesc() {
-        return fieldDesc;
+    public Long getTplId() {
+        return tplId;
     }
 
-    public void setFieldDesc(String fieldDesc) {
-        this.fieldDesc = fieldDesc == null ? null : fieldDesc.trim();
+    public void setTplId(Long tplId) {
+        this.tplId = tplId;
     }
 
-    public String getFieldName() {
-        return fieldName;
+    public Long getTypeId() {
+        return typeId;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName == null ? null : fieldName.trim();
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType == null ? null : dataType.trim();
+    public void setTypeId(Long typeId) {
+        this.typeId = typeId;
     }
 
     public Boolean getDeleteFlag() {
@@ -146,29 +105,5 @@ public class GisDevTplAttrPO {
 
     public void setUpdateAt(Date updateAt) {
         this.updateAt = updateAt;
-    }
-
-    public Short getIdx() {
-        return idx;
-    }
-
-    public void setIdx(Short idx) {
-        this.idx = idx;
-    }
-
-    public Boolean getFill() {
-        return fill;
-    }
-
-    public void setFill(Boolean fill) {
-        this.fill = fill;
-    }
-
-    public Boolean getEdit() {
-        return edit;
-    }
-
-    public void setEdit(Boolean edit) {
-        this.edit = edit;
     }
 }

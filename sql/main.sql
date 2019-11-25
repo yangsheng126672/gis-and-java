@@ -425,21 +425,46 @@ COMMENT ON COLUMN share_sequence_define.update_at IS '更新时间';
 COMMENT ON COLUMN share_sequence_define.remarks IS '备注';
 COMMENT ON TABLE share_sequence_define is '序列生成';
 
--- [15] 导入数据的日志表
-DROP TABLE IF EXISTS data_import_log;
-CREATE TABLE data_import_log(
+-- [15] 字段模板表
+DROP TABLE IF EXISTS gis_dev_tpl;
+CREATE TABLE gis_dev_tpl(
 	id serial8 primary key,
-	dev_id char(12) NOT NULL,
-	code varchar(32) not null default '',
-	belong_to int8 NOT NULL,
-	batch_number  varchar(20) not null default ''
+	name varchar(32) NOT NULL,
+  delete_flag boolean NOT NULL DEFAULT false,
+  create_by character varying(32) NOT NULL DEFAULT ''::character varying,
+  create_at timestamp without time zone NOT NULL DEFAULT now(),
+  update_by character varying(32) NOT NULL DEFAULT ''::character varying,
+  update_at timestamp without time zone NOT NULL DEFAULT now()
 );
-COMMENT ON COLUMN data_import_log.id IS '主键';
-COMMENT ON COLUMN data_import_log.dev_id IS '设备编号';
-COMMENT ON COLUMN data_import_log.code IS '编号';
-COMMENT ON COLUMN data_import_log.belong_to IS '数据权限ID';
-COMMENT ON COLUMN data_import_log.batch_number IS '批次号';
-COMMENT ON TABLE data_import_log IS '导入数据的日志表';
+COMMENT ON COLUMN gis_dev_tpl.id IS '主键';
+COMMENT ON COLUMN gis_dev_tpl.name IS '模板名称';
+COMMENT ON COLUMN gis_dev_tpl.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_dev_tpl.create_by IS '创建人';
+COMMENT ON COLUMN gis_dev_tpl.create_at IS '创建时间';
+COMMENT ON COLUMN gis_dev_tpl.update_by IS '修改人';
+COMMENT ON COLUMN gis_dev_tpl.update_at IS '修改时间';
+
+-- [16] 字段模板和设备类型映射表
+DROP TABLE IF EXISTS gis_tpl_type;
+CREATE TABLE gis_tpl_type(
+	id serial8 primary key,
+	tpl_id int8 NOT NULL,
+	type_id int8 NOT NULL,
+  delete_flag boolean NOT NULL DEFAULT false,
+  create_by character varying(32) NOT NULL DEFAULT ''::character varying,
+  create_at timestamp without time zone NOT NULL DEFAULT now(),
+  update_by character varying(32) NOT NULL DEFAULT ''::character varying,
+  update_at timestamp without time zone NOT NULL DEFAULT now()
+);
+COMMENT ON COLUMN gis_tpl_type.id IS '主键';
+COMMENT ON COLUMN gis_tpl_type.tpl_id IS '模板ID';
+COMMENT ON COLUMN gis_tpl_type.type_id IS '设备类型ID';
+COMMENT ON COLUMN gis_tpl_type.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_tpl_type.create_by IS '创建人';
+COMMENT ON COLUMN gis_tpl_type.create_at IS '创建时间';
+COMMENT ON COLUMN gis_tpl_type.update_by IS '修改人';
+COMMENT ON COLUMN gis_tpl_type.update_at IS '修改时间';
+
 
 ------------------------------增加唯一性约束begin-----------------------
 -- 数据字典中，同一类型下不能有重复的名称和值
@@ -448,6 +473,8 @@ alter table dict_detail add constraint uk_t_n_v unique(type_id,name,val);
 alter table dict_type add constraint uk_dict_type_v unique (val);
 -- 序列表中key 和 platform_code 复合唯一
 alter table share_sequence_define add constraint uk_seq_kp unique (key,platform_code);
+-- 一个类型ID只能映射一个模板，而一个模板可以对应多个类型，故类型ID不重复
+alter table gis_tpl_type add constraint uk_type_id unique (type_id)
 ------------------------------增加唯一性约束end-------------------------
 
 

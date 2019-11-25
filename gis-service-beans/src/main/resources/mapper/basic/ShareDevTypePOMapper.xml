@@ -75,27 +75,50 @@
     </select>
 
     <select id="findHasTplDevTypeListById" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    SELECT *  FROM
-        (
-            WITH RECURSIVE A AS (
-            SELECT A .* FROM share_dev_type A
-            WHERE
-                ID = #{id,jdbcType=BIGINT}
-                AND del_flag = 0
-            UNION ALL
-            SELECT b.* FROM (select * from share_dev_type WHERE del_flag = 0) b, A
-            WHERE
-                A.ID = b.p_id
-                AND b.del_flag = 0
-            ) SELECT * FROM A
-        ) aa
-    WHERE EXISTS
-    (
-        SELECT 1 FROM
-            ( SELECT type_id FROM gis_dev_tpl_attr WHERE delete_flag = FALSE GROUP BY type_id ) b
-        WHERE
-            aa.ID = b.type_id
-    )
+     select * FROM share_dev_type
+            WHERE id = (
+                select type_id from gis_tpl_type where type_id  = (
+                select type_id FROM (
+                    SELECT * FROM (
+                        SELECT DISTINCT type_id FROM gis_tpl_type
+                    ) att
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM (
+                            WITH RECURSIVE a AS (
+                                    SELECT a.id, a.p_id
+                                    FROM share_dev_type a
+                                    WHERE del_flag = 0
+                                        AND id = #{id}
+                                    UNION ALL
+                                    SELECT b.id, b.p_id
+                                    FROM share_dev_type b, a
+                                    WHERE b.id = a.p_id
+                                )
+                            SELECT * FROM a
+                        ) bc
+                        WHERE bc.id = att.type_id
+                    )
+                ) exi INNER JOIN (
+                        SELECT *
+                        FROM (
+                            WITH RECURSIVE t (id, p_id, depth) AS (
+                                    SELECT a.id, a.p_id, 1
+                                    FROM share_dev_type a
+                                    WHERE del_flag = 0
+                                        AND id = #{id}
+                                    UNION ALL
+                                    SELECT b.id, b.p_id, c.DEPTH + 1
+                                    FROM share_dev_type b, t c
+                                    WHERE c.p_id = b.id
+                                )
+                            SELECT * FROM t
+                        ) por
+                    ) pathOrd
+                    ON exi.type_id = pathOrd.id  ORDER BY depth desc
+                LIMIT 1
+			  ) LIMIT 1
+            )
     </select>
 
     <select id="findLeafTypesByLimbTypeIds" parameterType="java.util.List" resultMap="BaseResultMap">

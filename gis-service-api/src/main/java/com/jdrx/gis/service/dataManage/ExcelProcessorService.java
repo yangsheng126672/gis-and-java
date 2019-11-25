@@ -25,7 +25,6 @@ import com.jdrx.gis.service.basic.ShareDevService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
-import com.jdrx.share.service.ShareDeviceService;
 import org.apache.poi.ss.usermodel.*;
 import org.postgis.PGgeometry;
 import org.postgresql.util.PGobject;
@@ -150,41 +149,14 @@ public class ExcelProcessorService {
 	}
 	/**
 	 * 验证配置并获取信息
-	 * @param sheetName     sheet的名称
 	 * @return
 	 * @throws BizException
 	 */
-	Map<String,List<DictDetailPO>> findTplIfConfig(String sheetName) throws BizException {
-		String dictConfigTpl = null, dictConfigAuth = null;
-		if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)){
-			dictConfigTpl = dictConfig.getPointTpl();
-		} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
-			dictConfigTpl = dictConfig.getLineTpl();
-		}
+	Map<String,List<DictDetailPO>> findTplIfConfig() throws BizException {
+		String dictConfigAuth;
 		dictConfigAuth = dictConfig.getAuthId();
 
 		Map<String, List<DictDetailPO>> map = Maps.newHashMap();
-		if (Objects.isNull(dictConfigTpl)) {
-			throw new BizException("请联系管理员，需在Nacos中配置管点和管段的模板参数！管点的key值为[dict.pointTpl]，" +
-					"管段的key值为[dict.lineTpl]");
-		} else {
-			Logger.debug("验证管理员在数据库配置的模板信息：");
-			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(dictConfigTpl);
-			String format = "格式为：表头,对应英文字段名,数据类型,排序。 如：管点编码,code,varchar,1  如果不清楚，请联系管理员。";
-			if (Objects.isNull(dictDetailPOS) | dictDetailPOS.size() == 0) {
-				throw new BizException("请在[字典配置]页面为" + dictConfigTpl + "添加模板参数，" +
-						"[参数名称]项可以配置成Excel里面的表头，[参数值]项请严格按照格式配置，" + format);
-			} else {
-				for (DictDetailPO dictDetailPO : dictDetailPOS) {
-					String val = dictDetailPO.getVal();
-					if(!(Objects.nonNull(val) && val.split(",").length == 4)) {
-						throw new BizException(dictConfigTpl + "配置的参数格式不正确，请重新配置，" + format);
-					}
-				}
-				Logger.debug("dict_detail配置模板" + dictConfigTpl + "数据：" + dictDetailPOS);
-				map.put("dictConfigTpl", dictDetailPOS);
-			}
-		}
 
 		if (Objects.isNull(dictConfigAuth)) {
 			throw new BizException("请联系管理员，需在Nacos中配置权属单位的参数！key值为[dict.authId]");
@@ -200,14 +172,13 @@ public class ExcelProcessorService {
 				for (DictDetailPO dictDetailPO : dictDetailPOS) {
 					String val = dictDetailPO.getVal();
 					if(!(Objects.nonNull(val) && val.split("=").length == 2)) {
-						throw new BizException(dictConfigTpl + "配置的参数格式不正确，请重新配置，" + format);
+						throw new BizException(dictConfigAuth + "配置的参数格式不正确，请重新配置，" + format);
 					}
 				}
 				Logger.debug("dict_detail配置权属单位" + dictConfigAuth + "数据：" + dictDetailPOS);
 				map.put("dictConfigAuth", dictDetailPOS);
 			}
 		}
-
 		return map;
 	}
 
@@ -218,9 +189,9 @@ public class ExcelProcessorService {
 	 * @throws BizException
 	 */
 	Map<String,HashMap> valid_GetExcelHeader(Workbook workbook, String sheetName) throws BizException {
-		Map<String, List<DictDetailPO>> dictConfigMap = findTplIfConfig(sheetName);
+		Map<String, List<DictDetailPO>> dictConfigMap = findTplIfConfig();
 		// 数据字典中配置的模板信息
-		List<DictDetailPO> detailTplPOList = dictConfigMap.get("dictConfigTpl");
+		// List<DictDetailPO> detailTplPOList = dictConfigMap.get("dictConfigTpl");
 		// 数据字典中配置的权属单位
 		List<DictDetailPO> authIdPOList = dictConfigMap.get("dictConfigAuth");
 		// 数据库中配置的模板信息-字段中文名, 数据类型
@@ -233,36 +204,32 @@ public class ExcelProcessorService {
 		HashMap<Integer, HashMap<String, String>> allDevTypeNames = Maps.newHashMap();
 		// 模板信息中，字段中文名，字段英文名
 		HashMap<String, String> fieldMap = Maps.newHashMap();
-
-		detailTplPOList.stream().forEach(dictDetailPO -> {
-			String[] vals = dictDetailPO.getVal().split(",");
-			if (Objects.nonNull(vals)) {
-				nameDataTypeMap.put(vals[0],vals[2]);
-				fieldMap.put(vals[0],vals[1]);
-			}
+		List<GisDevTplAttrPO> attrPOList = Lists.newArrayList();
+		if(GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
+			attrPOList = gisDevTplAttrService.selectTplByTplName(GISConstants.TOP_TPL_1_CHN);
+		} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
+			attrPOList = gisDevTplAttrService.selectTplByTplName(GISConstants.TOP_TPL_2_CHN);
+		}
+		Map<String, String> caMap = Maps.newHashMap();
+		attrPOList.stream().forEach(attrPO -> {
+			caMap.put(attrPO.getFieldDesc(), attrPO.getDataType());
+			fieldMap.put(attrPO.getFieldDesc(), attrPO.getFieldName());
 		});
 		Sheet sheet = workbook.getSheet(sheetName);
 		Row header = sheet.getRow(0);
 		int firstCellNum = header.getPhysicalNumberOfCells();
-		if (firstCellNum != detailTplPOList.size()) {
-			throw new BizException(sheetName + "表头的名称数量和数据库字典配置的模板参数数量不匹配，" +
-					"当前Excel有" + firstCellNum + "个，数据库中的参数配置了" +
-					detailTplPOList.size() + "个！");
-		}
 		for (int i = 0; i < firstCellNum; i ++) {
 			Cell cell = header.getCell(i);
 			String headerName = cell.getStringCellValue();
+
 			if (Objects.nonNull(headerName) && !StringUtils.isEmpty(headerName)) {
 				headerName.trim();
 			}
-			if (!nameDataTypeMap.containsKey(headerName)) {
-				throw new BizException(sheetName + "表头中的[" + headerName + "]未在字典配置中配置，请先配置！");
+			if (!caMap.containsKey(headerName)) {
+				throw new BizException(sheetName + "中表头[" + headerName + "]在数据库的模板未配置");
 			} else {
-				String typeName = nameDataTypeMap.get(headerName);
+				String typeName = caMap.get(headerName);
 				String category = pgTypeDAO.selectCategoryByTypname(typeName);
-				if (Objects.isNull(category)) {
-					throw new BizException("字典配置中配置的数据类型[" + typeName + "]错误，PG数据库中无此数据类型，请确认！");
-				}
 				cellDataTypeMap.put(i, category);
 				cellIdxHeaderMap.put(i, headerName);
 			}
@@ -403,8 +370,6 @@ public class ExcelProcessorService {
 		Set<String> pointCodeSets = Sets.newHashSet();
 		// 用以判断管段的编码是否重复，有重复请修改后导入
 		Set<String> lineCodeSets = Sets.newHashSet();
-		Set<String> startCodeSets = Sets.newHashSet();
-		Set<String> endCodeSets = Sets.newHashSet();
 		// 存放数据
 		List<Map<String, Object>> excelDevList = Lists.newArrayList();
 		// 获取实际列数
@@ -579,7 +544,7 @@ public class ExcelProcessorService {
 					gisDevTplAttrPO.setFieldName(confValArray[i++]);
 					gisDevTplAttrPO.setDataType(confValArray[i++]);
 					gisDevTplAttrPO.setIdx(Short.parseShort(confValArray[i]));
-					gisDevTplAttrPO.setTypeId(typeId);
+					gisDevTplAttrPO.setTplId(typeId);
 					gisDevTplAttrPO.setCreateBy(loginUserName);
 					gisDevTplAttrPO.setCreateAt(new Date());
 					tplAttrPOList.add(gisDevTplAttrPO);
@@ -857,7 +822,7 @@ public class ExcelProcessorService {
 				}
 				gisDevExtPO.setMaterial(material);
 				gisDevExtPO.setGeom(geom.getValue());
-				gisDevExtPO.setTplTypeId(devSaveParam.getTplTypeId());
+				gisDevExtPO.setTplTypeId(typeId);
 				gisDevExtPO.setDataInfo(jsonObject);
 				if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
 					gisDevExtPO.setCreateAt(creatAt);
@@ -963,10 +928,8 @@ public class ExcelProcessorService {
 		devSaveParam.setLoginUserName(loginUserName);
 		devSaveParam.setExistsCodes(existsExtPOs);
 		if (Objects.nonNull(pointDataList)) { // 点
-			long typeId = saveTplAttr(dictConfig.getPointTpl(), loginUserName, GISConstants.TOP_TPL_1_CHN);
 			devSaveParam.setDataMapList(pointDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET0_NAME);
-			devSaveParam.setTplTypeId(typeId);
 
 			if (tsBool) {
 				updateDBData(devSaveParam);
@@ -975,10 +938,8 @@ public class ExcelProcessorService {
 		}
 
 		if (Objects.nonNull(lineDataList)) { // 线
-			long typeId = saveTplAttr(dictConfig.getLineTpl(), loginUserName, GISConstants.TOP_TPL_2_CHN);
 			devSaveParam.setDataMapList(lineDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET1_NAME);
-			devSaveParam.setTplTypeId(typeId);
 			if (tsBool) {
 				updateDBData(devSaveParam);
 			}

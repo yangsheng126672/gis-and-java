@@ -118,10 +118,10 @@ public class GISConstants {
 	public final static String DEV_ADDR_CHN = "道路名称";
 
 	/** 管件，导入的Excel的管点的模板根据管件去查模板 ID */
-	public final static String TOP_TPL_1_CHN = "管件";
+	public final static String TOP_TPL_1_CHN = "管点模板";
 
 	/** 水管，导入的Excel的管段的模板根据水管去查模板ID */
-	public final static String TOP_TPL_2_CHN = "水管";
+	public final static String TOP_TPL_2_CHN = "管段模板";
 
 	/** data_info */
 	public final static String DATA_INFO = "data_info";

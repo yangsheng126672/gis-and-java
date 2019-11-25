@@ -77,6 +77,7 @@ public interface DevQueryDAO {
 	 * @param devId
 	 * @return
 	 */
+	@Deprecated
 	List<FieldNameVO> findFieldNamesByDevID(String devId);
 
 	/**

@@ -89,4 +89,20 @@ public class GisDevTplAttrService {
 			throw new BizException();
 		}
 	}
+
+	/**
+	 * 根据模板名称查模板字段信息
+	 * @param tplName
+	 * @return
+	 * @throws BizException
+	 */
+	public List<GisDevTplAttrPO> selectTplByTplName(String tplName) throws BizException {
+		try {
+			return gisDevTplAttrPOMapper.selectTplByTplName(tplName);
+		}  catch (Exception e) {
+			Logger.error("根据模板名称查模板字段信息失败！");
+			e.printStackTrace();
+			throw new BizException();
+		}
+	}
 }

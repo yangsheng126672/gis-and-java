@@ -23,6 +23,7 @@ public interface GisDevTplAttrPOMapper {
 	 * @param devId
 	 * @return
 	 */
+	@Deprecated
 	List<GisDevTplAttrPO> findTplAttrsByDevId(Long devId);
 
 	/**
@@ -47,7 +48,7 @@ public interface GisDevTplAttrPOMapper {
 	int batchInsertSelective(@Param("tplAttrPOList") List<GisDevTplAttrPO> tplAttrPOList);
 
 	/**
-	 * 获取每个type_id对应的模板（列转行）
+	 * 获取每个tpl_id对应的模板（列转行）
 	 * @return
 	 */
 	List<Map<String, String>> selectTypeIdDescMap();
@@ -58,4 +59,11 @@ public interface GisDevTplAttrPOMapper {
 	 * @return
 	 */
 	int delByTypeId(@Param("typeId") Long typeId);
+
+	/**
+	 * 根据模板名称查模板字段信息
+	 * @param tplName
+	 * @return
+	 */
+	List<GisDevTplAttrPO> selectTplByTplName(String tplName);
 }

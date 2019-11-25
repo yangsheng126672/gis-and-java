@@ -11,6 +11,7 @@ import com.jdrx.gis.beans.dto.query.CriteriaWithDataTypeCategoryCodeDTO;
 import com.jdrx.gis.beans.dto.query.MeterialDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
+import com.jdrx.gis.beans.entry.basic.ShareDevPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
@@ -18,6 +19,7 @@ import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
@@ -82,24 +84,23 @@ public class AttrQueryService {
 	@Autowired
 	private DevQueryDAO devQueryDAO;
 
+	@Autowired
+	private ShareDevPOMapper shareDevPOMapper;
+
 	/**
-	 * 根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类，
-	 * 并且查询出来的设备类型信息就不做层级展示。因为，按照前端页面的需求：父类A查出所有子类B1，B2等等都展示在下拉框中，
-	 * 倘若B1在gis_dev_tpl_attr配置了模板，而且B1的子类C1，C2，C3也都在gis_dev_tpl_attr配置了
-	 * 模板的话，当下拉框中选中B1时，它后面的联动下拉框就不知道作何展示（是该展示B1的模板字段还是该展示
-	 * C1、C2、C3等这些子类型呢？），故type_id的子孙类中配置了模板信息的都放在一起罗列出来。
+	 * 从typeId往上递归，查询到离typeId最近，在gis_tpl_type配置了模板的记录
 	 * @param id
 	 * @return
 	 * @throws BizException
 	 */
 	public List<ShareDevTypePO> findHasTplDevTypeListById(Long id) throws BizException {
 		try {
-			Logger.debug("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类");
+			Logger.debug("根据设备类型ID递归查询模板");
 			return shareDevTypePOMapper.findHasTplDevTypeListById(id);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.error("根据设备类型的ID{}查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类失败！", id);
-			throw new BizException("根据设备类型的ID查它所有子孙类中在gis_dev_tpl_attr配置了模板信息的子孙类失败！");
+			Logger.error("根据设备类型的ID{}根据设备类型ID递归查询模板！", id);
+			throw new BizException("根据设备类型ID递归查询模板失败！");
 		}
 	}
 
@@ -445,7 +446,11 @@ public class AttrQueryService {
 	 */
 	public List<FieldNameVO> getFieldNames(String devId) throws BizException {
 		try {
-			return devQueryDAO.findFieldNamesByDevID(devId);
+			ShareDevPO shareDevPO = shareDevPOMapper.selectByPrimaryKey(devId);
+			if (Objects.isNull(shareDevPO)) {
+				return Lists.newArrayList();
+			}
+			return devQueryDAO.findFieldNamesByDevTypeId(shareDevPO.getTypeId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException(e);

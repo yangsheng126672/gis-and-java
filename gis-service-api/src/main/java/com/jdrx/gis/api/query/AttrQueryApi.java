@@ -57,11 +57,11 @@ public class AttrQueryApi {
 	@Autowired
 	AttCriteriaService attCriteriaService;
 
-	@ApiOperation(value = "根据设备类型ID递归查询所有配置了模板的子类")
+	@ApiOperation(value = "根据设备类型ID递归查询模板")
 	@RequestMapping(value = "findHasTplDevTypeListById")
 	public ResposeVO findHasTplDevTypeListById(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto)
 			throws BizException {
-		Logger.debug("api/0/query/findHasTplDevTypeListById 根据设备类型ID递归查询所有配置了模板的子类，typeId = {}", dto.getId());
+		Logger.debug("api/0/query/findHasTplDevTypeListById 根据设备类型ID递归查询模板，typeId = {}", dto.getId());
 		return ResponseFactory.ok(attrQueryService.findHasTplDevTypeListById(dto.getId()));
 	}
 

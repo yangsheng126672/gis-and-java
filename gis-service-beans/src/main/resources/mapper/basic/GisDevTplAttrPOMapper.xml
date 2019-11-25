@@ -3,7 +3,7 @@
 <mapper namespace="com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper">
     <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
         <id column="id" jdbcType="BIGINT" property="id" />
-        <result column="type_id" jdbcType="BIGINT" property="typeId" />
+        <result column="tpl_id" jdbcType="BIGINT" property="tplId" />
         <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc" />
         <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
         <result column="data_type" jdbcType="VARCHAR" property="dataType" />
@@ -17,7 +17,7 @@
         <result column="edit" jdbcType="BIT" property="edit" />
     </resultMap>
     <sql id="Base_Column_List">
-        id, type_id, field_desc, field_name, data_type, delete_flag, create_by, create_at,
+        id, tpl_id, field_desc, field_name, data_type, delete_flag, create_by, create_at,
         update_by, update_at, idx, fill,edit
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -27,11 +27,11 @@
         where id = #{id,jdbcType=BIGINT}
     </select>
     <insert id="insert" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
-        insert into gis_dev_tpl_attr (id, type_id, field_desc,
+        insert into gis_dev_tpl_attr (id, tpl_id, field_desc,
           field_name, data_type, delete_flag,
           create_by, create_at, update_by,
           update_at, idx, fill,edit)
-        values (#{id,jdbcType=BIGINT}, #{typeId,jdbcType=BIGINT}, #{fieldDesc,jdbcType=VARCHAR},
+        values (#{id,jdbcType=BIGINT}, #{tplId,jdbcType=BIGINT}, #{fieldDesc,jdbcType=VARCHAR},
            #{fieldName,jdbcType=VARCHAR}, #{dataType,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT},
            #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR},
            #{updateAt,jdbcType=TIMESTAMP}, #{idx,jdbcType=SMALLINT}, #{fill,jdbcType=BIT},#{edit,jdbcType=BIT})
@@ -42,8 +42,8 @@
             <if test="id != null">
                 id,
             </if>
-            <if test="typeId != null">
-                type_id,
+            <if test="tplId != null">
+                tpl_id,
             </if>
             <if test="fieldDesc != null">
                 field_desc,
@@ -83,8 +83,8 @@
             <if test="id != null">
                 #{id,jdbcType=BIGINT},
             </if>
-            <if test="typeId != null">
-                #{typeId,jdbcType=BIGINT},
+            <if test="tplId != null">
+                #{tplId,jdbcType=BIGINT},
             </if>
             <if test="fieldDesc != null">
                 #{fieldDesc,jdbcType=VARCHAR},
@@ -124,8 +124,8 @@
     <update id="updateByPrimaryKeySelective" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
         update gis_dev_tpl_attr
         <set>
-            <if test="typeId != null">
-                type_id = #{typeId,jdbcType=BIGINT},
+            <if test="tplId != null">
+                tpl_id = #{tplId,jdbcType=BIGINT},
             </if>
             <if test="fieldDesc != null">
                 field_desc = #{fieldDesc,jdbcType=VARCHAR},
@@ -165,7 +165,7 @@
     </update>
     <update id="updateByPrimaryKey" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
         update gis_dev_tpl_attr
-        set type_id = #{typeId,jdbcType=BIGINT},
+        set tpl_id = #{tplId,jdbcType=BIGINT},
             field_desc = #{fieldDesc,jdbcType=VARCHAR},
             field_name = #{fieldName,jdbcType=VARCHAR},
             data_type = #{dataType,jdbcType=VARCHAR},
@@ -183,9 +183,9 @@
     <select id="findTplAttrsByDevId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select * from gis_dev_tpl_attr
          where delete_flag = false
-         and type_id =
+         and tpl_id =
          (
-            select tpl_type_id from gis_dev_ext
+            select tpl_id from gis_dev_ext
             where dev_id = #{devId,jdbcType=BIGINT}
             limit 1
          )
@@ -193,10 +193,52 @@
     </select>
 
     <select id="findAttrListByTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap">
-     select * from gis_dev_tpl_attr
-         where delete_flag = false
-         and type_id = #{typeId,jdbcType=BIGINT}
-         order by idx
+     select * FROM gis_dev_tpl_attr
+            WHERE tpl_id = (
+                select tpl_id from gis_tpl_type where type_id  = (
+                select type_id FROM (
+                    SELECT * FROM (
+                        SELECT DISTINCT type_id FROM gis_tpl_type
+                    ) att
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM (
+                            WITH RECURSIVE a AS (
+                                    SELECT a.id, a.p_id
+                                    FROM share_dev_type a
+                                    WHERE del_flag = 0
+                                        AND id = #{typeId}
+                                    UNION ALL
+                                    SELECT b.id, b.p_id
+                                    FROM share_dev_type b, a
+                                    WHERE b.id = a.p_id
+                                )
+                            SELECT * FROM a
+                        ) bc
+                        WHERE bc.id = att.type_id
+                    )
+                ) exi INNER JOIN (
+                        SELECT *
+                        FROM (
+                            WITH RECURSIVE t (id, p_id, depth) AS (
+                                    SELECT a.id, a.p_id, 1
+                                    FROM share_dev_type a
+                                    WHERE del_flag = 0
+                                        AND id = #{typeId}
+                                    UNION ALL
+                                    SELECT b.id, b.p_id, c.DEPTH + 1
+                                    FROM share_dev_type b, t c
+                                    WHERE c.p_id = b.id
+                                )
+                            SELECT * FROM t
+                        ) por
+                    ) pathOrd
+                    ON exi.type_id = pathOrd.id  ORDER BY depth desc
+                LIMIT 1
+			  )
+            )
+            and delete_flag = false
+            order by idx asc
     </select>
 
     <select id="getCategoryCodeByDataType" parameterType="java.lang.String" resultType="java.lang.String">
@@ -204,11 +246,11 @@
     </select>
 
     <insert id="batchInsertSelective" parameterType="java.util.List">
-        insert into gis_dev_tpl_attr (type_id, field_desc, field_name,data_type, idx, create_at, create_by)
+        insert into gis_dev_tpl_attr (tpl_id, field_desc, field_name,data_type, idx, create_at, create_by)
         values
         <foreach collection="tplAttrPOList" item="item" index="index" separator=",">
             (
-                #{item.typeId,jdbcType=BIGINT},
+                #{item.tplId,jdbcType=BIGINT},
                 #{item.fieldDesc,jdbcType=VARCHAR},
                 #{item.fieldName,jdbcType=VARCHAR},
                 #{item.dataType,jdbcType=VARCHAR},
@@ -220,7 +262,7 @@
     </insert>
 
     <select id="selectTypeIdDescMap" resultType="java.util.Map">
-        SELECT type_id typeId,
+        SELECT tpl_id tplId,
                string_agg(field_desc,',') fieldDescArray
         FROM gis_dev_tpl_attr
         WHERE delete_flag = false
@@ -230,6 +272,13 @@
     <update id="delByTypeId" parameterType="java.lang.Long">
         UPDATE gis_dev_tpl_attr
         SET delete_flag = true
-        WHERE type_id = #{typeId}
+        WHERE tpl_id = #{typeId}
     </update>
+
+    <select id="selectTplByTplName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from gis_dev_tpl_attr
+         where delete_flag = false
+         and tpl_id = (select id from gis_dev_tpl where name = #{tplName} limit 1)
+    </select>
 </mapper>
