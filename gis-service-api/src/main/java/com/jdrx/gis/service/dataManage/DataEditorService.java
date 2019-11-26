@@ -166,6 +166,7 @@ public class DataEditorService {
             String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
             String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
 
+            map.put("dev_id",devId);
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
@@ -185,8 +186,8 @@ public class DataEditorService {
             shareDevPO.setTypeId(dto.getTypeId());
             shareDevPO.setLng(String.format("%.8f",dto.getX()));
             shareDevPO.setLat(String.format("%.8f",dto.getY()));
-            if (map.containsKey("dlm")){
-                shareDevPO.setAddr(map.get("dlm").toString());
+            if (map.containsKey("addr")){
+                shareDevPO.setAddr(map.get("addr").toString());
             }
 
             //保存管点信息
@@ -216,8 +217,46 @@ public class DataEditorService {
             String devIdLine2 = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seqLine2);
             gisDevExtPOLine2.setDevId(devIdLine2);
 
+            //更新data_info里面的值
+            JSONObject jb1 = JSONObject.parseObject(gisDevExtPOLine1.getDataInfo().toString());
+            Map<String,Object> map1 = (Map)jb1;
+            String lineCode1 = null;
+            if (map1.containsKey("qdbm")){
+                lineCode1 = map1.get("qdbm").toString()+"-"+po.getCode();
+                map1.replace("code",map1.get("code"),lineCode1);
+                map1.replace("zdbm",map1.get("zdbm"),po.getCode());
+            }
+            map1.replace("dev_id",map1.get("dev_id"),devIdLine1);
+            String jsonStr1 = JSONObject.toJSONString(map1);
+            PGobject jsonObject1 = new PGobject();
+            jsonObject1.setValue(jsonStr1);
+            jsonObject1.setType("jsonb");
+
+            JSONObject jb2 = JSONObject.parseObject(gisDevExtPOLine2.getDataInfo().toString());
+            Map<String,Object> map2 = (Map)jb2;
+            String lineCode2 = null;
+            if (map2.containsKey("zdbm")){
+                lineCode2 = po.getCode()+"-"+map2.get("zdbm").toString();
+                map2.replace("code",map2.get("code"),lineCode2);
+                map2.replace("qdbm",map2.get("qdbm"),po.getCode());
+            }
+            map2.replace("dev_id",map2.get("dev_id"),devIdLine2);
+            String jsonStr2 = JSONObject.toJSONString(map2);
+            PGobject jsonObject2 = new PGobject();
+            jsonObject2.setValue(jsonStr2);
+            jsonObject2.setType("jsonb");
+
+
             gisDevExtPOLine1.setGeom(lineGeom1);
+            gisDevExtPOLine1.setDataInfo(jsonObject1);
+            if (lineCode1 != null){
+                gisDevExtPOLine1.setCode(lineCode1);
+            }
+            if (lineCode2 != null){
+                gisDevExtPOLine2.setCode(lineCode2);
+            }
             gisDevExtPOLine2.setGeom(lineGeom2);
+            gisDevExtPOLine2.setDataInfo(jsonObject2);
             gisDevExtPOLine1.setId(null);
             gisDevExtPOLine2.setId(null);
 
