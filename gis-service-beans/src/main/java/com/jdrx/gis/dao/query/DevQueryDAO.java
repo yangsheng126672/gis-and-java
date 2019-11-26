@@ -55,6 +55,7 @@ public interface DevQueryDAO {
 	 * @param id
 	 * @return
 	 */
+	@Deprecated
 	List<FieldNameVO> findFieldNamesByTypeID(Long id);
 
 
