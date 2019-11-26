@@ -84,8 +84,8 @@ public class GISConstants {
 	/** 一次最多导入条数*/
 	public final static int IMPORT_MAX_ROWS = 20000;
 
-	/** 设备数据导入中表头需要验证之一： 类别名称 */
-	public final static String DEV_TYPE_NAME_CHN = "类别名称";
+	/** 设备数据导入中表头需要验证之一： 名称 */
+	public final static String DEV_TYPE_NAME_CHN = "名称";
 
 	/** 设备数据导入中表头需要验证之二： 材质 */
 	public final static String MATERIAL_CHN = "材质";
@@ -106,10 +106,10 @@ public class GISConstants {
 	public final static String DATA_AUTH_CHN = "权属单位";
 
 	/** 设备数据导入中表头需要验证之八：横坐标 */
-	public final static String X_CHN = "横坐标";
+	public final static String X_CHN = "X坐标";
 
 	/** 设备数据导入中表头需要验证之九：纵坐标 */
-	public final static String Y_CHN = "纵坐标";
+	public final static String Y_CHN = "Y坐标";
 
 	/** 平台编码 */
 	public final static String PLATFORM_CODE = "02";
