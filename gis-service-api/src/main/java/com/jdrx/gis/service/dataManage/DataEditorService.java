@@ -223,8 +223,10 @@ public class DataEditorService {
             String lineCode1 = null;
             if (map1.containsKey("qdbm")){
                 lineCode1 = map1.get("qdbm").toString()+"-"+po.getCode();
-                map1.replace("code",map1.get("code"),lineCode1);
                 map1.replace("zdbm",map1.get("zdbm"),po.getCode());
+                if (map1.containsKey("code")){
+                    map1.replace("code",map1.get("code"),lineCode1);
+                }
             }
             map1.replace("dev_id",map1.get("dev_id"),devIdLine1);
             String jsonStr1 = JSONObject.toJSONString(map1);
@@ -237,8 +239,10 @@ public class DataEditorService {
             String lineCode2 = null;
             if (map2.containsKey("zdbm")){
                 lineCode2 = po.getCode()+"-"+map2.get("zdbm").toString();
-                map2.replace("code",map2.get("code"),lineCode2);
                 map2.replace("qdbm",map2.get("qdbm"),po.getCode());
+                if (map2.containsKey("code")){
+                    map2.replace("code",map2.get("code"),lineCode2);
+                }
             }
             map2.replace("dev_id",map2.get("dev_id"),devIdLine2);
             String jsonStr2 = JSONObject.toJSONString(map2);

@@ -371,6 +371,8 @@ public class BasicDevQuery {
 					vo.setExtent(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("resolutions")){
 					vo.setResolutions(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("popLayer")){
+					vo.setPopLayer(dictDetail.getVal());
 				}
 			}
 		} catch (Exception e) {

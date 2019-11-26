@@ -51,5 +51,10 @@ public class DefaultLayersVO {
      */
     String resolutions;
 
+    /**
+     * 默认地图管网
+     */
+    String popLayer;
+
 
 }
