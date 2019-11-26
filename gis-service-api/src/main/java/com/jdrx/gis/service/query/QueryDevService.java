@@ -10,6 +10,7 @@ import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.*;
 import com.jdrx.gis.beans.dto.third.GetPipeTotalLenthDTO;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
+import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entry.query.PipeLengthPO;
@@ -18,6 +19,7 @@ import com.jdrx.gis.beans.vo.query.*;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.service.basic.DictDetailService;
@@ -85,6 +87,9 @@ public class QueryDevService {
 	@Autowired
 	private ShareDevPOMapper shareDevPOMapper;
 
+	@Autowired
+	private GisDevTplAttrPOMapper gisDevTplAttrPOMapper;
+
 	/**
 	 * 根据传来的设备集合获取第一级图层和图层对应的设备个数
 	 * @return
@@ -147,34 +152,15 @@ public class QueryDevService {
 	 */
 	public List<FieldNameVO> findFieldNamesByTypeID(Long id) throws BizException{
 		try {
-			List<FieldNameVO> list = devQueryDAO.findFieldNamesByTypeID(id);
-			if (Objects.nonNull(list)) {
-				// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
-				// 所以这里就把类名称这一列+上来
-				FieldNameVO vo = new FieldNameVO();
-				vo.setFieldName(GISConstants.DEV_TYPE_NAME);
-				vo.setFieldDesc(GISConstants.DEV_TYPE_NAME_DESC);
-				list.add(vo);
-
-				for (int i = 0; i < list.size(); i++) {
-					FieldNameVO fieldNameVO = list.get(i);
-					if (Objects.isNull(fieldNameVO)) {
-						break;
-					}
-					String fieldName = fieldNameVO.getFieldName();
-					if (StringUtils.isEmpty(fieldName)) {
-						break;
-					}
-					if (GISConstants.DEV_ID.equals(fieldName)) {
-						Collections.swap(list, i, 0);
-						continue;
-					}
-					if (list.size() > 1) {
-						if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
-							Collections.swap(list, i, 1);
-						}
-					}
-				}
+			List<FieldNameVO> list = Lists.newArrayList();
+			List<GisDevTplAttrPO> listDB = gisDevTplAttrPOMapper.findAttrListByTypeId(id);
+			if (Objects.nonNull(listDB)) {
+				listDB.stream().forEach(gisDevTplAttrPO -> {
+					FieldNameVO vo = new FieldNameVO();
+					vo.setFieldName(gisDevTplAttrPO.getFieldName());
+					vo.setFieldDesc(gisDevTplAttrPO.getFieldDesc());
+					list.add(vo);
+				});
 			}
 			return list;
 		} catch (Exception e) {
