@@ -3,7 +3,7 @@ package com.jdrx.gis.api.dataManage;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.api.query.AttrQueryApi;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.dto.datamanage.ImportDTO;
+import com.jdrx.gis.beans.dto.dataManage.ImportDTO;
 import com.jdrx.gis.beans.vo.datamanage.ImportVO;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.service.dataManage.ExcelProcessorService;

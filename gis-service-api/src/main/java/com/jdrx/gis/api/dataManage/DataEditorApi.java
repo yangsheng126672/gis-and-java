@@ -1,10 +1,10 @@
 package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
-import com.jdrx.gis.beans.dto.datamanage.MapAttrDTO;
-import com.jdrx.gis.beans.dto.datamanage.MovePointDTO;
-import com.jdrx.gis.beans.dto.datamanage.ShareAddedNetsDTO;
-import com.jdrx.gis.beans.dto.datamanage.ShareAddedPointDTO;
+import com.jdrx.gis.beans.dto.dataManage.MapAttrDTO;
+import com.jdrx.gis.beans.dto.dataManage.MovePointDTO;
+import com.jdrx.gis.beans.dto.dataManage.ShareAddedNetsDTO;
+import com.jdrx.gis.beans.dto.dataManage.ShareAddedPointDTO;
 import com.jdrx.gis.service.dataManage.DataEditorService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;

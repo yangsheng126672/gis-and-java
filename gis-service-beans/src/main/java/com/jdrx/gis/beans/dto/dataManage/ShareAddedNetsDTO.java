@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.dto.datamanage;
+package com.jdrx.gis.beans.dto.dataManage;
 
 
 import io.swagger.annotations.ApiModelProperty;

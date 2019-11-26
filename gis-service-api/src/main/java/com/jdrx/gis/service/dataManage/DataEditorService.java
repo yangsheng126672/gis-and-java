@@ -2,7 +2,7 @@ package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.dto.datamanage.*;
+import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entry.basic.DictDetailPO;
 import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevPO;
