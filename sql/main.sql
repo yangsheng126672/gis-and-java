@@ -380,6 +380,7 @@ DROP TABLE IF EXISTS gis_trans_log;
 CREATE table gis_trans_log(
 		id serial8 primary key,
 		trans_id char(32) not null default '',
+		trans_code char(4) not null default '',
 		api_name varchar(64) not null default '',
 		api varchar(128) not null default '',
 		req_params VARCHAR(1024) not null default '',
@@ -393,6 +394,7 @@ CREATE table gis_trans_log(
 ;
 COMMENT ON COLUMN gis_trans_log.id IS '主键';
 COMMENT ON COLUMN gis_trans_log.trans_id IS '交易ID';
+COMMENT ON COLUMN gis_trans_log.trans_code IS '接口编码';
 COMMENT ON COLUMN gis_trans_log.api_name IS '接口名称';
 COMMENT ON COLUMN gis_trans_log.api IS '接口';
 COMMENT ON COLUMN gis_trans_log.req_params IS '接口的请求参数';
