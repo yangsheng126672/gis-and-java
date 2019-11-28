@@ -421,12 +421,16 @@ public class ExcelProcessorService {
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName) && GISConstants.X_CHN.equals(headerName)) {
 					if (StringUtils.isEmpty(cellStringVal)) {
 						throw new BizException(cellAddrDesc + "的数据不能为空！");
+					} else if (cellStringVal.length() > 16) {
+						throw new BizException(cellAddrDesc + "的数据长度超过16位，请更改数据内容或把单元格式更改成文本格式！");
 					}
 				}
 				// 如果是管点，Y坐标不能为空
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName) && GISConstants.Y_CHN.equals(headerName)) {
 					if (StringUtils.isEmpty(cellStringVal)) {
 						throw new BizException(cellAddrDesc + "的数据不能为空！");
+					}  else if (cellStringVal.length() > 16) {
+						throw new BizException(cellAddrDesc + "的数据长度超过16位，请更改数据内容或把单元格式更改成文本格式！");
 					}
 				}
 				// 验证单元格值的数据类型是否正确：数值型 | 字符型 | 日期时间型

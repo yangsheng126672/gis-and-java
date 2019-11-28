@@ -73,7 +73,7 @@ public class GISConstants {
 	public final static String BELONG_TO_IDS = "belongToIds";
 
 	/** 导入设备数据模板的Excel名称*/
-	public final static String TEMPLATE_EXCEL_NAME = "templateForImport.xls";
+	public final static String TEMPLATE_EXCEL_NAME = "templateForImport.xlsx";
 
 	/** 导入数据的Excle 第一个sheet名称*/
 	public final static String IMPORT_SHEET0_NAME = "管点表";
