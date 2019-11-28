@@ -185,7 +185,7 @@
          where delete_flag = false
          and tpl_id =
          (
-            select tpl_id from gis_dev_ext
+            select tpl_id from gis_dev_ext gdx
             where dev_id = #{devId,jdbcType=BIGINT}
             limit 1
          )

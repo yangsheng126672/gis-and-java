@@ -45,7 +45,7 @@
         select
         id, dev_id, name, code, caliber, material, st_astext(geom) geom, tpl_type_id, data_info, delete_flag,
     create_by, create_at, update_by, update_at,belong_to
-        from gis_dev_ext
+        from gis_dev_ext gdx
         where dev_id = #{devId,jdbcType=VARCHAR}
         limit 1
     </select>
@@ -53,7 +53,7 @@
     <select id="findDevListByDevIds" resultMap="BaseResultMap2" parameterType="java.util.List">
         select
           id, dev_id, tpl_type_id,data_info
-        from gis_dev_ext
+        from gis_dev_ext gdx
         <where>
             delete_flag = FALSE
             <if test="devIds != null and devIds.size > 0">
@@ -74,7 +74,7 @@
                 delete_flag = FALSE
                 <if test="dto.typeId != null">
                     and dev_id in (
-                      SELECT id FROM share_dev WHERE
+                      SELECT id FROM share_dev sd WHERE
                       type_id IN (
                         WITH RECURSIVE A AS
                           ( SELECT A .*  FROM share_dev_type A
@@ -116,7 +116,7 @@
             delete_flag = FALSE
             <if test="dto.typeId != null">
                 and dev_id in (
-                SELECT id FROM share_dev WHERE
+                SELECT id FROM share_dev sd WHERE
                 type_id IN (
                 WITH RECURSIVE A AS
                 ( SELECT A .*  FROM share_dev_type A
@@ -152,7 +152,7 @@
 
     <select id="findPipeLength" resultType="com.jdrx.gis.beans.entry.query.PipeLengthPO" >
          select sum(cast(data_info::jsonb->> #{val} as FLOAT)) totalLength
-         from gis_dev_ext where caliber is not null
+         from gis_dev_ext gdx where caliber is not null
     </select>
 
     <select id="findDevListAttTypeByDevIds" resultType="java.lang.String" resultMap="BaseResultMap3" >
@@ -176,7 +176,7 @@
                     ) t2
                         LEFT JOIN (
                             SELECT id, type_id
-                            FROM share_dev
+                            FROM share_dev sd
                         ) t3
                         ON t2.dev_id = t3.id
                 ) rs
@@ -184,7 +184,7 @@
                 LEFT JOIN share_dev_type t5 ON t4.type_id = t5.id
     </select>
     <select id="findFeaturesByString"  resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
-        select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
+        select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext gdx
         where data_info->>'address' like '%${val}%' or data_info->>'code' like '%${val}%' or data_info->>'address' like '%${val}%'
               or data_info->>'qdbm' like '%${val}%'
               or data_info->>'zdbm' like '%${val}%'
@@ -192,12 +192,12 @@
     </select>
 
     <select id="findFeaturesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
-        select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext
+        select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext gdx
         where dev_id in (${devIds}) AND delete_flag = false
     </select>
 
     <select id="getPointDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoPointVO">
-        select dev_id,code,name,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y,belong_to from public.gis_dev_ext
+        select dev_id,code,name,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y,belong_to from gis_dev_ext gdx
         WHERE  caliber is  null AND delete_flag = false
         <if test="devIds != null ">
             AND
@@ -206,7 +206,7 @@
     </select>
 
     <select id="getLineDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoLineVO">
-        select dev_id,code,caliber,material,belong_to,data_info from public.gis_dev_ext WHERE  caliber is not null  AND delete_flag = false
+        select dev_id,code,caliber,material,belong_to,data_info from gis_dev_ext gdx WHERE  caliber is not null  AND delete_flag = false
         <if test="devIds != null ">
             AND
             dev_id in #{devIds}
@@ -215,7 +215,7 @@
 
     <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
         SELECT <include refid="Base_Column_List" />
-        FROM gis_dev_ext
+        FROM gis_dev_ext gdx
         WHERE delete_flag = false
         AND code = #{code}
         LIMIT 1
@@ -253,7 +253,7 @@
 
     <select id="selectExistRecords" parameterType="java.lang.String" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
-        FROM gis_dev_ext
+        FROM gis_dev_ext gdx
         WHERE delete_flag = false
         AND batch_number = #{batchNum}
     </select>
@@ -517,7 +517,7 @@
 
     <select id="selectLineByCode" parameterType="java.lang.String" resultType="com.jdrx.gis.beans.entry.basic.GISDevExtPO">
         SELECT  id, dev_id, name, code, caliber, material, st_astext(geom) as geom, tpl_type_id, data_info, delete_flag,
-            create_by, create_at, update_by, update_at, belong_to from gis_dev_ext
+            create_by, create_at, update_by, update_at, belong_to from gis_dev_ext gdx
         WHERE   data_info->>'qdbm' = #{val} or data_info->>'zdbm' = #{val}
     </select>
 </mapper>

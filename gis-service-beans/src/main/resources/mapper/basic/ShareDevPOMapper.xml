@@ -61,7 +61,7 @@
         update_by, update_at, del_flag
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-       SELECT <include refid="Base_Column_List"/> FROM share_dev
+       SELECT <include refid="Base_Column_List"/> FROM share_dev sd
         where id = #{id,jdbcType=CHAR}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
@@ -255,7 +255,7 @@
         where id = #{id,jdbcType=CHAR}
     </update>
     <select id="getTypeIdPrimaryKey" parameterType="java.lang.Long" resultType="java.lang.Long">
-        select type_id from share_dev
+        select type_id from share_dev sd
         where del_flag = false
         and id = #{id,jdbcType=BIGINT}
     </select>

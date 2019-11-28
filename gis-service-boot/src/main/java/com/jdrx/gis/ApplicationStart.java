@@ -1,5 +1,6 @@
 package com.jdrx.gis;
 
+import com.jdrx.gis.config.MySwaggersConfig;
 import com.jdrx.gis.config.PGConfigProperties;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "com.jdrx")
 @SpringBootApplication
 @MapperScan({"com.jdrx.gis.dao.*","com.jdrx.share.*"})
-@ImportAutoConfiguration({PGConfigProperties.class})
+@ImportAutoConfiguration({PGConfigProperties.class, MySwaggersConfig.class})
 public class ApplicationStart {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationStart.class, args);

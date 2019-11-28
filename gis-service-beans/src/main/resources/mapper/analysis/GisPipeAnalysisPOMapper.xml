@@ -175,7 +175,7 @@
 
   <select id="getExtendArea"  resultType="java.lang.String">
     SELECT ST_AsText(ST_Transform(ST_GeomFromText(
-    (select st_Astext(ST_ConvexHull(ST_Union(geom))) from gis_dev_ext where dev_id in
+    (select st_Astext(ST_ConvexHull(ST_Union(geom))) from gis_dev_ext gdx where dev_id in
     <foreach item="devIds" index="index" collection="devIds" open="(" separator="," close=")">
       #{devIds}
     </foreach>

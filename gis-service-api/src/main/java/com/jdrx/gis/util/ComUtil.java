@@ -291,4 +291,23 @@ public class ComUtil {
 		return jsonObject;
 	}
 
+	/**
+	 * 替换字符串中某个子串，该子串以忽略大小写的方式替换
+	 * @param target        需要替换的目标字符串
+	 * @param orginStr      被替换的子串，忽略大小写，并且是边界，如share_dev_type 中替换share_dev不成功
+	 * @param replaceStr    替换旧子串的新子串
+	 * @return
+	 */
+	public static String replaceTargetIngorCase(String target, String orginStr,String replaceStr) {
+		try {
+			Pattern pattern = Pattern.compile(orginStr + "\\b", Pattern.CASE_INSENSITIVE);
+			Pattern pattern1 = Pattern.compile(orginStr);
+			Matcher matcher = pattern.matcher(target);
+			target = matcher.replaceAll(replaceStr);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return target;
+	}
+
 }

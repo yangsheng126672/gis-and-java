@@ -105,7 +105,7 @@
                             </if>
                         ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
                         AND sd.del_flag = 0
-                    ) dv INNER JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext WHERE delete_flag = FALSE ) b
+                    ) dv INNER JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext gdx WHERE delete_flag = FALSE ) b
             ON dv.devId = b.dev_id
         ) as jj
     </select>
@@ -136,7 +136,7 @@
         </if>
         ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
         AND sd.del_flag = 0
-        ) dv LEFT JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext WHERE delete_flag = FALSE ) b
+        ) dv LEFT JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext gdx WHERE delete_flag = FALSE ) b
         ON dv.devId = b.dev_id
         ) as jj
     </select>
@@ -222,7 +222,7 @@
        SELECT field_name AS fieldName, field_desc AS fieldDesc, idx, fill, edit
             FROM gis_dev_tpl_attr
             WHERE type_id = (
-                select tpl_id from gis_dev_ext where dev_id = #{devId} limit 1
+                select tpl_id from gis_dev_ext gdx where dev_id = #{devId} limit 1
             ) ORDER BY idx asc
     </select>
 
