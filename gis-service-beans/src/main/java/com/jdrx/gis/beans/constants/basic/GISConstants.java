@@ -10,7 +10,7 @@ public class GISConstants {
 	/**
 	 * 验证串
 	 */
-	public static final String TRANSPARENT_TOKEN_FEILD = "X-TOKE";
+	public static final String TRANSPARENT_TOKEN_FEILD = "authorization";
 
 	/**
 	 * 用作空间查询展示设备编号，要想把设备编号放在第一列的话，

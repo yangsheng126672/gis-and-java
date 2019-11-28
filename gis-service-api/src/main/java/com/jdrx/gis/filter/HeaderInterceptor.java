@@ -1,7 +1,10 @@
 package com.jdrx.gis.filter;
 
+import com.alibaba.fastjson.JSONObject;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.util.ComUtil;
+import com.jdrx.gis.util.JsonFormatUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
@@ -15,10 +18,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import sun.misc.BASE64Encoder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.util.Base64;
+import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -43,7 +49,7 @@ public class HeaderInterceptor implements Interceptor {
 
 	@Override
 	public Object intercept(Invocation invocation) throws Throwable {
-		HttpServletRequest request = null;
+		HttpServletRequest request;
 		String deptPath = null;
 		if (RequestContextHolder.getRequestAttributes() != null) {
 			request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -51,7 +57,25 @@ public class HeaderInterceptor implements Interceptor {
 			return invocation.proceed();
 		}
 		if (Objects.nonNull(request)) {
-			deptPath = request.getHeader(DEPT_PATH);
+			Enumeration headerNames = request.getHeaderNames();
+			while (headerNames.hasMoreElements()) {
+				String key = (String) headerNames.nextElement();
+				String value = request.getHeader(key);
+				String[] tokens;
+				String tokenStr = null;
+				if (GISConstants.TRANSPARENT_TOKEN_FEILD.equalsIgnoreCase(key)) {
+					tokens = value.split("\\.");
+					if (Objects.nonNull(tokens) && tokens.length >=2) {
+						tokenStr = tokens[1]; // 取第二段
+					}
+					byte[] jsonBytes = Base64.getDecoder().decode(tokenStr.getBytes());
+					String jsonStr = new String(jsonBytes);
+					JSONObject jsonObject = JSONObject.parseObject(jsonStr);
+					deptPath = Objects.nonNull(jsonObject.get(DEPT_PATH)) ? String.valueOf(jsonObject.get(DEPT_PATH)) : null;
+					break;
+				}
+			}
+			logger.debug(DEPT_PATH + "=" + deptPath);
 		} else {
 			throw new Exception(" http header " + DEPT_PATH + " not found! ");
 		}
@@ -68,8 +92,6 @@ public class HeaderInterceptor implements Interceptor {
 					sql = handleSql(sql, deptPath);
 				}
 				setFieldValue(boundSql, "sql", sql);
-			} else {
-				throw new Exception(" http header " + DEPT_PATH + " not found! ");
 			}
 		}
 		return invocation.proceed();
@@ -166,5 +188,6 @@ public class HeaderInterceptor implements Interceptor {
 	public void setProperties(Properties properties) {
 		this.matchs = properties.getProperty("matchs", null);
 	}
+
 
 }

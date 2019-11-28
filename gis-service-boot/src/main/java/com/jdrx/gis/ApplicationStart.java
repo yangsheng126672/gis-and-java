@@ -16,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "com.jdrx")
 @SpringBootApplication
 @MapperScan({"com.jdrx.gis.dao.*","com.jdrx.share.*"})
-@ImportAutoConfiguration({PGConfigProperties.class, MySwaggersConfig.class})
+@ImportAutoConfiguration({PGConfigProperties.class})
 public class ApplicationStart {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationStart.class, args);
