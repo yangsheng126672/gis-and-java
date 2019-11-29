@@ -408,11 +408,12 @@ public class ExcelProcessorService {
 					}
 				}
 				// 验证单元格值的数据类型是否正确：数值型 | 字符型 | 日期时间型
-				boolean dataTypeStat = validCellDataType(cellStringVal, category);
-				if (!dataTypeStat) {
-					throw new BizException(cellAddrDesc + "的数据格式不正确，请确认并修改！");
+				if (Objects.nonNull(cellStringVal) && !StringUtils.isEmpty(cellStringVal)) {
+					boolean dataTypeStat = validCellDataType(cellStringVal, category);
+					if (!dataTypeStat) {
+						throw new BizException(cellAddrDesc + "的数据格式不正确，请确认并修改！");
+					}
 				}
-
 				// 验证类别名称是否合法
 				String typeName = null;
 				if (GISConstants.DEV_TYPE_NAME_CHN.equals(headerName)) {
