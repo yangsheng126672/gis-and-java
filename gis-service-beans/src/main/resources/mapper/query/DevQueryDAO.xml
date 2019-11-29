@@ -196,7 +196,7 @@
                 select dev_id,type_id from (
                 SELECT dev_id FROM gis_dev_ext gdx
                     <where>
-                        1=1
+                        delete_flag = false
                         <if test="devIds != null and devIds != ''">
                             and EXISTS (select 1 from
                             (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id= gdx.dev_id)
