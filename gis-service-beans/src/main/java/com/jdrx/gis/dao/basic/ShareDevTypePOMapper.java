@@ -39,8 +39,7 @@ public interface ShareDevTypePOMapper {
 	ShareDevTypePO getByPrimaryKey(Long id);
 
 	/**
-	 * 根据设备类型ID递归查询所有配置了模板的子类
-	 * 不区分层级
+	 * 从typeId往上递归，查询到离typeId最近，在gis_tpl_type配置了模板的记录
 	 * @param id
 	 * @return
 	 */

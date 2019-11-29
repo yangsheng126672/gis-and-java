@@ -126,30 +126,28 @@ public class AttrQueryService {
 					}
 					fieldNameVOS.add(vo);
 				});
-				// 设备模板里面是没有配置设备的类型名称的，其实可以配置，但感觉不是很合理
-				// 所以这里就把类名称这一列+上来
 				FieldNameVO vo = new FieldNameVO();
 				vo.setFieldName(GISConstants.DEV_TYPE_NAME);
 				vo.setFieldDesc(GISConstants.DEV_TYPE_NAME_DESC);
 				fieldNameVOS.add(vo);
 
-				for (int i = 0; i < fieldNameVOS.size(); i++) {
-					FieldNameVO fieldNameVO = fieldNameVOS.get(i);
-					if (Objects.isNull(fieldNameVO)) {
-						break;
-					}
-					String fieldName = fieldNameVO.getFieldName();
-					if (StringUtils.isEmpty(fieldName)) {
-						break;
-					}
-					if (GISConstants.DEV_ID.equals(fieldName)) {
-						Collections.swap(fieldNameVOS, i, 0);
-						continue;
-					}
-					if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
-						Collections.swap(fieldNameVOS, i, 1);
-					}
-				}
+//				for (int i = 0; i < fieldNameVOS.size(); i++) {
+//					FieldNameVO fieldNameVO = fieldNameVOS.get(i);
+//					if (Objects.isNull(fieldNameVO)) {
+//						break;
+//					}
+//					String fieldName = fieldNameVO.getFieldName();
+//					if (StringUtils.isEmpty(fieldName)) {
+//						break;
+//					}
+//					if (GISConstants.DEV_ID.equals(fieldName)) {
+//						Collections.swap(fieldNameVOS, i, 0);
+//						continue;
+//					}
+//					if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+//						Collections.swap(fieldNameVOS, i, 1);
+//					}
+//				}
 			}
 			return fieldNameVOS;
 		} catch (Exception e) {

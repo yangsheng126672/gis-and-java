@@ -100,7 +100,7 @@ public class GISConstants {
 	public final static String LINE_END_CODE_CHN = "终点编码";
 
 	/** 设备数据导入中表头需要验证之六：管径 */
-	public final static String CALIBER_CHN = "管径";
+	public final static String CALIBER_CHN = "管径(mm)";
 
 	/** 设备数据导入中表头需要验证之七：权属单位 */
 	public final static String DATA_AUTH_CHN = "权属单位";

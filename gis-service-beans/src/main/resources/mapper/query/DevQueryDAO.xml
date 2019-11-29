@@ -268,7 +268,7 @@
                             SELECT * FROM t
                         ) por
                     ) pathOrd
-                    ON exi.type_id = pathOrd.id  ORDER BY depth desc
+                    ON exi.type_id = pathOrd.id  ORDER BY depth asc
                 LIMIT 1
 			  )
             )

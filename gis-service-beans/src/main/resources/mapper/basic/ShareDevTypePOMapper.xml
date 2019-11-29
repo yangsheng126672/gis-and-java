@@ -115,7 +115,7 @@
                             SELECT * FROM t
                         ) por
                     ) pathOrd
-                    ON exi.type_id = pathOrd.id  ORDER BY depth desc
+                    ON exi.type_id = pathOrd.id  ORDER BY depth asc
                 LIMIT 1
 			  ) LIMIT 1
             )
@@ -209,7 +209,7 @@
          LIMIT 1
     </select>
 
-    <select id="getAllTypeIdByTopId" resultType="java.lang.Long">
+    <select id="getAllTypeIdByTopId" resultType="java.util.List">
         SELECT id  FROM (
             WITH RECURSIVE A AS (
                 SELECT A.*  FROM share_dev_type A

@@ -152,34 +152,20 @@ public class ExcelProcessorService {
 	 * @return
 	 * @throws BizException
 	 */
-	Map<String,List<DictDetailPO>> findTplIfConfig() throws BizException {
-		String dictConfigAuth;
-		dictConfigAuth = dictConfig.getAuthId();
-
-		Map<String, List<DictDetailPO>> map = Maps.newHashMap();
-
+	private List<DictDetailPO> findTplIfConfig() throws BizException {
+		String dictConfigAuth = dictConfig.getAuthId();
 		if (Objects.isNull(dictConfigAuth)) {
 			throw new BizException("请联系管理员，需在Nacos中配置权属单位的参数！key值为[dict.authId]");
 		} else {
-			Logger.debug("验证管理员在数据库配置的权属单位信息：");
 			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(dictConfigAuth);
-			String format = "格式为：OCP的资源ID=GIS系统的权属单位ID，如：55=2  OCP如果暂时未给出ID，可以先自己随便定义" +
-					"一个，等OCP给出后再更新，如果不清楚，请联系管理员。";
 			if (Objects.isNull(dictDetailPOS) | dictDetailPOS.size() == 0) {
 				throw new BizException("请在[字典配置]页面为" + dictConfigAuth + "添加权属单位参数，" +
-						"[参数名称]项配置成权属单位名称，[参数值]项请严格按照格式配置，" + format);
+						"[参数名称]项配置成权属单位名称，[参数值]配置成机构ID");
 			} else {
-				for (DictDetailPO dictDetailPO : dictDetailPOS) {
-					String val = dictDetailPO.getVal();
-					if(!(Objects.nonNull(val) && val.split("=").length == 2)) {
-						throw new BizException(dictConfigAuth + "配置的参数格式不正确，请重新配置，" + format);
-					}
-				}
 				Logger.debug("dict_detail配置权属单位" + dictConfigAuth + "数据：" + dictDetailPOS);
-				map.put("dictConfigAuth", dictDetailPOS);
 			}
+			return dictDetailPOS;
 		}
-		return map;
 	}
 
 	/**
@@ -189,13 +175,6 @@ public class ExcelProcessorService {
 	 * @throws BizException
 	 */
 	Map<String,HashMap> valid_GetExcelHeader(Workbook workbook, String sheetName) throws BizException {
-		Map<String, List<DictDetailPO>> dictConfigMap = findTplIfConfig();
-		// 数据字典中配置的模板信息
-		// List<DictDetailPO> detailTplPOList = dictConfigMap.get("dictConfigTpl");
-		// 数据字典中配置的权属单位
-		List<DictDetailPO> authIdPOList = dictConfigMap.get("dictConfigAuth");
-		// 数据库中配置的模板信息-字段中文名, 数据类型
-		HashMap<String, String> nameDataTypeMap = Maps.newHashMap();
 		// Excel中第几列，数据类型分类
 		HashMap<Integer, String> cellDataTypeMap = Maps.newHashMap();
 		// Excel中第几列，字段中文名
@@ -249,17 +228,12 @@ public class ExcelProcessorService {
 
 		HashMap<Integer, Map<String, String>> authIdMap = Maps.newHashMap();
 		Map<String, String> authMap = Maps.newHashMap();
-		if (Objects.nonNull(authIdPOList) && authIdPOList.size() > 0) {
-			authIdPOList.stream().forEach(dictDetailPO -> {
+		List<DictDetailPO> dictDetailPOS = findTplIfConfig();
+		if (Objects.nonNull(dictDetailPOS) && dictDetailPOS.size() > 0) {
+			dictDetailPOS.stream().forEach(dictDetailPO -> {
 				String val = dictDetailPO.getVal();
-				String authId = "-1";
-				if (Objects.nonNull(val) && !StringUtils.isEmpty(val)) {
-					// 这里字典数据配置的格式是 opc的资源=gis系统自定义的权限id,如34=1，我们把1又和广安区映射
-					String[] gisAuthId = val.split("=");
-					authId = gisAuthId[1];
-				}
 				// 要求数据权属名称不能重复
-				authMap.put(dictDetailPO.getName(), authId);
+				authMap.put(dictDetailPO.getName(), val);
 			});
 		}
 		authIdMap.put(KEY, authMap);
