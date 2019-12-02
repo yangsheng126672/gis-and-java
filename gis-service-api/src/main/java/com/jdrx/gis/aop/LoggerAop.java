@@ -142,10 +142,8 @@ public class LoggerAop {
 				Logger.debug("转换请求参数为JSON字符串失败！参数类型 ： " + e.getMessage());
 			}
 		}
-		synchronized (Logger) {
-			Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "\n"
-					+ JsonFormatUtil.formatJson(reqParams));
-		}
+		Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "\n"
+				+ JsonFormatUtil.formatJson(reqParams));
 		gisTransLog.setReqParams(reqParams);
 
 		ResposeVO resposeVO = (ResposeVO) proceedingJoinPoint.proceed(argObjs);
