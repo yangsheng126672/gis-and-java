@@ -138,13 +138,13 @@ public class LoggerAop {
 				if (isValidJsonObject(argObjs)) {
 					reqParams = JSONObject.toJSONString(argObjs);
 				}
-				synchronized (Logger) {
-					Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "\n"
-							+ JsonFormatUtil.formatJson(reqParams));
-				}
 			} catch (Exception e) {
 				Logger.debug("转换请求参数为JSON字符串失败！参数类型 ： " + e.getMessage());
 			}
+		}
+		synchronized (Logger) {
+			Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "\n"
+					+ JsonFormatUtil.formatJson(reqParams));
 		}
 		gisTransLog.setReqParams(reqParams);
 
