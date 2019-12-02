@@ -359,9 +359,9 @@
         SELECT st_x(#{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler} ) as x,st_y(#{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler}) as y;
     </select>
 
-    <select id="deleteDevExtByDevId" parameterType="java.lang.String" resultType="java.lang.Integer">
+    <update id="deleteDevExtByDevId" parameterType="java.lang.String" >
         UPDATE gis_dev_ext set delete_flag = TRUE  where dev_id = #{devId}
-    </select>
+    </update>
 
     <select id="transformWgs84ToCustom" resultType="java.lang.String">
         SELECT ST_GeomFromText((SELECT   ST_AsText(ST_Transform(geom,#{srid})) AS transformgeom

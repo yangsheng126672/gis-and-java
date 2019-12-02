@@ -23,6 +23,7 @@ import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -624,6 +625,7 @@ public class DataEditorService {
      * @return
      * @throws BizException
      */
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteShareDevByDevId(String devId) throws BizException{
         try {
             gisDevExtPOMapper.deleteDevExtByDevId(devId);
