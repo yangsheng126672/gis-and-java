@@ -2,6 +2,7 @@
 package com.jdrx.gis.aop;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entry.log.GisTransLog;
 import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.gis.dao.log.GisTransLogMapper;
@@ -23,9 +24,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -87,6 +86,28 @@ public class LoggerAop {
 			apiName = apiOperation.value();
 		}
 
+		// 获取登录用户名称
+		Enumeration headerNames = request.getHeaderNames();
+		String loginUserName = "";
+		while (headerNames.hasMoreElements()) {
+			String key = (String) headerNames.nextElement();
+			String value = request.getHeader(key);
+			String[] tokens;
+			String tokenStr = null;
+			if (GISConstants.TRANSPARENT_TOKEN_FEILD.equalsIgnoreCase(key)) {
+				tokens = value.split("\\.");
+				if (Objects.nonNull(tokens) && tokens.length >= 2) {
+					tokenStr = tokens[1]; // 取第二段
+				}
+				byte[] jsonBytes = Base64.getDecoder().decode(tokenStr.getBytes());
+				String jsonStr = new String(jsonBytes);
+				JSONObject jsonObject = JSONObject.parseObject(jsonStr);
+				loginUserName = Objects.nonNull(jsonObject.get(GISConstants.REAL_NAME)) ?
+						String.valueOf(jsonObject.get(GISConstants.REAL_NAME)) : "";
+				break;
+			}
+		}
+
 		// 获取接口请求
 		RequestMapping methodRm = targetMethod.getAnnotation(RequestMapping.class);
 		RequestMapping classRm = proceedingJoinPoint.getTarget().getClass().getAnnotation(RequestMapping.class);
@@ -108,6 +129,7 @@ public class LoggerAop {
 		gisTransLog.setApi(String.valueOf(api));
 		gisTransLog.setCreateAt(new Date());
 		gisTransLog.setTransCode(transCode);
+		gisTransLog.setOperator(loginUserName);
 		gisTransLog.setCost(start.intValue()); // 异常时用
 		gisTransLogLocal.set(gisTransLog);
 		String reqParams = "";

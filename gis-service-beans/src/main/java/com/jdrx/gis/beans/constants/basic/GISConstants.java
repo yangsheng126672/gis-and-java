@@ -13,6 +13,11 @@ public class GISConstants {
 	public static final String TRANSPARENT_TOKEN_FEILD = "authorization";
 
 	/**
+	 * 用户ID
+	 */
+	public static final String REAL_NAME = "realName";
+
+	/**
 	 * 用作空间查询展示设备编号，要想把设备编号放在第一列的话，
 	 * 就需要配置类型模板时，把gis_dev_tpl_attr的field_name字段统一成dev_id,
 	 * 否则动态展示设备属性数据时就不能固定在第一列
