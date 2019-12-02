@@ -694,10 +694,10 @@ public class ExcelProcessorService {
 					ShareDevPO shareDevPOStart = shareDevPOMapper.selectByPrimaryKey(start.getDevId());
 					ShareDevPO shareDevPOEnd = shareDevPOMapper.selectByPrimaryKey(end.getDevId());
 					codeXYPO.setLineCode(lineCode)
-							.setLineStartX(shareDevPOStart.getLat())
-							.setLineStartY(shareDevPOStart.getLng())
-							.setLineEndX(shareDevPOEnd.getLat())
-							.setLineEndY(shareDevPOEnd.getLng())
+							.setLineStartX(shareDevPOStart.getLng())
+							.setLineStartY(shareDevPOStart.getLat())
+							.setLineEndX(shareDevPOEnd.getLng())
+							.setLineEndY(shareDevPOEnd.getLat())
 							.setCode(lineCode);
 					codeXYPOList.add(codeXYPO);
 				}
