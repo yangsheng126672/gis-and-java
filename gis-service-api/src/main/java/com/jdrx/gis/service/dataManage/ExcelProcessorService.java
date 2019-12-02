@@ -351,6 +351,9 @@ public class ExcelProcessorService {
 		// 遍历数据，有非法数据抛出异常信息
 		for (int i = 1; i < total; i ++ ){
 			Row row = sheet.getRow(i);
+			if (Objects.isNull(row)) {
+				throw new BizException("请检查" + sheetName + "的数据格式是否正确，确认是否含有有格式的空单元格，确认是否有误操作导致非可视区单元格有内容等等");
+			}
 			Map<String, Object> shareDevDataMap = Maps.newHashMap();
 			Map<String, String> gisExtDataMap = Maps.newHashMap();
 			StringBuffer lineCode = new StringBuffer();
