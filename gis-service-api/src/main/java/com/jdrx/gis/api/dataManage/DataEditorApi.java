@@ -1,10 +1,7 @@
 package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
-import com.jdrx.gis.beans.dto.dataManage.MapAttrDTO;
-import com.jdrx.gis.beans.dto.dataManage.MovePointDTO;
-import com.jdrx.gis.beans.dto.dataManage.ShareAddedNetsDTO;
-import com.jdrx.gis.beans.dto.dataManage.ShareAddedPointDTO;
+import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.service.dataManage.DataEditorService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
@@ -15,10 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Map;
@@ -49,16 +43,18 @@ public class DataEditorApi {
 
     @ApiOperation(value = "保存新增管点")
     @RequestMapping(value ="saveSharePoint")
-    public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedPointDTO dto) throws Exception{
+    public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedPointDTO dto,
+                                     @RequestHeader(name ="deptPath") String deptPath) throws Exception{
         Logger.debug("api/0/dataEditor/saveSharePoint 保存新增管点");
-        return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto));
+        return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto,deptPath));
     }
 
     @ApiOperation(value = "保存新增管网")
     @RequestMapping(value ="saveShareNets")
-    public ResposeVO saveShareNets(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedNetsDTO dto) throws Exception{
+    public ResposeVO saveShareNets(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedNetsDTO dto,
+                                   @RequestHeader(name ="deptPath") String deptPath) throws Exception{
         Logger.debug("api/0/dataEditor/saveShareNets 保存新增管网");
-        return  ResponseFactory.ok(dataEditorService.saveShareNets(dto));
+        return  ResponseFactory.ok(dataEditorService.saveShareNets(dto,deptPath));
     }
 
     @ApiOperation(value = "获取管线类型")
@@ -104,6 +100,14 @@ public class DataEditorApi {
     public ResposeVO moveSharePointWithLine(@ApiParam(name = "dto", required = true) @RequestBody @Valid MovePointDTO dto) throws Exception{
         Logger.debug("api/0/dataEditor/moveSharePointWithLine 移动管点及关联管线");
         return  ResponseFactory.ok(dataEditorService.moveShareDevPoint(dto));
+    }
+
+    @ApiOperation(value = "连接两点功能")
+    @RequestMapping(value ="connectPointsByDevIds")
+    public ResposeVO connectPointsByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid ConnectPointsDTO dto,
+                                           @RequestHeader(name ="deptPath") String deptPath) throws Exception{
+        Logger.debug("api/0/dataEditor/connectPointsByDevIds 连接两点功能");
+        return  ResponseFactory.ok(dataEditorService.connectPoints(dto,deptPath));
     }
 
     @ApiOperation(value = "根据设备id删除设备")

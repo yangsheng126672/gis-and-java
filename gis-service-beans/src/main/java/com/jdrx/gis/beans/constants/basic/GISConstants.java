@@ -179,4 +179,22 @@ public class GISConstants {
 	public final static String CALIBER_600 = "DN600-DN900管段";
 
 	public final static String CALIBER_900 = "DN900（含）以上管段";
+
+	/********************************管网设备固定几个属性字段**********************/
+
+	public final static String GIS_ATTR_QDBM = "qdbm";
+
+	public final static String GIS_ATTR_ZDBM = "zdbm";
+
+	public final static String GIS_ATTR_CALIBER = "caliber";
+
+	public final static String GIS_ATTR_MATERIAL = "material";
+
+	public final static String GIS_ATTR_DEVID = "dev_id";
+
+	public final static String GIS_ATTR_CODE = "code";
+
+	public final static String GIS_ATTR_NAME = "name";
+
+	public final static String GIS_ATTR_ADDR = "addr";
 }

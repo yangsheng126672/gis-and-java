@@ -668,200 +668,200 @@ public class NetsAnalysisService {
 
     }
 
-    /**
-     * 导出某条爆管记录
-     * @param dto
-     * @return
-     * @throws BizException
-     */
-    public String exportAnalysisResult(ExportValveDTO dto) throws BizException{
-        Long valve_typeid = -1L;
-        OutputStream os = null;
-        String title = null;
-        try {
-            String typeIdDictStr =dictConfig.getValveTypeId();
-            valve_typeid = Long.valueOf(getValByDictString(typeIdDictStr));
-            SXSSFWorkbook workbook;
-            workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
-            if (dto.getName() == null || StringUtils.isEmpty(dto.getName())){
-                title = "爆管详细记录";
-            }else {
-                title = dto.getName();
-            }
-            SXSSFSheet sheet = workbook.createSheet(title);
-            sheet.setDefaultColumnWidth((short) 12); // 设置列宽
-            CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
-            CellStyle style2 = createBodyStyle(workbook);
-            CellStyle style3 = createBodyStyle(workbook);
-            Font font = workbook.createFont();
-            font.setFontHeightInPoints((short) 12);//设置字体大小
-            style3.setFont(font);
-
-            Row row = sheet.createRow(1);
-            List<FieldNameVO> headerList =new ArrayList<>();
-            FieldNameVO tmpVO = new FieldNameVO();
-            tmpVO.setFieldDesc("阀门状态");
-            tmpVO.setFieldName("fmstatu");
-            headerList.add(tmpVO);
-            headerList.addAll(queryDevService.findFieldNamesByTypeID(valve_typeid));
-            if (Objects.isNull(headerList)) {
-                Logger.error("空间查询的表头信息为空");
-                throw new BizException("设备列表的title为空");
-            }
-            for (int i = 0; i < headerList.size(); i++) {
-                FieldNameVO fieldNameVO = headerList.get(i);
-                Cell cell = row.createCell(i);
-                cell.setCellStyle(style);
-                String txt = fieldNameVO.getFieldDesc();
-                XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
-                cell.setCellValue(text);
-            }
-
-            int pageSize = GISConstants.EXPORT_PAGESIZE;
-            int pageTotal = 1;
-            String[] filedNames = headerList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
-
-            //获取设备id
-            List<Long> devIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getValveDevIds())) ;
-            List<Long>faileddevIdList = null;
-            if (!((dto.getFailedDevIds() == null)||(dto.getFailedDevIds().length == 0))){
-                faileddevIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFailedDevIds())) ;
-            }
-
-            int body_i = 2; // body 行索引
-            int pageNum = 1;
-            while (pageTotal-- > 0) {
-                DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
-                DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
-                devIDsForTypeDTO.setTypeId(valve_typeid);
-                devIDsForTypeDTO.setDevIds(devIdList.toArray(new String[devIdList.size()]));
-                devIDsForTypeDTO.setPageSize(pageSize);
-                devIDsForTypeDTO.setPageNum(pageNum);
-                PageVO<SpaceInfoVO> pageVO = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
-                List<SpaceInfoVO> subDevList = pageVO.getData();
-
-                List<SpaceInfoVO> subDevList2 = new ArrayList<>();
-                if (faileddevIdList != null){
-                    devIDsForTypeDTO2.setTypeId(valve_typeid);
-                    devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new String[faileddevIdList.size()]));
-                    devIDsForTypeDTO2.setPageSize(pageSize);
-                    devIDsForTypeDTO2.setPageNum(pageNum);
-                    PageVO<SpaceInfoVO> pageVO2 = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO2);
-                    subDevList2 = pageVO2.getData();
-                }
-
-                if (Objects.nonNull(subDevList)) {
-                    subDevList.stream().map(vo -> {
-                        Object obj = vo.getDataInfo();
-                        if (Objects.isNull(obj)) {
-                            return vo;
-                        }
-                        try {
-                            Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
-                            vo.setDataMap(map);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return vo;
-                    }).collect(Collectors.toList());
-                    //设置第一行  爆管点经纬度
-                    Row xssfRow0 = sheet.createRow(0);
-                    Cell cell1 = xssfRow0.createCell(0);
-                    cell1.setCellValue("爆管点经纬度： "+dto.getPoint()[0]+" , "+dto.getPoint()[1]+" ; 爆管编号："+dto.getLineId());
-                    cell1.setCellStyle(style3);
-                    for (SpaceInfoVO spaceInfoVO : subDevList) {
-                        Map<String, String> map = spaceInfoVO.getDataMap();
-                        if (Objects.isNull(map)) {
-                            continue;
-                        }
-                        Row xssfRow = sheet.createRow(body_i++);
-                        for (int i = 0; i < headerList.size(); i++) {
-                            Cell cell = xssfRow.createCell(i);
-                            XSSFRichTextString text;
-                            FieldNameVO fieldNameVO = headerList.get(i);
-                            String txt = null;
-                            if (Objects.nonNull(fieldNameVO)) {
-                                String fieldName = fieldNameVO.getFieldName();
-                                if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
-                                    txt = spaceInfoVO.getTypeName();
-                                } else {
-                                    txt = map.get(fieldName);
-                                }
-                                if (fieldName.equals("fmstatu")){
-                                    txt = "可关阀门";
-                                }
-                            }
-                            text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
-                            cell.setCellValue(text);
-                            cell.setCellStyle(style2);
-                        }
-                    }
-                }
-                if (Objects.nonNull(subDevList2)) {
-                    subDevList2.stream().map(vo -> {
-                        Object obj = vo.getDataInfo();
-                        if (Objects.isNull(obj)) {
-                            return vo;
-                        }
-                        try {
-                            Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
-                            vo.setDataMap(map);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return vo;
-                    }).collect(Collectors.toList());
-
-                    for (SpaceInfoVO spaceInfoVO : subDevList2) {
-                        Map<String, String> map = spaceInfoVO.getDataMap();
-                        if (Objects.isNull(map)) {
-                            continue;
-                        }
-                        Row xssfRow = sheet.createRow(body_i++);
-                        for (int i = 0; i < headerList.size(); i++) {
-                            Cell cell = xssfRow.createCell(i);
-                            XSSFRichTextString text;
-                            FieldNameVO fieldNameVO = headerList.get(i);
-                            String txt = null;
-                            if (Objects.nonNull(fieldNameVO)) {
-                                String fieldName = fieldNameVO.getFieldName();
-                                if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
-                                    txt = spaceInfoVO.getTypeName();
-                                } else {
-                                    txt = map.get(fieldName);
-                                }
-                                if (fieldName.equals("fmstatu")){
-                                    txt = "关阀失败";
-                                }
-                            }
-                            text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
-                            cell.setCellValue(text);
-                            cell.setCellStyle(style2);
-                        }
-                    }
-                }
-                subDevList.clear();
-                pageNum ++;
-            }
-            String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
-            os = new FileOutputStream(new File(filePath));
-            workbook.write(os);
-            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BizException("导出空间数据信息失败！");
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
+//    /**
+//     * 导出某条爆管记录
+//     * @param dto
+//     * @return
+//     * @throws BizException
+//     */
+//    public String exportAnalysisResult(ExportValveDTO dto) throws BizException{
+//        Long valve_typeid = -1L;
+//        OutputStream os = null;
+//        String title = null;
+//        try {
+//            String typeIdDictStr =dictConfig.getValveTypeId();
+//            valve_typeid = Long.valueOf(getValByDictString(typeIdDictStr));
+//            SXSSFWorkbook workbook;
+//            workbook = new SXSSFWorkbook(1000); // 超过1000写入硬盘
+//            if (dto.getName() == null || StringUtils.isEmpty(dto.getName())){
+//                title = "爆管详细记录";
+//            }else {
+//                title = dto.getName();
+//            }
+//            SXSSFSheet sheet = workbook.createSheet(title);
+//            sheet.setDefaultColumnWidth((short) 12); // 设置列宽
+//            CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
+//            CellStyle style2 = createBodyStyle(workbook);
+//            CellStyle style3 = createBodyStyle(workbook);
+//            Font font = workbook.createFont();
+//            font.setFontHeightInPoints((short) 12);//设置字体大小
+//            style3.setFont(font);
+//
+//            Row row = sheet.createRow(1);
+//            List<FieldNameVO> headerList =new ArrayList<>();
+//            FieldNameVO tmpVO = new FieldNameVO();
+//            tmpVO.setFieldDesc("阀门状态");
+//            tmpVO.setFieldName("fmstatu");
+//            headerList.add(tmpVO);
+//            headerList.addAll(queryDevService.findFieldNamesByTypeID(valve_typeid));
+//            if (Objects.isNull(headerList)) {
+//                Logger.error("空间查询的表头信息为空");
+//                throw new BizException("设备列表的title为空");
+//            }
+//            for (int i = 0; i < headerList.size(); i++) {
+//                FieldNameVO fieldNameVO = headerList.get(i);
+//                Cell cell = row.createCell(i);
+//                cell.setCellStyle(style);
+//                String txt = fieldNameVO.getFieldDesc();
+//                XSSFRichTextString text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+//                cell.setCellValue(text);
+//            }
+//
+//            int pageSize = GISConstants.EXPORT_PAGESIZE;
+//            int pageTotal = 1;
+//            String[] filedNames = headerList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
+//
+//            //获取设备id
+//            List<Long> devIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getValveDevIds())) ;
+//            List<Long>faileddevIdList = null;
+//            if (!((dto.getFailedDevIds() == null)||(dto.getFailedDevIds().length == 0))){
+//                faileddevIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFailedDevIds())) ;
+//            }
+//
+//            int body_i = 2; // body 行索引
+//            int pageNum = 1;
+//            while (pageTotal-- > 0) {
+//                DevIDsForTypeDTO devIDsForTypeDTO = new DevIDsForTypeDTO();
+//                DevIDsForTypeDTO devIDsForTypeDTO2 = new DevIDsForTypeDTO();
+//                devIDsForTypeDTO.setTypeId(valve_typeid);
+//                devIDsForTypeDTO.setDevIds(devIdList.toArray(new String[devIdList.size()]));
+//                devIDsForTypeDTO.setPageSize(pageSize);
+//                devIDsForTypeDTO.setPageNum(pageNum);
+//                PageVO<SpaceInfoVO> pageVO = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO);
+//                List<SpaceInfoVO> subDevList = pageVO.getData();
+//
+//                List<SpaceInfoVO> subDevList2 = new ArrayList<>();
+//                if (faileddevIdList != null){
+//                    devIDsForTypeDTO2.setTypeId(valve_typeid);
+//                    devIDsForTypeDTO2.setDevIds(faileddevIdList.toArray(new String[faileddevIdList.size()]));
+//                    devIDsForTypeDTO2.setPageSize(pageSize);
+//                    devIDsForTypeDTO2.setPageNum(pageNum);
+//                    PageVO<SpaceInfoVO> pageVO2 = queryDevService.findDevListPageByTypeID(devIDsForTypeDTO2);
+//                    subDevList2 = pageVO2.getData();
+//                }
+//
+//                if (Objects.nonNull(subDevList)) {
+//                    subDevList.stream().map(vo -> {
+//                        Object obj = vo.getDataInfo();
+//                        if (Objects.isNull(obj)) {
+//                            return vo;
+//                        }
+//                        try {
+//                            Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+//                            vo.setDataMap(map);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                        return vo;
+//                    }).collect(Collectors.toList());
+//                    //设置第一行  爆管点经纬度
+//                    Row xssfRow0 = sheet.createRow(0);
+//                    Cell cell1 = xssfRow0.createCell(0);
+//                    cell1.setCellValue("爆管点经纬度： "+dto.getPoint()[0]+" , "+dto.getPoint()[1]+" ; 爆管编号："+dto.getLineId());
+//                    cell1.setCellStyle(style3);
+//                    for (SpaceInfoVO spaceInfoVO : subDevList) {
+//                        Map<String, String> map = spaceInfoVO.getDataMap();
+//                        if (Objects.isNull(map)) {
+//                            continue;
+//                        }
+//                        Row xssfRow = sheet.createRow(body_i++);
+//                        for (int i = 0; i < headerList.size(); i++) {
+//                            Cell cell = xssfRow.createCell(i);
+//                            XSSFRichTextString text;
+//                            FieldNameVO fieldNameVO = headerList.get(i);
+//                            String txt = null;
+//                            if (Objects.nonNull(fieldNameVO)) {
+//                                String fieldName = fieldNameVO.getFieldName();
+//                                if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+//                                    txt = spaceInfoVO.getTypeName();
+//                                } else {
+//                                    txt = map.get(fieldName);
+//                                }
+//                                if (fieldName.equals("fmstatu")){
+//                                    txt = "可关阀门";
+//                                }
+//                            }
+//                            text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+//                            cell.setCellValue(text);
+//                            cell.setCellStyle(style2);
+//                        }
+//                    }
+//                }
+//                if (Objects.nonNull(subDevList2)) {
+//                    subDevList2.stream().map(vo -> {
+//                        Object obj = vo.getDataInfo();
+//                        if (Objects.isNull(obj)) {
+//                            return vo;
+//                        }
+//                        try {
+//                            Map<String, String> map = ComUtil.parseDataInfo(obj, filedNames);
+//                            vo.setDataMap(map);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                        return vo;
+//                    }).collect(Collectors.toList());
+//
+//                    for (SpaceInfoVO spaceInfoVO : subDevList2) {
+//                        Map<String, String> map = spaceInfoVO.getDataMap();
+//                        if (Objects.isNull(map)) {
+//                            continue;
+//                        }
+//                        Row xssfRow = sheet.createRow(body_i++);
+//                        for (int i = 0; i < headerList.size(); i++) {
+//                            Cell cell = xssfRow.createCell(i);
+//                            XSSFRichTextString text;
+//                            FieldNameVO fieldNameVO = headerList.get(i);
+//                            String txt = null;
+//                            if (Objects.nonNull(fieldNameVO)) {
+//                                String fieldName = fieldNameVO.getFieldName();
+//                                if (GISConstants.DEV_TYPE_NAME.equals(fieldName)) {
+//                                    txt = spaceInfoVO.getTypeName();
+//                                } else {
+//                                    txt = map.get(fieldName);
+//                                }
+//                                if (fieldName.equals("fmstatu")){
+//                                    txt = "关阀失败";
+//                                }
+//                            }
+//                            text = new XSSFRichTextString(StringUtils.isEmpty(txt) ? "" : txt);
+//                            cell.setCellValue(text);
+//                            cell.setCellStyle(style2);
+//                        }
+//                    }
+//                }
+//                subDevList.clear();
+//                pageNum ++;
+//            }
+//            String filePath = pathConfig.getDownloadPath() + "/" + title + ".xls";
+//            os = new FileOutputStream(new File(filePath));
+//            workbook.write(os);
+//            String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+//            return result;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw new BizException("导出空间数据信息失败！");
+//        } finally {
+//            if (os != null) {
+//                try {
+//                    os.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//    }
 
     /**
      * 导出某条爆管记录
@@ -916,9 +916,9 @@ public class NetsAnalysisService {
             int pageTotal = 1;
             String[] filedNames = headerList.stream().map(FieldNameVO::getFieldName).toArray(String[]::new);
 
-            List<Long> firstdevIdList = new ArrayList<>() ;
-            List<Long>faileddevIdList = new ArrayList<>() ;
-            List<Long>seconddevIdList = new ArrayList<>() ;
+            List<String> firstdevIdList = new ArrayList<>() ;
+            List<String>faileddevIdList = new ArrayList<>() ;
+            List<String>seconddevIdList = new ArrayList<>() ;
 
             if (!((dto.getFirstDevIds() == null)||(dto.getFirstDevIds().length == 0))){
                 firstdevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFirstDevIds()));

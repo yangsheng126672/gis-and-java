@@ -169,7 +169,7 @@
     </trim>
   </insert>
 
-  <select id="getDevIdsByCode" parameterType="string" resultType="long">
+  <select id="getDevIdsByCode" parameterType="string" resultType="string">
     select dev_id from gis_dev_ext gdx where code in
     <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
       #{item}

@@ -101,7 +101,7 @@
                             )
                             <if test="devIds != null and devIds != ''">
                                 and EXISTS (select 1 from
-                                (SELECT regexp_split_to_table(#{devIds, jdbcType=VARCHAR},',') AS dev_id) AS vir where vir.dev_id = sd.id)
+                                (SELECT regexp_split_to_table(#{devIds, jdbcType=VARCHAR},',')::CHAR(12) AS dev_id) AS vir where vir.dev_id = sd.id)
                             </if>
                         ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
                         AND sd.del_flag = 0

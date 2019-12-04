@@ -85,12 +85,12 @@ public class NetsAnalysisApi {
 
     @ApiOperation(value = "导出关阀分析结果")
     @RequestMapping(value ="exportAnalysisiResult" )
-    public ResposeVO exportAnalysisiResult(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExportValveDTO dto) throws Exception{
+    public ResposeVO exportAnalysisiResult(@ApiParam(name = "dto", required = true) @RequestBody @Valid ExportValveRecondDTO dto) throws Exception{
         if (dto == null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }
         Logger.debug("api/0/analysis/exportAnalysisiResult 导出关阀分析结果");
-        return  ResponseFactory.ok(netsAnalysisService.exportAnalysisResult(dto));
+        return  ResponseFactory.ok(netsAnalysisService.exportAnalysisRecond(dto));
     }
 
     @ApiOperation(value = "导出历史关阀分析结果")

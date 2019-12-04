@@ -9,11 +9,13 @@ import com.jdrx.gis.beans.entry.basic.ShareDevPO;
 import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
+import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
@@ -108,9 +110,9 @@ public class DataEditorService {
      * 保存管点及新增管线信息（线上加点）
      * @param dto
      */
-    public Boolean saveAddedSharePoint(ShareAddedPointDTO dto) throws BizException{
+    public Boolean saveAddedSharePoint(ShareAddedPointDTO dto,String deptPath) throws BizException{
         try {
-            if(!savaSharePointOnLine(dto)){
+            if(!savaSharePointOnLine(dto,deptPath)){
                 throw new BizException("保存管点信息失败！");
             }
             return true;
@@ -125,7 +127,7 @@ public class DataEditorService {
      * @param typeId
      * @return
      */
-     public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
+    public List<FieldNameVO> getDevExtByTopPid(Long typeId) throws BizException{
         try {
             List<Long> typeIdList = getAllLineTypeIds();
             Boolean bl = typeIdList.contains(typeId);
@@ -134,10 +136,10 @@ public class DataEditorService {
             Iterator iterator = fieldNameVOS.iterator();
             while (iterator.hasNext()){
                 fieldNameVO = (FieldNameVO) iterator.next();
-                if(fieldNameVO.getFieldName().equals("dev_id") || fieldNameVO.getFieldName().equals("geom")){
+                if(fieldNameVO.getFieldName().equals(GISConstants.GIS_ATTR_DEVID) || fieldNameVO.getFieldName().equals("geom")){
                     iterator.remove();
                 }
-                if(bl && fieldNameVO.getFieldName().equals("code")){
+                if(bl && fieldNameVO.getFieldName().equals(GISConstants.GIS_ATTR_CODE)){
                     iterator.remove();
                 }
 
@@ -157,8 +159,10 @@ public class DataEditorService {
      * @param dto
      * @return
      */
-    public Boolean savaSharePointOnLine(ShareAddedPointDTO dto){
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean savaSharePointOnLine(ShareAddedPointDTO dto,String deptPath){
         try {
+            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             Map<String,Object> map = dto.getMap();
             Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
             String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
@@ -167,7 +171,7 @@ public class DataEditorService {
             String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
             String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
 
-            map.put("dev_id",devId);
+            map.put(GISConstants.GIS_ATTR_DEVID,devId);
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
@@ -175,20 +179,21 @@ public class DataEditorService {
 
             GISDevExtPO po = new GISDevExtPO();
             po.setDevId(devId);
-            po.setCode(map.get("code").toString());
-            po.setName(map.get("name").toString());
+            po.setCode(map.get(GISConstants.GIS_ATTR_CODE).toString());
+            po.setName(map.get(GISConstants.GIS_ATTR_NAME).toString());
             po.setGeom(transformGeom);
             po.setDataInfo(jsonObject);
             po.setTplTypeId(dto.getTypeId());
+            po.setBelongTo(deptId);
 
             ShareDevPO shareDevPO = new ShareDevPO();
             shareDevPO.setId(devId);
-            shareDevPO.setName(map.get("name").toString());
+            shareDevPO.setName(map.get(GISConstants.GIS_ATTR_NAME).toString());
             shareDevPO.setTypeId(dto.getTypeId());
             shareDevPO.setLng(String.format("%.8f",dto.getX()));
             shareDevPO.setLat(String.format("%.8f",dto.getY()));
-            if (map.containsKey("addr")){
-                shareDevPO.setAddr(map.get("addr").toString());
+            if (map.containsKey(GISConstants.GIS_ATTR_ADDR)){
+                shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
             }
 
             //保存管点信息
@@ -222,14 +227,14 @@ public class DataEditorService {
             JSONObject jb1 = JSONObject.parseObject(gisDevExtPOLine1.getDataInfo().toString());
             Map<String,Object> map1 = (Map)jb1;
             String lineCode1 = null;
-            if (map1.containsKey("qdbm")){
-                lineCode1 = map1.get("qdbm").toString()+"-"+po.getCode();
-                map1.replace("zdbm",map1.get("zdbm"),po.getCode());
-                if (map1.containsKey("code")){
-                    map1.replace("code",map1.get("code"),lineCode1);
+            if (map1.containsKey(GISConstants.GIS_ATTR_QDBM)){
+                lineCode1 = map1.get(GISConstants.GIS_ATTR_QDBM).toString()+"-"+po.getCode();
+                map1.replace(GISConstants.GIS_ATTR_ZDBM,map1.get(GISConstants.GIS_ATTR_ZDBM),po.getCode());
+                if (map1.containsKey(GISConstants.GIS_ATTR_CODE)){
+                    map1.replace(GISConstants.GIS_ATTR_CODE,map1.get(GISConstants.GIS_ATTR_CODE),lineCode1);
                 }
             }
-            map1.replace("dev_id",map1.get("dev_id"),devIdLine1);
+            map1.replace(GISConstants.GIS_ATTR_DEVID,map1.get(GISConstants.GIS_ATTR_DEVID),devIdLine1);
             String jsonStr1 = JSONObject.toJSONString(map1);
             PGobject jsonObject1 = new PGobject();
             jsonObject1.setValue(jsonStr1);
@@ -238,14 +243,14 @@ public class DataEditorService {
             JSONObject jb2 = JSONObject.parseObject(gisDevExtPOLine2.getDataInfo().toString());
             Map<String,Object> map2 = (Map)jb2;
             String lineCode2 = null;
-            if (map2.containsKey("zdbm")){
-                lineCode2 = po.getCode()+"-"+map2.get("zdbm").toString();
-                map2.replace("qdbm",map2.get("qdbm"),po.getCode());
-                if (map2.containsKey("code")){
-                    map2.replace("code",map2.get("code"),lineCode2);
+            if (map2.containsKey(GISConstants.GIS_ATTR_ZDBM)){
+                lineCode2 = po.getCode()+"-"+map2.get(GISConstants.GIS_ATTR_ZDBM).toString();
+                map2.replace(GISConstants.GIS_ATTR_QDBM,map2.get(GISConstants.GIS_ATTR_QDBM),po.getCode());
+                if (map2.containsKey(GISConstants.GIS_ATTR_CODE)){
+                    map2.replace(GISConstants.GIS_ATTR_CODE,map2.get(GISConstants.GIS_ATTR_CODE),lineCode2);
                 }
             }
-            map2.replace("dev_id",map2.get("dev_id"),devIdLine2);
+            map2.replace(GISConstants.GIS_ATTR_DEVID,map2.get(GISConstants.GIS_ATTR_DEVID),devIdLine2);
             String jsonStr2 = JSONObject.toJSONString(map2);
             PGobject jsonObject2 = new PGobject();
             jsonObject2.setValue(jsonStr2);
@@ -262,8 +267,10 @@ public class DataEditorService {
             }
             gisDevExtPOLine2.setGeom(lineGeom2);
             gisDevExtPOLine2.setDataInfo(jsonObject2);
-            gisDevExtPOLine1.setId(null);
             gisDevExtPOLine2.setId(null);
+            gisDevExtPOLine1.setId(null);
+            gisDevExtPOLine1.setBelongTo(deptId);
+            gisDevExtPOLine2.setBelongTo(deptId);
 
 
             //构造新的管线--share_dev
@@ -301,9 +308,10 @@ public class DataEditorService {
      * @param dto
      * @return
      */
-    public Boolean saveShareNets(ShareAddedNetsDTO dto) throws BizException{
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveShareNets(ShareAddedNetsDTO dto,String deptPath) throws BizException{
         try {
-            if((!saveSharePoint(dto.getPointList())) ||(!savaShareLine(dto.getLineList()))){
+            if((!saveSharePoint(dto.getPointList(),deptPath)) ||(!savaShareLine(dto.getLineList(),deptPath))){
                 return false;
             }else {
                 return true;
@@ -318,11 +326,12 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean saveSharePoint(List<SharePointDTO> list) throws BizException{
+    public Boolean saveSharePoint(List<SharePointDTO> list,String deptPath) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
         try {
+            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             for(SharePointDTO dto:list){
                 Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
                 String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
@@ -339,11 +348,12 @@ public class DataEditorService {
 
                 GISDevExtPO po = new GISDevExtPO();
                 po.setDevId(devId);
-                po.setCode(dto.getMapAttr().get("code").toString());
-                po.setName(dto.getMapAttr().get("name").toString());
+                po.setCode(dto.getMapAttr().get(GISConstants.GIS_ATTR_CODE).toString());
+                po.setName(dto.getMapAttr().get(GISConstants.GIS_ATTR_NAME).toString());
                 po.setGeom(transformGeom);
                 po.setDataInfo(jsonObject);
                 po.setTplTypeId(dto.getTypeId());
+                po.setBelongTo(deptId);
 
                 ShareDevPO shareDevPO = new ShareDevPO();
                 shareDevPO.setId(po.getDevId());
@@ -351,8 +361,8 @@ public class DataEditorService {
                 shareDevPO.setTypeId(po.getTplTypeId());
                 shareDevPO.setLng(String.format("%.8f",pointVO.getX()));
                 shareDevPO.setLat(String.format("%.8f",pointVO.getY()));
-                if(dto.getMapAttr().containsKey("dlm")){
-                    shareDevPO.setAddr(dto.getMapAttr().get("dlm").toString());
+                if(dto.getMapAttr().containsKey(GISConstants.GIS_ATTR_ADDR)){
+                    shareDevPO.setAddr(dto.getMapAttr().get(GISConstants.GIS_ATTR_ADDR).toString());
                 }
 
                 gisDevExtPOMapper.insertSelective(po);
@@ -373,11 +383,12 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean savaShareLine(List<ShareLineDTO> list) throws BizException{
+    public Boolean savaShareLine(List<ShareLineDTO> list,String deptPath) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
         try {
+            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             for (ShareLineDTO dto:list){
                 GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getQdbm());
                 GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getZdbm());
@@ -405,6 +416,7 @@ public class DataEditorService {
                 gisDevExtPO.setTplTypeId(dto.getTypeId());
                 gisDevExtPO.setDataInfo(jsonObject);
                 gisDevExtPO.setGeom(transformGeomStr);
+                gisDevExtPO.setBelongTo(deptId);
 
                 ShareDevPO shareDevPO = new ShareDevPO();
                 shareDevPO.setId(gisDevExtPO.getDevId());
@@ -452,10 +464,10 @@ public class DataEditorService {
     public Boolean updateGISDevExtAttr(Map<String,Object> map) throws BizException{
         try {
             String code = null;
-            if(!map.containsKey("code")){
-                code = map.get("qdbm").toString()+"-"+map.get("zdbm").toString();
+            if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
+                code = map.get(GISConstants.GIS_ATTR_QDBM).toString()+"-"+map.get(GISConstants.GIS_ATTR_ZDBM).toString();
             }else {
-                code = map.get("code").toString();
+                code = map.get(GISConstants.GIS_ATTR_CODE).toString();
             }
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByCode(code);
             if(gisDevExtPO == null){
@@ -466,13 +478,13 @@ public class DataEditorService {
             List<Long> list = shareDevTypePOMapper.getAllTypeIdByTopId(Long.valueOf(dictDetailPOS.get(0).getVal()));
             //判断是否是线类型
             if(list.contains(gisDevExtPO.getTplTypeId())){
-                if (!(Integer.parseInt(map.get("caliber").toString()) == gisDevExtPO.getCaliber())){
-                    gisDevExtPO.setCaliber(Integer.parseInt(map.get("caliber").toString()));
-                    String name = getNameByCaliber(Integer.parseInt(map.get("caliber").toString()));
+                if (!(Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()) == gisDevExtPO.getCaliber())){
+                    gisDevExtPO.setCaliber(Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
+                    String name = getNameByCaliber(Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
                     gisDevExtPO.setName(name);
                 }
-                if (!map.get("material").toString().equals(gisDevExtPO.getMaterial())){
-                    gisDevExtPO.setMaterial(map.get("material").toString());
+                if (!map.get(GISConstants.GIS_ATTR_MATERIAL).toString().equals(gisDevExtPO.getMaterial())){
+                    gisDevExtPO.setMaterial(map.get(GISConstants.GIS_ATTR_MATERIAL).toString());
                 }
                 //判断类型是否改变
                 if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
@@ -481,7 +493,7 @@ public class DataEditorService {
             }else {
                 //判断类型是否改变
                 if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
-                    gisDevExtPO.setName(map.get("name").toString());
+                    gisDevExtPO.setName(map.get(GISConstants.GIS_ATTR_NAME).toString());
                     gisDevExtPO.setTplTypeId(Long.valueOf(map.get("typeId").toString()));
                 }
 
@@ -539,6 +551,7 @@ public class DataEditorService {
      * @return
      * @throws BizException
      */
+    @Transactional(rollbackFor = Exception.class)
     public Boolean moveShareDevPoint(MovePointDTO dto)throws BizException{
         try {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(dto.getDevId());
@@ -560,13 +573,13 @@ public class DataEditorService {
                 String lineGeom = po.getGeom();
                 String lineGeomTmp = null;
                 String lineGeomSrid = null;
-                if((map.containsKey("qdbm")) && (map.containsKey("qdbm"))){
-                    if (map.get("qdbm").equals(gisDevExtPO.getCode())){
+                if((map.containsKey(GISConstants.GIS_ATTR_QDBM)) && (map.containsKey(GISConstants.GIS_ATTR_QDBM))){
+                    if (map.get(GISConstants.GIS_ATTR_QDBM).equals(gisDevExtPO.getCode())){
                         lineGeomTmp = "LINESTRING("+pointVO.getX()+" "+pointVO.getY()+lineGeom.substring(lineGeom.indexOf(","));
                         lineGeomSrid = gisDevExtPOMapper.addGeomWithSrid(lineGeomTmp,Integer.parseInt(srid));
                         po.setGeom(lineGeomSrid);
                     }
-                    if (map.get("zdbm").equals(gisDevExtPO.getCode())){
+                    if (map.get(GISConstants.GIS_ATTR_ZDBM).equals(gisDevExtPO.getCode())){
                         lineGeomTmp = lineGeom.substring(0,lineGeom.indexOf(",")+1)+pointVO.getX()+" "+pointVO.getY()+")";
                         lineGeomSrid = gisDevExtPOMapper.addGeomWithSrid(lineGeomTmp,Integer.parseInt(srid));
                         po.setGeom(lineGeomSrid);
@@ -580,6 +593,71 @@ public class DataEditorService {
             Logger.error("移动管点失败！"+dto.toString());
             throw new BizException("移动管点失败！");
         }
+    }
+
+    /**
+     * 两点连接
+     * @param dto
+     * @return
+     * @throws BizException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean connectPoints(ConnectPointsDTO dto,String deptPath)throws BizException {
+        try {
+            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+            List<String> devIdStr = dto.getDevIds();
+            if(2 == devIdStr.size()){
+                GISDevExtPO firstPointPO = gisDevExtPOMapper.getDevExtByDevId(devIdStr.get(0));
+                GISDevExtPO secondPointPO = gisDevExtPOMapper.getDevExtByDevId(devIdStr.get(1));
+
+                if (!(firstPointPO == null ||secondPointPO == null)) {
+                    PointVO firstPointVO = gisDevExtPOMapper.getPointXYFromGeom(firstPointPO.getGeom());
+                    PointVO secondPointVO = gisDevExtPOMapper.getPointXYFromGeom(secondPointPO.getGeom());
+
+                    String srid = detailService.findDetailsByTypeVal(dictConfig.getWaterPipeSrid()).get(0).getVal();
+                    String geom = "LINESTRING(" + firstPointVO.getX() + " " + firstPointVO.getY() + "," + secondPointVO.getX() + " " + secondPointVO.getY() + ")";
+                    String transformGeom = gisDevExtPOMapper.addGeomWithSrid(geom,Integer.parseInt(srid));
+                    Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
+                    String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
+
+                    Map<String,Object> mapAttr = dto.getMapAttr();
+                    mapAttr.put(GISConstants.GIS_ATTR_DEVID,devId);
+                    String jsonStr = JSONObject.toJSONString(mapAttr);
+                    PGobject jsonObject = new PGobject();
+                    jsonObject.setValue(jsonStr);
+                    jsonObject.setType("jsonb");
+
+                    GISDevExtPO gisDevExtPO = new GISDevExtPO();
+                    gisDevExtPO.setDevId(devId);
+                    gisDevExtPO.setCode(dto.getQdbm()+"-"+dto.getZdbm());
+                    gisDevExtPO.setTplTypeId(dto.getTypeId());
+                    gisDevExtPO.setCaliber(dto.getCaliber());
+                    gisDevExtPO.setMaterial(dto.getMaterial());
+                    gisDevExtPO.setGeom(transformGeom);
+                    gisDevExtPO.setDataInfo(jsonObject);
+                    gisDevExtPO.setBelongTo(deptId);
+
+                    ShareDevPO shareDevPO = new ShareDevPO();
+                    shareDevPO.setId(devId);
+                    shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
+                    shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
+
+                    gisDevExtPOMapper.insertSelective(gisDevExtPO);
+                    shareDevPOMapper.insertSelective(shareDevPO);
+
+                }
+
+            }else {
+                Logger.error("两点连接点位个数不对,当前点位个数为："+devIdStr.size());
+                throw new BizException("两点连接点位个数不对!");
+            }
+
+
+        }catch (Exception e){
+            Logger.error("两点连接失败！"+e.getMessage());
+            throw new BizException("两点连接失败!");
+        }
+        return true;
     }
 
     /**
@@ -625,7 +703,6 @@ public class DataEditorService {
      * @return
      * @throws BizException
      */
-    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteShareDevByDevId(String devId) throws BizException{
         try {
             gisDevExtPOMapper.deleteDevExtByDevId(devId);
