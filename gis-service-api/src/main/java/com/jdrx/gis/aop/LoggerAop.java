@@ -3,7 +3,7 @@ package com.jdrx.gis.aop;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.entry.log.GisTransLog;
+import com.jdrx.gis.beans.entity.log.GisTransLog;
 import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.gis.dao.log.GisTransLogMapper;
 import com.jdrx.gis.util.HttpUtil;

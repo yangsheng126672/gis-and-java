@@ -2,7 +2,7 @@ package com.jdrx.gis.dao.analysis;
 
 
 import com.jdrx.gis.beans.dto.analysis.RecondParamasDTO;
-import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisPO;
+import com.jdrx.gis.beans.entity.analysis.GisPipeAnalysisPO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.entry.user;
+package com.jdrx.gis.beans.entity.user;
 
 import lombok.Data;
 import lombok.ToString;

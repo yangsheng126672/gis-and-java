@@ -1,7 +1,7 @@
 package com.jdrx.gis.dao.basic;
 
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
-import com.jdrx.gis.beans.entry.basic.MeasurementPO;
+import com.jdrx.gis.beans.entity.basic.MeasurementPO;
 
 import java.util.List;
 

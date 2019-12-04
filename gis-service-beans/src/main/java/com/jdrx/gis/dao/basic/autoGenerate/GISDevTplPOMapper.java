@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.basic.autoGenerate;
 
-import com.jdrx.gis.beans.entry.basic.GISDevTplPO;
+import com.jdrx.gis.beans.entity.basic.GISDevTplPO;
 
 public interface GISDevTplPOMapper {
 

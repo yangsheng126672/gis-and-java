@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.analysis;
 
-import com.jdrx.gis.beans.entry.analysis.GisPipeAnalysisValvePO;
+import com.jdrx.gis.beans.entity.analysis.GisPipeAnalysisValvePO;
 import java.util.List;
 
 public interface GisPipeAnalysisValvePOMapper {

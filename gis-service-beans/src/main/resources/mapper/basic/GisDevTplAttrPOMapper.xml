@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper">
-    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
         <id column="id" jdbcType="BIGINT" property="id" />
         <result column="tpl_id" jdbcType="BIGINT" property="tplId" />
         <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc" />
@@ -26,7 +26,7 @@
         from gis_dev_tpl_attr
         where id = #{id,jdbcType=BIGINT}
     </select>
-    <insert id="insert" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
+    <insert id="insert" parameterType="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
         insert into gis_dev_tpl_attr (id, tpl_id, field_desc,
           field_name, data_type, delete_flag,
           create_by, create_at, update_by,
@@ -36,7 +36,7 @@
            #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR},
            #{updateAt,jdbcType=TIMESTAMP}, #{idx,jdbcType=SMALLINT}, #{fill,jdbcType=BIT},#{edit,jdbcType=BIT})
   </insert>
-    <insert id="insertSelective" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
+    <insert id="insertSelective" parameterType="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
         insert into gis_dev_tpl_attr
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -121,7 +121,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
+    <update id="updateByPrimaryKeySelective" parameterType="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
         update gis_dev_tpl_attr
         <set>
             <if test="tplId != null">
@@ -163,7 +163,7 @@
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO">
+    <update id="updateByPrimaryKey" parameterType="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
         update gis_dev_tpl_attr
         set tpl_id = #{tplId,jdbcType=BIGINT},
             field_desc = #{fieldDesc,jdbcType=VARCHAR},

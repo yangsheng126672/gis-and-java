@@ -1,30 +1,30 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entity.basic;
 
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-public class ShareDevTypePO {
+public class DictDetailPO {
     /**
      * 主键
      */
     private Long id;
 
     /**
-     * 设备类型名称
+     * 类型ID
+     */
+    private Long typeId;
+
+    /**
+     * 名称
      */
     private String name;
 
     /**
-     * 名称对应的值
+     * 值
      */
     private String val;
-
-    /**
-     * 父ID
-     */
-    private Long pId;
 
     /**
      * 平台编码
@@ -32,14 +32,9 @@ public class ShareDevTypePO {
     private String platformCode;
 
     /**
-     * 枝干还是叶子，1-枝干，2-叶子
-     */
-    private Short limbLeaf;
-
-    /**
      * 是否删除
      */
-    private Short delFlag;
+    private Boolean deleteFlag;
 
     /**
      * 创建人
@@ -60,4 +55,5 @@ public class ShareDevTypePO {
      * 修改时间
      */
     private Date updateAt;
+
 }

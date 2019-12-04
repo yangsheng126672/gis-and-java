@@ -1,9 +1,9 @@
 package com.jdrx.gis.dao.basic;
 
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
-import com.jdrx.gis.beans.entry.basic.CodeXYPO;
-import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entry.query.PipeLengthPO;
+import com.jdrx.gis.beans.entity.basic.CodeXYPO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;

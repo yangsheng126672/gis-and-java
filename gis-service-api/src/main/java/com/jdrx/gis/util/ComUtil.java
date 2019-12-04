@@ -9,7 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jdrx.gis.beans.constants.basic.EPGDataTypeCategory;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import okhttp3.*;
 import org.postgresql.util.PGobject;

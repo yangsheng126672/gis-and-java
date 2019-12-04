@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.basic.autoGenerate;
 
-import com.jdrx.gis.beans.entry.basic.GISTplTypePO;
+import com.jdrx.gis.beans.entity.basic.GISTplTypePO;
 
 public interface GISTplTypePOMapper {
 

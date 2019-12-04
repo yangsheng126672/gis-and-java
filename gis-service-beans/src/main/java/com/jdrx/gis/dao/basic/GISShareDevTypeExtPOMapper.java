@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.basic;
 
-import com.jdrx.gis.beans.entry.basic.GISShareDevTypeExtPO;
+import com.jdrx.gis.beans.entity.basic.GISShareDevTypeExtPO;
 
 public interface GISShareDevTypeExtPOMapper {
 

@@ -1,22 +1,27 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entity.analysis;
 
 import java.util.Date;
 
-public class GISTplTypePO {
+public class GisPipeAnalysisValvePO {
     /**
-     * 主键
+     * null
      */
     private Long id;
 
     /**
-     * 模板ID
+     * 关联爆管记录id
      */
-    private Long tplId;
+    private Long rid;
 
     /**
-     * 设备类型ID
+     * 一次关阀列表
      */
-    private Long typeId;
+    private String valveFirst;
+
+    /**
+     * 关阀失败阀门
+     */
+    private String valveFailed;
 
     /**
      * 是否删除
@@ -43,6 +48,11 @@ public class GISTplTypePO {
      */
     private Date updateAt;
 
+    /**
+     * 二次关阀列表
+     */
+    private String valveSecond;
+
     public Long getId() {
         return id;
     }
@@ -51,20 +61,28 @@ public class GISTplTypePO {
         this.id = id;
     }
 
-    public Long getTplId() {
-        return tplId;
+    public Long getRid() {
+        return rid;
     }
 
-    public void setTplId(Long tplId) {
-        this.tplId = tplId;
+    public void setRid(Long rid) {
+        this.rid = rid;
     }
 
-    public Long getTypeId() {
-        return typeId;
+    public String getValveFirst() {
+        return valveFirst;
     }
 
-    public void setTypeId(Long typeId) {
-        this.typeId = typeId;
+    public void setValveFirst(String valveFirst) {
+        this.valveFirst = valveFirst == null ? null : valveFirst.trim();
+    }
+
+    public String getValveFailed() {
+        return valveFailed;
+    }
+
+    public void setValveFailed(String valveFailed) {
+        this.valveFailed = valveFailed == null ? null : valveFailed.trim();
     }
 
     public Boolean getDeleteFlag() {
@@ -105,5 +123,13 @@ public class GISTplTypePO {
 
     public void setUpdateAt(Date updateAt) {
         this.updateAt = updateAt;
+    }
+
+    public String getValveSecond() {
+        return valveSecond;
+    }
+
+    public void setValveSecond(String valveSecond) {
+        this.valveSecond = valveSecond == null ? null : valveSecond.trim();
     }
 }

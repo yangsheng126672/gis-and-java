@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.jdrx.gis.dao.query.DevQueryDAO">
-    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entry.query.SpaceInfTotalPO">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entity.query.SpaceInfTotalPO">
         <result column="coverageName" property="coverageName" jdbcType="VARCHAR"/>
         <result column="devNum" property="number" jdbcType="INTEGER"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.entry.basic.ShareDevTypePO">
+    <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.entity.basic.ShareDevTypePO">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="val" jdbcType="VARCHAR" property="val"/>
@@ -39,7 +39,7 @@
         <result column="num" jdbcType="VARCHAR" property="num"/>
     </resultMap>
 
-    <resultMap id="BaseResultMap6" type="com.jdrx.gis.beans.entry.query.SpaceInfTotalPO">
+    <resultMap id="BaseResultMap6" type="com.jdrx.gis.beans.entity.query.SpaceInfTotalPO">
         <result column="coverageName" jdbcType="VARCHAR" property="coverageName"/>
         <result column="number" jdbcType="BIGINT" property="number"/>
         <result column="id" jdbcType="BIGINT" property="id"/>

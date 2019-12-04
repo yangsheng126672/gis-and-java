@@ -3,7 +3,7 @@ package com.jdrx.gis.service.basic;
 import com.jdrx.gis.beans.dto.basic.CriteriaDTO;
 import com.jdrx.gis.beans.dto.basic.CriteriaQueryDTO;
 import com.jdrx.gis.beans.dto.query.CriteriaWithDataTypeCategoryCodeDTO;
-import com.jdrx.gis.beans.entry.basic.GisAttrConditionRecord;
+import com.jdrx.gis.beans.entity.basic.GisAttrConditionRecord;
 import com.jdrx.gis.dao.basic.GisAttrConditionRecordMapper;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;

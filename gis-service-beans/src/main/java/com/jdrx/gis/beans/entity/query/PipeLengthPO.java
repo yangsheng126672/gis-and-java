@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.entry.query;
+package com.jdrx.gis.beans.entity.query;
 
 import lombok.Data;
 import lombok.ToString;

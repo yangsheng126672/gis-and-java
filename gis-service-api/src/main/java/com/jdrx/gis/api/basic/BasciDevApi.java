@@ -3,7 +3,7 @@ package com.jdrx.gis.api.basic;
 import com.jdrx.gis.beans.dto.base.KeyWordDTO;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
-import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;

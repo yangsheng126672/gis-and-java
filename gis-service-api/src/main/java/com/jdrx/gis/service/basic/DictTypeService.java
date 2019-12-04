@@ -4,7 +4,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.dto.basic.DictTypeDTO;
 import com.jdrx.gis.beans.dto.basic.DictTypeQueryDTO;
-import com.jdrx.gis.beans.entry.basic.DictTypePO;
+import com.jdrx.gis.beans.entity.basic.DictTypePO;
 import com.jdrx.gis.beans.vo.basic.DictTypeVO;
 import com.jdrx.gis.dao.basic.DictTypePOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;

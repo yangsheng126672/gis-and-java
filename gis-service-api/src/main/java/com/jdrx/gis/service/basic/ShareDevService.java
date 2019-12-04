@@ -1,6 +1,6 @@
 package com.jdrx.gis.service.basic;
 
-import com.jdrx.gis.beans.entry.basic.ShareDevPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevPO;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;

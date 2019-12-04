@@ -4,7 +4,7 @@ import com.jdrx.gis.beans.dto.base.InsertDTO;
 import com.jdrx.gis.beans.dto.base.UpdateDTO;
 import com.jdrx.gis.beans.dto.basic.DictDetailDTO;
 import com.jdrx.gis.beans.dto.basic.DictQueryByValDTO;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.basic.DictDetailVO;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;

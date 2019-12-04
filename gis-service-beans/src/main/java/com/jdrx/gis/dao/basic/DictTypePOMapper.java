@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.basic;
 
-import com.jdrx.gis.beans.entry.basic.DictTypePO;
+import com.jdrx.gis.beans.entity.basic.DictTypePO;
 
 import java.util.List;
 

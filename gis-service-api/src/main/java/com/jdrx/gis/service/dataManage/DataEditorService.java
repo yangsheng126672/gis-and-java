@@ -3,13 +3,12 @@ package com.jdrx.gis.service.dataManage;
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.*;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
-import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entry.basic.ShareDevPO;
-import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
-import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
@@ -271,7 +270,6 @@ public class DataEditorService {
             gisDevExtPOLine1.setId(null);
             gisDevExtPOLine1.setBelongTo(deptId);
             gisDevExtPOLine2.setBelongTo(deptId);
-
 
             //构造新的管线--share_dev
             ShareDevPO shareDevPOLine = shareDevPOMapper.selectByPrimaryKey(dto.getLineDevId());

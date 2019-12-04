@@ -1,17 +1,22 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entity.basic;
 
 import java.util.Date;
 
-public class GISDevTplPO {
+public class GISTplTypePO {
     /**
      * 主键
      */
     private Long id;
 
     /**
-     * 模板名称
+     * 模板ID
      */
-    private String name;
+    private Long tplId;
+
+    /**
+     * 设备类型ID
+     */
+    private Long typeId;
 
     /**
      * 是否删除
@@ -46,12 +51,20 @@ public class GISDevTplPO {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Long getTplId() {
+        return tplId;
     }
 
-    public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+    public void setTplId(Long tplId) {
+        this.tplId = tplId;
+    }
+
+    public Long getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(Long typeId) {
+        this.typeId = typeId;
     }
 
     public Boolean getDeleteFlag() {

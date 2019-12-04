@@ -1,17 +1,13 @@
 package com.jdrx.gis.service.analysis;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.*;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
-import com.jdrx.gis.beans.entry.analysis.*;
+import com.jdrx.gis.beans.entity.analysis.*;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
 import com.jdrx.gis.beans.vo.analysis.RecondValveVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
@@ -41,7 +37,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
 import org.slf4j.LoggerFactory;

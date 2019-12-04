@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.entry.log;
+package com.jdrx.gis.beans.entity.log;
 
 import java.util.Date;
 

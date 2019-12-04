@@ -3,7 +3,7 @@ package com.jdrx.gis.service.basic;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.dto.basic.DictDetailDTO;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.vo.basic.DictDetailVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.DictDetailPOMapper;

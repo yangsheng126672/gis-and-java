@@ -6,7 +6,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ComUtil;

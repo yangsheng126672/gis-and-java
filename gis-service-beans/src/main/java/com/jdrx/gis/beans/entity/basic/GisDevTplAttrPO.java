@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entity.basic;
 
 import java.util.Date;
 

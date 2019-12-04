@@ -1,32 +1,17 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entity.basic;
 
 import java.util.Date;
 
-public class GisAttrConditionRecord {
+public class GISShareDevTypeExtPO {
     /**
      * 主键
      */
     private Long id;
 
     /**
-     * 可执行的条件
+     * 排序
      */
-    private String criteriaExe;
-
-    /**
-     * 类型ID
-     */
-    private Long typeId;
-
-    /**
-     * 模板的类型ID
-     */
-    private Long tplId;
-
-    /**
-     * 中文表述的筛选条件
-     */
-    private String criteria;
+    private Integer sortBy;
 
     /**
      * 是否删除
@@ -61,36 +46,12 @@ public class GisAttrConditionRecord {
         this.id = id;
     }
 
-    public String getCriteriaExe() {
-        return criteriaExe;
+    public Integer getSortBy() {
+        return sortBy;
     }
 
-    public void setCriteriaExe(String criteriaExe) {
-        this.criteriaExe = criteriaExe == null ? null : criteriaExe.trim();
-    }
-
-    public Long getTypeId() {
-        return typeId;
-    }
-
-    public void setTypeId(Long typeId) {
-        this.typeId = typeId;
-    }
-
-    public Long getTplId() {
-        return tplId;
-    }
-
-    public void setTplId(Long tplId) {
-        this.tplId = tplId;
-    }
-
-    public String getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(String criteria) {
-        this.criteria = criteria == null ? null : criteria.trim();
+    public void setSortBy(Integer sortBy) {
+        this.sortBy = sortBy;
     }
 
     public Boolean getDeleteFlag() {

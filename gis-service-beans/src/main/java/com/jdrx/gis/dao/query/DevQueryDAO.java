@@ -1,8 +1,8 @@
 package com.jdrx.gis.dao.query;
 
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
-import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
-import com.jdrx.gis.beans.entry.query.SpaceInfTotalPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.query.SpaceInfTotalPO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.beans.vo.query.SpaceInfoVO;
 import org.apache.ibatis.annotations.Param;

@@ -1,41 +1,35 @@
-package com.jdrx.gis.beans.entry.analysis;
+package com.jdrx.gis.beans.entity.basic;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-public class GisPipeAnalysisPO {
+public class DictTypePO {
     /**
-     * null
+     * 主键
      */
     private Long id;
 
     /**
-     * 爆管编号
+     * 类型名称
      */
     private String name;
 
     /**
-     * 爆管编号
+     * 名称对应的值
      */
-    private String code;
+    private String val;
 
     /**
-     * 经纬
+     * 父ID
      */
-    private BigDecimal x;
+    private Long pId;
 
     /**
-     * 纬度
+     * 平台编码
      */
-    private BigDecimal y;
-
-    /**
-     * 爆管影响范围空间信息
-     */
-    private Object area;
+    private String platformCode;
 
     /**
      * 是否删除
@@ -61,5 +55,4 @@ public class GisPipeAnalysisPO {
      * 修改时间
      */
     private Date updateAt;
-
 }

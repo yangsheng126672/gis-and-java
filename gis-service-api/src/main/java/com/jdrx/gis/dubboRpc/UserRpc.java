@@ -1,7 +1,7 @@
 package com.jdrx.gis.dubboRpc;
 
 import com.google.common.collect.Maps;
-import com.jdrx.gis.beans.entry.user.SysOcpUserPo;
+import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.platform.common.support.gateway.GwConstants;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;

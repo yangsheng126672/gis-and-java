@@ -3,7 +3,7 @@ package com.jdrx.gis.service.basic;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.dto.query.DevIDsAndTypeDTO;
-import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;

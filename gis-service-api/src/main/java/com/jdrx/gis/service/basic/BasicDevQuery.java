@@ -6,10 +6,10 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
-import com.jdrx.gis.beans.entry.basic.DictDetailPO;
-import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entry.basic.MeasurementPO;
-import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.MeasurementPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.InspectionVO;
@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.jdrx.gis.util.ComUtil.getChildNodes;
 

@@ -2,8 +2,8 @@ package com.jdrx.gis.service.basic;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.jdrx.gis.beans.entry.basic.CodeXYPO;
-import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.CodeXYPO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;

@@ -1,10 +1,9 @@
-package com.jdrx.gis.beans.entry.dataManage;
+package com.jdrx.gis.beans.entity.dataManage;
 
-import com.jdrx.gis.beans.entry.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @Author: liaosijun

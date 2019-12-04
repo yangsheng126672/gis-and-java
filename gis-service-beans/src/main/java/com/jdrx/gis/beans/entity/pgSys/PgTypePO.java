@@ -1,4 +1,4 @@
-package com.jdrx.gis.beans.entry.pgSys;
+package com.jdrx.gis.beans.entity.pgSys;
 
 /**
  * @Author: liaosijun

@@ -1,8 +1,7 @@
-package com.jdrx.gis.beans.entry.basic;
+package com.jdrx.gis.beans.entity.basic;
 
 import lombok.Data;
 import java.util.Date;
-import java.util.List;
 
 @Data
 public class MeasurementPO {

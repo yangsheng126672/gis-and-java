@@ -1,27 +1,17 @@
-package com.jdrx.gis.beans.entry.analysis;
+package com.jdrx.gis.beans.entity.basic;
 
 import java.util.Date;
 
-public class GisPipeAnalysisValvePO {
+public class GISDevTplPO {
     /**
-     * null
+     * 主键
      */
     private Long id;
 
     /**
-     * 关联爆管记录id
+     * 模板名称
      */
-    private Long rid;
-
-    /**
-     * 一次关阀列表
-     */
-    private String valveFirst;
-
-    /**
-     * 关阀失败阀门
-     */
-    private String valveFailed;
+    private String name;
 
     /**
      * 是否删除
@@ -48,11 +38,6 @@ public class GisPipeAnalysisValvePO {
      */
     private Date updateAt;
 
-    /**
-     * 二次关阀列表
-     */
-    private String valveSecond;
-
     public Long getId() {
         return id;
     }
@@ -61,28 +46,12 @@ public class GisPipeAnalysisValvePO {
         this.id = id;
     }
 
-    public Long getRid() {
-        return rid;
+    public String getName() {
+        return name;
     }
 
-    public void setRid(Long rid) {
-        this.rid = rid;
-    }
-
-    public String getValveFirst() {
-        return valveFirst;
-    }
-
-    public void setValveFirst(String valveFirst) {
-        this.valveFirst = valveFirst == null ? null : valveFirst.trim();
-    }
-
-    public String getValveFailed() {
-        return valveFailed;
-    }
-
-    public void setValveFailed(String valveFailed) {
-        this.valveFailed = valveFailed == null ? null : valveFailed.trim();
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
     }
 
     public Boolean getDeleteFlag() {
@@ -123,13 +92,5 @@ public class GisPipeAnalysisValvePO {
 
     public void setUpdateAt(Date updateAt) {
         this.updateAt = updateAt;
-    }
-
-    public String getValveSecond() {
-        return valveSecond;
-    }
-
-    public void setValveSecond(String valveSecond) {
-        this.valveSecond = valveSecond == null ? null : valveSecond.trim();
     }
 }

@@ -1,10 +1,9 @@
 package com.jdrx.gis.dao.basic;
 
-import com.jdrx.gis.beans.entry.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Set;
 
 public interface ShareDevTypePOMapper {
 

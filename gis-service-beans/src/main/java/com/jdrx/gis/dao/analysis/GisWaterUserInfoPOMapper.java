@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.analysis;
 
-import com.jdrx.gis.beans.entry.analysis.GisWaterUserInfoPO;
+import com.jdrx.gis.beans.entity.analysis.GisWaterUserInfoPO;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.jdrx.gis.service.dataManage;
 
-import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
+import com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.jdrx.gis.dao.basic;
 
-import com.jdrx.gis.beans.entry.basic.GisDevTplAttrPO;
+import com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
