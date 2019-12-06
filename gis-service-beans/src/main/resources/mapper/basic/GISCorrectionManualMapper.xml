@@ -31,8 +31,11 @@
           <if test="dto.createBy != null and dto.createBy != ''">
               AND create_by like concat('%',#{dto.createBy},'%')
           </if>
-          <if test="dto.queryDate != null and dto.queryDate != ''">
-              AND to_char(create_at,'YYYY-MM-DD') = #{dto.queryDate}
+          <if test="dto.startDate != null and dto.startDate != ''">
+              AND to_char(create_at,'YYYY-MM-DD') <![CDATA[>=]]> #{dto.startDate}
+          </if>
+          <if test="dto.endDate != null and dto.endDate != ''">
+              AND to_char(create_at,'YYYY-MM-DD') <![CDATA[<=]]> #{dto.endDate}
           </if>
     </select>
 
@@ -104,7 +107,4 @@
         WHERE dev_id = #{devId}
     </update>
 
-    <select id="d" >
-
-    </select>
 </mapper>

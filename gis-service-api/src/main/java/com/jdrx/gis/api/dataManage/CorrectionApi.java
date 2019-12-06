@@ -44,6 +44,9 @@ public class CorrectionApi {
 	                                       @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException {
 		Logger.debug("api/0/correction/correctAttributeValue 提交纠正的错误值");
 		boolean bool;
+		if (Objects.isNull(dto) || dto.getMapAttr().size() == 0) {
+			throw new BizException("参数为空！");
+		}
 		try {
 			bool = correctionService.correctAttributeValue(dto, userId, token);
 			return ResponseFactory.ok(bool);
@@ -61,8 +64,7 @@ public class CorrectionApi {
 			List<GISCorrectionPO> needAuditAttrList = correctionService.findNeedAuditAttrList(dto);
 			return ResponseFactory.ok(needAuditAttrList);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new BizException("查询待审核的列表失败！");
+			throw new BizException("查询待审核的列表失败！" + e.getCause().getMessage());
 		}
 	}
 

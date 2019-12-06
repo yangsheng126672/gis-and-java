@@ -7,6 +7,7 @@
         <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc" />
         <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
         <result column="updval" jdbcType="VARCHAR" property="updval" />
+        <result column="haspass" jdbcType="SMALLINT" property="hasPass" />
         <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
         <result column="create_by" jdbcType="VARCHAR" property="createBy" />
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
@@ -15,7 +16,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, co_record_id, field_desc, field_name, updval, delete_flag, create_by, create_at, update_by,
+        id, co_record_id, field_desc, field_name, updval, hasPass, delete_flag, create_by, create_at, update_by,
         update_at
     </sql>
 
@@ -38,8 +39,12 @@
         SELECT <include refid="Base_Column_List"/>
         FROM gis_correction_record_detail
         WHERE delete_flag = false
-        AND co_record_id = #{coRecordId}
-        AND status = #{status}
+        AND co_record_id =
+          (
+              SELECT id FROM gis_correction_record
+              WHERE id = #{coRecordId}
+              AND status = #{status} LIMIT 1
+          )
     </select>
 
 
@@ -71,13 +76,6 @@
                 <foreach collection="correctionDetails" item="item" index="index">
                     <if test="item.hasPass != null">
                         when id = #{item.id,jdbcType=BIGINT} then #{item.hasPass,jdbcType=SMALLINT}
-                    </if>
-                </foreach>
-            </trim>
-            <trim prefix="update_at = CASE" suffix="END,">
-                <foreach collection="correctionDetails" item="item" index="index">
-                    <if test="item.updateAt != null">
-                        when id = #{item.id,jdbcType=BIGINT} then #{item.updateAt,jdbcType=TIMESTAMP}
                     </if>
                 </foreach>
             </trim>

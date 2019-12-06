@@ -64,7 +64,7 @@ public class CorrectionDetailService {
 	 */
 	public int batchUpdate(List<GISCorrectionDetailPO> correctionDetails) throws BizException {
 		try {
-			return gisCorrectionDetailManualMapper.batchInsert(correctionDetails);
+			return gisCorrectionDetailManualMapper.batchUpdate(correctionDetails);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error(e.getMessage());

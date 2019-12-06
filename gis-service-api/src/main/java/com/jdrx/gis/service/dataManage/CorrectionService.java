@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -184,7 +185,6 @@ public class CorrectionService {
 		try {
 			SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 			String loginUserName = sysOcpUserPo.getName();
-			Date now = new Date();
 			String devId = list.get(0).getDevId();
 			List<GISCorrectionDetailPO> detailPOList = Lists.newArrayList();
 			List<FieldNameVO> fieldNames = attrQueryService.getFieldNames(devId);
@@ -199,7 +199,6 @@ public class CorrectionService {
 				detailPO.setId(dto.getDetailId());
 				detailPO.setHasPass(Short.parseShort(String.valueOf(dto.getHasPass())));
 				detailPO.setUpdateBy(loginUserName);
-				detailPO.setUpdateAt(now);
 				detailPOList.add(detailPO);
 				for (int i = 0; i < fieldNames.size(); i++) {
 					FieldNameVO fieldNameVO = fieldNames.get(i);
@@ -237,10 +236,17 @@ public class CorrectionService {
 		try {
 			List<HistoryRecordVO> historyRecordVOS = Lists.newArrayList();
 			List<GISCorrectionPO> list = gisCorrectionPOManualMapper.selectRecords(dto, null);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			if (Objects.nonNull(list) && list.size() > 0) {
 				list.stream().forEach(gisCorrectionPO -> {
 					HistoryRecordVO vo = new HistoryRecordVO();
+					Date createAt = gisCorrectionPO.getCreateAt();
+					String createAtStr = "";
+					if (Objects.nonNull(createAt)) {
+						createAtStr = sdf.format(createAt);
+					}
 					BeanUtils.copyProperties(gisCorrectionPO, vo);
+					vo.setCreateAt(createAtStr);
 					Integer status = Integer.parseInt(String.valueOf(gisCorrectionPO.getStatus()));
 					for (EAuditStatus eAuditStatus : EAuditStatus.values()) {
 						if (eAuditStatus.getVal().equals(status)) {

@@ -155,6 +155,7 @@ public class LoggerAop {
 		gisTransLog.setReturnCode(returnCode);
 		gisTransLog.setReturnMsg(returnMsg);
 
+
 		logExecutorService.execute(() -> {
 			synchronized (Logger) {
 				Logger.debug("Response-----------------" + transId + "-----------------" + transCode + "\n"
@@ -184,7 +185,12 @@ public class LoggerAop {
 		if (Objects.nonNull(gisTransLog)) {
 			gisTransLog.setCost(cost.intValue());
 			gisTransLog.setReturnCode("1");
-			gisTransLog.setReturnMsg(exception.getMessage());
+			String returnMsg = exception.getMessage();
+			gisTransLog.setReturnMsg(returnMsg);
+			if (Objects.nonNull(returnMsg) && returnMsg.length() > 512) {
+				returnMsg = "响应消息大于512，请根据trans_id到日志中查看";
+				gisTransLog.setReturnMsg(returnMsg);
+			}
 		}
 		logExecutorService.execute(() -> {
 			try {
