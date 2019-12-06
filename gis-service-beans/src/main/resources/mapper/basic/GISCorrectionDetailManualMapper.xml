@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jdrx.gis.dao.basic.GISCorrectionDetailManualMapper">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entity.dataManage.GISCorrectionDetailPO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="co_record_id" jdbcType="CHAR" property="coRecordId" />
+        <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc" />
+        <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
+        <result column="updval" jdbcType="VARCHAR" property="updval" />
+        <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+        <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, co_record_id, field_desc, field_name, updval, delete_flag, create_by, create_at, update_by,
+        update_at
+    </sql>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO gis_correction_record_detail (co_record_id, field_desc, field_name, updval, create_by, create_at)
+        VALUES
+        <foreach collection="correctionDetails" item="item" index="index" separator=",">
+            (
+                #{item.coRecordId,jdbcType=BIGINT},
+                #{item.fieldDesc,jdbcType=VARCHAR},
+                #{item.fieldName,jdbcType=VARCHAR},
+                #{item.updval,jdbcType=VARCHAR},
+                #{item.createBy,jdbcType=VARCHAR},
+                #{item.createAt,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+
+    <select id="findAuditFieldsByRecordId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM gis_correction_record_detail
+        WHERE delete_flag = false
+        AND co_record_id = #{coRecordId}
+        AND status = #{status}
+    </select>
+
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        UPDATE gis_correction_record_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="field_desc = CASE" suffix="END,">
+                <foreach collection="correctionDetails" item="item" index="index">
+                    <if test="item.fieldDesc != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.fieldDesc,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="field_name = CASE" suffix="END,">
+                <foreach collection="correctionDetails" item="item" index="index">
+                    <if test="item.fieldName != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.fieldName,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="updval = CASE" suffix="END,">
+                <foreach collection="correctionDetails" item="item" index="index">
+                    <if test="item.updval != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.updval,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="haspass = CASE" suffix="END,">
+                <foreach collection="correctionDetails" item="item" index="index">
+                    <if test="item.hasPass != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.hasPass,jdbcType=SMALLINT}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_at = CASE" suffix="END,">
+                <foreach collection="correctionDetails" item="item" index="index">
+                    <if test="item.updateAt != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.updateAt,jdbcType=TIMESTAMP}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_by = CASE" suffix="END,">
+                <foreach collection="correctionDetails" item="item" index="index">
+                    <if test="item.updateBy != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.updateBy,jdbcType=VARCHAR}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        WHERE
+        <foreach collection="correctionDetails" separator="OR" item="item" index="index" >
+            id = #{item.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+
+    <select id="findPassedFieldsByRecordId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM gis_correction_record_detail
+        WHERE delete_flag = false
+        AND co_record_id = #{coRecordId}
+        AND hasPass = #{hasPass}
+    </select>
+</mapper>

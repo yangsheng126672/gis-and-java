@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jdrx.gis.dao.basic.GISCorrectionPOManualMapper">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entity.dataManage.GISCorrectionPO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="dev_id" jdbcType="VARCHAR" property="devId" />
+        <result column="code" jdbcType="VARCHAR" property="code" />
+        <result column="status" jdbcType="SMALLINT" property="status" />
+        <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+        <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, dev_id, code, status, delete_flag, create_by, create_at, update_by, update_at
+    </sql>
+
+    <select id="selectRecords" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM gis_correction_record
+        WHERE
+          delete_flag = false
+          <if test="status != null">
+              AND status = #{status}
+          </if>
+          <if test="dto.code != null and dto.code != ''">
+              AND code like concat('%',#{dto.code},'%')
+          </if>
+          <if test="dto.createBy != null and dto.createBy != ''">
+              AND create_by like concat('%',#{dto.createBy},'%')
+          </if>
+          <if test="dto.queryDate != null and dto.queryDate != ''">
+              AND to_char(create_at,'YYYY-MM-DD') = #{dto.queryDate}
+          </if>
+    </select>
+
+    <insert id="insertReturnId" useGeneratedKeys="true" keyProperty="id" parameterType="com.jdrx.gis.beans.entity.dataManage.GISCorrectionPO">
+        insert into gis_correction_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="devId != null">
+                dev_id,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createAt != null">
+                create_at,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateAt != null">
+                update_at,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="devId != null">
+                #{devId,jdbcType=CHAR},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=SMALLINT},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag,jdbcType=BIT},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createAt != null">
+                #{createAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateAt != null">
+                #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateAuditedByDevId">
+        UPDATE gis_correction_record
+        SET status = #{status}
+        WHERE dev_id = #{devId}
+    </update>
+
+    <select id="d" >
+
+    </select>
+</mapper>

@@ -468,6 +468,60 @@ COMMENT ON COLUMN gis_tpl_type.update_by IS '修改人';
 COMMENT ON COLUMN gis_tpl_type.update_at IS '修改时间';
 
 
+-- [17] 设备纠错记录
+DROP TABLE IF EXISTS gis_correction_record;
+CREATE TABLE gis_correction_record (
+  id serial8 primary key,
+  dev_id char(12) not null,
+	code varchar(32) not null default '',
+	status int2 not null default 0,
+  delete_flag boolean NOT NULL DEFAULT false,
+  create_by varchar(32) NOT NULL DEFAULT '',
+  create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_by varchar(32) NOT NULL DEFAULT '',
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN gis_correction_record.id IS '主键';
+COMMENT ON COLUMN gis_correction_record.dev_id IS '设备ID';
+COMMENT ON COLUMN gis_correction_record.code IS '编码';
+COMMENT ON COLUMN gis_correction_record.status IS '0-未审核，1-审核';
+COMMENT ON COLUMN gis_correction_record.delete_flag IS '是否删除,0-正常，1-删除';
+COMMENT ON COLUMN gis_correction_record.create_by IS '创建人';
+COMMENT ON COLUMN gis_correction_record.create_at IS '创建时间';
+COMMENT ON COLUMN gis_correction_record.update_by IS '修改人';
+COMMENT ON COLUMN gis_correction_record.update_at IS '修改时间';
+COMMENT ON TABLE gis_correction_record is '纠错记录表';
+
+-- [18] 设备纠错记录详情
+DROP TABLE IF EXISTS gis_correction_record_detail;
+CREATE TABLE gis_correction_record_detail (
+  id serial8 primary key,
+  co_record_id int8 not null,
+	field_desc varchar(32) not null default '',
+	field_name varchar(32) not null default '',
+	updVal varchar(512) not null default '',
+	hasPass int2 not null default 0,
+  delete_flag boolean NOT NULL DEFAULT false,
+  create_by varchar(32) NOT NULL DEFAULT '',
+  create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_by varchar(32) NOT NULL DEFAULT '',
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN gis_correction_record_detail.id IS '主键';
+COMMENT ON COLUMN gis_correction_record_detail.co_record_id IS 'gis_correction_record.id';
+COMMENT ON COLUMN gis_correction_record_detail.field_desc IS '字段中文描述';
+COMMENT ON COLUMN gis_correction_record_detail.field_name IS '英文字段名称';
+COMMENT ON COLUMN gis_correction_record_detail.updVal IS '修改值';
+COMMENT ON COLUMN gis_correction_record_detail.hasPass IS '是否通过, 0-不通过，1-通过';
+COMMENT ON COLUMN gis_correction_record_detail.delete_flag IS '是否删除,0-正常，1-删除';
+COMMENT ON COLUMN gis_correction_record_detail.create_by IS '创建人';
+COMMENT ON COLUMN gis_correction_record_detail.create_at IS '创建时间';
+COMMENT ON COLUMN gis_correction_record_detail.update_by IS '修改人';
+COMMENT ON COLUMN gis_correction_record_detail.update_at IS '修改时间';
+COMMENT ON TABLE gis_correction_record_detail is '纠错记录详情表';
+
 ------------------------------增加唯一性约束begin-----------------------
 -- 数据字典中，同一类型下不能有重复的名称和值
 alter table dict_detail add constraint uk_t_n_v unique(type_id,name,val);

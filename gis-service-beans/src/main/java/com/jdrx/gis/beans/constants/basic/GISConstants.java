@@ -13,7 +13,7 @@ public class GISConstants {
 	public static final String TRANSPARENT_TOKEN_FEILD = "authorization";
 
 	/**
-	 * 用户ID
+	 * 登录用户名称
 	 */
 	public static final String REAL_NAME = "realName";
 
