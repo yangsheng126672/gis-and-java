@@ -5,21 +5,27 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.dto.base.PageDTO;
+import com.jdrx.gis.beans.dto.base.TypeIdDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entity.basic.MeasurementPO;
 import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.cad.*;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.InspectionVO;
+import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
 import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.LayerService;
+import com.jdrx.gis.util.JavaFileToFormUpload;
+import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.slf4j.LoggerFactory;
@@ -27,6 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.validation.Valid;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 import static com.jdrx.gis.util.ComUtil.getChildNodes;
@@ -61,6 +72,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private DictConfig dictConfig;
+
+	@Autowired
+	private PathConfig pathConfig;
 
 	public final static String SHARE_DEV_TYPE_NAME_PIPE = "水管";
 
@@ -368,6 +382,7 @@ public class BasicDevQuery {
 	}
 
 	/**
+<<<<<<< Updated upstream
 	 * 获取地图中心点
 	 * @param deptPath
 	 * @return
@@ -408,6 +423,134 @@ public class BasicDevQuery {
 		return extent;
 	}
 
+	/**
+	 * 根据id获取图层
+	 * @param list_id
+	 */
+	public String findLayerById(List<TypeIdDTO> list_id) throws BizException {
+		try {
+			Document doc = new Document();
+			for (TypeIdDTO id:list_id) {
+				List<ExportCadVO> list = gisDevExtPOMapper.selectGeomByTypeId(id.getId());
+				for (ExportCadVO exportCadVO:list) {
+					String name = exportCadVO.getName();
+					String type = exportCadVO.getType();
+					String geom = exportCadVO.getGeom();
+					if(type.equals("POINT")){
+						String aa = geom.substring(6,geom.length()-1);
+						Double x = Double.parseDouble(aa.split(" ")[0]);
+						Double y = Double.parseDouble(aa.split(" ")[1]);
+						double R = 0.3;
+						double d = R/(Math.sqrt(2));
+						if(id.getId()==19){//阀门
+							Vertex v1 = new Vertex(x-d, y+d, "Vertex");
+							Vertex v2 = new Vertex(x-d, y-d, "Vertex");
+							Vertex v3 = new Vertex(x, y, "Vertex");
+							Vertex v4 = new Vertex(x+d, y-d, "Vertex");
+							Vertex v5 = new Vertex(x+d, y+d, "Vertex");
+							Vertex v6 = new Vertex(x, y, "Vertex");
+							PolyLine polyLine = new PolyLine("famen",(short)3);
+							polyLine.AddVertex(v1);
+							polyLine.AddVertex(v2);
+							polyLine.AddVertex(v3);
+							polyLine.AddVertex(v4);
+							polyLine.AddVertex(v5);
+							polyLine.AddVertex(v6);
+							doc.add(polyLine);
+						}
+						if(id.getId()==26){//管件
+							Vertex v1 = new Vertex(x-d, y-d, "Vertex");
+							Vertex v2 = new Vertex(x+d, y-d, "Vertex");
+							Vertex v3 = new Vertex(x+d, y, "Vertex");
+							Vertex v4 = new Vertex(x+0.5*d, y, "Vertex");
+							Vertex v5 = new Vertex(x+0.5*d, y+d, "Vertex");
+							Vertex v6 = new Vertex(x-0.5*d, y+d, "Vertex");
+							Vertex v7 = new Vertex(x-0.5*d, y, "Vertex");
+							Vertex v8 = new Vertex(x-d, y, "Vertex");
+							PolyLine polyLine = new PolyLine("guanjian",(short)3);
+							polyLine.AddVertex(v1);
+							polyLine.AddVertex(v2);
+							polyLine.AddVertex(v3);
+							polyLine.AddVertex(v4);
+							polyLine.AddVertex(v5);
+							polyLine.AddVertex(v6);
+							polyLine.AddVertex(v7);
+							polyLine.AddVertex(v8);
+							doc.add(polyLine);
+						}
+						if(id.getId()==18){//消防栓
+							Vertex v1 = new Vertex(x-0.5*d, y, "Vertex");
+							Vertex v2 = new Vertex(x-0.5*d, y-d, "Vertex");
+							Vertex v3 = new Vertex(x+0.5*d, y-d, "Vertex");
+							Vertex v4 = new Vertex(x+0.5*d, y, "Vertex");
+							Vertex v5 = new Vertex(x+d, y, "Vertex");
+							Vertex v6 = new Vertex(x, y+d, "Vertex");
+							Vertex v7 = new Vertex(x-d, y, "Vertex");
+							PolyLine polyLine = new PolyLine("xiaofang",(short)3);
+							polyLine.AddVertex(v1);
+							polyLine.AddVertex(v2);
+							polyLine.AddVertex(v3);
+							polyLine.AddVertex(v4);
+							polyLine.AddVertex(v5);
+							polyLine.AddVertex(v6);
+							polyLine.AddVertex(v7);
+							doc.add(polyLine);
+						}
+						if(id.getId()==1){//其它
+							Vertex v1 = new Vertex(x-d, y-d, "Vertex");
+							Vertex v2 = new Vertex(x+d, y-d, "Vertex");
+							Vertex v3 = new Vertex(x+d, y+d, "Vertex");
+							Vertex v4 = new Vertex(x-d, y+d, "Vertex");
+							PolyLine polyLine = new PolyLine("qita",(short)3);
+							polyLine.AddVertex(v1);
+							polyLine.AddVertex(v2);
+							polyLine.AddVertex(v3);
+							polyLine.AddVertex(v4);
+							doc.add(polyLine);
+						}
+						Circle cc = new Circle(x,y, R, "pointTest");
+						doc.add(cc);
+					}
+					if(type.equals("LINESTRING")){
+						String aa = geom.substring(11,geom.length()-1);
+						Double xi = Double.parseDouble(aa.split(",")[0].split(" ")[0]);
+						Double yi = Double.parseDouble(aa.split(",")[0].split(" ")[1]);
+						Double xf = Double.parseDouble(aa.split(",")[1].split(" ")[0]);
+						Double yf = Double.parseDouble(aa.split(",")[1].split(" ")[1]);
+						Line line = new Line("Line",xi, yi,xf ,yf);
+						if(name.equals("DN600-DN900管段")){
+							line.setLwidth(6+"");//紫色
+						}
+						else if(name.equals("DN400-DN600管段")){
+							line.setLwidth(4+"");//浅蓝色
+						}
+						else if(name.equals("DN200-DN400管段")){
+							line.setLwidth(3+"");//绿色
+						}
+						else if(name.equals("DN100-DN200管段")){
+							line.setLwidth(5+"");//深蓝
+						}
+						else if(name.equals("DN100（不含）以下管段")){
+							line.setLwidth(40+"");//橘色
+						}
+						else if(name.equals("DN900（含）以上管段")){
+							line.setLwidth(1+"");//红色
+						}
+						doc.add(line);
+					}
+				}
+			}
+			String filePath = pathConfig.getDownloadPath() + "/Export.dxf";
+			FileOutputStream f1 = new FileOutputStream(new File(filePath));
+			Writer.Write(doc, f1);
+			f1.close();
+			String result = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("导出CAD数据失败！");
+		}
+	}
 
 
 }

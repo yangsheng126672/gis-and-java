@@ -531,4 +531,20 @@
         SELECT  ROUND((st_length( #{geom}))::NUMERIC,3)
     </select>
 
+
+    <select id="selectGeomByTypeId" parameterType="java.lang.Long" resultType="com.jdrx.gis.beans.vo.datamanage.ExportCadVO">
+        SELECT name,Geometrytype(geom) AS type,ST_AsText(geom) AS geom
+        FROM gis_dev_ext
+        WHERE dev_id in (
+          SELECT id
+          FROM share_dev
+          WHERE type_id in(
+		    SELECT id
+		    FROM (WITH RECURSIVE A AS (
+		        SELECT A.*  FROM share_dev_type A WHERE id = #{id} AND del_flag = 0 UNION ALL
+			    SELECT b.*  FROM share_dev_type b, A WHERE A.ID = b.p_id  AND b.del_flag = 0
+			) SELECT *  FROM A)a
+	      )
+        )
+    </select>
 </mapper>

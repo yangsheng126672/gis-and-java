@@ -6,6 +6,7 @@ import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entity.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
+import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
@@ -194,6 +195,13 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	Double getLengthByGeomStr(@Param("geom") String geom);
+
+	/**
+	 * 根据id查询其geom
+	 * @param id
+	 * @return
+	 */
+	List<ExportCadVO> selectGeomByTypeId(@Param("id") Long id);
 
 }
 

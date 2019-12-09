@@ -2,6 +2,7 @@ package com.jdrx.gis.api.basic;
 
 import com.jdrx.gis.beans.dto.base.KeyWordDTO;
 import com.jdrx.gis.beans.dto.base.PageDTO;
+import com.jdrx.gis.beans.dto.base.TypeIdDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
@@ -19,6 +20,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @Description: 图层展示
@@ -111,5 +114,11 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getFeaturesByString(dto.getKey()));
 	}
 
+	@ApiOperation(value = "根据id获取图层")
+	@RequestMapping(value = "findLayerById")
+	public ResposeVO findLayerById(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) throws BizException{
+		Logger.debug("api/0/basic/findLayerById根据id获取图层");
+		return ResponseFactory.ok(basicDevQuery.findLayerById(dto));
+	}
 
 }
