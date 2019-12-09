@@ -339,7 +339,9 @@ public class DataEditorService {
                 String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
                 PointVO pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
 
-                String jsonStr = JSONObject.toJSONString(dto.getMapAttr());
+                Map<String,Object> map = dto.getMapAttr();
+                map.put(GISConstants.GIS_ATTR_DEVID,devId);
+                String jsonStr = JSONObject.toJSONString(map);
                 PGobject jsonObject = new PGobject();
                 jsonObject.setValue(jsonStr);
                 jsonObject.setType("jsonb");
@@ -388,6 +390,9 @@ public class DataEditorService {
         try {
             Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             for (ShareLineDTO dto:list){
+                Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
+                String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
+
                 GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getQdbm());
                 GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getZdbm());
 
@@ -398,14 +403,16 @@ public class DataEditorService {
 
                 String lineGeomStr = "LINESTRING("+startVO.getX()+" "+startVO.getY()+","+endVO.getX()+" "+endVO.getY()+")";
                 String transformGeomStr = gisDevExtPOMapper.addGeomWithSrid(lineGeomStr,Integer.parseInt(srid));
+                Double pipe_length = gisDevExtPOMapper.getLengthByGeomStr(transformGeomStr);
 
-                String jsonStr = JSONObject.toJSONString(dto.getMapAttr());
+                Map<String,Object> map = dto.getMapAttr();
+                map.put(GISConstants.GIS_ATTR_DEVID,devId);
+                map.put(GISConstants.GIS_ATTR_PIPE_LENGTH,pipe_length);
+                String jsonStr = JSONObject.toJSONString(map);
                 PGobject jsonObject = new PGobject();
                 jsonObject.setValue(jsonStr);
                 jsonObject.setType("jsonb");
 
-                Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
-                String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
                 GISDevExtPO gisDevExtPO = new GISDevExtPO();
                 gisDevExtPO.setDevId(devId);
                 gisDevExtPO.setCode(dto.getQdbm()+"-"+dto.getZdbm());
@@ -617,9 +624,11 @@ public class DataEditorService {
                     String transformGeom = gisDevExtPOMapper.addGeomWithSrid(geom,Integer.parseInt(srid));
                     Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
                     String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
+                    Double pipe_length = gisDevExtPOMapper.getLengthByGeomStr(transformGeom);
 
                     Map<String,Object> mapAttr = dto.getMapAttr();
                     mapAttr.put(GISConstants.GIS_ATTR_DEVID,devId);
+                    mapAttr.put(GISConstants.GIS_ATTR_PIPE_LENGTH,pipe_length);
                     String jsonStr = JSONObject.toJSONString(mapAttr);
                     PGobject jsonObject = new PGobject();
                     jsonObject.setValue(jsonStr);

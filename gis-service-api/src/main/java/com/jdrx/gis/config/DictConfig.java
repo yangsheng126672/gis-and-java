@@ -64,4 +64,7 @@ public class DictConfig {
 
 	/** 权限ID集合 */
 	private String authId;
+
+	/** 图层显示范围 */
+	private String layerExtent;
 }

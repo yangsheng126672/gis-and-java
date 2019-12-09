@@ -187,5 +187,13 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	int updateDataInfoByDevId(@Param("dataInfo") PGobject dataInfo, @Param("devId") String devId);
+
+	/**
+	 * 获取管段长度(系统统一保留三位小数）
+	 * @param geom
+	 * @return
+	 */
+	Double getLengthByGeomStr(@Param("geom") String geom);
+
 }
 

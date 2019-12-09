@@ -56,5 +56,8 @@ public class DefaultLayersVO {
      */
     String popLayer;
 
+    /** 图层范围 */
+    String layerExtent;
+
 
 }

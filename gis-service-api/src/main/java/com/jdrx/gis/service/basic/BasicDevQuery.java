@@ -18,12 +18,14 @@ import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -305,51 +307,26 @@ public class BasicDevQuery {
 		}
 	}
 
-	/**
-	 * 获取巡检系统所需图层url
-	 * @return
-	 */
-	public InspectionVO getXjLayerSourceUrl(){
-		InspectionVO vo = new InspectionVO();
-		String layerUrl = null;
-		Map<String,String> map = new HashMap<>();
-		try {
-			layerUrl = dictConfig.getXjSourceUrl();
-			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
-			for (DictDetailPO dictDetail:detailPOs){
-				map.put(dictDetail.getName(),dictDetail.getVal());
-				if (dictDetail.getName().equals("wms")){
-					vo.setWms(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("point")){
-					vo.setPoint(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("line")){
-					vo.setLine(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("x")){
-					vo.setX(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("y")){
-					vo.setY(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("title")){
-					vo.setTitle(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("extent")){
-					vo.setExtent(dictDetail.getVal());
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return vo;
-	}
-
 
 	/**
 	 * 获取默认地图相关配置
 	 * @return
 	 */
-	public DefaultLayersVO getDefaultLayers(){
+	public DefaultLayersVO getDefaultLayers(String deptPath) throws BizException{
 		DefaultLayersVO vo = new DefaultLayersVO();
 		String layerUrl = null;
 		Map<String,String> map = new HashMap<>();
 		try {
+			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+			//获取地图中心点
+			String ceterStr = getMapCenterByByAuthId(deptId);
+			vo.setX(ceterStr.split(",")[0]);
+			vo.setY(ceterStr.split(",")[1]);
+
+			//获取图层范围
+			String extentStr = getLayerExtentByAuthId(deptId);
+			vo.setLayerExtent(extentStr);
+
 			layerUrl = dictConfig.getDefaultLayerUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
@@ -357,13 +334,9 @@ public class BasicDevQuery {
 				if (dictDetail.getName().equals("cad")){
 					vo.setCad(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("point")){
-					vo.setPoint(dictDetail.getVal());
+					vo.setPoint(dictDetail.getVal()+"&inSR=4326&geometry="+extentStr);
 				}else if (dictDetail.getName().equals("line")){
-					vo.setLine(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("x")){
-					vo.setX(dictDetail.getVal());
-				}else if (dictDetail.getName().equals("y")){
-					vo.setY(dictDetail.getVal());
+					vo.setLine(dictDetail.getVal()+"&inSR=4326&geometry="+extentStr);
 				}else if (dictDetail.getName().equals("title")){
 					vo.setTitle(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("extent")){
@@ -392,6 +365,47 @@ public class BasicDevQuery {
 			e.printStackTrace();
 		}
 		return list;
+	}
+
+	/**
+	 * 获取地图中心点
+	 * @param deptPath
+	 * @return
+	 */
+	public String getMapCenterByByAuthId(Long deptPath){
+		String centerStr = null;
+		try {
+			//获取地图中心点
+			List<DictDetailPO> list = detailService.findDetailsByTypeVal(dictConfig.getMapCenterVal());
+			for(DictDetailPO po: list){
+				if (po.getName().equals(deptPath.toString())){
+					centerStr = po.getVal();
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return centerStr;
+	}
+
+	/**
+	 * 获取图层范围
+	 * @param deptId
+	 * @return
+	 */
+	public String getLayerExtentByAuthId(Long deptId){
+		String extent = null;
+		try {
+			List<DictDetailPO> list = detailService.findDetailsByTypeVal(dictConfig.getLayerExtent());
+			for(DictDetailPO po: list){
+				if (po.getName().equals(String.valueOf(deptId))){
+					extent = po.getVal();
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return extent;
 	}
 
 

@@ -16,10 +16,7 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -91,7 +88,6 @@ public class BasciDevApi {
 	public ResposeVO deleteMeasurementByID(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<Long> dto) throws BizException {
 		Logger.debug("api/0/basic/deleteMeasurementByID 删除测量信息");
 		return  ResponseFactory.ok(basicDevQuery.deleteMeasurementByID(dto.getId()));
-
 	}
 
 	@ApiOperation(value = "获取所有点线要素空间信息及dev_id")
@@ -101,18 +97,11 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getAllFeaturesUrl());
 	}
 
-	@ApiOperation(value = "获取巡检系统所有资源url")
-	@RequestMapping(value = "getAllSourceUrl")
-	public ResposeVO getAllSourceUrl() throws BizException{
-		Logger.debug("api/0/basic/getAllSourceUrl 获取巡检系统所有资源url");
-		return ResponseFactory.ok(basicDevQuery.getXjLayerSourceUrl());
-	}
-
 	@ApiOperation(value = "获取默认地图相关配置")
 	@RequestMapping(value = "getDefaultLayers")
-	public ResposeVO getDefaultLayers() throws BizException{
+	public ResposeVO getDefaultLayers( @RequestHeader(name ="deptPath") String deptPath) throws BizException{
 		Logger.debug("api/0/basic/getDefaultLayers获取默认地图相关配置");
-		return ResponseFactory.ok(basicDevQuery.getDefaultLayers());
+		return ResponseFactory.ok(basicDevQuery.getDefaultLayers(deptPath));
 	}
 
 	@ApiOperation(value = "根据关键字搜索设备")

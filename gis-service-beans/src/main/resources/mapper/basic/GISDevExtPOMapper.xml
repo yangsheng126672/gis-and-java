@@ -526,4 +526,9 @@
         SET data_info = #{dataInfo}
         WHERE dev_id = #{devId}
     </update>
+
+    <select id="getLengthByGeomStr" parameterType="java.lang.String" resultType="double">
+        SELECT  ROUND((st_length( #{geom}))::NUMERIC,3)
+    </select>
+
 </mapper>

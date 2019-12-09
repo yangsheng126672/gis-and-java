@@ -197,4 +197,6 @@ public class GISConstants {
 	public final static String GIS_ATTR_NAME = "name";
 
 	public final static String GIS_ATTR_ADDR = "addr";
+
+	public final static String GIS_ATTR_PIPE_LENGTH = "pipe_length";
 }
