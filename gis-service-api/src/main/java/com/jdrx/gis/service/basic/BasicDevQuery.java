@@ -25,6 +25,7 @@ import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.gis.util.JavaFileToFormUpload;
+import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
@@ -75,6 +76,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private PathConfig pathConfig;
+
+	@Autowired
+	private Neo4jUtil neo4jUtil;
 
 	public final static String SHARE_DEV_TYPE_NAME_PIPE = "水管";
 
@@ -443,13 +447,31 @@ public class BasicDevQuery {
 						double R = 0.3;
 						double d = R/(Math.sqrt(2));
 						if(id.getId()==19){//阀门
-							Vertex v1 = new Vertex(x-d, y+d, "Vertex");
-							Vertex v2 = new Vertex(x-d, y-d, "Vertex");
+							String devId = exportCadVO.getDevId();
+							String devId2 = neo4jUtil.getValveNodeByDevId(devId).getDev_id();
+							double sin;
+							double cos;
+							double d1=2/(Math.sqrt(2));
+							double d2=-2/(Math.sqrt(2));
+							if(devId2!=null && devId2.length()!=0){
+								FeatureVO featureVO = gisDevExtPOMapper.findFeaturesByDevId(devId2);
+								String geom1= featureVO.getGeom();
+								String aa1 = geom1.substring(6,geom1.length()-1);
+								Double x1 = Double.parseDouble(aa1.split(" ")[0]);
+								Double y1 = Double.parseDouble(aa1.split(" ")[1]);
+								sin = (y1-y)/(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y)));
+								cos = (x1-x)/(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y)));
+								d1 = (sin+cos)*(2/(Math.sqrt(2)));
+								d2 = (sin-cos)*(2/(Math.sqrt(2)));
+							}
+							double r=R/2;
+							Vertex v1 = new Vertex(x-(r*d1), y-(r*d2), "Vertex");
+							Vertex v2 = new Vertex(x+(r*d2), y-(r*d1), "Vertex");
 							Vertex v3 = new Vertex(x, y, "Vertex");
-							Vertex v4 = new Vertex(x+d, y-d, "Vertex");
-							Vertex v5 = new Vertex(x+d, y+d, "Vertex");
+							Vertex v4 = new Vertex(x+(r*d1), y+(r*d2), "Vertex");
+							Vertex v5 = new Vertex(x-(r*d2), y+(r*d1), "Vertex");
 							Vertex v6 = new Vertex(x, y, "Vertex");
-							PolyLine polyLine = new PolyLine("famen",(short)3);
+							PolyLine polyLine = new PolyLine("FaMen",(short)3);
 							polyLine.AddVertex(v1);
 							polyLine.AddVertex(v2);
 							polyLine.AddVertex(v3);
@@ -467,7 +489,7 @@ public class BasicDevQuery {
 							Vertex v6 = new Vertex(x-0.5*d, y+d, "Vertex");
 							Vertex v7 = new Vertex(x-0.5*d, y, "Vertex");
 							Vertex v8 = new Vertex(x-d, y, "Vertex");
-							PolyLine polyLine = new PolyLine("guanjian",(short)3);
+							PolyLine polyLine = new PolyLine("GuanJian",(short)3);
 							polyLine.AddVertex(v1);
 							polyLine.AddVertex(v2);
 							polyLine.AddVertex(v3);
@@ -486,7 +508,7 @@ public class BasicDevQuery {
 							Vertex v5 = new Vertex(x+d, y, "Vertex");
 							Vertex v6 = new Vertex(x, y+d, "Vertex");
 							Vertex v7 = new Vertex(x-d, y, "Vertex");
-							PolyLine polyLine = new PolyLine("xiaofang",(short)3);
+							PolyLine polyLine = new PolyLine("XiaoFang",(short)3);
 							polyLine.AddVertex(v1);
 							polyLine.AddVertex(v2);
 							polyLine.AddVertex(v3);
@@ -501,7 +523,7 @@ public class BasicDevQuery {
 							Vertex v2 = new Vertex(x+d, y-d, "Vertex");
 							Vertex v3 = new Vertex(x+d, y+d, "Vertex");
 							Vertex v4 = new Vertex(x-d, y+d, "Vertex");
-							PolyLine polyLine = new PolyLine("qita",(short)3);
+							PolyLine polyLine = new PolyLine("Other",(short)3);
 							polyLine.AddVertex(v1);
 							polyLine.AddVertex(v2);
 							polyLine.AddVertex(v3);

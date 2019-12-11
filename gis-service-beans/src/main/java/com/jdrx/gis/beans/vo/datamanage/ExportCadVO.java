@@ -21,15 +21,24 @@ public class ExportCadVO {
 	 */
 	private String geom;
 
-	public void setName(String name) {this.name = name;}
-
-	public void setType(String type) {this.type = type;}
-
-	public void setGeom(String geom) {this.geom = geom;}
+	/**
+	 * dev_id
+	 */
+	private String devId;
 
 	public String getName() {return name;}
 
 	public String getType() {return type;}
 
 	public String getGeom() {return geom;}
+
+	public String getDevId() {return devId;}
+
+	public void setName(String name) {this.name = name;}
+
+	public void setType(String type) {this.type = type;}
+
+	public void setGeom(String geom) {this.geom = geom;}
+
+	public void setDevId(String devId) {this.devId = devId;}
 }

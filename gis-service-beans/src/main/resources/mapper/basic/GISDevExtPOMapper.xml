@@ -533,7 +533,7 @@
 
 
     <select id="selectGeomByTypeId" parameterType="java.lang.Long" resultType="com.jdrx.gis.beans.vo.datamanage.ExportCadVO">
-        SELECT name,Geometrytype(geom) AS type,ST_AsText(geom) AS geom
+        SELECT name,Geometrytype(geom) AS type,ST_AsText(geom) AS geom,dev_id AS devId
         FROM gis_dev_ext
         WHERE dev_id in (
           SELECT id
@@ -546,5 +546,11 @@
 			) SELECT *  FROM A)a
 	      )
         )
+    </select>
+
+    <select id="findFeaturesByDevId" parameterType="java.lang.String" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
+        select dev_id AS devId,GeometryType(geom) as type,ST_AsText(geom) AS geom
+        from gis_dev_ext
+        where dev_id = #{devId} AND delete_flag = false
     </select>
 </mapper>

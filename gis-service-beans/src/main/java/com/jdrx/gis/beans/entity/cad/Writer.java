@@ -10,7 +10,7 @@ public class Writer {
 	}
 	public static void Write(Document d, OutputStream s) throws IOException
 	{
-		OutputStreamWriter sr = new OutputStreamWriter(s);
+		OutputStreamWriter sr = new OutputStreamWriter(s,"UTF-8");
 
 		WriteHeader(d.header,sr);
 		WriteTables(d.tables,sr);

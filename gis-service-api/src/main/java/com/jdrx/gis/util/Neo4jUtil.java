@@ -432,4 +432,18 @@ public class Neo4jUtil {
         return list;
     }
 
+    /**
+     * 根据dev_id获取相邻节点的详细信息
+     * @return
+     */
+    public NodeDTO getValveNodeByDevId(String devId){
+        NodeDTO node = new NodeDTO();
+        String cypherSql = String.format("MATCH (n)-[r:gdline]-(b) where n.dev_id='%s' RETURN b LIMIT 1",devId);
+        StatementResult result = session.run(cypherSql);
+        while (result.hasNext()) {
+            Record record = result.next();
+            node.setDev_id(record.get(0).asMap().get("dev_id").toString());
+        }
+        return node;
+    }
 }

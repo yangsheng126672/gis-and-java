@@ -203,5 +203,11 @@ public interface GISDevExtPOMapper {
 	 */
 	List<ExportCadVO> selectGeomByTypeId(@Param("id") Long id);
 
+	/**
+	 * 根据devId获取要素基础信息
+	 * @param devId
+	 * @return
+	 */
+	FeatureVO findFeaturesByDevId(@Param("devId") String devId);
 }
 
