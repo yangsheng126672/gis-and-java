@@ -5,6 +5,7 @@ import com.jdrx.gis.beans.entity.basic.CodeXYPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entity.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
+import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
@@ -197,6 +198,7 @@ public interface GISDevExtPOMapper {
 	Double getLengthByGeomStr(@Param("geom") String geom);
 
 	/**
+<<<<<<< Updated upstream
 	 * 根据id查询其geom
 	 * @param id
 	 * @return
@@ -209,5 +211,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	FeatureVO findFeaturesByDevId(@Param("devId") String devId);
+
+	/**
+	 * 根据权限值获取管网总长度(系统统一保留三位小数）
+	 * @return
+	 */
+	public List<PipeLengthVO> getPipeLengthByAuthId();
+
 }
 

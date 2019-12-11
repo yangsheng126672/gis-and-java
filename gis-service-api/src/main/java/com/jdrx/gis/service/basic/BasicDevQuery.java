@@ -14,8 +14,8 @@ import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entity.cad.*;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
-import com.jdrx.gis.beans.vo.basic.InspectionVO;
 import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
+import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
@@ -26,19 +26,13 @@ import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.gis.util.Neo4jUtil;
-import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import javax.validation.Valid;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.*;
 
 import static com.jdrx.gis.util.ComUtil.getChildNodes;
@@ -428,6 +422,7 @@ public class BasicDevQuery {
 	}
 
 	/**
+<<<<<<< Updated upstream
 	 * 根据id获取图层
 	 * @param list_id
 	 */
@@ -574,5 +569,27 @@ public class BasicDevQuery {
 		}
 	}
 
+	/**
+	 * 获取管网长度
+	 * @return
+	 * @throws BizException
+	 */
+	public Map<String, String> getPipeLengthByDeptPath() throws BizException{
+		Map<String,String>map = new HashMap<>();
+		try {
+			List<PipeLengthVO> list = gisDevExtPOMapper.getPipeLengthByAuthId();
+			List<DictDetailPO> detailPOS = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+			for(PipeLengthVO vo:list){
+				for (DictDetailPO po: detailPOS){
+					if (po.getVal().equals(String.valueOf(vo.getAuthId()))){
+						map.put(po.getName(),String.valueOf(vo.getLength()));
+					}
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return map;
+	}
 
 }

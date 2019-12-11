@@ -116,9 +116,16 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "根据id获取图层")
 	@RequestMapping(value = "findLayerById")
-	public ResposeVO findLayerById(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) throws BizException{
+	public ResposeVO findLayerById(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) throws BizException {
 		Logger.debug("api/0/basic/findLayerById根据id获取图层");
 		return ResponseFactory.ok(basicDevQuery.findLayerById(dto));
+	}
+
+	@ApiOperation(value = "获取管网长度")
+	@RequestMapping(value = "getPipeLength")
+	public ResposeVO getPipeLength() throws BizException{
+		Logger.debug("api/0/basic/getPipeLength 获取管网长度");
+		return ResponseFactory.ok(basicDevQuery.getPipeLengthByDeptPath());
 	}
 
 }

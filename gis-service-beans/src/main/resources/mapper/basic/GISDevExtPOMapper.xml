@@ -531,7 +531,6 @@
         SELECT  ROUND((st_length( #{geom}))::NUMERIC,3)
     </select>
 
-
     <select id="selectGeomByTypeId" parameterType="java.lang.Long" resultType="com.jdrx.gis.beans.vo.datamanage.ExportCadVO">
         SELECT name,Geometrytype(geom) AS type,ST_AsText(geom) AS geom,dev_id AS devId
         FROM gis_dev_ext
@@ -553,4 +552,11 @@
         from gis_dev_ext
         where dev_id = #{devId} AND delete_flag = false
     </select>
+
+    <select id="getPipeLengthByAuthId"  resultType="com.jdrx.gis.beans.vo.basic.PipeLengthVO">
+        select belong_to as authId, ROUND(st_length(st_Astext(ST_Union(geom)))::NUMERIC,0)/1000 as length
+        from  gis_dev_ext
+        where caliber  is not null and delete_flag = false GROUP BY belong_to
+    </select>
+
 </mapper>
