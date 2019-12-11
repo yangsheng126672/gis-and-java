@@ -446,4 +446,97 @@ public class Neo4jUtil {
         }
         return node;
     }
+
+    /**
+     * 孤立点查询
+     */
+    public List<String> getLonelyPointsByDevIds(String devIds){
+        List<String> list = new ArrayList<>();
+        String cypherSql;
+        StatementResult result;
+        try {
+            if ("".equals(devIds) || devIds == null) {
+                cypherSql = String.format("match(a:%s)  where size((a)-[]-()) = 0 return a.dev_id", GISConstants.NEO_POINT);
+                result  = session.run(cypherSql);
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    list.add(record.get(0).asString());
+                }
+            }else{
+                cypherSql = String.format("match(a:%s) where a.dev_id in [%s]  match (a) where size((a)-[]-()) = 0 return a.dev_id", GISConstants.NEO_POINT, devIds);
+                result = session.run(cypherSql);
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    list.add(record.get(0).asString());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return list;
+        }
+    }
+
+    /**
+     * 孤立线查询
+     */
+    public List<String> getLonelyLinesByDevIds(String devIds) {
+        List<String> list = new ArrayList<>();
+        String cypherSql;
+        StatementResult result;
+        try {
+            if ("".equals(devIds) || devIds == null) {
+                cypherSql = String.format("match(a)-[rel:%s]-(b) where  size((a)-[]-())=1 and size((b)-[]-())=1 return rel.relationID", GISConstants.NEO_LINE);
+                result = session.run(cypherSql);
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    list.add(record.get(0).asString());
+                }
+            } else {
+                cypherSql = String.format("match(a)-[rel:%s]-(b) where rel.relationID in [%s] and size((a)-[]-())=1 and size((b)-[]-())=1 return rel.relationID", GISConstants.NEO_LINE, devIds);
+                result = session.run(cypherSql);
+                while (result.hasNext()) {
+                    Record record = result.next();
+                    list.add(record.get(0).asString());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return list;
+        }
+    }
+
+
+    /**
+     * 根据devID删除某一管点
+     * @param devId
+     * @return
+     */
+    public  Boolean deletePointById(String devId){
+        try {
+            String cypherSql =String.format("match (a:%s) where a.dev_id=\"%s\"  delete a",GISConstants.NEO_POINT,devId);
+            session.run(cypherSql);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 根据devID删除某一管线
+     * @param devId
+     * @return
+     */
+    public Boolean deleteLineById(String devId) {
+        try {
+            String cypherSql = String.format("match (a)-[b:%s]-[c] where a.dev_id=\"%s\"  delete b", GISConstants.NEO_LINE, devId);
+            session.run(cypherSql);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

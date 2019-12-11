@@ -195,7 +195,26 @@
         select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext gdx
         where dev_id in (${devIds}) AND delete_flag = false
     </select>
-
+    <select id="getLonelyPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
+        select code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext
+        where delete_flag = false
+        <if test="devIds != null and devIds.size > 0">
+            AND dev_id in
+            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="getLonelyLinesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
+        select code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext
+        where delete_flag = false
+        <if test="devIds != null and devIds.size > 0">
+            AND dev_id in
+            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
     <select id="getPointDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoPointVO">
         select dev_id,code,name,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y,belong_to from gis_dev_ext gdx
         WHERE  caliber is  null AND delete_flag = false
@@ -216,6 +235,7 @@
     <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
         SELECT <include refid="Base_Column_List" />
         FROM gis_dev_ext gdx
+
         WHERE delete_flag = false
         AND code = #{code}
         LIMIT 1
@@ -361,6 +381,9 @@
 
     <update id="deleteDevExtByDevId" parameterType="java.lang.String" >
         UPDATE gis_dev_ext set delete_flag = TRUE  where dev_id = #{devId}
+    </update>
+    <update id="deleteShareDevByDevId" parameterType="java.lang.String" >
+        UPDATE share_dev set delete_flag = 1  where dev_id = #{devId}
     </update>
 
     <select id="transformWgs84ToCustom" resultType="java.lang.String">
@@ -559,4 +582,32 @@
         where caliber  is not null and delete_flag = false GROUP BY belong_to
     </select>
 
+    <select id="getRepeatPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
+        select code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext
+        where delete_flag = false
+        <if test="devIds ==null or devIds.size==0">
+            and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is null order by st_astext(geom)
+         </if>
+        <if test="devIds != null and devIds.size > 0">
+            AND st_astext(geom) in (select st_astext(geom) From  gis_dev_ext where  dev_id in
+            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is null order by st_astext(geom)
+        </if>
+    </select>
+    <select id="getRepeatLinesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
+        select code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext
+        where delete_flag = false
+        <if test="devIds ==null or devIds.size==0">
+            and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is not null order by st_astext(geom)
+        </if>
+        <if test="devIds != null and devIds.size > 0">
+            AND st_astext(geom) in (select st_astext(geom) From  gis_dev_ext where  dev_id in
+            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is not null order by st_astext(geom)
+        </if>
+    </select>
 </mapper>

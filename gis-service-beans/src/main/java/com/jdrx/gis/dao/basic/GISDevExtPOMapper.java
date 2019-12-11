@@ -4,6 +4,7 @@ import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entity.basic.CodeXYPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entity.query.PipeLengthPO;
+import com.jdrx.gis.beans.vo.basic.AnalysisVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
@@ -198,7 +199,6 @@ public interface GISDevExtPOMapper {
 	Double getLengthByGeomStr(@Param("geom") String geom);
 
 	/**
-<<<<<<< Updated upstream
 	 * 根据id查询其geom
 	 * @param id
 	 * @return
@@ -217,6 +217,36 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	public List<PipeLengthVO> getPipeLengthByAuthId();
+	/**
+	 * 根据devIds获取孤立点分析基础信息
+	 * @param devIds
+	 * @return
+	 */
+	List<AnalysisVO> getLonelyPointsByDevIds(@Param("devIds") List<String> devIds);
+	/**
+	 * 根据devIds获取孤立线分析基础信息
+	 * @param devIds
+	 * @return
+	 */
+	List<AnalysisVO> getLonelyLinesByDevIds(@Param("devIds") List<String> devIds);
+    /**
+     * 根据设备id逻辑删除share_dev
+     * @param devId
+     * @return
+     */
+    Integer deleteShareDevByDevId(@Param("devId")String devId);
+    /**
+     * 根据devIds获取重复点基础信息
+     * @param devIds
+     * @return
+     */
+    List<AnalysisVO> getRepeatPointsByDevIds(@Param("devIds") List<String> devIds);
+	/**
+	 * 根据devIds获取重复线基础信息
+	 * @param devIds
+	 * @return
+	 */
+	List<AnalysisVO> getRepeatLinesByDevIds(@Param("devIds") List<String> devIds);
 
 }
 
