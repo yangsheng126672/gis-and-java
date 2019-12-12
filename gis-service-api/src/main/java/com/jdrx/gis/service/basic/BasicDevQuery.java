@@ -339,6 +339,9 @@ public class BasicDevQuery {
 			String extentStr = getLayerExtentByAuthId(deptId);
 			vo.setLayerExtent(extentStr);
 
+			Long tmpNumber = System.currentTimeMillis();
+			String tmpStr = "&number="+String.valueOf(tmpNumber);
+
 			layerUrl = dictConfig.getDefaultLayerUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
@@ -346,9 +349,9 @@ public class BasicDevQuery {
 				if (dictDetail.getName().equals("cad")){
 					vo.setCad(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("point")){
-					vo.setPoint(dictDetail.getVal()+"&inSR=4326&geometry="+extentStr);
+					vo.setPoint(dictDetail.getVal()+"&inSR=4326&geometry="+extentStr + tmpStr);
 				}else if (dictDetail.getName().equals("line")){
-					vo.setLine(dictDetail.getVal()+"&inSR=4326&geometry="+extentStr);
+					vo.setLine(dictDetail.getVal()+"&inSR=4326&geometry="+extentStr + tmpStr);
 				}else if (dictDetail.getName().equals("title")){
 					vo.setTitle(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("extent")){
@@ -380,7 +383,6 @@ public class BasicDevQuery {
 	}
 
 	/**
-<<<<<<< Updated upstream
 	 * 获取地图中心点
 	 * @param deptPath
 	 * @return
@@ -422,7 +424,6 @@ public class BasicDevQuery {
 	}
 
 	/**
-<<<<<<< Updated upstream
 	 * 根据id获取图层
 	 * @param list_id
 	 */
