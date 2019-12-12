@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.NodeDTO;
+import com.jdrx.gis.beans.dto.dataManage.ShareAddedPointDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
@@ -535,6 +536,33 @@ public class Neo4jUtil {
             session.run(cypherSql);
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 保存管点同步到neo4j数据库中
+     * @param
+     * @return
+     */
+    public Boolean savePointToNeo4j( ShareAddedPointDTO dto,String devid){
+        try{
+            String nodeType;
+            String name = dto.getMap().get(GISConstants.GIS_ATTR_CODE).toString();
+            if(dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("阀")){
+                nodeType=GISConstants.NEO_NODE_VALVE;
+            }else if(dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("水源")){
+                nodeType=GISConstants.NEO_NODE_WATER;
+            }
+            else{
+                nodeType=GISConstants.NEO_NODE_NORMAL;
+            }
+            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f})",GISConstants.NEO_POINT,devid,
+                    name,nodeType,dto.getX(),dto.getY());
+            session.run(cypherSql);
+            return true;
+        }catch(Exception e){
             e.printStackTrace();
             return false;
         }
