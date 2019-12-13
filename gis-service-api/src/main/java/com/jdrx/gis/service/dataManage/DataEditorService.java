@@ -566,6 +566,17 @@ public class DataEditorService {
             PointVO pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
 
             //设置更新新的管点空间信息
+            JSONObject pointJson = JSONObject.parseObject(gisDevExtPO.getDataInfo().toString());
+            Map<String,Object> pointMap = (Map)pointJson;
+            if (pointMap.containsKey("x")&&pointMap.containsKey("y")){
+                pointMap.replace("x",pointVO.getX());
+                pointMap.replace("y",pointVO.getY());
+            }
+            String jsonStr = JSONObject.toJSONString(pointMap);
+            PGobject jsonObject = new PGobject();
+            jsonObject.setValue(jsonStr);
+            jsonObject.setType("jsonb");
+            gisDevExtPO.setDataInfo(jsonObject);
             gisDevExtPO.setGeom(transformGeom);
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
 
@@ -720,6 +731,27 @@ public class DataEditorService {
             Logger.error("根据devId删除设备失败！dev_id ="+devId);
             throw new BizException("根据devId删除设备失败!");
         }
+    }
+
+    /**
+     * 经纬度转地方坐标系
+     * @param dto
+     * @return
+     * @throws BizException
+     */
+    public PointVO transformWgs84ToXY(PointDTO dto) throws BizException{
+        PointVO pointVO = null;
+        try {
+            String geom = "POINT("+dto.getLng()+" "+dto.getLat()+")";
+            String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
+            String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
+            pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
+        }catch (Exception e){
+            e.printStackTrace();
+            Logger.error("根据经纬度转地方坐标系失败" + dto.toString());
+            throw new BizException("根据经纬度转地方坐标系失败!");
+        }
+        return pointVO;
     }
 
 

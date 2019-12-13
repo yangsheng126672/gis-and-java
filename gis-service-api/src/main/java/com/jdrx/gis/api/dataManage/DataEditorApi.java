@@ -117,11 +117,11 @@ public class DataEditorApi {
         return  ResponseFactory.ok(dataEditorService.deleteShareDevByDevId(dto.getId()));
     }
 
-
-
-
-
-
-
+    @ApiOperation(value = "经纬度转为地方坐标系")
+    @RequestMapping(value ="transformWgs84ToCustom")
+    public ResposeVO transformWgs84ToCustom(@ApiParam(name = "dto", required = true) @RequestBody @Valid PointDTO dto) throws Exception{
+        Logger.debug("api/0/dataEditor/transformWgs84ToCustom 经纬度转为地方坐标系");
+        return  ResponseFactory.ok(dataEditorService.transformWgs84ToXY(dto));
+    }
 
 }
