@@ -209,7 +209,7 @@
          LIMIT 1
     </select>
 
-    <select id="getAllTypeIdByTopId" resultType="java.util.List">
+    <select id="getAllTypeIdByTopId" resultType="long">
         SELECT id  FROM (
             WITH RECURSIVE A AS (
                 SELECT A.*  FROM share_dev_type A

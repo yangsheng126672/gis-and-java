@@ -104,6 +104,6 @@ public interface ShareDevTypePOMapper {
 	 * @param topId
 	 * @return
 	 */
-	List getAllTypeIdByTopId(@Param("topId") Long topId);
+	List<Long> getAllTypeIdByTopId(@Param("topId") Long topId);
 
 }
