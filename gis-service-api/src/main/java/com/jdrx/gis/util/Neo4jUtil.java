@@ -542,27 +542,51 @@ public class Neo4jUtil {
     }
 
     /**
-     * 保存管点同步到neo4j数据库中
+     * 保存管点及新增的关系同步到neo4j数据库中
      * @param
      * @return
      */
-    public Boolean savePointToNeo4j( ShareAddedPointDTO dto,String devid){
-        try{
+    public Boolean saveToNeo4j(ShareAddedPointDTO dto, String devid, String startDevid, String startRelationid, String code1, String endDevid, String endRelationid, String code2, Long belongTo) {
+        //参数依次为前端dto对象,创建的管点的devID,第一条管线起始管点的devid,管线的devid,第一条管线编码,第二条管线的结束devid,管线的devid,第二条管线的编码,类型
+        try {
+            //同步管点
             String nodeType;
             String name = dto.getMap().get(GISConstants.GIS_ATTR_CODE).toString();
-            if(dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("阀")){
-                nodeType=GISConstants.NEO_NODE_VALVE;
-            }else if(dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("水源")){
-                nodeType=GISConstants.NEO_NODE_WATER;
+            if (dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("阀")) {
+                nodeType = GISConstants.NEO_NODE_VALVE;
+            } else if (dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("水源")) {
+                nodeType = GISConstants.NEO_NODE_WATER;
+            } else {
+                nodeType = GISConstants.NEO_NODE_NORMAL;
             }
-            else{
-                nodeType=GISConstants.NEO_NODE_NORMAL;
-            }
-            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f})",GISConstants.NEO_POINT,devid,
-                    name,nodeType,dto.getX(),dto.getY());
+            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:%d})", GISConstants.NEO_POINT, devid,
+                    name, nodeType, dto.getX(), dto.getY(), belongTo);
             session.run(cypherSql);
+            //获取管线及管点的属性值
+            String relationId = dto.getLineDevId();
+            String cypherSql1 = String.format("match(a)-[rel:%s]-(b) where rel.relationID = \"%s\" return rel", GISConstants.NEO_LINE, dto.getLineDevId());
+            session.run(cypherSql1);
+            StatementResult result = session.run(cypherSql1);
+            String cztype = null;
+            Integer gj = null;
+            while (result.hasNext()) {
+                Record record = result.next();
+                gj = (int) record.get(0).asMap().get("gj");
+                cztype = record.get(0).asMap().get("cztype").toString();
+            }
+            //删除原有管线
+            String cypherSql2 = String.format("match(a)-[rel:%s]-(b) where rel.relationID = \"%s\"  delete rel", GISConstants.NEO_LINE, dto.getLineDevId());
+            session.run(cypherSql2);
+            //创建管线1
+            String cypherSql3 = String.format("match (a:gd) where a.dev_id =\"%s\",(b:gd) where b.dev_id=\"%s\" create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
+                    "belong_to:%d,name:\"%s\"}]-(b)", startDevid, devid, cztype, gj, startRelationid, belongTo, code1);
+            //创建管线2
+            String cypherSql4 = String.format("match (a:gd) where a.dev_id =\"%s\",(b:gd) where b.dev_id=\"%s\" create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
+                    "belong_to:%d,name:\"%s\"}]-(b)", devid, endDevid, cztype, gj, endRelationid, belongTo, code2);
+            session.run(cypherSql3);
+            session.run(cypherSql4);
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
