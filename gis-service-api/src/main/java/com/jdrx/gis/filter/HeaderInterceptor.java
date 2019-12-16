@@ -1,9 +1,12 @@
 package com.jdrx.gis.filter;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
+import com.jdrx.gis.config.JwtConfig;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.util.ComUtil;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
@@ -14,6 +17,7 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.plugin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -45,6 +49,9 @@ public class HeaderInterceptor implements Interceptor {
 	private static final String T_EXT = "gis_dev_ext";
 	private String matchs;
 
+	@Autowired
+	private JwtConfig jwtConfig;
+
 	@Override
 	public Object intercept(Invocation invocation) throws Throwable {
 		HttpServletRequest request;
@@ -59,17 +66,11 @@ public class HeaderInterceptor implements Interceptor {
 			while (headerNames.hasMoreElements()) {
 				String key = (String) headerNames.nextElement();
 				String value = request.getHeader(key);
-				String[] tokens;
-				String tokenStr = null;
 				if (GISConstants.TRANSPARENT_TOKEN_FEILD.equalsIgnoreCase(key)) {
-					tokens = value.split("\\.");
-					if (Objects.nonNull(tokens) && tokens.length >=2) {
-						tokenStr = tokens[1]; // 取第二段
-					}
-					byte[] jsonBytes = Base64.getDecoder().decode(tokenStr.getBytes());
-					String jsonStr = new String(jsonBytes);
-					JSONObject jsonObject = JSONObject.parseObject(jsonStr);
-					deptPath = Objects.nonNull(jsonObject.get(DEPT_PATH)) ? String.valueOf(jsonObject.get(DEPT_PATH)) : null;
+					JwtParser parser = Jwts.parser();
+					parser.setSigningKey(jwtConfig.getSigningKey());
+					DefaultClaims body = (DefaultClaims) parser.parse(value).getBody();
+					deptPath = Objects.nonNull(body.get(DEPT_PATH)) ? String.valueOf(body.get(DEPT_PATH)) : null;
 					break;
 				}
 			}

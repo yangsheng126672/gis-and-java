@@ -4,11 +4,16 @@ package com.jdrx.gis.aop;
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entity.log.GisTransLog;
+import com.jdrx.gis.config.JwtConfig;
 import com.jdrx.gis.dao.basic.DictDetailPOMapper;
 import com.jdrx.gis.dao.log.GisTransLogMapper;
 import com.jdrx.gis.util.HttpUtil;
 import com.jdrx.gis.util.JsonFormatUtil;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.DefaultClaims;
 import io.swagger.annotations.ApiOperation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import sun.awt.AWTCharset;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -51,6 +57,8 @@ public class LoggerAop {
 	@Autowired
 	private DictDetailPOMapper dictDetailPOMapper;
 
+	@Autowired
+	private JwtConfig jwtConfig;
 
 	// 拦截api接口下面的所有类所有方法，所有要求api目录下不要包含其他方法
 	@Pointcut("execution(* com.jdrx.gis.api..*(..))")
@@ -92,18 +100,12 @@ public class LoggerAop {
 		while (headerNames.hasMoreElements()) {
 			String key = (String) headerNames.nextElement();
 			String value = request.getHeader(key);
-			String[] tokens;
-			String tokenStr = null;
 			if (GISConstants.TRANSPARENT_TOKEN_FEILD.equalsIgnoreCase(key)) {
-				tokens = value.split("\\.");
-				if (Objects.nonNull(tokens) && tokens.length >= 2) {
-					tokenStr = tokens[1]; // 取第二段
-				}
-				byte[] jsonBytes = Base64.getDecoder().decode(tokenStr.getBytes());
-				String jsonStr = new String(jsonBytes);
-				JSONObject jsonObject = JSONObject.parseObject(jsonStr);
-				loginUserName = Objects.nonNull(jsonObject.get(GISConstants.REAL_NAME)) ?
-						String.valueOf(jsonObject.get(GISConstants.REAL_NAME)) : "";
+				JwtParser parser = Jwts.parser();
+				parser.setSigningKey(jwtConfig.getSigningKey());
+				DefaultClaims body = (DefaultClaims) parser.parse(value).getBody();
+				loginUserName = Objects.nonNull(body.get(GISConstants.REAL_NAME)) ?
+						String.valueOf(body.get(GISConstants.REAL_NAME)) : "";
 				break;
 			}
 		}
@@ -178,6 +180,7 @@ public class LoggerAop {
 
 	@AfterThrowing(value = "logcut()", throwing = "exception")
 	public void afterThrowing(JoinPoint joinPoint, Exception exception) throws Throwable {
+		exception.printStackTrace();
 		GisTransLog gisTransLog = gisTransLogLocal.get();
 		Long start =  gisTransLog.getCost().longValue();
 		Long end = System.currentTimeMillis();
@@ -215,4 +218,5 @@ public class LoggerAop {
 			return false;
 		}
 	}
+
 }
