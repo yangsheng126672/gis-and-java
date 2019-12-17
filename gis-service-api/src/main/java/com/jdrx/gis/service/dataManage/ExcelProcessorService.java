@@ -1,5 +1,6 @@
 package com.jdrx.gis.service.dataManage;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -12,6 +13,7 @@ import com.jdrx.gis.beans.entity.dataManage.DevSaveParam;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.datamanage.ImportVO;
 import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
@@ -23,6 +25,8 @@ import com.jdrx.gis.service.basic.GISDeviceService;
 import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.gis.service.basic.ShareDevService;
 import com.jdrx.gis.util.ComUtil;
+import com.jdrx.gis.util.JavaFileToFormUpload;
+import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
 import org.apache.poi.ss.usermodel.*;
@@ -36,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -87,6 +93,12 @@ public class ExcelProcessorService {
 
 	@Autowired
 	private UserRpc userRpc;
+
+	@Autowired
+	private PathConfig pathConfig;
+
+	@Autowired
+	private Neo4jUtil neo4jUtil;
 
 	// 需要判断是否为空的列
 	private static List<String>  validHeader = Lists.newArrayList();
@@ -584,8 +596,8 @@ public class ExcelProcessorService {
 	 * @throws BizException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public boolean saveExcelData(DevSaveParam devSaveParam) throws BizException {
-		boolean result = false;
+	public List<Map<String, String>> saveExcelData(DevSaveParam devSaveParam) throws BizException {
+		List<Map<String, String>> codeDevIdMapList = Lists.newArrayList();
 		devSaveParam.setSaveFlag(1);
 		Map<String, List> buildMap = buildDevPO(devSaveParam);
 		try {
@@ -596,16 +608,20 @@ public class ExcelProcessorService {
 				e1 = shareDevService.splitBatchInsert(shareDevPOS);
 			}
 			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
+				for (GISDevExtPO gisDevExtPO : gisDevExtPOS){
+					Map<String, String> map = Maps.newHashMap();
+					map.put(gisDevExtPO.getCode(), gisDevExtPO.getDevId());
+					codeDevIdMapList.add(map);
+				}
 				e2 = gisDevExtService.splitBatchInsert(gisDevExtPOS);
 			}
 			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows");
-			result = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error(e.getMessage());
 			new BizException("保存设备数据失败！");
 		}
-		return result;
+		return codeDevIdMapList;
 	}
 
 	/**
@@ -615,10 +631,10 @@ public class ExcelProcessorService {
 	 * @throws BizException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public boolean updateDBData(DevSaveParam devSaveParam) throws BizException {
-		boolean result = false;
+	public List<Map<String, String>> updateDBData(DevSaveParam devSaveParam) throws BizException {
 		devSaveParam.setSaveFlag(2);
 		Map<String, List> buildMap = buildDevPO(devSaveParam);
+		List<Map<String, String>> codeDevIdMapList = Lists.newArrayList();
 		try {
 			List<ShareDevPO> shareDevPOS = buildMap.get(GISConstants.SHARE_DEV_S);
 			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
@@ -627,16 +643,20 @@ public class ExcelProcessorService {
 				e1 = shareDevService.splitBatchUpdate(shareDevPOS);
 			}
 			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
+				for (GISDevExtPO gisDevExtPO : gisDevExtPOS){
+					Map<String, String> map = Maps.newHashMap();
+					map.put(gisDevExtPO.getCode(), gisDevExtPO.getDevId());
+					codeDevIdMapList.add(map);
+				}
 				e2 = gisDevExtService.splitBatchUpdate(gisDevExtPOS);
 			}
 			Logger.debug("share_dev update " + e1 + " rows, and gis_dev_ext update " + e2 + " rows");
-			result = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error(e.getMessage());
 			new BizException("保存设备数据失败！");
 		}
-		return result;
+		return codeDevIdMapList;
 	}
 
 	/**
@@ -905,32 +925,150 @@ public class ExcelProcessorService {
 			importVO.setIsOverride("Y");
 			return importVO;
 		}
-		boolean result = false;
+		List<Map<String, String>> result1;
+		List<Map<String, String>> result2;
 		DevSaveParam devSaveParam = new DevSaveParam();
 		devSaveParam.setLoginUserName(loginUserName);
 		devSaveParam.setExistsCodes(existsExtPOs);
 		if (Objects.nonNull(pointDataList)) { // 点
 			devSaveParam.setDataMapList(pointDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET0_NAME);
-
+			List<Map<String, String>> pList = Lists.newArrayList();
 			if (tsBool) {
-				updateDBData(devSaveParam);
+				pList = updateDBData(devSaveParam);
 			}
-			result = saveExcelData(devSaveParam);
+			result1 = saveExcelData(devSaveParam);
+			result1.addAll(pList);
+			pointDataList = putDevId(result1, pointDataList, 0);
+			pointDataList = putNodeType(pointDataList);
 		}
 
 		if (Objects.nonNull(lineDataList)) { // 线
 			devSaveParam.setDataMapList(lineDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET1_NAME);
+			List<Map<String, String>> pList = Lists.newArrayList();
 			if (tsBool) {
-				updateDBData(devSaveParam);
+				pList = updateDBData(devSaveParam);
 			}
-			result = saveExcelData(devSaveParam);
+			result2 = saveExcelData(devSaveParam);
+			result2.addAll(pList);
+			lineDataList = putDevId(result2, lineDataList, 1);
 		}
-		importVO.setRetStatus(result);
+
+		String filePathPoint = writeCsv(pointDataList, "point");
+		String filePathLine = writeCsv(lineDataList, "line");
+		neo4jUtil.createNodesByCsvPoint(filePathPoint);
+		neo4jUtil.createNodesByCsvLine(filePathLine);
+
+		importVO.setRetStatus(true);
 		importVO.setIsOverride("N");
 		importVO.setMsg("Success");
 		return importVO;
 	}
+
+
+	private String writeCsv(List<Map<String, Object>> pointDataList, String title) {
+		String path = "";
+		try {
+			String[] noNeedHeader = {GISConstants.DATA_INFO, GISConstants.DEV_TYPE_NAME_EN};
+			Set<String> headerSet = Sets.newHashSet();
+			if (Objects.nonNull(pointDataList) && pointDataList.size() > 0) {
+				for (Map<String, Object> map : pointDataList) {
+					map.keySet().removeAll(Arrays.asList(noNeedHeader));
+				}
+				Set<String> headers = pointDataList.get(0).keySet();
+				headerSet.addAll(headers);
+			}
+			if (headerSet.contains(GISConstants.CALIBER_CHN)) {
+				headerSet.add(GISConstants.GIS_ATTR_CALIBER);
+				headerSet.remove(GISConstants.CALIBER_CHN);
+			}
+			String filePath = pathConfig.getDownloadPath() + "/" + title + ".csv";
+			CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8),
+					CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
+			writer.writeNext(StringUtils.toStringArray(headerSet));
+			int total = pointDataList.size();
+			int pageSize = GISConstants.EXPORT_PAGESIZE;
+			int pageTotal;
+			if (total <= pageSize) {
+				pageTotal = 1;
+			} else {
+				pageTotal = total / pageSize == 0 ? total / pageSize : total / pageSize + 1;
+			}
+			int pageNum = 0;
+			while (pageTotal-- > 0) {
+				List<Map<String, Object>> subList = pointDataList.subList(pageNum * pageSize,
+						(pageNum + 1) * pageSize > total ? total : (pageNum + 1) * pageSize);
+				for (Map<String, Object> map : subList) {
+					Iterator<String> iterator = headerSet.iterator();
+					String[] rows = new String[map.size()];
+					for (int i = 0; i < headerSet.size(); i++) {
+						String header = iterator.hasNext() ? iterator.next() : "";
+						if (GISConstants.GIS_ATTR_CALIBER.equals(header)) {
+							header = GISConstants.CALIBER_CHN;
+						}
+						String txt = Objects.nonNull(map.get(header)) ? String.valueOf(map.get(header)) : "";
+						rows[i] = txt;
+					}
+					writer.writeNext(rows);
+				}
+				pageNum++;
+			}
+			writer.flush();
+			writer.close();
+			path = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return path;
+	}
+
+	private List<Map<String, Object>> putDevId(List<Map<String, String>> list, List<Map<String, Object>> exList, int flag) {
+		if (Objects.isNull(list)) {
+			return exList;
+		}
+		for (Map<String, Object> exMap : exList) {
+			for (Map<String, String> map : list) {
+				String code = "";
+				if (flag == 0) {
+					Object codeObj = exMap.get(GISConstants.POINT_CODE_CHN);
+					if (Objects.nonNull(codeObj)) {
+						code = String.valueOf(codeObj);
+					}
+				} else if (flag == 1) {
+					Object startObj = exMap.get(GISConstants.LINE_START_CODE_CHN);
+					Object endObj = exMap.get(GISConstants.LINE_END_CODE_CHN);
+					if (Objects.nonNull(startObj) && Objects.nonNull(endObj)) {
+						code = String.valueOf(startObj) + "-" + String.valueOf(endObj);
+					}
+				}
+				if (map.containsKey(code)) {
+					exMap.put(GISConstants.DEV_ID, map.get(code));
+					break;
+				}
+			}
+		}
+		return exList;
+	}
+
+	private List<Map<String, Object>> putNodeType(List<Map<String, Object>> pointDataList) {
+		List<String> devIds = Lists.newArrayList();
+		for (Map<String, Object> map : pointDataList) {
+			devIds.add(Objects.nonNull(map.get(GISConstants.DEV_ID)) ? String.valueOf(map.get(GISConstants.DEV_ID)) : "");
+		}
+		// 键devId,值是否为阀门
+		List<Map<String, Integer>> nodeTypes = shareDevPOMapper.findNodeType(devIds);
+		for (Map<String, Object> map : pointDataList) {
+			String dev_id = String.valueOf(map.get(GISConstants.DEV_ID));
+			for (Map<String, Integer> xMap : nodeTypes) {
+				if(xMap.containsKey(dev_id)) {
+					map.put(GISConstants.NODE_TYPE, xMap.get(dev_id));
+					break;
+				}
+			}
+		}
+		return pointDataList;
+	}
+
 
 }

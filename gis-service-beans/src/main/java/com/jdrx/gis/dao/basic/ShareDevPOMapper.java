@@ -4,6 +4,7 @@ import com.jdrx.gis.beans.entity.basic.ShareDevPO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ShareDevPOMapper {
 
@@ -46,5 +47,8 @@ public interface ShareDevPOMapper {
 	 * @return
 	 */
 	int batchUpdate(@Param("shareDevPOList") List<ShareDevPO> shareDevPOList);
+
+
+	List<Map<String, Integer>> findNodeType(@Param("devIds") List<String> devIds);
 
 }

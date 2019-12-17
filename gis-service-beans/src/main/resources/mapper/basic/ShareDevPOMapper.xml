@@ -353,4 +353,43 @@
             id = #{item.id,jdbcType=VARCHAR}
         </foreach>
     </update>
+
+    <select id="findNodeType" resultType="java.util.Map">
+        SELECT id, CASE WHEN type_id = typeid THEN 1 ELSE 0 END AS nodetype
+        FROM (
+            SELECT * FROM (
+                SELECT id, type_id
+                FROM share_dev
+                <if test="devIds != null and devIds.size > 0">
+                    where id in
+                    <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+            ) a
+                LEFT JOIN (
+                    SELECT id AS typeid
+                    FROM (
+                        WITH RECURSIVE a AS (
+                                SELECT a.*
+                                FROM share_dev_type a
+                                WHERE p_id = (
+                                        SELECT id
+                                        FROM share_dev_type
+                                        WHERE name = '阀门'
+                                        LIMIT 1
+                                    )
+                                    AND del_flag = 0
+                                UNION ALL
+                                SELECT b.*
+                                FROM share_dev_type b, a
+                                WHERE a.id = b.p_id
+                                    AND b.del_flag = 0
+                            )
+                        SELECT * FROM a
+                    ) rs
+                ) b
+                ON a.type_id = b.typeid
+        ) c
+    </select>
 </mapper>

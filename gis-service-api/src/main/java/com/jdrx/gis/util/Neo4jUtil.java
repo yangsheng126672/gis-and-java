@@ -675,4 +675,24 @@ public class Neo4jUtil {
         }
     }
 
+	/**
+	 * 创建管点
+	 * @param filePath
+	 */
+	public void createNodesByCsvPoint(String filePath) {
+		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS point "
+				+ "create (:gd1{dev_id:point.dev_id, name : point." + GISConstants.POINT_CODE_CHN + ", nodeType : point.nodetype, x : point." + GISConstants.X_CHN + ", y : point." + GISConstants.Y_CHN + ",  belongTo : point." + GISConstants.AUTH_ID_S + "})";
+		session.run(cypherSql);
+	}
+
+	/**
+	 * 创建管线
+	 * @param filePath
+	 */
+	public void createNodesByCsvLine(String filePath) {
+		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS line "
+				+ "match (from:gd1{name:\'line." + GISConstants.LINE_START_CODE_CHN + "\',belongTo:line."+ GISConstants.AUTH_ID_S+"}), (to:gd1{name:\'line." + GISConstants.LINE_END_CODE_CHN + "\',belongTo:line."+ GISConstants.AUTH_ID_S+"})"
+				+ "create (from) - [:lsjd{relationID:line.dev_id, name : line." + GISConstants.LINE_START_CODE_CHN + "line." + GISConstants.LINE_END_CODE_CHN + ", gj : line." + GISConstants.GIS_ATTR_CALIBER +"}]-(to)";
+		session.run(cypherSql);
+	}
 }

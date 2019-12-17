@@ -199,4 +199,8 @@ public class GISConstants {
 	public final static String GIS_ATTR_ADDR = "addr";
 
 	public final static String GIS_ATTR_PIPE_LENGTH = "pipe_length";
+
+	/** 图数据库鉴别节点是否为阀门 1-是，0-不是 */
+	public final static String NODE_TYPE = "nodetype";
+
 }
