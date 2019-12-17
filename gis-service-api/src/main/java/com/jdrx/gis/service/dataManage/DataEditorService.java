@@ -3,14 +3,12 @@ package com.jdrx.gis.service.dataManage;
 import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.*;
-import com.jdrx.gis.beans.entity.basic.DictDetailPO;
-import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entity.basic.ShareDevPO;
-import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.*;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
@@ -63,6 +61,9 @@ public class DataEditorService {
 
     @Autowired
     NetsAnalysisService netsAnalysisService;
+
+    @Autowired
+    GisDevTplAttrPOMapper gisDevTplAttrPOMapper;
 
 
     /**
@@ -171,6 +172,14 @@ public class DataEditorService {
             String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
 
             map.put(GISConstants.GIS_ATTR_DEVID,devId);
+            List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
+            for (GisDevTplAttrPO gis:list) {
+                String name = gis.getFieldName();
+                //如果map集合的key中没有某些管点属性英文字段，则对其增加key并赋值为""
+                if(!map.containsKey(name)){
+                    map.put(name,"");
+                }
+            }
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
@@ -340,7 +349,16 @@ public class DataEditorService {
                 PointVO pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
 
                 Map<String,Object> map = dto.getMapAttr();
+
                 map.put(GISConstants.GIS_ATTR_DEVID,devId);
+                List<GisDevTplAttrPO> list1 = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
+                for (GisDevTplAttrPO gis:list1) {
+                    String name = gis.getFieldName();
+                    //如果map集合的key中没有某些管点属性英文字段，则对其增加key并赋值为""
+                    if(!map.containsKey(name)){
+                        map.put(name,"");
+                    }
+                }
                 String jsonStr = JSONObject.toJSONString(map);
                 PGobject jsonObject = new PGobject();
                 jsonObject.setValue(jsonStr);
@@ -408,6 +426,14 @@ public class DataEditorService {
                 Map<String,Object> map = dto.getMapAttr();
                 map.put(GISConstants.GIS_ATTR_DEVID,devId);
                 map.put(GISConstants.GIS_ATTR_PIPE_LENGTH,pipe_length);
+                List<GisDevTplAttrPO> list1 = gisDevTplAttrPOMapper.selectNameByTqlId(2);//获取管线的全部字段英文名称
+                for (GisDevTplAttrPO gis:list1) {
+                    String name = gis.getFieldName();
+                    //如果map集合的key中没有某些管点属性英文字段，则对其增加key并赋值为""
+                    if(!map.containsKey(name)){
+                        map.put(name,"");
+                    }
+                }
                 String jsonStr = JSONObject.toJSONString(map);
                 PGobject jsonObject = new PGobject();
                 jsonObject.setValue(jsonStr);

@@ -66,4 +66,11 @@ public interface GisDevTplAttrPOMapper {
 	 * @return
 	 */
 	List<GisDevTplAttrPO> selectTplByTplName(String tplName);
+
+	/**
+	 * 根据设备类型id查字段英文名称
+	 * @param tqlId
+	 * @return
+	 */
+	List<GisDevTplAttrPO> selectNameByTqlId(Integer tqlId);
 }

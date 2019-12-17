@@ -281,4 +281,8 @@
          where delete_flag = false
          and tpl_id = (select id from gis_dev_tpl where name = #{tplName} limit 1)
     </select>
+
+    <select id="selectNameByTqlId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select field_name from gis_dev_tpl_attr where tpl_id=#{tqlId} and delete_flag = false
+    </select>
 </mapper>
