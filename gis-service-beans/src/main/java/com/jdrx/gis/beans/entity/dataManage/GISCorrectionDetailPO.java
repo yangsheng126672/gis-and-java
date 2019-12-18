@@ -29,7 +29,7 @@ public class GISCorrectionDetailPO {
     /**
      * 修改值
      */
-    private String updval;
+    private String updVal;
 
 	/**
 	 * 是否通过，0-未通过，1-通过

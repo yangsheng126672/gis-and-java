@@ -6,7 +6,7 @@
         <result column="co_record_id" jdbcType="CHAR" property="coRecordId" />
         <result column="field_desc" jdbcType="VARCHAR" property="fieldDesc" />
         <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
-        <result column="updval" jdbcType="VARCHAR" property="updval" />
+        <result column="updval" jdbcType="VARCHAR" property="updVal" />
         <result column="haspass" jdbcType="SMALLINT" property="hasPass" />
         <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
         <result column="create_by" jdbcType="VARCHAR" property="createBy" />
