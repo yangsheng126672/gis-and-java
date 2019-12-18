@@ -144,7 +144,7 @@
         #{name,jdbcType=VARCHAR},
       </if>
       <if test="belongTo != null">
-        belong_to = #{belongTo,jdbcType=BIGINT},
+        #{belongTo,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -152,7 +152,7 @@
   <select id="selectById" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from gis_pipe_analysis
+    from gis_pipe_analysis a
     WHERE delete_flag = FALSE
     AND
     id = #{id}
@@ -161,7 +161,7 @@
   <select id="selectByParamas"  resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from gis_pipe_analysis
+    from gis_pipe_analysis a
     WHERE delete_flag = FALSE
     <if test="dto.code != null and dto.code != ''">
       AND

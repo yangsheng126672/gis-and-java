@@ -128,9 +128,9 @@
     <if test="zoom != null">
       #{zoom,jdbcType=INTEGER},
     </if>
-      <if test="belongTo != null">
-        belong_to = #{belongTo,jdbcType=BIGINT},
-      </if>
+    <if test="belongTo != null">
+      #{belongTo,jdbcType=BIGINT},
+    </if>
     </trim>
   </insert>
 
@@ -139,7 +139,7 @@
     <include refid="Base_Column_List" />,
     st_x(ST_Centroid(geom)) as x,
     st_y(ST_Centroid(geom)) as y
-    from gis_measurement
+    from gis_measurement a
     WHERE delete_flag = FALSE
   </select>
 
