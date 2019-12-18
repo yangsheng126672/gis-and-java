@@ -546,8 +546,8 @@ public class Neo4jUtil {
      * @param
      * @return
      */
-    public Boolean saveToNeo4j(ShareAddedPointDTO dto, String devid, String startDevid, String startRelationid, String code1, String endDevid, String endRelationid, String code2, Long belongTo) {
-        //参数依次为前端dto对象,创建的管点的devID,第一条管线起始管点的devid,管线的devid,第一条管线编码,第二条管线的结束devid,管线的devid,第二条管线的编码,类型
+    public Boolean saveToNeo4j(ShareAddedPointDTO dto, String devid, String startCode, String startRelationid, String code1, String endCode, String endRelationid, String code2, Long belongTo) {
+        //参数依次为前端dto对象,创建的管点的devID,第一条管线起始管点的code,管线的devid,第一条管线编码,第二条管线的结束code,管线的devid,第二条管线的编码,类型
         try {
             //同步管点
             String nodeType;
@@ -568,21 +568,21 @@ public class Neo4jUtil {
             session.run(cypherSql1);
             StatementResult result = session.run(cypherSql1);
             String cztype = null;
-            Integer gj = null;
+            Long gj = null;
             while (result.hasNext()) {
                 Record record = result.next();
-                gj = (int) record.get(0).asMap().get("gj");
+                gj = (Long) record.get(0).asMap().get("gj");
                 cztype = record.get(0).asMap().get("cztype").toString();
             }
             //删除原有管线
             String cypherSql2 = String.format("match(a)-[rel:%s]-(b) where rel.relationID = \"%s\"  delete rel", GISConstants.NEO_LINE, dto.getLineDevId());
             session.run(cypherSql2);
             //创建管线1
-            String cypherSql3 = String.format("match (a:gd{dev_id:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)", startDevid, devid, cztype, gj, startRelationid, belongTo, code1);
+            String cypherSql3 = String.format("match (a:gd{name:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
+                    "belong_to:%d,name:\"%s\"}]->(b)", startCode, devid, cztype, gj, startRelationid, belongTo, code1);
             //创建管线2
-            String cypherSql4 = String.format("match  (a:gd{dev_id:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)", devid, endDevid, cztype, gj, endRelationid, belongTo, code2);
+            String cypherSql4 = String.format("match  (a:gd{dev_id:\"%s\"}),(b:gd{name:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
+                    "belong_to:%d,name:\"%s\"}]->(b)", devid, endCode, cztype, gj, endRelationid, belongTo, code2);
             session.run(cypherSql3);
             session.run(cypherSql4);
             return true;
@@ -617,12 +617,12 @@ public class Neo4jUtil {
     /**
      * 管网保存中管线信息的保存
      */
-    public Boolean saveLineToNeo4j(ShareLineDTO dto, String code, String startdevid, String endDevid, String lineDevid, Long belongTo) {
+    public Boolean saveLineToNeo4j(ShareLineDTO dto, String code, String startCode, String endCode, String lineDevid, Long belongTo) {
         try {
             String cztype = dto.getMaterial();
             Integer gj = dto.getCaliber();
-            String cypherSql = String.format("match (a:gd{dev_id:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)", startdevid, endDevid, cztype, gj, lineDevid, belongTo, code);
+            String cypherSql = String.format("match (a:gd{name:\"%s\"}),(b:gd{name:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
+                    "belong_to:%d,name:\"%s\"}]->(b)", startCode, endCode, cztype, gj, lineDevid, belongTo, code);
             session.run(cypherSql);
             return true;
         } catch (Exception e) {
@@ -633,9 +633,9 @@ public class Neo4jUtil {
     /**
      * 管线属性信息更改
      */
-    public Boolean updateLineToNeo4j(String devid,Map map){
+    public Boolean updateLineToNeo4j(String code,Map map){
         try{
-            String cypherSql = String.format("match(a)-[rel:gdline]-(b) where rel.relationID = \"%s\" set rel.cztype=\"%s\",rel.gj=%d",devid,
+            String cypherSql = String.format("match(a)-[rel:gdline]-(b) where rel.name = \"%s\" set rel.cztype=\"%s\",rel.gj=%d",code,
                     map.get(GISConstants.GIS_ATTR_MATERIAL).toString(),Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
             session.run(cypherSql);
             return true;
