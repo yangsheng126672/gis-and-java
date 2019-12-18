@@ -1,6 +1,8 @@
 package com.jdrx.gis.service.dataManage;
 
 import au.com.bytecode.opencsv.CSVWriter;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -692,16 +694,11 @@ public class ExcelProcessorService {
 				String caliber = Objects.nonNull(map.get(GISConstants.CALIBER_CHN)) ? String.valueOf(map.get(GISConstants.CALIBER_CHN)) : null;
 				String material = Objects.nonNull(map.get(GISConstants.MATERIAL_CHN)) ? String.valueOf(map.get(GISConstants.MATERIAL_CHN)) : null;
 				String belongTo = Objects.nonNull(map.get(GISConstants.AUTH_ID_S)) ? String.valueOf(map.get(GISConstants.AUTH_ID_S)) : null;
+
+				// data_info数据
 				HashMap dataInfoTempMap = (HashMap) map.get(GISConstants.DATA_INFO);
 				Object dataInfoStr =  dataInfoTempMap.get("value");
-				PGobject jsonObject = new PGobject();
-				try {
-					jsonObject.setValue(String.valueOf(dataInfoStr));
-					jsonObject.setType("jsonb");
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
+				JSONObject jsb = JSON.parseObject(String.valueOf(dataInfoStr));
 				Date creatAt = new Date();
 				PGgeometry geom = null;
 				String devCode = null;
@@ -711,6 +708,16 @@ public class ExcelProcessorService {
 				} else if (p_l == 2) {
 					devCode = lineCode;
 					geom = (PGgeometry) codeGeomMap.get(lineCode);
+					Double pipe_length = gisDevExtPOMapper.getLengthByGeomStr(geom.getValue());
+					jsb.put(GISConstants.PIPE_LENGTH, pipe_length);
+				}
+
+				PGobject jsonObject = new PGobject();
+				try {
+					jsonObject.setValue(jsb.toJSONString());
+					jsonObject.setType("jsonb");
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
 				// share_dev数据
 				shareDevPO.setId(String.valueOf(devId));
