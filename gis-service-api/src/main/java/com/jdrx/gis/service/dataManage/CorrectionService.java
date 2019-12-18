@@ -102,7 +102,7 @@ public class CorrectionService {
 							gisCorrectionDetailPO.setCoRecordId(coRecordId);
 							gisCorrectionDetailPO.setFieldDesc(fieldNameVO.getFieldDesc());
 							gisCorrectionDetailPO.setFieldName(key);
-							gisCorrectionDetailPO.setUpdval(String.valueOf(val));
+							gisCorrectionDetailPO.setUpdVal(String.valueOf(val));
 							gisCorrectionDetailPO.setCreateAt(now);
 							gisCorrectionDetailPO.setCreateBy(loginUserName);
 							detailPOS.add(gisCorrectionDetailPO);
@@ -263,7 +263,7 @@ public class CorrectionService {
 						List<GISCorrectionDetailPO> details = correctionDetailService.findPassedFieldsByRecordId(id);
 						if (Objects.nonNull(details)) {
 							for (GISCorrectionDetailPO detailPO : details) {
-								passContent.put(detailPO.getFieldDesc(), detailPO.getUpdval());
+								passContent.put(detailPO.getFieldDesc(), detailPO.getUpdVal());
 							}
 							vo.setPassMap(passContent);
 						}
