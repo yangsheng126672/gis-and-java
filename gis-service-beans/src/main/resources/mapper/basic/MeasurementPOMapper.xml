@@ -20,6 +20,7 @@
     <result column="zoom" jdbcType="INTEGER" property="zoom" />
     <result column="x" jdbcType="VARCHAR" property="centerPointX"/>
     <result column="y" jdbcType="VARCHAR" property="centerPointY"/>
+    <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
   </resultMap>
 
   <sql id="Example_Where_Clause">
@@ -63,7 +64,7 @@
       This element was generated on Wed Jul 17 11:35:51 CST 2019.
     -->
     id, name, meatured_value, remark, geom, delete_flag, create_by, create_at, update_by,
-    update_at,zoom
+    update_at,zoom,belong_to
   </sql>
 
 
@@ -107,6 +108,9 @@
       <if test="zoom != null">
         zoom,
       </if>
+      <if test="belongTo != null">
+        belong_to,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="name != null">
@@ -124,6 +128,9 @@
     <if test="zoom != null">
       #{zoom,jdbcType=INTEGER},
     </if>
+      <if test="belongTo != null">
+        belong_to = #{belongTo,jdbcType=BIGINT},
+      </if>
     </trim>
   </insert>
 
@@ -135,14 +142,5 @@
     from gis_measurement
     WHERE delete_flag = FALSE
   </select>
-
-  <!--<select id="getExtendArea"  parameterType="java.util.ArrayList" resultType="java.lang.String">-->
-    <!--SELECT ST_AsText(ST_Transform(ST_GeomFromText(-->
-    <!--(select st_Astext(ST_ConvexHull(ST_Union(geom))) from gis_dev_ext where dev_id in (-->
-      <!--<foreach collection="list" item="guard" index="index"-->
-               <!--separator=",">#{guard}</foreach>-->
-    <!--))-->
-    <!--,4548),4326)) As wgs_geom;-->
-  <!--</select>-->
 
 </mapper>

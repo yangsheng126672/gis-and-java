@@ -74,16 +74,18 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "获取所有测量列表")
 	@RequestMapping(value = "findMeasurementList")
-	public ResposeVO findMeasurementList(@ApiParam(name = "dto", required = true)@RequestBody @Valid PageDTO dto) throws BizException{
+	public ResposeVO findMeasurementList(@ApiParam(name = "dto", required = true)@RequestBody @Valid PageDTO dto,
+										 @RequestHeader(name ="deptPath") String deptPath) throws BizException{
 		Logger.debug("api/0/basic/findMeasurementList 获取所有测量列表");
 		return ResponseFactory.ok(basicDevQuery.findMeasurementList(dto));
 	}
 
 	@ApiOperation(value = "保存测量结果")
 	@RequestMapping(value ="saveMeasurement" )
-	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementDTO dto) throws BizException{
+	public ResposeVO saveMeasurement(@ApiParam(name = "dto", required = true)@RequestBody @Valid MeasurementDTO dto,
+									 @RequestHeader(name ="deptPath") String deptPath) throws BizException{
 		Logger.debug("api/0/basic/saveMeasurement 保存测量结果");
-		return ResponseFactory.ok(basicDevQuery.saveMeasurement(dto));
+		return ResponseFactory.ok(basicDevQuery.saveMeasurement(dto,deptPath));
 	}
 
 	@ApiOperation(value = "删除测量信息")

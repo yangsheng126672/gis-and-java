@@ -70,4 +70,9 @@ public class MeasurementPO {
      */
     private String centerPointY;
 
+    /**
+     * 权属值
+     */
+    private Long belongTo;
+
 }

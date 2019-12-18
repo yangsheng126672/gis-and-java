@@ -260,8 +260,10 @@ public class BasicDevQuery {
 	 * @param dto
 	 * @return
 	 */
-	public Integer saveMeasurement(MeasurementDTO dto) throws BizException{
+	public Integer saveMeasurement(MeasurementDTO dto,String deptPath) throws BizException{
 		try {
+			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+			dto.setBelongTo(deptId);
 			return measurementPOMapper.insertSelective(dto);
 		} catch (Exception e) {
 			e.printStackTrace();

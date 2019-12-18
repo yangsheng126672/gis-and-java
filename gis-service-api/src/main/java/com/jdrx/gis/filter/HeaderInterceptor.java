@@ -47,6 +47,8 @@ public class HeaderInterceptor implements Interceptor {
 	private static final String DEPT_PATH = "deptPath";
 	private static final String T_DEV = "share_dev";
 	private static final String T_EXT = "gis_dev_ext";
+	private static final String T_MEATUREMENT = "gis_measurement";
+	private static final String T_PIPE_ANALYSIS = "gis_pipe_analysis";
 	private String matchs;
 
 	@Autowired
@@ -112,12 +114,20 @@ public class HeaderInterceptor implements Interceptor {
 		StringBuffer sb2 = new StringBuffer().append("(SELECT * FROM ")
 				.append(T_EXT)
 				.append(" WHERE belong_to = ~)");
+		StringBuffer sb3 = new StringBuffer().append("(SELECT * FROM ")
+				.append(T_MEATUREMENT)
+				.append(" WHERE belong_to = ~)");
+		StringBuffer sb4 = new StringBuffer().append("(SELECT * FROM ")
+				.append(T_PIPE_ANALYSIS)
+				.append(" WHERE belong_to = ~)");
 
 		if (Objects.nonNull(deptPath) && Objects.nonNull(sql)) {
 			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
 			if (Objects.nonNull(deptId)) {
 				sql = ComUtil.replaceTargetIngorCase(sql, T_EXT, String.valueOf(sb2)).replaceAll("\\~", String.valueOf(deptId));
 				sql = ComUtil.replaceTargetIngorCase(sql, T_DEV, String.valueOf(sb1)).replaceAll("\\~", String.valueOf(deptId));
+				sql = ComUtil.replaceTargetIngorCase(sql, T_MEATUREMENT, String.valueOf(sb3)).replaceAll("\\~", String.valueOf(deptId));
+				sql = ComUtil.replaceTargetIngorCase(sql, T_PIPE_ANALYSIS, String.valueOf(sb4)).replaceAll("\\~", String.valueOf(deptId));
 			}
 		}
 		return sql;

@@ -16,10 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -61,12 +58,13 @@ public class NetsAnalysisApi {
 
     @ApiOperation(value = "保存关阀分析结果")
     @RequestMapping(value ="saveSecondAnalysisiResult" )
-    public ResposeVO saveSecondAnalysisiResult(@ApiParam(name = "dto", required = true) @RequestBody @Valid AnalysisRecordDTO recordDTO) throws Exception{
+    public ResposeVO saveSecondAnalysisiResult(@ApiParam(name = "dto", required = true) @RequestBody @Valid AnalysisRecordDTO recordDTO,
+                                               @RequestHeader(name ="deptPath") String deptPath) throws Exception{
         if (recordDTO == null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }
         Logger.debug("api/0/analysis/saveSecondAnalysisiResult 保存关阀分析结果");
-        return  ResponseFactory.ok(netsAnalysisService.saveAnalysisRecond(recordDTO));
+        return  ResponseFactory.ok(netsAnalysisService.saveAnalysisRecond(recordDTO,deptPath));
     }
 
     @ApiOperation(value = "获取爆管历史记录列表")

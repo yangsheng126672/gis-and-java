@@ -13,7 +13,7 @@ public class GisPipeAnalysisPO {
     private Long id;
 
     /**
-     * 爆管编号
+     * 爆管名称
      */
     private String name;
 
@@ -61,5 +61,10 @@ public class GisPipeAnalysisPO {
      * 修改时间
      */
     private Date updateAt;
+
+    /**
+     * 权属值
+     */
+    private Long belongTo;
 
 }

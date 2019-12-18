@@ -19,6 +19,7 @@ import com.jdrx.gis.dao.analysis.GisPipeAnalysisValvePOMapper;
 import com.jdrx.gis.dao.analysis.GisWaterUserInfoPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.ComUtil;
@@ -557,17 +558,20 @@ public class NetsAnalysisService {
     /**
      * 保存爆管记录
      * @param recordDTO
+     * @param deptPath
      * @return
      * @throws BizException
      */
-    public boolean saveAnalysisRecond(AnalysisRecordDTO recordDTO) throws BizException {
+    public boolean saveAnalysisRecond(AnalysisRecordDTO recordDTO,String deptPath) throws BizException {
         try {
+            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             GisPipeAnalysisPO gisPipeAnalysisPO =new GisPipeAnalysisPO();
             gisPipeAnalysisPO.setCode(recordDTO.getCode()) ;
             gisPipeAnalysisPO.setX(BigDecimal.valueOf(recordDTO.getPoint()[0]));
             gisPipeAnalysisPO.setY(BigDecimal.valueOf(recordDTO.getPoint()[1]));
             gisPipeAnalysisPO.setArea(recordDTO.getArea());
             gisPipeAnalysisPO.setName(recordDTO.getName());
+            gisPipeAnalysisPO.setBelongTo(deptId);
 
             gisPipeAnalysisPOMapper.insertSelective(gisPipeAnalysisPO);
             //回填id
