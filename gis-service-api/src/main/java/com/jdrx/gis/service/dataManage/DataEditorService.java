@@ -505,6 +505,8 @@ public class DataEditorService {
                 Logger.error("查找无设备信息");
                 throw new BizException("查询设备失败！");
             }
+            ShareDevPO shareDevPO = shareDevPOMapper.selectByPrimaryKey(gisDevExtPO.getDevId());
+
             List<DictDetailPO> dictDetailPOS = detailService.findDetailsByTypeVal(dictConfig.getLineType());
             List<Long> list = shareDevTypePOMapper.getAllTypeIdByTopId(Long.valueOf(dictDetailPOS.get(0).getVal()));
             //判断是否是线类型
@@ -513,6 +515,7 @@ public class DataEditorService {
                     gisDevExtPO.setCaliber(Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
                     String name = getNameByCaliber(Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
                     gisDevExtPO.setName(name);
+                    shareDevPO.setName(name);
                 }
                 if (!map.get(GISConstants.GIS_ATTR_MATERIAL).toString().equals(gisDevExtPO.getMaterial())){
                     gisDevExtPO.setMaterial(map.get(GISConstants.GIS_ATTR_MATERIAL).toString());
@@ -520,16 +523,21 @@ public class DataEditorService {
                 //判断类型是否改变
                 if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
                     gisDevExtPO.setTplTypeId(Long.valueOf(map.get("typeId").toString()));
+                    shareDevPO.setTypeId(Long.valueOf(map.get("typeId").toString()));
+                }
+                //判断街道是否改变
+                if(!map.get(GISConstants.GIS_ATTR_ADDR).toString().equals(shareDevPO.getAddr())){
+                    shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
                 }
             }else {
                 //判断类型是否改变
                 if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
                     gisDevExtPO.setName(map.get(GISConstants.GIS_ATTR_NAME).toString());
                     gisDevExtPO.setTplTypeId(Long.valueOf(map.get("typeId").toString()));
+                    shareDevPO.setTypeId(Long.valueOf(map.get("typeId").toString()));
                 }
 
             }
-
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
