@@ -1,5 +1,6 @@
 package com.jdrx.gis.beans.dto.dataManage;
 
+import com.jdrx.gis.beans.dto.base.PageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import lombok.Data;
  * @Time: 2019/12/5 16:29
  */
 @Data
-public class QueryAuditDTO {
+public class QueryAuditDTO extends PageDTO {
 
 	@ApiModelProperty("设备编码")
 	private String code;

@@ -1061,8 +1061,8 @@ public class ExcelProcessorService {
 		for (Map<String, Object> map : pointDataList) {
 			String dev_id = String.valueOf(map.get(GISConstants.DEV_ID));
 			for (Map<String, Integer> xMap : nodeTypes) {
-				if(xMap.containsKey(dev_id)) {
-					map.put(GISConstants.NODE_TYPE, xMap.get(dev_id));
+				if(xMap.containsValue(dev_id)) {
+					map.put(GISConstants.NODE_TYPE, xMap.get(GISConstants.NODE_TYPE));
 					break;
 				}
 			}

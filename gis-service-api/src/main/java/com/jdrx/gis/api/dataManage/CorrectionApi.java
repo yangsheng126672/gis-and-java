@@ -84,7 +84,7 @@ public class CorrectionApi {
 
 	@ApiOperation(value = "审核纠错值")
 	@RequestMapping(value ="auditCorrectionData")
-	public ResposeVO auditCorrectionData(@ApiParam(name = "dto", required = true) @RequestBody @Valid HashMap<String,List<AuditCorrectionDTO>> dtos,
+	public ResposeVO auditCorrectionData(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<AuditCorrectionDTO> dtos,
 										 @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
 	                                     @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException {
 		Logger.debug("api/0/correction/auditCorrectionData 审核纠错值");
@@ -92,7 +92,7 @@ public class CorrectionApi {
 			throw new BizException("参数为空！");
 		}
 		try {
-			Boolean bool = correctionService.auditCorrectionData(dtos.get("data"), userId, token);
+			Boolean bool = correctionService.auditCorrectionData(dtos, userId, token);
 			return ResponseFactory.ok(bool);
 		} catch (Exception e) {
 			e.printStackTrace();

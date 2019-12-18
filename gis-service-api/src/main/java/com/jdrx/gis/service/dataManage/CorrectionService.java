@@ -1,6 +1,7 @@
 package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.constants.basic.EAuditStatus;
@@ -216,6 +217,7 @@ public class CorrectionService {
 			int e1 = correctionDetailService.batchUpdate(detailPOList);
 			int e2 = updateAuditedByDevId(devId);
 			int e3 = gisDevExtPOMapper.updateDataInfoByDevId(dataInfoPG, devId);
+
 			if (e1 > 0 && e2 > 0 && e3 > 0) {
 				return true;
 			}
@@ -235,6 +237,7 @@ public class CorrectionService {
 	public List<HistoryRecordVO> findAllAuditList(QueryAuditDTO dto) throws BizException {
 		try {
 			List<HistoryRecordVO> historyRecordVOS = Lists.newArrayList();
+			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 			List<GISCorrectionPO> list = gisCorrectionPOManualMapper.selectRecords(dto, null);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			if (Objects.nonNull(list) && list.size() > 0) {
