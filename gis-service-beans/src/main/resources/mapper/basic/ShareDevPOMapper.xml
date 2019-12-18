@@ -359,7 +359,7 @@
         FROM (
             SELECT * FROM (
                 SELECT id, type_id
-                FROM share_dev
+                FROM share_dev sd
                 <if test="devIds != null and devIds.size > 0">
                     where id in
                     <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">

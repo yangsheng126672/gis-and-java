@@ -504,91 +504,6 @@ public class ExcelProcessorService {
 		return excelDevList;
 	}
 
-
-	/**
-	 * 保存模板，如果有一模一样的模板，直接返回模板ID，模板ID（管点取的是管件，管段取的是水管）
-	 * @param tplConfigVal
-	 * @param loginUserName
-	 * @param typeName
-	 * @return
-	 * @throws BizException
-	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Long saveTplAttr(String tplConfigVal, String loginUserName, String typeName) throws BizException {
-		try{
-			Long typeId = shareDevTypePOMapper.getIdByNameForTopHierarchy(typeName);
-			boolean hasTypeId = false;
-			if (Objects.isNull(typeId)) {
-				throw new BizException(typeName + "对应的模板未在数据库表gis_dev_tpl_attr配置，请先配置！");
-			} else {
-				hasTypeId = true;
-			}
-			List<Map<String, String>> typeDescList = gisDevTplAttrService.selectTypeIdDescMap();
-			List<DictDetailPO> dictDetailPOS =  dictDetailService.findDetailsByTypeVal(tplConfigVal);
-			List<GisDevTplAttrPO> tplAttrPOList = Lists.newArrayList();
-			StringBuffer sb = new StringBuffer();
-			if (Objects.nonNull(dictDetailPOS) && dictDetailPOS.size() > 0) {
-				for (DictDetailPO dictDetailPO : dictDetailPOS) {
-					GisDevTplAttrPO gisDevTplAttrPO = new GisDevTplAttrPO();
-					String confVal = dictDetailPO.getVal();
-					String[] confValArray = confVal.split(",");
-					int i = 0;
-					gisDevTplAttrPO.setFieldDesc(confValArray[i++]);
-					sb.append(gisDevTplAttrPO.getFieldDesc()).append(",");
-					gisDevTplAttrPO.setFieldName(confValArray[i++]);
-					gisDevTplAttrPO.setDataType(confValArray[i++]);
-					gisDevTplAttrPO.setIdx(Short.parseShort(confValArray[i]));
-					gisDevTplAttrPO.setTplId(typeId);
-					gisDevTplAttrPO.setCreateBy(loginUserName);
-					gisDevTplAttrPO.setCreateAt(new Date());
-					tplAttrPOList.add(gisDevTplAttrPO);
-				}
-			}
-			String configDesc = String.valueOf(sb);
-			boolean isExist = false;
-			configDesc = configDesc.substring(0, configDesc.lastIndexOf(","));
-			if(Objects.nonNull(typeDescList) && typeDescList.size() > 0) {
-				for (Map<String, String> map : typeDescList) {
-					String fieldDescArray = "";
-					String tId = "";
-					for(Map.Entry<String, String> entry : map.entrySet()) {
-						String key = entry.getKey();
-						if("fielddescarray".equals(entry.getKey())) {
-							fieldDescArray = entry.getValue();
-						}
-						if("typeid".equals(entry.getKey())) {
-							tId = String.valueOf(entry.getValue());
-						}
-					}
-					String[] fieldsDB = fieldDescArray.split(",");
-					String[] configFields = configDesc.split(",");
-					Collections.sort(Arrays.asList(fieldsDB));
-					Collections.sort(Arrays.asList(configFields));
-					fieldDescArray = Joiner.on(",").join(fieldsDB);
-					configDesc = Joiner.on(",").join(configFields);
-					if (fieldDescArray.equals(configDesc)) {
-						isExist = true;
-						typeId = Long.parseLong(tId);
-						break;
-					}
-
-				}
-			}
-			// 如果数据库不存在相同的模板再插入数据库
-			if (!isExist) {
-				if (hasTypeId) {
-					gisDevTplAttrService.delByTypeId(typeId);
-				}
-				gisDevTplAttrService.batchInsertSelective(tplAttrPOList);
-			}
-			return typeId;
-		} catch (Exception e) {
-			Logger.error("保存字段模板信息失败！");
-			e.printStackTrace();
-			throw new BizException(e);
-		}
-	}
-
 	/**
 	 * 保存Excel数据
 	 * @param devSaveParam
@@ -801,8 +716,8 @@ public class ExcelProcessorService {
 				shareDevPO.setId(String.valueOf(devId));
 				shareDevPO.setTypeId(typeId);
 				shareDevPO.setName(name);
-				shareDevPO.setLng(Objects.nonNull(map.get(GISConstants.Y_CHN)) ? String.valueOf(map.get(GISConstants.Y_CHN)) : "");
-				shareDevPO.setLat(Objects.nonNull(map.get(GISConstants.X_CHN)) ? String.valueOf(map.get(GISConstants.X_CHN)) : "");
+				shareDevPO.setLng(Objects.nonNull(map.get(GISConstants.X_CHN)) ? String.valueOf(map.get(GISConstants.X_CHN)) : "");
+				shareDevPO.setLat(Objects.nonNull(map.get(GISConstants.Y_CHN)) ? String.valueOf(map.get(GISConstants.Y_CHN)) : "");
 				shareDevPO.setAddr(String.valueOf(map.get(GISConstants.DEV_ADDR_CHN)));
 				if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
 					shareDevPO.setCreateAt(creatAt);
@@ -966,7 +881,13 @@ public class ExcelProcessorService {
 		return importVO;
 	}
 
-
+	/**
+	 * 写csv文件，便于图数据库导入，一条条创建效率太低下，效率最高的导入方式都需要脱机导入，故选择load csv方式
+	 * 导入，既满足速率相对一条条导入有很大提高，又满足不脱机
+	 * @param pointDataList
+	 * @param title
+	 * @return
+	 */
 	private String writeCsv(List<Map<String, Object>> pointDataList, String title) {
 		String path = "";
 		try {
@@ -1023,6 +944,13 @@ public class ExcelProcessorService {
 		return path;
 	}
 
+	/**
+	 * 保存设备返回的dev_id，存入图数据库中
+	 * @param list
+	 * @param exList
+	 * @param flag
+	 * @return
+	 */
 	private List<Map<String, Object>> putDevId(List<Map<String, String>> list, List<Map<String, Object>> exList, int flag) {
 		if (Objects.isNull(list)) {
 			return exList;
@@ -1051,6 +979,11 @@ public class ExcelProcessorService {
 		return exList;
 	}
 
+	/**
+	 * 增加管点是否为阀门的标志，存入图数据库，便于爆管分析使用
+	 * @param pointDataList
+	 * @return
+	 */
 	private List<Map<String, Object>> putNodeType(List<Map<String, Object>> pointDataList) {
 		List<String> devIds = Lists.newArrayList();
 		for (Map<String, Object> map : pointDataList) {
