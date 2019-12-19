@@ -31,6 +31,8 @@ import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;
@@ -389,15 +391,22 @@ public class BasicDevQuery {
 	 * @param deptPath
 	 * @return
 	 */
-	public String getMapCenterByByAuthId(Long deptPath){
+	public String getMapCenterByByAuthId(Long deptId){
 		String centerStr = null;
 		try {
 			//获取地图中心点
 			List<DictDetailPO> list = detailService.findDetailsByTypeVal(dictConfig.getMapCenterVal());
 			for(DictDetailPO po: list){
-				if (po.getName().equals(deptPath.toString())){
-					centerStr = po.getVal();
+				if (deptId != null){
+					if (po.getName().equals(deptId.toString())){
+						centerStr = po.getVal();
+					}
+				}else {
+					if (StringUtils.isEmpty(po.getName())){
+						centerStr = po.getVal();
+					}
 				}
+
 			}
 		}catch (Exception e){
 			e.printStackTrace();
@@ -415,9 +424,16 @@ public class BasicDevQuery {
 		try {
 			List<DictDetailPO> list = detailService.findDetailsByTypeVal(dictConfig.getLayerExtent());
 			for(DictDetailPO po: list){
-				if (po.getName().equals(String.valueOf(deptId))){
-					extent = po.getVal();
+				if (deptId != null){
+					if (po.getName().equals(String.valueOf(deptId))){
+						extent = po.getVal();
+					}
+				}else {
+					if (StringUtils.isEmpty(po.getName())){
+						extent = po.getVal();
+					}
 				}
+
 			}
 		}catch (Exception e){
 			e.printStackTrace();

@@ -182,9 +182,9 @@ public class GISConstants {
 
 	/********************************管网设备固定几个属性字段**********************/
 
-	public final static String GIS_ATTR_QDBM = "qdbm";
+	public final static String GIS_ATTR_QDBM = "startCode";
 
-	public final static String GIS_ATTR_ZDBM = "zdbm";
+	public final static String GIS_ATTR_ZDBM = "endCode";
 
 	public final static String GIS_ATTR_CALIBER = "caliber";
 
@@ -196,7 +196,7 @@ public class GISConstants {
 
 	public final static String GIS_ATTR_NAME = "name";
 
-	public final static String GIS_ATTR_ADDR = "addr";
+	public final static String GIS_ATTR_ADDR = "address";
 
 	public final static String GIS_ATTR_PIPE_LENGTH = "pipe_length";
 
