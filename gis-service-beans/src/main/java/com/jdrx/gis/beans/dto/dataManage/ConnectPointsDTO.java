@@ -23,10 +23,10 @@ public class ConnectPointsDTO {
     private Long typeId;
 
     @ApiModelProperty("起点编码")
-    String qdbm;
+    String startCode;
 
     @ApiModelProperty("终点编码")
-    String zdbm;
+    String endCode;
 
     @ApiModelProperty("材质")
     String material;

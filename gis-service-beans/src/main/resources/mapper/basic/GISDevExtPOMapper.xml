@@ -186,8 +186,8 @@
     <select id="findFeaturesByString"  resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
         select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext gdx
         where data_info->>'address' like '%${val}%' or data_info->>'code' like '%${val}%' or data_info->>'address' like '%${val}%'
-              or data_info->>'qdbm' like '%${val}%'
-              or data_info->>'zdbm' like '%${val}%'
+              or data_info->>'startCode' like '%${val}%'
+              or data_info->>'endCode' like '%${val}%'
         AND delete_flag = false
     </select>
 
@@ -541,7 +541,7 @@
     <select id="selectLineByCode" parameterType="java.lang.String" resultType="com.jdrx.gis.beans.entity.basic.GISDevExtPO">
         SELECT  id, dev_id, name, code, caliber, material, st_astext(geom) as geom, tpl_type_id, data_info, delete_flag,
             create_by, create_at, update_by, update_at, belong_to from gis_dev_ext gdx
-        WHERE   data_info->>'qdbm' = #{val} or data_info->>'zdbm' = #{val}
+        WHERE   data_info->>'startCode' = #{val} or data_info->>'endCode' = #{val}
     </select>
 
     <update id="updateDataInfoByDevId">

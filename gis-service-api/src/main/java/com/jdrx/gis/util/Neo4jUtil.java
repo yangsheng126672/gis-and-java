@@ -100,8 +100,8 @@ public class Neo4jUtil {
                 dataInfo = lineVO.getData_info();
                 JSONObject jb = JSONObject.parseObject(dataInfo.toString());
                 Map<String,Object> map = (Map)jb;
-                startNodeNme = map.get("qdbm").toString();
-                endNodeName = map.get("zdbm").toString();
+                startNodeNme = map.get(GISConstants.GIS_ATTR_QDBM).toString();
+                endNodeName = map.get(GISConstants.GIS_ATTR_ZDBM).toString();
 
                 REdge edge = new REdge();
                 edge.setRelationID( lineVO.getDev_id());
