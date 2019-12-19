@@ -144,7 +144,7 @@ public class LoggerAop {
 				Logger.debug("转换请求参数为JSON字符串失败！参数类型 ： " + e.getMessage());
 			}
 		}
-		Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "\n"
+		Logger.debug("Request-----------------" + transId + "-----------------" + transCode + "-----------------" +  apiName + "\n"
 				+ JsonFormatUtil.formatJson(reqParams));
 		gisTransLog.setReqParams(reqParams);
 
