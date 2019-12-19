@@ -639,6 +639,9 @@ public class DataEditorService {
             gisDevExtPO.setDataInfo(jsonObject);
             gisDevExtPO.setGeom(transformGeom);
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
+            //同步到share_dev中
+            PointVO pointVO1 = gisDevExtPOMapper.get4544From4326(geom);
+            gisDevExtPOMapper.updateShareDev(String.format("%.3f",pointVO1.getX()),String.format("%.3f",pointVO1.getY()),dto.getDevId());
 
             //查找相关联的管线
             List<GISDevExtPO> gisDevExtPOLines = gisDevExtPOMapper.selectLineByCode(gisDevExtPO.getCode());
