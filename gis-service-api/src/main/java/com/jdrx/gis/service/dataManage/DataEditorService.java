@@ -425,8 +425,8 @@ public class DataEditorService {
                 Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
                 String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
 
-                GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getQdbm());
-                GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getZdbm());
+                GISDevExtPO startPointPO = gisDevExtPOMapper.selectByCode(dto.getStartCode());
+                GISDevExtPO endPointPO = gisDevExtPOMapper.selectByCode(dto.getEndCode());
 
                 PointVO startVO = gisDevExtPOMapper.getPointXYFromGeom(startPointPO.getGeom());
                 PointVO endVO = gisDevExtPOMapper.getPointXYFromGeom(endPointPO.getGeom());
@@ -455,7 +455,7 @@ public class DataEditorService {
 
                 GISDevExtPO gisDevExtPO = new GISDevExtPO();
                 gisDevExtPO.setDevId(devId);
-                gisDevExtPO.setCode(dto.getQdbm()+"-"+dto.getZdbm());
+                gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
                 gisDevExtPO.setCaliber(dto.getCaliber());
                 gisDevExtPO.setMaterial(dto.getMaterial());
                 gisDevExtPO.setTplTypeId(dto.getTypeId());
@@ -711,7 +711,7 @@ public class DataEditorService {
 
                     GISDevExtPO gisDevExtPO = new GISDevExtPO();
                     gisDevExtPO.setDevId(devId);
-                    gisDevExtPO.setCode(dto.getQdbm()+"-"+dto.getZdbm());
+                    gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
                     gisDevExtPO.setTplTypeId(dto.getTypeId());
                     gisDevExtPO.setCaliber(dto.getCaliber());
                     gisDevExtPO.setMaterial(dto.getMaterial());

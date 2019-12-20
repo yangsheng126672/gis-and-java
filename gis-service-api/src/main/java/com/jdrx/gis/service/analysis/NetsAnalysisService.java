@@ -421,60 +421,6 @@ public class NetsAnalysisService {
         AnalysisResultVO analysisResultVO = new AnalysisResultVO();
         //获取管网坐标系srid
         String srid = getValByDictString(dictConfig.getWaterPipeSrid());
-
-//        //yuechi
-//        if( "83308".equals(dto.getId())){
-//            List<NodeDTO> fmlist_final = new ArrayList<>();
-//            NodeDTO nodeDTO = new NodeDTO();
-//            nodeDTO.setDev_id(99419L);
-//            nodeDTO.setX(106.4596);
-//            nodeDTO.setY(30.5338);
-//            nodeDTO.setCode("2JS128");
-//            fmlist_final.add(nodeDTO);
-//            analysisResultVO.setFmlist(fmlist_final);
-//            String geom = "POLYGON((106.459593149117 30.5338276457265,106.471855569077 30.5330651051196,106.465779925876 30.5331336171525,106.462296023151 30.5334703970648,106.459593149117 30.5338276457265))";
-//            analysisResultVO.setGeom(geom);
-//            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
-//            analysisResultVO.setUserInfoPOS( userInfoPOS);
-//            analysisResultVO.setTotal(userInfoPOS.size());
-//            return analysisResultVO;
-//        }
-//        //qianfeng
-//        if("74587".equals(dto.getId())){
-//            List<NodeDTO> fmlist_final = new ArrayList<>();
-//            NodeDTO nodeDTO = new NodeDTO();
-//            nodeDTO.setDev_id(99419L);
-//            nodeDTO.setX(106.7314);
-//            nodeDTO.setY(30.3731);
-//            nodeDTO.setCode("1JS974");
-//            fmlist_final.add(nodeDTO);
-//            analysisResultVO.setFmlist(fmlist_final);
-//            String geom = "POLYGON((106.731406291511 30.3730975739014,106.731121656797 30.3720717711355,106.730587742321 30.370923110294,106.730150247105 30.37077851258,106.730788000591 30.3719688624995,106.731406291511 30.3730975739014))";
-//            analysisResultVO.setGeom(geom);
-//            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
-//            analysisResultVO.setUserInfoPOS( userInfoPOS);
-//            analysisResultVO.setTotal(userInfoPOS.size());
-//            return analysisResultVO;
-//        }
-//        //wusheng
-//        if("80840".equals(dto.getId())){
-//            List<NodeDTO> fmlist_final = new ArrayList<>();
-//            NodeDTO nodeDTO = new NodeDTO();
-//            nodeDTO.setDev_id(98657L);
-//            nodeDTO.setX(106.28602739);
-//            nodeDTO.setY(30.360879773);
-//            nodeDTO.setCode("2J649");
-//            fmlist_final.add(nodeDTO);
-//            analysisResultVO.setFmlist(fmlist_final);
-//            String geom = "POLYGON((106.286031242797 30.3608797537096,106.286027394791 30.3608797735347,106.285262292459 30.3624207846633,106.285107297802 30.3630316042983,106.285359628108 30.3630970658476,106.285997951562 30.361801140805,106.286031316709 30.3616723223547,106.286031242797 30.3608797537096))";
-//            analysisResultVO.setGeom(geom);
-//            List<GisWaterUserInfoPO>userInfoPOS = findInfluenceUser();
-//            analysisResultVO.setUserInfoPOS( userInfoPOS);
-//            analysisResultVO.setTotal(userInfoPOS.size());
-//            return analysisResultVO;
-//        }
-
-
         //获取所有阀门列表
         List<NodeDTO> fmlist_all = findAllFamens(dto.getId());
         //获取必须关闭的阀门
