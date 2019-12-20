@@ -147,10 +147,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	PointVO getPointXYFromGeom(@Param("geom") String geom);
+
     /**
      * 根据4326获取到4544坐标系
      */
     PointVO get4544From4326(@Param("geom") String geom);
+
 	/**
 	 * 根据设备id逻辑删除
 	 * @param devId
@@ -178,10 +180,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	int updateByPrimaryKeySelective(GISDevExtPO record);
+
     /**
      * 管点移动更改share_dev中的lng和lag
      */
-     int updateShareDev(String x,String y,String devId);
+     int updateShareDev(@Param("x") String x,@Param("y")String y,@Param("devId")String devId);
+
 	/**
 	 * 根据管点编码查询关联的管线
 	 * @param val

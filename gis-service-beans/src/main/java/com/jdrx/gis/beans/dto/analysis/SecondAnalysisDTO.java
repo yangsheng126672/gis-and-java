@@ -1,6 +1,5 @@
 package com.jdrx.gis.beans.dto.analysis;
 
-import com.jdrx.gis.beans.dto.base.PageDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

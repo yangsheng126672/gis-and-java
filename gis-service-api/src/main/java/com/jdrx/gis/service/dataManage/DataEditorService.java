@@ -145,10 +145,7 @@ public class DataEditorService {
                 if(bl && fieldNameVO.getFieldName().equals(GISConstants.GIS_ATTR_CODE)){
                     iterator.remove();
                 }
-
             }
-
-
             return fieldNameVOS;
         }catch (Exception e) {
             e.printStackTrace();
@@ -462,6 +459,7 @@ public class DataEditorService {
                 gisDevExtPO.setDataInfo(jsonObject);
                 gisDevExtPO.setGeom(transformGeomStr);
                 gisDevExtPO.setBelongTo(deptId);
+                gisDevExtPO.setName(getNameByCaliber(dto.getCaliber()));
 
                 ShareDevPO shareDevPO = new ShareDevPO();
                 shareDevPO.setId(gisDevExtPO.getDevId());
@@ -544,7 +542,7 @@ public class DataEditorService {
                     shareDevPO.setTypeId(Long.valueOf(map.get("typeId").toString()));
                 }
                 //判断街道是否改变
-                if(!map.get(GISConstants.GIS_ATTR_ADDR).toString().equals(shareDevPO.getAddr())){
+                if(map.containsKey(GISConstants.GIS_ATTR_ADDR)){
                     shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
                 }
             }else {
@@ -640,8 +638,7 @@ public class DataEditorService {
             gisDevExtPO.setGeom(transformGeom);
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
             //同步到share_dev中
-            PointVO pointVO1 = gisDevExtPOMapper.get4544From4326(geom);
-            gisDevExtPOMapper.updateShareDev(String.format("%.3f",pointVO1.getX()),String.format("%.3f",pointVO1.getY()),dto.getDevId());
+            gisDevExtPOMapper.updateShareDev(String.format("%.6f",dto.getX()),String.format("%.6f",dto.getY()),dto.getDevId());
 
             //查找相关联的管线
             List<GISDevExtPO> gisDevExtPOLines = gisDevExtPOMapper.selectLineByCode(gisDevExtPO.getCode());
@@ -721,6 +718,7 @@ public class DataEditorService {
                     gisDevExtPO.setGeom(transformGeom);
                     gisDevExtPO.setDataInfo(jsonObject);
                     gisDevExtPO.setBelongTo(deptId);
+                    gisDevExtPO.setName(getNameByCaliber(dto.getCaliber()));
 
                     ShareDevPO shareDevPO = new ShareDevPO();
                     shareDevPO.setId(devId);

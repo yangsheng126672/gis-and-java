@@ -338,11 +338,11 @@ public class Neo4jUtil {
 
     /**
      * 获取关联节点
-     * @param nodeName
+     * @param dev_id
      * @return
      */
-    public List<Value> getNextNode(String nodeName,String nodeLable) {
-        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return b  ", nodeLable,nodeName);
+    public List<Value> getNextNode(String dev_id,String nodeLable) {
+        String cypherSql = String.format("MATCH (n:%s{dev_id:\"%s\"})-[r]-(b) return b  ", nodeLable,dev_id);
         StatementResult result = session.run(cypherSql);
         List<Value> values = new ArrayList<>();
         while (result.hasNext()) {
@@ -354,11 +354,11 @@ public class Neo4jUtil {
 
     /**
      * 获取关联节点和边
-     * @param nodeName
+     * @param devId
      * @return
      */
-    public List<Record> getNextNodeAndPath(String nodeName,String nodeLable) {
-        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return b,r  ", nodeLable,nodeName);
+    public List<Record> getNextNodeAndPath(String devId,String nodeLable) {
+        String cypherSql = String.format("MATCH (n:%s{dev_id:\"%s\"})-[r]-(b) return b,r  ", nodeLable,devId);
         StatementResult result = session.run(cypherSql);
         List<Record> values = result.list();
         return values;
@@ -368,14 +368,14 @@ public class Neo4jUtil {
      * 查找水源列表
      * @return
      */
-    public List<String> getWaterSourceList(){
+    public List<String> getWaterSourceList(String belongTo){
         List<String>list = new ArrayList<>();
         String code = null;
-        String cypherSql = String.format("match (n:gd) where n.nodetype = '2' return n");
+        String cypherSql = String.format("match (n:gd) where n.nodetype = \'%s\' and n.belong_to = \'%s\' return n",GISConstants.NEO_NODE_WATER,belongTo);
         StatementResult result = session.run(cypherSql);
         while (result.hasNext()) {
             Record record = result.next();
-            code = (record.get(0).asMap().get("name").toString());
+            code = (record.get(0).asMap().get("dev_id").toString());
             list.add(code);
         }
         return list;

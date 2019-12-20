@@ -388,7 +388,7 @@ public class BasicDevQuery {
 
 	/**
 	 * 获取地图中心点
-	 * @param deptPath
+	 * @param deptId
 	 * @return
 	 */
 	public String getMapCenterByByAuthId(Long deptId){

@@ -17,5 +17,5 @@ public class NodeDTO {
     @ApiModelProperty("x坐标")
     private Double x;
     @ApiModelProperty("y坐标")
-    private double y;
+    private Double y;
 }
