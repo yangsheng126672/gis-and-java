@@ -378,6 +378,9 @@
     <select id="getPointXYFromGeom" resultType="com.jdrx.gis.beans.vo.basic.PointVO">
         SELECT st_x(#{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler} ) as x,st_y(#{geom,jdbcType=VARCHAR,typeHandler=GeomStrHandler}) as y;
     </select>
+    <select id="get4544From4326" resultType="com.jdrx.gis.beans.vo.basic.PointVO">
+        select st_x (geom1) as x,st_y(geom1) as y  from (select st_transform(geom,4544) as geom1 from (select st_geomfromtext(#{geom},4326) as geom) a ) cc;
+    </select>
 
     <update id="deleteDevExtByDevId" parameterType="java.lang.String" >
         UPDATE gis_dev_ext set delete_flag = TRUE  where dev_id = #{devId}
@@ -610,4 +613,8 @@
             Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is not null order by st_astext(geom)
         </if>
     </select>
+    <update id="updateShareDev" >
+            UPDATE share_dev
+            SET lng = #{x},lat=#{y} where id=#{devId}
+    </update>
 </mapper>
