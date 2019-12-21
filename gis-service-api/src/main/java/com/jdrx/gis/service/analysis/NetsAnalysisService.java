@@ -182,7 +182,7 @@ public class NetsAnalysisService {
      * */
     public List<NodeDTO> findSecondAnalysisResult(String failedValve,List<String> valveList) throws BizException{
         List<Value> values = neo4jUtil.getNextNode(failedValve,GISConstants.NEO_POINT_LJ);
-        if(values == null){
+        if(values.size() == 0){
             throw new BizException("二级关阀查询失败，无关系设备id ："+ failedValve);
         }
         String nodetype = null;
@@ -468,7 +468,7 @@ public class NetsAnalysisService {
         //获取管网坐标系srid
         String srid = getValByDictString(dictConfig.getWaterPipeSrid());
         AnalysisResultVO vo = new AnalysisResultVO();
-        List<String>dtoList = secondAnalysisDTO.getFealtureList();
+        List<String>failedList = secondAnalysisDTO.getFealtureList();
         List<String>fmList = new ArrayList<>();
         List<NodeDTO> fmlistNode = findAllFamens(secondAnalysisDTO.getDev_id());
         List<String> fmlistTmp = secondAnalysisDTO.getFmlist();
@@ -480,10 +480,10 @@ public class NetsAnalysisService {
                if ((!StringUtils.isEmpty(nodeDTO.getDev_id())&&(!fmList.contains(nodeDTO.getDev_id()))))
                fmList.add(nodeDTO.getDev_id());
            }
-           for(String string:dtoList){
+           for(String string:failedList){
                List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string,fmList);
                for(NodeDTO innerDto:tmpNodeList){
-                   if ((!fmList.contains(innerDto.getCode()))&&(!dtoList.contains(innerDto.getCode()))){
+                   if ((!fmList.contains(innerDto.getCode()))&&(!failedList.contains(innerDto.getCode()))){
                        if (!tmpList.contains(innerDto.getCode())){
                            tmpList.add(innerDto.getCode());
                            resultDtoList.add(innerDto);
@@ -494,7 +494,7 @@ public class NetsAnalysisService {
            vo.setFmlist(resultDtoList);
            List<NodeDTO> fmlist_all = new ArrayList<>();
           for (String s:fmList){
-              if (dtoList.contains(s)||(!fmlistTmp.contains(s))){
+              if (failedList.contains(s)||(!fmlistTmp.contains(s))){
                   continue;
               }
               NodeDTO node = new NodeDTO();
