@@ -214,7 +214,7 @@ public class DataEditorService {
             shareDevPO.setName(map.get(GISConstants.GIS_ATTR_NAME).toString());
             shareDevPO.setTypeId(dto.getTypeId());
             shareDevPO.setLng(String.format("%.3f",transPointVo.getX()));
-            shareDevPO.setLat(String.format("%.3f",transPointVo.getX()));
+            shareDevPO.setLat(String.format("%.3f",transPointVo.getY()));
             if (map.containsKey(GISConstants.GIS_ATTR_ADDR)){
                 shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
             }
