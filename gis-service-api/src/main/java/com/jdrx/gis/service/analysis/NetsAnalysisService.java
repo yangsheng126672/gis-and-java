@@ -885,13 +885,13 @@ public class NetsAnalysisService {
             List<String>seconddevIdList = new ArrayList<>() ;
 
             if (!((dto.getFirstDevIds() == null)||(dto.getFirstDevIds().length == 0))){
-                firstdevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFirstDevIds()));
+                firstdevIdList =  valvePOMapper.getDevIdsByDevId(Arrays.asList(dto.getFirstDevIds()));
             }
             if (!((dto.getSecondDevIds() == null)||(dto.getSecondDevIds().length == 0))){
-                seconddevIdList =  valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getSecondDevIds()));
+                seconddevIdList =  valvePOMapper.getDevIdsByDevId(Arrays.asList(dto.getSecondDevIds()));
             }
             if (!((dto.getFailedDevIds() == null)||(dto.getFailedDevIds().length == 0))){
-                faileddevIdList = valvePOMapper.getDevIdsByCode(Arrays.asList(dto.getFailedDevIds())) ;
+                faileddevIdList = valvePOMapper.getDevIdsByDevId(Arrays.asList(dto.getFailedDevIds())) ;
             }
 
             int body_i = 2; // body 行索引
