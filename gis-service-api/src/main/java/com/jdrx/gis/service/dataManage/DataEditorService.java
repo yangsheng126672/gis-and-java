@@ -170,7 +170,9 @@ public class DataEditorService {
             String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
             String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
             String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
-
+            PointVO transPointVo = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
+            map.replace("x",String.format("%.3f",transPointVo.getX()));
+            map.replace("y",String.format("%.3f",transPointVo.getY()));
             map.put(GISConstants.GIS_ATTR_DEVID,devId);
             List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
             for (GisDevTplAttrPO gis:list) {
@@ -180,6 +182,19 @@ public class DataEditorService {
                     map.put(name,"");
                 }
             }
+            //增加data_info属性信息的belong_to字段
+            if (!map.containsKey("belong_to")) {
+                String depId1 = String.valueOf(deptId);
+                String belongTo = "";
+                List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+                for (DictDetailPO po : dictDetailPOList) {
+                    if (po.getVal().equals(depId1)) {
+                        belongTo = po.getName();
+                        map.put("belong_to", belongTo);
+                    }
+                }
+            }
+
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
@@ -198,8 +213,8 @@ public class DataEditorService {
             shareDevPO.setId(devId);
             shareDevPO.setName(map.get(GISConstants.GIS_ATTR_NAME).toString());
             shareDevPO.setTypeId(dto.getTypeId());
-            shareDevPO.setLng(String.format("%.8f",dto.getX()));
-            shareDevPO.setLat(String.format("%.8f",dto.getY()));
+            shareDevPO.setLng(String.format("%.3f",transPointVo.getX()));
+            shareDevPO.setLat(String.format("%.3f",transPointVo.getX()));
             if (map.containsKey(GISConstants.GIS_ATTR_ADDR)){
                 shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
             }
@@ -219,6 +234,8 @@ public class DataEditorService {
 
             String lineGeom1 = gisDevExtPOMapper.addGeomWithSrid(newLineGeomStr1,Integer.parseInt(srid));
             String lineGeom2 = gisDevExtPOMapper.addGeomWithSrid(newLineGeomStr2,Integer.parseInt(srid));
+            Double pipeLength1 = gisDevExtPOMapper.getLengthByGeomStr(lineGeom1);//管网长度1
+            Double pipeLength2 = gisDevExtPOMapper.getLengthByGeomStr(lineGeom2);//管网长度2
 
             //构造新的管线GISDevExtPO对象
             GISDevExtPO gisDevExtPOLine1 = gisDevExtPOMapper.getDevExtByDevId(dto.getLineDevId());
@@ -243,6 +260,7 @@ public class DataEditorService {
                 }
             }
             map1.replace(GISConstants.GIS_ATTR_DEVID,map1.get(GISConstants.GIS_ATTR_DEVID),devIdLine1);
+            map1.replace(GISConstants.GIS_ATTR_PIPE_LENGTH,pipeLength1);//更新管网长度1
             String jsonStr1 = JSONObject.toJSONString(map1);
             PGobject jsonObject1 = new PGobject();
             jsonObject1.setValue(jsonStr1);
@@ -259,6 +277,7 @@ public class DataEditorService {
                 }
             }
             map2.replace(GISConstants.GIS_ATTR_DEVID,map2.get(GISConstants.GIS_ATTR_DEVID),devIdLine2);
+            map2.replace(GISConstants.GIS_ATTR_PIPE_LENGTH,pipeLength2);//更新管网长度2
             String jsonStr2 = JSONObject.toJSONString(map2);
             PGobject jsonObject2 = new PGobject();
             jsonObject2.setValue(jsonStr2);
@@ -356,7 +375,9 @@ public class DataEditorService {
                 PointVO pointVO = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
 
                 Map<String,Object> map = dto.getMapAttr();
-
+                //将前端的4326坐标系的值改为4544的值修改到datainfo中
+                map.replace("x",String.format("%.3f",pointVO.getX()));
+                map.replace("y",String.format("%.3f",pointVO.getY()));
                 map.put(GISConstants.GIS_ATTR_DEVID,devId);
                 List<GisDevTplAttrPO> list1 = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
                 for (GisDevTplAttrPO gis:list1) {
@@ -364,6 +385,18 @@ public class DataEditorService {
                     //如果map集合的key中没有某些管点属性英文字段，则对其增加key并赋值为""
                     if(!map.containsKey(name)){
                         map.put(name,"");
+                    }
+                }
+                //增加data_info属性信息的belong_to字段
+                if (!map.containsKey("belong_to")) {
+                    String depId1 = String.valueOf(deptId);
+                    String belongTo = "";
+                    List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+                    for (DictDetailPO po : dictDetailPOList) {
+                        if (po.getVal().equals(depId1)) {
+                            belongTo = po.getName();
+                            map.put("belong_to", belongTo);
+                        }
                     }
                 }
                 String jsonStr = JSONObject.toJSONString(map);
@@ -384,8 +417,8 @@ public class DataEditorService {
                 shareDevPO.setId(po.getDevId());
                 shareDevPO.setName(po.getName());
                 shareDevPO.setTypeId(po.getTplTypeId());
-                shareDevPO.setLng(String.format("%.8f",pointVO.getX()));
-                shareDevPO.setLat(String.format("%.8f",pointVO.getY()));
+                shareDevPO.setLng(String.format("%.3f",pointVO.getX()));
+                shareDevPO.setLat(String.format("%.3f",pointVO.getY()));
                 if(dto.getMapAttr().containsKey(GISConstants.GIS_ATTR_ADDR)){
                     shareDevPO.setAddr(dto.getMapAttr().get(GISConstants.GIS_ATTR_ADDR).toString());
                 }
@@ -443,6 +476,18 @@ public class DataEditorService {
                     //如果map集合的key中没有某些管点属性英文字段，则对其增加key并赋值为""
                     if(!map.containsKey(name)){
                         map.put(name,"");
+                    }
+                }
+                //增加data_info属性信息的belong_to字段
+                if (!map.containsKey("belong_to")) {
+                    String depId1 = String.valueOf(deptId);
+                    String belongTo = "";
+                    List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+                    for (DictDetailPO po : dictDetailPOList) {
+                        if (po.getVal().equals(depId1)) {
+                            belongTo = po.getName();
+                            map.put("belong_to", belongTo);
+                        }
                     }
                 }
                 String jsonStr = JSONObject.toJSONString(map);
@@ -638,7 +683,7 @@ public class DataEditorService {
             gisDevExtPO.setGeom(transformGeom);
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
             //同步到share_dev中
-            gisDevExtPOMapper.updateShareDev(String.format("%.6f",dto.getX()),String.format("%.6f",dto.getY()),dto.getDevId());
+            gisDevExtPOMapper.updateShareDev(String.format("%.3f",dto.getX()),String.format("%.3f",dto.getY()),dto.getDevId());
 
             //查找相关联的管线
             List<GISDevExtPO> gisDevExtPOLines = gisDevExtPOMapper.selectLineByCode(gisDevExtPO.getCode());
@@ -649,17 +694,29 @@ public class DataEditorService {
                 String lineGeom = po.getGeom();
                 String lineGeomTmp = null;
                 String lineGeomSrid = null;
+                Double pipeLength = null;
                 if((map.containsKey(GISConstants.GIS_ATTR_QDBM)) && (map.containsKey(GISConstants.GIS_ATTR_QDBM))){
                     if (map.get(GISConstants.GIS_ATTR_QDBM).equals(gisDevExtPO.getCode())){
                         lineGeomTmp = "LINESTRING("+pointVO.getX()+" "+pointVO.getY()+lineGeom.substring(lineGeom.indexOf(","));
                         lineGeomSrid = gisDevExtPOMapper.addGeomWithSrid(lineGeomTmp,Integer.parseInt(srid));
                         po.setGeom(lineGeomSrid);
+                        pipeLength= gisDevExtPOMapper.getLengthByGeomStr(lineGeomSrid);//管网长度
                     }
                     if (map.get(GISConstants.GIS_ATTR_ZDBM).equals(gisDevExtPO.getCode())){
                         lineGeomTmp = lineGeom.substring(0,lineGeom.indexOf(",")+1)+pointVO.getX()+" "+pointVO.getY()+")";
                         lineGeomSrid = gisDevExtPOMapper.addGeomWithSrid(lineGeomTmp,Integer.parseInt(srid));
                         po.setGeom(lineGeomSrid);
+                         pipeLength = gisDevExtPOMapper.getLengthByGeomStr(lineGeomSrid);//管网长度
                     }
+                    //更新新的管网长度
+                    JSONObject jb1 = JSONObject.parseObject(po.getDataInfo().toString());
+                    Map<String,Object> map1 = (Map)jb1;
+                    map1.replace(GISConstants.PIPE_LENGTH,pipeLength);
+                    String jsonStr1 = JSONObject.toJSONString(map1);
+                    PGobject jsonObject1 = new PGobject();
+                    jsonObject1.setValue(jsonStr1);
+                    jsonObject1.setType("jsonb");
+                    po.setDataInfo(jsonObject1);
                     gisDevExtPOMapper.updateByPrimaryKeySelective(po);
                 }
             }
@@ -704,6 +761,19 @@ public class DataEditorService {
                     Map<String,Object> mapAttr = dto.getMapAttr();
                     mapAttr.put(GISConstants.GIS_ATTR_DEVID,devId);
                     mapAttr.put(GISConstants.GIS_ATTR_PIPE_LENGTH,pipe_length);
+                    //增加data_info属性信息的belong_to字段
+                    if (!mapAttr.containsKey("belong_to")) {
+                        String depId1 = String.valueOf(deptId);
+                        String belongTo = "";
+                        List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+                        for (DictDetailPO po : dictDetailPOList) {
+                            if (po.getVal().equals(depId1)) {
+                                belongTo = po.getName();
+                                mapAttr.put("belong_to", belongTo);
+                            }
+                        }
+                    }
+
                     String jsonStr = JSONObject.toJSONString(mapAttr);
                     PGobject jsonObject = new PGobject();
                     jsonObject.setValue(jsonStr);
