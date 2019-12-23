@@ -559,10 +559,10 @@
 
     <select id="selectGeomByTypeId" parameterType="java.lang.Long" resultType="com.jdrx.gis.beans.vo.datamanage.ExportCadVO">
         SELECT name,Geometrytype(geom) AS type,ST_AsText(geom) AS geom,dev_id AS devId
-        FROM gis_dev_ext
+        FROM gis_dev_ext aa
         WHERE dev_id in (
           SELECT id
-          FROM share_dev
+          FROM share_dev bb
           WHERE type_id in(
 		    SELECT id
 		    FROM (WITH RECURSIVE A AS (

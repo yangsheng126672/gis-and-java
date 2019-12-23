@@ -111,7 +111,7 @@ public abstract class Element {
 			else return false;
 		if((d.code>=60 && d.code<=79)||(d.code>=270 && d.code<=289)||(d.code>=370 && d.code<=389)||(d.code>=170 && d.code<=179))
 		{
-			System.out.println(d.data instanceof Short||d.data instanceof Long);
+			//System.out.println(d.data instanceof Short||d.data instanceof Long);
 			if(d.data instanceof Short||d.data instanceof Long) return true;
 			else return false;
 		}
