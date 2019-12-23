@@ -116,10 +116,10 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getFeaturesByString(dto.getKey()));
 	}
 
-	@ApiOperation(value = "根据id获取图层")
-	@RequestMapping(value = "findLayerById")
-	public ResposeVO findLayerById(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) throws BizException {
-		Logger.debug("api/0/basic/findLayerById根据id获取图层");
+	@ApiOperation(value = "根据勾选图层ID导出CAD")
+	@RequestMapping(value = "exportCAD")
+	public ResposeVO exportCAD(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) throws BizException {
+		Logger.debug("api/0/basic/findLayerById 根据勾选图层ID导出CAD");
 		return ResponseFactory.ok(basicDevQuery.findLayerById(dto));
 	}
 
