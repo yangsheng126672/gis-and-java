@@ -389,7 +389,7 @@ public class Neo4jUtil {
     public List<String> getNodeConnectionLine(String devId){
         List<String> list = new ArrayList<>();
         try {
-            String cypherSql = String.format("MATCH (n:%s{dev_id:%d})-[r]-(b) return r",GISConstants.NEO_POINT,devId);
+            String cypherSql = String.format("MATCH (n:%s{dev_id:'%s'})-[r]-(b) return r",GISConstants.NEO_POINT,devId);
             StatementResult result = session.run(cypherSql);
             while (result.hasNext()) {
                 Record record = result.next();

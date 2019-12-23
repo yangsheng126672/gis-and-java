@@ -191,9 +191,13 @@
         AND delete_flag = false
     </select>
 
-    <select id="findFeaturesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
+    <select id="findFeaturesByDevIds" parameterType="string" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
         select dev_id,GeometryType(geom) as type,ST_AsText(st_transform(geom, 4326)) AS geom from gis_dev_ext gdx
-        where dev_id in (${devIds}) AND delete_flag = false
+        where dev_id in
+            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            AND delete_flag = false
     </select>
     <select id="getLonelyPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
         select code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext

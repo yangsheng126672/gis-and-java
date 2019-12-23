@@ -71,13 +71,15 @@ public class SpatialAnalysisService {
             if(list.size() == 0){
                 return null;
             }
-            String devIds = Joiner.on(",").join(list);
-            featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(devIds);
+            featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
 
         }catch (Exception e) {
             e.printStackTrace();
             Logger.error("获取连通性分析结果失败!");
             throw new BizException("获取连通性分析结果失败!");
+        }
+        if (featureVOList.size() == 0){
+            throw new BizException("设备连通个数为0");
         }
         return featureVOList;
     }

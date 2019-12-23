@@ -68,7 +68,7 @@ public interface GISDevExtPOMapper {
 	 * @param devIds
 	 * @return
 	 */
-	List<FeatureVO> findFeaturesByDevIds(@Param("devIds") String devIds);
+	List<FeatureVO> findFeaturesByDevIds(@Param("devIds") List<String> devIds);
 
 	/**
 	 * 获取管点数据
