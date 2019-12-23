@@ -307,9 +307,9 @@ public class Neo4jUtil {
      * 获取节点详细信息
      * @return
      */
-    public NodeDTO getValveNode(String code){
+    public NodeDTO getValveNode(String devId){
         NodeDTO node = new NodeDTO();
-        String cypherSql = String.format("match (n:gd) where n.name = '%s' return n",code);
+        String cypherSql = String.format("match (n:gd) where n.dev_id = '%s' return n",devId);
         StatementResult result = session.run(cypherSql);
         while (result.hasNext()) {
             Record record = result.next();
@@ -681,7 +681,7 @@ public class Neo4jUtil {
 	 */
 	public void createNodesByCsvPoint(String filePath) {
 		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS point "
-				+ "merge (:gd{dev_id:point." + GISConstants.DEV_ID + ", name : point." + GISConstants.POINT_CODE_CHN + ", nodetype : point.nodetype, x : point."
+				+ "create (:gd{dev_id:point." + GISConstants.DEV_ID + ", name : point." + GISConstants.POINT_CODE_CHN + ", nodetype : point.nodetype, x : point."
 				+ GISConstants.X_CHN + ", y : point." + GISConstants.Y_CHN + ",  belong_to : point." + GISConstants.AUTH_ID_S + "})";
 		session.run(cypherSql);
 	}
@@ -694,7 +694,7 @@ public class Neo4jUtil {
 		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS line "
 				+ "match (s:gd{name:line." + GISConstants.LINE_START_CODE_CHN + ",belong_to:line." + GISConstants.AUTH_ID_S + "})"
 				+ "match (e:gd{name:line." + GISConstants.LINE_END_CODE_CHN + ",belong_to:line." + GISConstants.AUTH_ID_S + "})"
-				+ "merge (s) - [:jdline{relationID:line." + GISConstants.DEV_ID + ", name:line." + GISConstants.LINE_START_CODE_CHN
+				+ "create (s) - [:jdline{relationID:line." + GISConstants.DEV_ID + ", name:line." + GISConstants.LINE_START_CODE_CHN
 				+ "+\"-\"+line." + GISConstants.LINE_END_CODE_CHN + ", gj:line." + GISConstants.GIS_ATTR_CALIBER + "}]->(e)";
 		session.run(cypherSql);
 	}

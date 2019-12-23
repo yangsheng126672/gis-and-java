@@ -74,7 +74,7 @@ public class GisPipeAnalysisValvePO {
     }
 
     public void setValveFirst(String valveFirst) {
-        this.valveFirst = valveFirst == null ? null : valveFirst.trim();
+        this.valveFirst = valveFirst == null ? null : valveFirst;
     }
 
     public String getValveFailed() {
@@ -82,7 +82,7 @@ public class GisPipeAnalysisValvePO {
     }
 
     public void setValveFailed(String valveFailed) {
-        this.valveFailed = valveFailed == null ? null : valveFailed.trim();
+        this.valveFailed = valveFailed == null ? null : valveFailed;
     }
 
     public Boolean getDeleteFlag() {
@@ -98,7 +98,7 @@ public class GisPipeAnalysisValvePO {
     }
 
     public void setCreateBy(String createBy) {
-        this.createBy = createBy == null ? null : createBy.trim();
+        this.createBy = createBy == null ? null : createBy;
     }
 
     public Date getCreateAt() {
@@ -114,7 +114,7 @@ public class GisPipeAnalysisValvePO {
     }
 
     public void setUpdateBy(String updateBy) {
-        this.updateBy = updateBy == null ? null : updateBy.trim();
+        this.updateBy = updateBy == null ? null : updateBy;
     }
 
     public Date getUpdateAt() {
@@ -130,6 +130,6 @@ public class GisPipeAnalysisValvePO {
     }
 
     public void setValveSecond(String valveSecond) {
-        this.valveSecond = valveSecond == null ? null : valveSecond.trim();
+        this.valveSecond = valveSecond == null ? null : valveSecond;
     }
 }
