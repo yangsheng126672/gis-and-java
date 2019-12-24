@@ -266,5 +266,16 @@ public interface GISDevExtPOMapper {
 	 */
 	String getGeomTypeByGeomStr(@Param("geomStr") String geomStr);
 
+	/**
+	 * 保存视频和图片
+	 * @param picUrls
+	 * @param videoUrls
+	 * @param devId
+	 * @return
+	 */
+	int updateMultiVideo(@Param("picUrls") String picUrls,
+	                     @Param("videoUrls") String videoUrls,
+	                     @Param("devId") String devId);
+
 }
 

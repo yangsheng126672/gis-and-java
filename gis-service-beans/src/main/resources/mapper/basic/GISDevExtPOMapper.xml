@@ -624,4 +624,18 @@
     <select id="getGeomTypeByGeomStr" parameterType="string" resultType="string">
         select GeometryType(st_astext(#{geomStr}))
     </select>
+
+
+    <update id="updateMultiVideo" >
+        UPDATE gis_dev_ext
+        <set>
+            <if test="picUrls != null and picUrls != ''">
+                pic_urls = #{picUrls},
+            </if>
+            <if test="videoUrls != null and videoUrls != ''">
+                video_urls = #{videoUrls},
+            </if>
+        </set>
+        WHERE dev_id = #{devId}
+    </update>
 </mapper>
