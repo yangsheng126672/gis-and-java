@@ -125,6 +125,7 @@ public class SpatialAnalysisService {
         PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
         String[] devIDsDTOStr = devIDsDTO.getDevIds();
         List<String> list = new ArrayList<>();//neo4j返回的list
+        Page<AnalysisVO> pageList = null;
         String s = "";
         //查询全局
         if (devIDsDTOStr == null || devIDsDTOStr.length == 0) {
@@ -136,8 +137,13 @@ public class SpatialAnalysisService {
             s = s.substring(0, s.length() - 1);
             list = neo4jUtil.getLonelyPointsByDevIds(s);
         }
-        Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
-        return new PageVO<AnalysisVO>(pageList);
+        if(list!=null&&list.size()>0){
+             pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
+            return new PageVO<AnalysisVO>(pageList);
+        }else{
+           return  new PageVO<AnalysisVO>(pageList);
+        }
+
     }
 
         /**
@@ -151,6 +157,7 @@ public class SpatialAnalysisService {
             PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List<String> list = new ArrayList<>();//neo4j返回的list
+            Page<AnalysisVO> pageList = null;
             String s = "";
             if (devIDsDTOStr == null || devIDsDTOStr.length == 0) {
                 list = neo4jUtil.getLonelyLinesByDevIds(s);
@@ -165,8 +172,14 @@ public class SpatialAnalysisService {
             HashSet h = new HashSet(list);
             list.clear();
             list.addAll(h);
-            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
-            return new PageVO<AnalysisVO>(pageList);
+            if(list!=null&&list.size()>0){
+                pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
+                return new PageVO<AnalysisVO>(pageList);
+            }
+            else{
+                return new PageVO<AnalysisVO>(pageList);
+            }
+
         }
 
         /**
