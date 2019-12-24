@@ -14,7 +14,6 @@ import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import org.apache.ibatis.annotations.Param;
-import org.postgresql.util.PGobject;
 
 import java.util.List;
 import java.util.Map;
@@ -195,11 +194,10 @@ public interface GISDevExtPOMapper {
 
 	/**
 	 * 更新设备的data_info
-	 * @param dataInfo
-	 * @param devId
+	 * @param record
 	 * @return
 	 */
-	int updateDataInfoByDevId(@Param("dataInfo") PGobject dataInfo, @Param("devId") String devId);
+	int updateDataInfoByDevId(GISDevExtPO record);
 
 	/**
 	 * 获取管段长度(系统统一保留三位小数）

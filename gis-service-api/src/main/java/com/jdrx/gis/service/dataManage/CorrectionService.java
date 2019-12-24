@@ -5,10 +5,14 @@ import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.constants.basic.EAuditStatus;
+import com.jdrx.gis.beans.constants.basic.EPassStatus;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.AuditCorrectionDTO;
 import com.jdrx.gis.beans.dto.dataManage.CorrectionDTO;
 import com.jdrx.gis.beans.dto.dataManage.QueryAuditDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entity.dataManage.GISCorrectionDetailPO;
 import com.jdrx.gis.beans.entity.dataManage.GISCorrectionPO;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
@@ -16,9 +20,12 @@ import com.jdrx.gis.beans.vo.datamanage.HistoryRecordVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.dao.basic.GISCorrectionPOManualMapper;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.basic.autoGenerate.GISCorrectionPOMapper;
 import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.service.query.AttrQueryService;
+import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
@@ -27,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -58,6 +66,15 @@ public class CorrectionService {
 
 	@Autowired
 	private GISCorrectionPOManualMapper gisCorrectionPOManualMapper;
+
+	@Autowired
+	private ShareDevPOMapper shareDevPOMapper;
+
+	@Autowired
+	private QueryDevService queryDevService;
+
+	@Autowired
+	private ShareDevTypePOMapper shareDevTypePOMapper;
 
 	/**
 	 * 报错纠错信息
@@ -165,9 +182,14 @@ public class CorrectionService {
 	 * @return
 	 * @throws BizException
 	 */
-	public int updateAuditedByDevId(String devId) throws BizException {
+	public int updateAuditedByDevId(String devId, String loginUserName) throws BizException {
 		try {
-			return gisCorrectionPOManualMapper.updateAuditedByDevId(EAuditStatus.AUDITED.getVal(), devId);
+			GISCorrectionPO po = new GISCorrectionPO();
+			po.setDevId(devId);
+			po.setStatus(Short.parseShort(String.valueOf(EAuditStatus.AUDITED.getVal())));
+			po.setUpdateAt(new Date());
+			po.setUpdateBy(loginUserName);
+			return gisCorrectionPOManualMapper.updateAuditedByDevId(po);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException(e);
@@ -194,31 +216,81 @@ public class CorrectionService {
 			JSONObject dataInfoObj = JSONObject.parseObject(JSONObject.toJSONString(dataInfo));
 			String value = (String) dataInfoObj.get("value");
 			JSONObject valueObj = JSONObject.parseObject(value);
-
+			int caliber = 0;
+			String material = "";
+			String address = "";
+			Date now = new Date();
+			int passCount = 0; // 通过条数
 			for (AuditCorrectionDTO dto : list) {
 				GISCorrectionDetailPO detailPO = new GISCorrectionDetailPO();
 				detailPO.setId(dto.getDetailId());
-				detailPO.setHasPass(Short.parseShort(String.valueOf(dto.getHasPass())));
+				short p = Short.parseShort(String.valueOf(dto.getHasPass()));
+				detailPO.setHasPass(p);
+				boolean isPass = EPassStatus.PASSED.getVal() == p;
+				if (isPass) {
+					passCount ++;
+				}
 				detailPO.setUpdateBy(loginUserName);
+				detailPO.setUpdateAt(now);
 				detailPOList.add(detailPO);
 				for (int i = 0; i < fieldNames.size(); i++) {
 					FieldNameVO fieldNameVO = fieldNames.get(i);
 					String key = fieldNameVO.getFieldName();
-					if (key.equals(dto.getFieldName())) {
-						valueObj.put(key,dto.getUpdVal());
+					String chnName = fieldNameVO.getFieldDesc();
+					String updVal = dto.getUpdVal();
+					if (key.equals(dto.getFieldName()) && isPass) {
+						valueObj.put(key,updVal);
+						if (!StringUtils.isEmpty(updVal)) {
+							if (GISConstants.CALIBER_CHN.equals(chnName)) {
+								caliber = Integer.parseInt(updVal);
+							} else if (GISConstants.MATERIAL_CHN.equals(chnName)) {
+								material = updVal;
+							} else if (GISConstants.DEV_ADDR_CHN.equals(chnName)) {
+								address = updVal;
+							}
+						}
 						break;
 					}
 				}
 			}
 
-			PGobject dataInfoPG = new PGobject();
-			dataInfoPG.setValue(JSONObject.toJSONString(valueObj));
-			dataInfoPG.setType("jsonb");
-			int e1 = correctionDetailService.batchUpdate(detailPOList);
-			int e2 = updateAuditedByDevId(devId);
-			int e3 = gisDevExtPOMapper.updateDataInfoByDevId(dataInfoPG, devId);
 
-			if (e1 > 0 && e2 > 0 && e3 > 0) {
+			int e1 = correctionDetailService.batchUpdate(detailPOList);
+			int e2 = updateAuditedByDevId(devId, loginUserName);
+			if (passCount > 0) {
+				GISDevExtPO po = new GISDevExtPO();
+				po.setDevId(devId);
+				po.setUpdateAt(now);
+				po.setUpdateBy(loginUserName);
+				if (!StringUtils.isEmpty(material)) {
+					po.setMaterial(material);
+				}
+				ShareDevPO shareDevPO = new ShareDevPO();
+				shareDevPO.setUpdateAt(now);
+				shareDevPO.setUpdateBy(loginUserName);
+				shareDevPO.setId(devId);
+				if (caliber != 0) {
+					po.setCaliber(caliber);
+					String caliberTypeName = queryDevService.getCaliberNameByCaliber(caliber);
+					ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.selectByTypeName(caliberTypeName);
+					shareDevPO.setTypeId(shareDevTypePO.getId());
+					shareDevPO.setName(caliberTypeName);
+					po.setName(caliberTypeName);
+					valueObj.put(GISConstants.GIS_ATTR_NAME, caliberTypeName);
+				}
+				if (!StringUtils.isEmpty(address)) {
+					shareDevPO.setAddr(address);
+				}
+
+				PGobject dataInfoPG = new PGobject();
+				dataInfoPG.setValue(JSONObject.toJSONString(valueObj));
+				dataInfoPG.setType("jsonb");
+				po.setDataInfo(dataInfoPG);
+
+				shareDevPOMapper.updateByPrimaryKeySelective(shareDevPO);
+				gisDevExtPOMapper.updateDataInfoByDevId(po);
+			}
+			if (e1 > 0 && e2 > 0) {
 				return true;
 			}
 		} catch (Exception e) {

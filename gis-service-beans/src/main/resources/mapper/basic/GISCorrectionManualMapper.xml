@@ -101,9 +101,11 @@
         </trim>
     </insert>
 
-    <update id="updateAuditedByDevId">
+    <update id="updateAuditedByDevId" parameterType="com.jdrx.gis.beans.entity.dataManage.GISCorrectionPO">
         UPDATE gis_correction_record
-        SET status = #{status}
+        SET status = #{status},
+            update_at = #{updateAt},
+            update_by = #{updateBy}
         WHERE dev_id = #{devId}
     </update>
 

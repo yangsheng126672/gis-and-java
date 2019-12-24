@@ -24,9 +24,9 @@ public interface GISCorrectionPOManualMapper {
 
 	/**
 	 * 更新审核状态
-	 * @param status
+	 * @param po
 	 * @return
 	 */
-	int updateAuditedByDevId(@Param("status") Integer status, @Param("devId") String devId);
+	int updateAuditedByDevId(GISCorrectionPO po);
 
 }

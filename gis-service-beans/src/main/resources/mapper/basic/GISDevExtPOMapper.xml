@@ -552,7 +552,26 @@
 
     <update id="updateDataInfoByDevId">
         UPDATE gis_dev_ext
-        SET data_info = #{dataInfo}
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="caliber != null">
+                caliber = #{caliber,jdbcType=INTEGER},
+            </if>
+            <if test="material != null">
+                material = #{material,jdbcType=VARCHAR},
+            </if>
+            <if test="dataInfo != null">
+                data_info = #{dataInfo,jdbcType=OTHER},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateAt != null">
+                update_at = #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+        </set>
         WHERE dev_id = #{devId}
     </update>
 

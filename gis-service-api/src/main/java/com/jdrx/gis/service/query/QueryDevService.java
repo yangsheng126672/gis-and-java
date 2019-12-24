@@ -638,4 +638,42 @@ public class QueryDevService {
 		}
 		return JSON.parseArray(JSON.toJSON(t).toString());
 	}
+
+	/**
+	 * 根据管径获取对应的类型名称（数据字典配置的管径分类）
+	 * @param caliber       管径值
+	 * @return
+	 * @throws BizException
+	 */
+	public String getCaliberNameByCaliber(int caliber) throws BizException{
+		if ( caliber <= 0) {
+			throw new BizException("没有管径为[" + caliber + "]对应的管段类型名称！");
+		}
+		String caliberType = dictConfig.getCaliberType();
+		if (Objects.isNull(caliberType)) {
+			throw new BizException("配置文件中未配置水管口径的类型名称！");
+		}
+		String caliberTypeName = "";
+		List<DictDetailPO> dictDetailPOs = dictDetailService.findDetailsByTypeVal(caliberType);
+		if (Objects.nonNull(dictDetailPOs)) {
+			for (DictDetailPO dictDetailPO : dictDetailPOs) {
+				try {
+					Object[] params = ComUtil.splitCaliberType(dictDetailPO.getVal());
+					if (Objects.isNull(params)) {
+						throw new BizException("水管口径类型参数值格式不正确");
+					}
+					String pre = String.valueOf(params[0]);
+					int min = Integer.parseInt(String.valueOf(params[1]));
+					int max = Integer.parseInt(String.valueOf(params[2]));
+					if (caliber >= min && caliber < max) {
+						caliberTypeName = dictDetailPO.getName();
+						break;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return caliberTypeName;
+	}
 }
