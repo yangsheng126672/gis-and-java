@@ -200,7 +200,7 @@
             AND delete_flag = false
     </select>
     <select id="getLonelyPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
-        select dev_id, code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
+        select dev_id AS devId, code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds != null and devIds.size > 0">
             AND dev_id in
@@ -210,7 +210,7 @@
         </if>
     </select>
     <select id="getLonelyLinesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
-        select dev_id, code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
+        select dev_id AS devId, code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds != null and devIds.size > 0">
             AND dev_id in
@@ -589,7 +589,7 @@
     </select>
 
     <select id="getRepeatPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
-        select dev_id,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
+        select dev_id AS devId,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds ==null or devIds.size==0">
             and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext bbb  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is null order by st_astext(geom)
@@ -603,7 +603,7 @@
         </if>
     </select>
     <select id="getRepeatLinesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
-        select dev_id,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
+        select dev_id AS devId,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds ==null or devIds.size==0">
             and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext bbb  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is not null order by st_astext(geom)

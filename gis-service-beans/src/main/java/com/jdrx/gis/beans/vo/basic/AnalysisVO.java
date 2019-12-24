@@ -20,4 +20,7 @@ public class AnalysisVO implements Serializable {
     //空间信息
     String geom;
 
+    //devid
+    String devId;
+
 }
