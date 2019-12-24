@@ -68,7 +68,9 @@ public class SpatialAnalysisService {
             }else{
                 list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
-            featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
+            if(list.size() > 0){
+                featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
+            }
 
         }catch (Exception e) {
             e.printStackTrace();
