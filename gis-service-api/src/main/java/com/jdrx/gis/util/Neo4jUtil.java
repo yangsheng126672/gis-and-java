@@ -182,7 +182,7 @@ public class Neo4jUtil {
         boolean bl = getLineEixts(edge,lineLable);
         if(bl == false){
             String propertiesString = mapper.writeValueAsString(edge.getProperties());
-            String cypherSql = String.format("match(a:%s),(b:%s) where a.name=\"%s\" and b.name=\"%s\"  and a.belong_to =%d  and b.belong_to =%d create (a)-[r:%s %s]->(b)",
+            String cypherSql = String.format("match(a:%s),(b:%s) where a.name=\"%s\" and b.name=\"%s\"  and a.belong_to ='%d'  and b.belong_to ='%d' create (a)-[r:%s %s]->(b)",
                     nodeLable,nodeLable,startNodeName,endNodeName,edge.getBelong_to(),lineLable,propertiesString);
             System.out.println(cypherSql);
             session.run(cypherSql);
@@ -411,7 +411,7 @@ public class Neo4jUtil {
         List<String> list = new ArrayList<>();
         try {
             //查找关联的点
-            String cypherSql = String.format("MATCH (a)-[r:%s{relationID:%d}]-(b) return a,b",GISConstants.NEO_LINE,devId);
+            String cypherSql = String.format("MATCH (a)-[r:%s{relationID:'%s'}]-(b) return a,b",GISConstants.NEO_LINE,devId);
             System.out.println(cypherSql);
             StatementResult result = session.run(cypherSql);
             while (result.hasNext()) {
@@ -419,7 +419,7 @@ public class Neo4jUtil {
                 list.add(record.get(0).asMap().get("dev_id").toString());
             }
             //查找关联的线
-            String cypherSqlLine = String.format("match (a)-[re:%s{relationID:%d}]-(b)-[re2]-(c) return re2",GISConstants.NEO_LINE,devId);
+            String cypherSqlLine = String.format("match (a)-[re:%s{relationID:'%s'}]-(b)-[re2]-(c) return re2",GISConstants.NEO_LINE,devId);
             System.out.println(cypherSqlLine);
             StatementResult result1 = session.run(cypherSqlLine);
             while (result1.hasNext()) {
@@ -559,7 +559,7 @@ public class Neo4jUtil {
             } else {
                 nodeType = GISConstants.NEO_NODE_NORMAL;
             }
-            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:%d})", GISConstants.NEO_POINT, devid,
+            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:'%d'})", GISConstants.NEO_POINT, devid,
                     name, nodeType, dto.getX(), dto.getY(), belongTo);
             session.run(cypherSql);
             //获取管线及管点的属性值
@@ -578,11 +578,11 @@ public class Neo4jUtil {
             String cypherSql2 = String.format("match(a)-[rel:%s]-(b) where rel.relationID = \"%s\"  delete rel", GISConstants.NEO_LINE, dto.getLineDevId());
             session.run(cypherSql2);
             //创建管线1
-            String cypherSql3 = String.format("match (a:gd{name:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)", startCode, devid, cztype, gj, startRelationid, belongTo, code1);
+            String cypherSql3 = String.format("match (a:gd{name:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:'%d',relationID:\"%s\"," +
+                    "belong_to:'%d',name:\"%s\"}]->(b)", startCode, devid, cztype, gj, startRelationid, belongTo, code1);
             //创建管线2
-            String cypherSql4 = String.format("match  (a:gd{dev_id:\"%s\"}),(b:gd{name:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)", devid, endCode, cztype, gj, endRelationid, belongTo, code2);
+            String cypherSql4 = String.format("match  (a:gd{dev_id:\"%s\"}),(b:gd{name:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:'%d',relationID:\"%s\"," +
+                    "belong_to:'%d',name:\"%s\"}]->(b)", devid, endCode, cztype, gj, endRelationid, belongTo, code2);
             session.run(cypherSql3);
             session.run(cypherSql4);
             return true;
@@ -605,7 +605,7 @@ public class Neo4jUtil {
             } else {
                 nodeType = GISConstants.NEO_NODE_NORMAL;
             }
-            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:%d})", GISConstants.NEO_POINT, devid, name, nodeType, dto.getX(), dto.getY(), belongTo);
+            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:'%d'})", GISConstants.NEO_POINT, devid, name, nodeType, dto.getX(), dto.getY(), belongTo);
             session.run(cypherSql);
             return true;
         }catch (Exception e){
@@ -621,8 +621,8 @@ public class Neo4jUtil {
         try {
             String cztype = dto.getMaterial();
             Integer gj = dto.getCaliber();
-            String cypherSql = String.format("match (a:gd{name:\"%s\"}),(b:gd{name:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)", startCode, endCode, cztype, gj, lineDevid, belongTo, code);
+            String cypherSql = String.format("match (a:gd{name:\"%s\"}),(b:gd{name:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:'%d',relationID:\"%s\"," +
+                    "belong_to:'%d',name:\"%s\"}]->(b)", startCode, endCode, cztype, gj, lineDevid, belongTo, code);
             session.run(cypherSql);
             return true;
         } catch (Exception e) {
@@ -635,7 +635,7 @@ public class Neo4jUtil {
      */
     public Boolean updateLineToNeo4j(String code,Map map){
         try{
-            String cypherSql = String.format("match(a)-[rel:gdline]-(b) where rel.name = \"%s\" set rel.cztype=\"%s\",rel.gj=%d",code,
+            String cypherSql = String.format("match(a)-[rel:gdline]-(b) where rel.name = \"%s\" set rel.cztype=\"%s\",rel.gj='%d'",code,
                     map.get(GISConstants.GIS_ATTR_MATERIAL).toString(),Integer.parseInt(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
             session.run(cypherSql);
             return true;
@@ -664,8 +664,8 @@ public class Neo4jUtil {
      */
     public  Boolean createTwoPointsConnectionToNeo4j(ConnectPointsDTO dto ,String code,String startDevid,String endDevid,String lineDevid,Long belongTo){
         try{
-            String cypherSql = String.format("match (a:gd{dev_id:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:%d,relationID:\"%s\"," +
-                    "belong_to:%d,name:\"%s\"}]->(b)",startDevid,endDevid,dto.getMaterial(),dto.getCaliber(),lineDevid,belongTo,code);
+            String cypherSql = String.format("match (a:gd{dev_id:\"%s\"}),(b:gd{dev_id:\"%s\"}) create(a)-[c:gdline{cztype:\"%s\",gj:'%d',relationID:\"%s\"," +
+                    "belong_to:'%d',name:\"%s\"}]->(b)",startDevid,endDevid,dto.getMaterial(),dto.getCaliber(),lineDevid,belongTo,code);
             session.run(cypherSql);
             return true;
         }

@@ -250,6 +250,7 @@ public interface GISDevExtPOMapper {
      * @param devIds
      * @return
      */
+
     List<AnalysisVO> getRepeatPointsByDevIds(@Param("devIds") List<String> devIds);
 	/**
 	 * 根据devIds获取重复线基础信息
@@ -257,6 +258,13 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<AnalysisVO> getRepeatLinesByDevIds(@Param("devIds") List<String> devIds);
+
+	/**
+	 * 根据geom获取空间类型
+	 * @param geomStr
+	 * @return
+	 */
+	String getGeomTypeByGeomStr(@Param("geomStr") String geomStr);
 
 }
 

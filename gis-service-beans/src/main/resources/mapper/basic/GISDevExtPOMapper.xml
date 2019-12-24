@@ -239,7 +239,6 @@
     <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
         SELECT <include refid="Base_Column_List" />
         FROM gis_dev_ext gdx
-
         WHERE delete_flag = false
         AND code = #{code}
         LIMIT 1
@@ -619,6 +618,10 @@
     </select>
     <update id="updateShareDev" >
             UPDATE share_dev
-            SET lng = #{x},lat=#{y} where id=#{devId}
+            SET lng = #{x},lat = #{y} where id=#{devId}
     </update>
+
+    <select id="getGeomTypeByGeomStr" parameterType="string" resultType="string">
+        select GeometryType(st_astext(#{geomStr}))
+    </select>
 </mapper>

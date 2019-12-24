@@ -68,8 +68,34 @@ public class SpatialAnalysisService {
             }else{
                 list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
-            if(list.size() == 0){
-                return null;
+            featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
+
+        }catch (Exception e) {
+            e.printStackTrace();
+            Logger.error("获取连通性分析结果失败!");
+            throw new BizException("获取连通性分析结果失败!");
+        }
+        if (featureVOList.size() == 0){
+            throw new BizException("设备连通个数为0");
+        }
+        return featureVOList;
+    }
+
+    /**
+     * 获取连通性分析结果
+     * @param code
+     */
+    public List<FeatureVO> getConnectivityByCode(String code) throws BizException {
+        List<FeatureVO> featureVOList = new ArrayList<>();
+        List<String> list = new ArrayList<>();
+        try {
+            GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByCode(code);
+            String geomType = gisDevExtPOMapper.getGeomTypeByGeomStr(gisDevExtPO.getGeom());
+            //判断设备类型是线的话，返回线两端的点设备和连通的线;如果是点，则返回连通的线
+            if(geomType.contains("POINT")){
+                list = neo4jUtil.getNodeConnectionLine(gisDevExtPO.getDevId());
+            }else{
+                list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
             featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
 
