@@ -136,124 +136,116 @@ public class SpatialAnalysisService {
             s = s.substring(0, s.length() - 1);
             list = neo4jUtil.getLonelyPointsByDevIds(s);
         }
-        if (list != null && list.size() > 0) {
-            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
-            return new PageVO<AnalysisVO>(pageList);
-        } else {
-            return null;
-        }
+        Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
+        return new PageVO<AnalysisVO>(pageList);
     }
 
-    /**
-     * 孤立线分页查询
-     *
-     * @param devIDsDTO
-     * @return
-     * @throws BizException
-     */
-    public PageVO<AnalysisVO> getLonelyLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
-        String[] devIDsDTOStr = devIDsDTO.getDevIds();
-        List<String> list = new ArrayList<>();//neo4j返回的list
-        String s = "";
-        if (devIDsDTOStr == null || devIDsDTOStr.length == 0) {
-            list = neo4jUtil.getLonelyLinesByDevIds(s);
-        } else {
-            for (String ids : devIDsDTOStr) {
-                s = s + "\"" + ids + "\"" + ",";
+        /**
+         * 孤立线分页查询
+         *
+         * @param devIDsDTO
+         * @return
+         * @throws BizException
+         */
+        public PageVO<AnalysisVO> getLonelyLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            String[] devIDsDTOStr = devIDsDTO.getDevIds();
+            List<String> list = new ArrayList<>();//neo4j返回的list
+            String s = "";
+            if (devIDsDTOStr == null || devIDsDTOStr.length == 0) {
+                list = neo4jUtil.getLonelyLinesByDevIds(s);
+            } else {
+                for (String ids : devIDsDTOStr) {
+                    s = s + "\"" + ids + "\"" + ",";
+                }
+                s = s.substring(0, s.length() - 1);
+                list = neo4jUtil.getLonelyLinesByDevIds(s);
             }
-            s = s.substring(0, s.length() - 1);
-            list = neo4jUtil.getLonelyLinesByDevIds(s);
-        }
-        //集合去重 查找的数据可能存在数据重复的问题
-        HashSet h = new HashSet(list);
-        list.clear();
-        list.addAll(h);
-        if (list != null && list.size() > 0) {
+            //集合去重 查找的数据可能存在数据重复的问题
+            HashSet h = new HashSet(list);
+            list.clear();
+            list.addAll(h);
             Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
-        } else {
-            return null;
         }
-    }
 
-    /**
-     * 逻辑删除gis_dev_ext 和share_dev 点
-     *
-     * @param devId
-     * @return
-     * @throws BizException
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteLonelyPointByDevId(String devId) throws BizException {
-        try {
-            getGisDevExtPOMapper.deleteDevExtByDevId(devId);
-            getGisDevExtPOMapper.deleteShareDevByDevId(devId);
+        /**
+         * 逻辑删除gis_dev_ext 和share_dev 点
+         *
+         * @param devId
+         * @return
+         * @throws BizException
+         */
+        @Transactional(rollbackFor = Exception.class)
+        public Boolean deleteLonelyPointByDevId(String devId) throws BizException {
+            try {
+                getGisDevExtPOMapper.deleteDevExtByDevId(devId);
+                getGisDevExtPOMapper.deleteShareDevByDevId(devId);
 //            if (neo4jUtil.deletePointById(devId)) {
                 return true;
 //            } else {
 //                return false;
 //            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error("根据devId删除点失败！dev_id =" + devId);
-            throw new BizException("根据devId删除点失败!");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Logger.error("根据devId删除点失败！dev_id =" + devId);
+                throw new BizException("根据devId删除点失败!");
+            }
         }
-    }
 
-    /**
-     * 逻辑删除gis_dev_ext 和share_dev线
-     *
-     * @param devId
-     * @return
-     * @throws BizException
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteLonelyLineByDevId(String devId) throws BizException {
-        try {
-            getGisDevExtPOMapper.deleteDevExtByDevId(devId);
-            getGisDevExtPOMapper.deleteShareDevByDevId(devId);
+        /**
+         * 逻辑删除gis_dev_ext 和share_dev线
+         *
+         * @param devId
+         * @return
+         * @throws BizException
+         */
+        @Transactional(rollbackFor = Exception.class)
+        public Boolean deleteLonelyLineByDevId(String devId) throws BizException {
+            try {
+                getGisDevExtPOMapper.deleteDevExtByDevId(devId);
+                getGisDevExtPOMapper.deleteShareDevByDevId(devId);
 //            if (neo4jUtil.deleteLineById(devId)) {
                 return true;
 //            } else {
 //                return false;
 //            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error("根据devId删除线失败！dev_id =" + devId);
-            throw new BizException("根据devId删除线失败!");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Logger.error("根据devId删除线失败！dev_id =" + devId);
+                throw new BizException("根据devId删除线失败!");
+            }
         }
-    }
 
-    /**
-     * 重复点分页查询
-     *
-     * @param devIDsDTO
-     * @return
-     * @throws BizException
-     */
-    public PageVO<AnalysisVO> getRepeatPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
-        Page<AnalysisVO> pageList;
-        String[] devIDsDTOStr = devIDsDTO.getDevIds();
-        List list = Arrays.asList(devIDsDTOStr);
-        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
-        return new PageVO<AnalysisVO>(pageList);
-    }
-    /**
-     * 重复线分页查询
-     *
-     * @param devIDsDTO
-     * @return
-     * @throws BizException
-     */
-    public PageVO<AnalysisVO> getRepeatLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
-        Page<AnalysisVO> pageList;
-        String[] devIDsDTOStr = devIDsDTO.getDevIds();
-        List list = Arrays.asList(devIDsDTOStr);
-        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
-        return new PageVO<AnalysisVO>(pageList);
-    }
+        /**
+         * 重复点分页查询
+         *
+         * @param devIDsDTO
+         * @return
+         * @throws BizException
+         */
+        public PageVO<AnalysisVO> getRepeatPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            Page<AnalysisVO> pageList;
+            String[] devIDsDTOStr = devIDsDTO.getDevIds();
+            List list = Arrays.asList(devIDsDTOStr);
+            pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
+            return new PageVO<AnalysisVO>(pageList);
+        }
+        /**
+         * 重复线分页查询
+         *
+         * @param devIDsDTO
+         * @return
+         * @throws BizException
+         */
+        public PageVO<AnalysisVO> getRepeatLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            Page<AnalysisVO> pageList;
+            String[] devIDsDTOStr = devIDsDTO.getDevIds();
+            List list = Arrays.asList(devIDsDTOStr);
+            pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
+            return new PageVO<AnalysisVO>(pageList);
+        }
 
-}
+    }
