@@ -87,4 +87,14 @@ public class GISDevExtPO {
 	 * geom对象
 	 */
 	private PGgeometry geomObj;
+
+	/**
+	 * 图片地址数组
+	 */
+	private String picUrls;
+
+	/**
+	 * 视频地址数组
+	 */
+	private String videoUrls;
 }

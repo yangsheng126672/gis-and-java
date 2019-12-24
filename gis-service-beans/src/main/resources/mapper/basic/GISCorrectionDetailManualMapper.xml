@@ -28,7 +28,7 @@
                 #{item.coRecordId,jdbcType=BIGINT},
                 #{item.fieldDesc,jdbcType=VARCHAR},
                 #{item.fieldName,jdbcType=VARCHAR},
-                #{item.updval,jdbcType=VARCHAR},
+                #{item.updVal,jdbcType=VARCHAR},
                 #{item.createBy,jdbcType=VARCHAR},
                 #{item.createAt,jdbcType=TIMESTAMP}
             )
@@ -67,8 +67,8 @@
             </trim>
             <trim prefix="updval = CASE" suffix="END,">
                 <foreach collection="correctionDetails" item="item" index="index">
-                    <if test="item.updval != null">
-                        when id = #{item.id,jdbcType=BIGINT} then #{item.updval,jdbcType=VARCHAR}
+                    <if test="item.updVal != null">
+                        when id = #{item.id,jdbcType=BIGINT} then #{item.updVal,jdbcType=VARCHAR}
                     </if>
                 </foreach>
             </trim>
