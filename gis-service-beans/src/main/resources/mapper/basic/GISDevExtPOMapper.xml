@@ -199,7 +199,8 @@
             </foreach>
             AND delete_flag = false
     </select>
-    <select id="getLonelyPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
+
+    <select id="getLonelyShareDevByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
         select dev_id AS devId, code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds != null and devIds.size > 0">
@@ -209,16 +210,8 @@
             </foreach>
         </if>
     </select>
-    <select id="getLonelyLinesByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
-        select dev_id AS devId, code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
-        where delete_flag = false
-        <if test="devIds != null and devIds.size > 0">
-            AND dev_id in
-            <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
-        </if>
-    </select>
+
+
     <select id="getPointDevExt" resultType="com.jdrx.gis.beans.vo.datamanage.NeoPointVO">
         select dev_id,code,name,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y,belong_to from gis_dev_ext gdx
         WHERE  caliber is  null AND delete_flag = false

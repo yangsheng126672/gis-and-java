@@ -57,8 +57,8 @@ public class SpatialAnalysisService {
      * 获取连通性分析结果
      * @param devId
      */
-    public List<FeatureVO> getConnectivityAnalysis(String devId) throws BizException {
-        List<FeatureVO> featureVOList = new ArrayList<>();
+    public List<AnalysisVO> getConnectivityAnalysis(String devId) throws BizException {
+        List<AnalysisVO> featureVOList = new ArrayList<>();
         List<String> list = new ArrayList<>();
         try {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
@@ -69,7 +69,7 @@ public class SpatialAnalysisService {
                 list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
             if(list.size() > 0){
-                featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
+                featureVOList = getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             }
 
         }catch (Exception e) {
@@ -87,8 +87,8 @@ public class SpatialAnalysisService {
      * 获取连通性分析结果
      * @param code
      */
-    public List<FeatureVO> getConnectivityByCode(String code) throws BizException {
-        List<FeatureVO> featureVOList = new ArrayList<>();
+    public List<AnalysisVO> getConnectivityByCode(String code) throws BizException {
+        List<AnalysisVO> featureVOList = new ArrayList<>();
         List<String> list = new ArrayList<>();
         try {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByCode(code);
@@ -99,7 +99,9 @@ public class SpatialAnalysisService {
             }else{
                 list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
-            featureVOList = getGisDevExtPOMapper.findFeaturesByDevIds(list);
+            if(list.size() > 0){
+                featureVOList = getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
+            }
 
         }catch (Exception e) {
             e.printStackTrace();
@@ -135,7 +137,7 @@ public class SpatialAnalysisService {
             list = neo4jUtil.getLonelyPointsByDevIds(s);
         }
         if (list != null && list.size() > 0) {
-            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyPointsByDevIds(list);
+            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         } else {
             return null;
@@ -168,7 +170,7 @@ public class SpatialAnalysisService {
         list.clear();
         list.addAll(h);
         if (list != null && list.size() > 0) {
-            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyLinesByDevIds(list);
+            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         } else {
             return null;
