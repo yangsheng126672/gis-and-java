@@ -134,12 +134,8 @@ public class SpatialAnalysisService {
             s = s.substring(0, s.length() - 1);
             list = neo4jUtil.getLonelyPointsByDevIds(s);
         }
-        if (list != null && list.size() > 0) {
             Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyPointsByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -167,12 +163,8 @@ public class SpatialAnalysisService {
         HashSet h = new HashSet(list);
         list.clear();
         list.addAll(h);
-        if (list != null && list.size() > 0) {
-            Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyLinesByDevIds(list);
-            return new PageVO<AnalysisVO>(pageList);
-        } else {
-            return null;
-        }
+        Page<AnalysisVO> pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyLinesByDevIds(list);
+        return new PageVO<AnalysisVO>(pageList);
     }
 
     /**
