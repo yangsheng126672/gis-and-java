@@ -8,7 +8,7 @@ package com.jdrx.gis.beans.vo.basic;
 
 public class FeatureVO {
     //设备id
-    Long devId;
+    String devId;
 
     //数据类型
     String type;
@@ -24,11 +24,11 @@ public class FeatureVO {
         this.type = type;
     }
 
-    public Long getDevId() {
+    public String getDevId() {
         return devId;
     }
 
-    public void setDevId(Long devId) {
+    public void setDevId(String devId) {
         this.devId = devId;
     }
 

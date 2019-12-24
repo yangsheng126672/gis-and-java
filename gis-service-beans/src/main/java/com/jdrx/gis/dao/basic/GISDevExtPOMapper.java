@@ -224,19 +224,15 @@ public interface GISDevExtPOMapper {
 	 * 根据权限值获取管网总长度(系统统一保留三位小数）
 	 * @return
 	 */
-	public List<PipeLengthVO> getPipeLengthByAuthId();
+	 List<PipeLengthVO> getPipeLengthByAuthId();
+
 	/**
-	 * 根据devIds获取孤立点分析基础信息
+	 * 根据devIds获取孤立设备基础分析信息
 	 * @param devIds
 	 * @return
 	 */
-	List<AnalysisVO> getLonelyPointsByDevIds(@Param("devIds") List<String> devIds);
-	/**
-	 * 根据devIds获取孤立线分析基础信息
-	 * @param devIds
-	 * @return
-	 */
-	List<AnalysisVO> getLonelyLinesByDevIds(@Param("devIds") List<String> devIds);
+	List<AnalysisVO> getLonelyShareDevByDevIds(@Param("devIds") List<String> devIds);
+
     /**
      * 根据设备id逻辑删除share_dev
      * @param devId
