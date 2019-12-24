@@ -185,11 +185,11 @@ public class SpatialAnalysisService {
         try {
             getGisDevExtPOMapper.deleteDevExtByDevId(devId);
             getGisDevExtPOMapper.deleteShareDevByDevId(devId);
-            if (neo4jUtil.deletePointById(devId)) {
+//            if (neo4jUtil.deletePointById(devId)) {
                 return true;
-            } else {
-                return false;
-            }
+//            } else {
+//                return false;
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             Logger.error("根据devId删除点失败！dev_id =" + devId);
@@ -209,11 +209,11 @@ public class SpatialAnalysisService {
         try {
             getGisDevExtPOMapper.deleteDevExtByDevId(devId);
             getGisDevExtPOMapper.deleteShareDevByDevId(devId);
-            if (neo4jUtil.deleteLineById(devId)) {
+//            if (neo4jUtil.deleteLineById(devId)) {
                 return true;
-            } else {
-                return false;
-            }
+//            } else {
+//                return false;
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             Logger.error("根据devId删除线失败！dev_id =" + devId);
