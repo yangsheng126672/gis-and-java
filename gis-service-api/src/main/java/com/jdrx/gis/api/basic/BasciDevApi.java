@@ -1,11 +1,15 @@
 package com.jdrx.gis.api.basic;
 
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.base.KeyWordDTO;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.base.TypeIdDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
+import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
+import com.jdrx.gis.service.query.QueryDevService;
+import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -37,6 +41,12 @@ public class BasciDevApi {
 
 	@Autowired
 	private BasicDevQuery basicDevQuery;
+
+	@Autowired
+	private RedisComponents redisComponents;
+
+	@Autowired
+	private QueryDevService queryDevService;
 
 	@ApiOperation(value = "获取首层图层")
 	@RequestMapping(value = "findFirstHierarchyDevType")
@@ -116,11 +126,41 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getFeaturesByString(dto.getKey()));
 	}
 
-	@ApiOperation(value = "根据勾选图层ID导出CAD")
-	@RequestMapping(value = "exportCAD")
-	public ResposeVO exportCAD(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) throws BizException {
-		Logger.debug("api/0/basic/findLayerById 根据勾选图层ID导出CAD");
-		return ResponseFactory.ok(basicDevQuery.findLayerById(dto));
+	@ApiOperation(value = "根据勾选图层ID导出CAD", notes = "根据勾选图层ID导出CAD")
+	@RequestMapping(value = "exportCAD", method = RequestMethod.POST)
+	public ResposeVO exportCAD(@ApiParam(name = "dto", required = true) @RequestBody @Valid List<TypeIdDTO> dto) {
+		try {
+			String key = dto.get(0).getId().toString() + GISConstants.UNDER_LINE + dto.get(0).getTime();
+			new Thread(() -> {
+				try {
+					String result = basicDevQuery.findLayerById(dto);
+					redisComponents.set(key, result, GISConstants.DOWNLOAD_EXPIRE);
+					Logger.debug("生成导出文件成功，key = {}", key);
+				} catch (BizException e) {
+					e.printStackTrace();
+					Logger.error("导出CAD失败！{}", Thread.currentThread().getName());
+					redisComponents.set(key, EApiStatus.ERR_SYS.getStatus(), 60);
+					try {
+						throw new BizException(e);
+					} catch (BizException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}).start();
+			return ResponseFactory.ok(Boolean.TRUE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
+	}
+
+	@ApiOperation(value = "查询下载CAD文件")
+	@RequestMapping(value = "getDownLoadCAD")
+	public ResposeVO getDownLoadCAD(@RequestBody List<TypeIdDTO> dto) throws BizException {
+		Logger.debug("根据勾选图层ID导出CAD");
+		String key = dto.get(0).getId().toString() + GISConstants.UNDER_LINE + dto.get(0).getTime();
+		String result = queryDevService.getDownLoadFile(key);
+		return ResponseFactory.ok(result);
 	}
 
 	@ApiOperation(value = "获取管网长度")
