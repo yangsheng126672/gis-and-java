@@ -12,6 +12,7 @@ import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -105,7 +106,7 @@ public class CorrectionApi {
 	public ResposeVO findAllAuditList(@ApiParam(name = "dto", required = true) @RequestBody QueryAuditDTO dto) throws BizException {
 		Logger.debug("api/0/correction/findAllAuditList 获取所有审核记录");
 		try {
-			List<HistoryRecordVO> allAuditList = correctionService.findAllAuditList(dto);
+			PageVO<HistoryRecordVO> allAuditList = correctionService.findAllAuditList(dto);
 			return ResponseFactory.ok(allAuditList);
 		} catch (Exception e) {
 			e.printStackTrace();

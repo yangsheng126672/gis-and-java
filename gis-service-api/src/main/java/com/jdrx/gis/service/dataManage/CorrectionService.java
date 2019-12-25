@@ -1,6 +1,7 @@
 package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -27,6 +28,7 @@ import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -306,14 +308,18 @@ public class CorrectionService {
 	 * @return
 	 * @throws BizException
 	 */
-	public List<HistoryRecordVO> findAllAuditList(QueryAuditDTO dto) throws BizException {
+	public PageVO<HistoryRecordVO> findAllAuditList(QueryAuditDTO dto) throws BizException {
 		try {
-			List<HistoryRecordVO> historyRecordVOS = Lists.newArrayList();
+			PageVO<HistoryRecordVO> historyRecordVOS = new PageVO<>();
+			List<HistoryRecordVO> data = Lists.newArrayList();
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-			List<GISCorrectionPO> list = gisCorrectionPOManualMapper.selectRecords(dto, null);
+			Page<GISCorrectionPO> list = (Page<GISCorrectionPO>) gisCorrectionPOManualMapper.selectRecords(dto, null);
+			historyRecordVOS.setPageNum(list.getPageNum());
+			historyRecordVOS.setPageSize(list.getPageSize());
+			historyRecordVOS.setTotal(list.getTotal());
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			if (Objects.nonNull(list) && list.size() > 0) {
-				list.stream().forEach(gisCorrectionPO -> {
+			if (list.size() > 0) {
+				list.forEach(gisCorrectionPO -> {
 					HistoryRecordVO vo = new HistoryRecordVO();
 					Date createAt = gisCorrectionPO.getCreateAt();
 					Date updateAt = gisCorrectionPO.getUpdateAt();
@@ -347,9 +353,10 @@ public class CorrectionService {
 					} catch (BizException e) {
 						e.printStackTrace();
 					}
-					historyRecordVOS.add(vo);
+					data.add(vo);
 				});
 			}
+			historyRecordVOS.setData(data);
 			return historyRecordVOS;
 		} catch (Exception e) {
 			e.printStackTrace();
