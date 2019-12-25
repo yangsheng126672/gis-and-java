@@ -122,7 +122,6 @@ public class SpatialAnalysisService {
      * @throws BizException
      */
     public PageVO<AnalysisVO> getLonelyPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
         String[] devIDsDTOStr = devIDsDTO.getDevIds();
         List<String> list = new ArrayList<>();//neo4j返回的list
         Page<AnalysisVO> pageList = null;
@@ -138,7 +137,8 @@ public class SpatialAnalysisService {
             list = neo4jUtil.getLonelyPointsByDevIds(s);
         }
         if(list!=null&&list.size()>0){
-             pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
+	        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+	        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         }else{
            return  new PageVO<AnalysisVO>(pageList);
@@ -154,7 +154,6 @@ public class SpatialAnalysisService {
          * @throws BizException
          */
         public PageVO<AnalysisVO> getLonelyLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List<String> list = new ArrayList<>();//neo4j返回的list
             Page<AnalysisVO> pageList = null;
@@ -173,6 +172,7 @@ public class SpatialAnalysisService {
             list.clear();
             list.addAll(h);
             if(list!=null&&list.size()>0){
+	            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
                 pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
                 return new PageVO<AnalysisVO>(pageList);
             }
@@ -238,10 +238,10 @@ public class SpatialAnalysisService {
          * @throws BizException
          */
         public PageVO<AnalysisVO> getRepeatPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
             Page<AnalysisVO> pageList;
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List list = Arrays.asList(devIDsDTOStr);
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
             pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         }
@@ -253,10 +253,10 @@ public class SpatialAnalysisService {
          * @throws BizException
          */
         public PageVO<AnalysisVO> getRepeatLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
             Page<AnalysisVO> pageList;
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List list = Arrays.asList(devIDsDTOStr);
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
             pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         }

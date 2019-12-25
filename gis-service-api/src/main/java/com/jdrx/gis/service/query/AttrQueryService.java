@@ -204,7 +204,6 @@ public class AttrQueryService {
 			if (Objects.nonNull(devIds) && devIds.length > 0) {
 				devStr = Joiner.on(",").join(ids);
 			}
-			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = dto.getCriteriaList();
 			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
 				criteriaList.stream().forEach(cri -> {
@@ -216,6 +215,7 @@ public class AttrQueryService {
 					}
 				});
 			}
+			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
             Page<GISDevExtVO> list = (Page<GISDevExtVO>) gisDevExtPOMapper.findDevListByAreaOrInputVal(dto, devStr);
 			Long end = System.currentTimeMillis();
 			Logger.debug("数据库耗时： " + (end - start) + " ms");
@@ -462,7 +462,6 @@ public class AttrQueryService {
 	 */
 	public Boolean validateCriteria(AttrQeuryDTO dto) throws BizException{
 		try {
-			PageHelper.startPage(1, 10, null);
 			List<CriteriaWithDataTypeCategoryCodeDTO> criteriaList = dto.getCriteriaList();
 			StringBuffer sb = new StringBuffer();
 			if (Objects.nonNull(criteriaList) && criteriaList.size() > 0) {
