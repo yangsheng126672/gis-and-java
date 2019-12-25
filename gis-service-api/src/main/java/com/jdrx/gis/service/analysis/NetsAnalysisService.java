@@ -180,6 +180,7 @@ public class NetsAnalysisService {
      * @param failedValve
      * @param valveList
      * */
+
     public List<NodeDTO> findSecondAnalysisResult(String failedValve,List<String> valveList) throws BizException{
         List<Value> values = neo4jUtil.getNextNode(failedValve,GISConstants.NEO_POINT_LJ);
         if(values.size() == 0){
@@ -237,7 +238,6 @@ public class NetsAnalysisService {
                 }
                 iterator = lookingSet.listIterator();
             }
-
             return nodeDTOList;
 
         } catch (Exception e) {
@@ -476,6 +476,7 @@ public class NetsAnalysisService {
         List<NodeDTO> resultDtoList = new ArrayList<>();
         List<String>tmpList = new ArrayList<>();
        try {
+           GISDevExtPO po = gisDevExtPOMapper.getDevExtByDevId(devId);
            for (NodeDTO nodeDTO : fmlistNode){
                if ((!StringUtils.isEmpty(nodeDTO.getDev_id())&&(!fmList.contains(nodeDTO.getDev_id()))))
                fmList.add(nodeDTO.getDev_id());
@@ -483,25 +484,38 @@ public class NetsAnalysisService {
            for(String string:failedList){
                List<NodeDTO> tmpNodeList= findSecondAnalysisResult(string,fmList);
                for(NodeDTO innerDto:tmpNodeList){
-                   if ((!fmList.contains(innerDto.getCode()))&&(!failedList.contains(innerDto.getCode()))){
-                       if (!tmpList.contains(innerDto.getCode())){
-                           tmpList.add(innerDto.getCode());
+                   if ((!fmList.contains(innerDto.getDev_id()))&&(!failedList.contains(innerDto.getDev_id()))){
+                       if (!tmpList.contains(innerDto.getDev_id())){
+                           tmpList.add(innerDto.getDev_id());
                            resultDtoList.add(innerDto);
                        }
                    }
                }
            }
-           vo.setFmlist(resultDtoList);
            List<NodeDTO> fmlist_all = new ArrayList<>();
-          for (String s:fmList){
+           for (String s:fmList){
               if (failedList.contains(s)||(!fmlistTmp.contains(s))){
                   continue;
               }
               NodeDTO node = new NodeDTO();
-              node.setCode(s);
+              node.setDev_id(s);
               fmlist_all.add(node);
           }
           fmlist_all.addAll(resultDtoList);
+
+           //获取必须关阀列表
+           List<NodeDTO> finalList = findFinalFamens(fmlist_all,String.valueOf(po.getBelongTo()));
+           //去除第一次关阀列表中的阀门
+           Iterator iterator = finalList.listIterator();
+           NodeDTO nodeDTO = null;
+           while (iterator.hasNext()){
+               nodeDTO = (NodeDTO)iterator.next();
+               if (fmlistTmp.contains(nodeDTO.getDev_id())){
+                   iterator.remove();
+               }
+           }
+           vo.setFmlist(finalList);
+
            //获取影响区域范围
            List<String> devIds = findInfluenceArea(devId,fmlist_all);
            if (devIds != null){
