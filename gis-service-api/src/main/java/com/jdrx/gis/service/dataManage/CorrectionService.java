@@ -316,12 +316,17 @@ public class CorrectionService {
 				list.stream().forEach(gisCorrectionPO -> {
 					HistoryRecordVO vo = new HistoryRecordVO();
 					Date createAt = gisCorrectionPO.getCreateAt();
-					String createAtStr = "";
+					Date updateAt = gisCorrectionPO.getUpdateAt();
+					String createAtStr = "", updateAtStr = "";
 					if (Objects.nonNull(createAt)) {
 						createAtStr = sdf.format(createAt);
 					}
+					if (Objects.nonNull(updateAt)) {
+						updateAtStr = sdf.format(updateAt);
+					}
 					BeanUtils.copyProperties(gisCorrectionPO, vo);
 					vo.setCreateAt(createAtStr);
+					vo.setUpdateAt(updateAtStr);
 					Integer status = Integer.parseInt(String.valueOf(gisCorrectionPO.getStatus()));
 					for (EAuditStatus eAuditStatus : EAuditStatus.values()) {
 						if (eAuditStatus.getVal().equals(status)) {

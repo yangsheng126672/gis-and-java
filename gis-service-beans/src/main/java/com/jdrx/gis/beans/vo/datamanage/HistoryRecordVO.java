@@ -25,4 +25,11 @@ public class HistoryRecordVO {
 
 	/** 审核状态 */
 	private String status;
+
+	/** 审核日期 */
+	private String updateAt;
+
+	/** 审核人 */
+	private String updateBy;
+
 }

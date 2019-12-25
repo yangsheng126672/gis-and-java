@@ -17,6 +17,8 @@
         <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
         <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
+        <result column="pic_urls" jdbcType="VARCHAR" property="picUrls" />
+        <result column="video_urls" jdbcType="VARCHAR" property="videoUrls" />
     </resultMap>
 
     <resultMap id="BaseResultMap2" type="com.jdrx.gis.beans.vo.query.GISDevExtVO">
@@ -38,7 +40,7 @@
 
     <sql id="Base_Column_List">
     id, dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at, belong_to
+    create_by, create_at, update_by, update_at, belong_to, pic_urls, video_urls
     </sql>
 
     <select id="getDevExtByDevId" parameterType="java.lang.String" resultMap="BaseResultMap">
