@@ -694,7 +694,7 @@ public class Neo4jUtil {
 		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS line "
 				+ "match (s:gd{name:line." + GISConstants.LINE_START_CODE_CHN + ",belong_to:line." + GISConstants.AUTH_ID_S + "})"
 				+ "match (e:gd{name:line." + GISConstants.LINE_END_CODE_CHN + ",belong_to:line." + GISConstants.AUTH_ID_S + "})"
-				+ "create (s) - [:jdline{relationID:line." + GISConstants.DEV_ID + ", name:line." + GISConstants.LINE_START_CODE_CHN
+				+ "create (s) - [:gdline{relationID:line." + GISConstants.DEV_ID + ", name:line." + GISConstants.LINE_START_CODE_CHN
 				+ "+\"-\"+line." + GISConstants.LINE_END_CODE_CHN + ", gj:line." + GISConstants.GIS_ATTR_CALIBER + "}]->(e)";
 		session.run(cypherSql);
 	}
