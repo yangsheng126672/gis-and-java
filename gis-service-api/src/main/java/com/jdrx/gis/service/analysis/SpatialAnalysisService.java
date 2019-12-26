@@ -238,7 +238,7 @@ public class SpatialAnalysisService {
          * @throws BizException
          */
         public PageVO<AnalysisVO> getRepeatPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
             Page<AnalysisVO> pageList;
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List list = Arrays.asList(devIDsDTOStr);
@@ -253,7 +253,7 @@ public class SpatialAnalysisService {
          * @throws BizException
          */
         public PageVO<AnalysisVO> getRepeatLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
             Page<AnalysisVO> pageList;
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List list = Arrays.asList(devIDsDTOStr);
