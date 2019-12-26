@@ -51,4 +51,8 @@ public class GISCorrectionPO {
      */
     private Date updateAt;
 
+    /**
+     * 权属单位 ID
+     */
+    private Long belongTo;
 }

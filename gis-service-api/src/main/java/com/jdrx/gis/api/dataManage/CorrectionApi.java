@@ -1,5 +1,6 @@
 package com.jdrx.gis.api.dataManage;
 
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.AuditCorrectionDTO;
 import com.jdrx.gis.beans.dto.dataManage.CorrectionDTO;
 import com.jdrx.gis.beans.dto.dataManage.QueryAuditDTO;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,14 +43,15 @@ public class CorrectionApi {
 	@RequestMapping(value ="correctAttributeValue")
 	public ResposeVO correctAttributeValue(@ApiParam(name = "dto", required = true) @RequestBody @Valid CorrectionDTO dto,
 	                                       @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
-	                                       @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException {
+	                                       @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token,
+	                                       @RequestHeader (value = GISConstants.DEPT_PATH) String deptPath) throws BizException {
 		Logger.debug("api/0/correction/correctAttributeValue 提交纠正的错误值");
 		boolean bool;
 		if (Objects.isNull(dto) || dto.getMapAttr().size() == 0) {
 			throw new BizException("参数为空！");
 		}
 		try {
-			bool = correctionService.correctAttributeValue(dto, userId, token);
+			bool = correctionService.correctAttributeValue(dto, userId, token, deptPath);
 			return ResponseFactory.ok(bool);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -60,10 +61,11 @@ public class CorrectionApi {
 
 	@ApiOperation(value = "获取待审核的列表")
 	@RequestMapping(value ="findNeedAuditAttrList")
-	public ResposeVO findNeedAuditAttrList(@ApiParam(name = "dto", required = true) @RequestBody QueryAuditDTO dto ) throws BizException {
+	public ResposeVO findNeedAuditAttrList(@ApiParam(name = "dto", required = true) @RequestBody QueryAuditDTO dto,
+	                                       @RequestHeader (value = GISConstants.DEPT_PATH) String deptPath) throws BizException {
 		Logger.debug("api/0/correction/findNeedAuditAttrList 查询待审核的列表");
 		try {
-			List<GISCorrectionPO> needAuditAttrList = correctionService.findNeedAuditAttrList(dto);
+			List<GISCorrectionPO> needAuditAttrList = correctionService.findNeedAuditAttrList(dto, deptPath);
 			return ResponseFactory.ok(needAuditAttrList);
 		} catch (Exception e) {
 			throw new BizException("查询待审核的列表失败！" + e.getCause().getMessage());
@@ -103,10 +105,11 @@ public class CorrectionApi {
 
 	@ApiOperation(value = "获取所有审核记录")
 	@RequestMapping(value = "findAllAuditList")
-	public ResposeVO findAllAuditList(@ApiParam(name = "dto", required = true) @RequestBody QueryAuditDTO dto) throws BizException {
+	public ResposeVO findAllAuditList(@ApiParam(name = "dto", required = true) @RequestBody QueryAuditDTO dto,
+	                                  @RequestHeader (value = GISConstants.DEPT_PATH) String deptPath) throws BizException {
 		Logger.debug("api/0/correction/findAllAuditList 获取所有审核记录");
 		try {
-			PageVO<HistoryRecordVO> allAuditList = correctionService.findAllAuditList(dto);
+			PageVO<HistoryRecordVO> allAuditList = correctionService.findAllAuditList(dto, deptPath);
 			return ResponseFactory.ok(allAuditList);
 		} catch (Exception e) {
 			e.printStackTrace();

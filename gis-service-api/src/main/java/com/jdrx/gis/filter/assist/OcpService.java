@@ -2,11 +2,13 @@ package com.jdrx.gis.filter.assist;
 
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * @Author: Huangxg
  * @Time: 2019/11/28 10:38
  */
+@Service
 public class OcpService {
 	/**
 	 * 用户所属机构父级路径，约定规则如下：第一级为集团机构信息、集团之下也就是第二级为水厂机构信息，

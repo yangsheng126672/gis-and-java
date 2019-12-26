@@ -3,7 +3,7 @@
 <mapper namespace="com.jdrx.gis.dao.basic.GISCorrectionPOManualMapper">
     <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entity.dataManage.GISCorrectionPO">
         <id column="id" jdbcType="BIGINT" property="id" />
-        <result column="dev_id" jdbcType="VARCHAR" property="devId" />
+        <result column="dev_id" jdbcType="CHAR" property="devId" />
         <result column="code" jdbcType="VARCHAR" property="code" />
         <result column="status" jdbcType="SMALLINT" property="status" />
         <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
@@ -11,10 +11,11 @@
         <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
         <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
         <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+        <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, dev_id, code, status, delete_flag, create_by, create_at, update_by, update_at
+        id, dev_id, code, status, delete_flag, create_by, create_at, update_by, update_at, belong_to
     </sql>
 
     <select id="selectRecords" resultMap="BaseResultMap">
@@ -36,6 +37,9 @@
           </if>
           <if test="dto.endDate != null and dto.endDate != ''">
               AND to_char(create_at,'YYYY-MM-DD') <![CDATA[<=]]> #{dto.endDate}
+          </if>
+          <if test="belongTo != null">
+              AND belong_to = #{belongTo}
           </if>
     </select>
 
@@ -69,6 +73,9 @@
             <if test="updateAt != null">
                 update_at,
             </if>
+            <if test="belongTo != null">
+                belong_to,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -97,6 +104,9 @@
             </if>
             <if test="updateAt != null">
                 #{updateAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="belongTo != null">
+                #{belongTo,jdbcType=BIGINT},
             </if>
         </trim>
     </insert>

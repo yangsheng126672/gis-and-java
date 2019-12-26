@@ -25,6 +25,7 @@ import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.basic.autoGenerate.GISCorrectionPOMapper;
 import com.jdrx.gis.dubboRpc.UserRpc;
+import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -78,6 +79,9 @@ public class CorrectionService {
 	@Autowired
 	private ShareDevTypePOMapper shareDevTypePOMapper;
 
+	@Autowired
+	private OcpService ocpService;
+
 	/**
 	 * 报错纠错信息
 	 * @param dto
@@ -88,7 +92,7 @@ public class CorrectionService {
 	 * @throws SQLException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Boolean correctAttributeValue(CorrectionDTO dto, Long userId, String token) throws BizException, SQLException {
+	public Boolean correctAttributeValue(CorrectionDTO dto, Long userId, String token, String deptPath) throws BizException, SQLException {
 		try {
 			GISCorrectionPO gisCorrectionPO = new GISCorrectionPO();
 			gisCorrectionPO.setCode(dto.getCode());
@@ -100,6 +104,8 @@ public class CorrectionService {
 			gisCorrectionPO.setCreateBy(loginUserName);
 			Date now = new Date();
 			gisCorrectionPO.setCreateAt(now);
+			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
+			gisCorrectionPO.setBelongTo(deptId);
 			int e1 = gisCorrectionPOManualMapper.insertReturnId(gisCorrectionPO);
 			Long coRecordId = gisCorrectionPO.getId();
 			int e2 = 0;
@@ -146,7 +152,7 @@ public class CorrectionService {
 	 * 查询待审核的纠错列表
 	 * @return
 	 */
-	public List<GISCorrectionPO> findNeedAuditAttrList(QueryAuditDTO dto) throws BizException{
+	public List<GISCorrectionPO> findNeedAuditAttrList(QueryAuditDTO dto, String deptPath) throws BizException{
 		try {
 			if (Objects.nonNull(dto)) {
 				if (Objects.nonNull(dto.getStartDate()) && Objects.isNull(dto.getEndDate())) {
@@ -155,7 +161,8 @@ public class CorrectionService {
 					throw new BizException("开始日期为空！");
 				}
 			}
-			return gisCorrectionPOManualMapper.selectRecords(dto, EAuditStatus.NO_AUDIT.getVal());
+			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
+			return gisCorrectionPOManualMapper.selectRecords(dto, EAuditStatus.NO_AUDIT.getVal(), deptId);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException(e);
@@ -308,12 +315,13 @@ public class CorrectionService {
 	 * @return
 	 * @throws BizException
 	 */
-	public PageVO<HistoryRecordVO> findAllAuditList(QueryAuditDTO dto) throws BizException {
+	public PageVO<HistoryRecordVO> findAllAuditList(QueryAuditDTO dto, String deptPath) throws BizException {
 		try {
 			PageVO<HistoryRecordVO> historyRecordVOS = new PageVO<>();
 			List<HistoryRecordVO> data = Lists.newArrayList();
+			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-			Page<GISCorrectionPO> list = (Page<GISCorrectionPO>) gisCorrectionPOManualMapper.selectRecords(dto, null);
+			Page<GISCorrectionPO> list = (Page<GISCorrectionPO>) gisCorrectionPOManualMapper.selectRecords(dto, null, deptId);
 			historyRecordVOS.setPageNum(list.getPageNum());
 			historyRecordVOS.setPageSize(list.getPageSize());
 			historyRecordVOS.setTotal(list.getTotal());

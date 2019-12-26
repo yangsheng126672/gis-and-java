@@ -1,0 +1,1 @@
+alter table gis_correction_record  Add column belong_to int8 default -1

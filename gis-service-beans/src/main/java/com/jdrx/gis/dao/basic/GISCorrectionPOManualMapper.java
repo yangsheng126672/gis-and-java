@@ -20,7 +20,7 @@ public interface GISCorrectionPOManualMapper {
 	 * @param dto
 	 * @return
 	 */
-    List<GISCorrectionPO> selectRecords(@Param("dto") QueryAuditDTO dto, @Param("status") Integer status);
+    List<GISCorrectionPO> selectRecords(@Param("dto") QueryAuditDTO dto, @Param("status") Integer status, @Param("belongTo") Long belongTo);
 
 	/**
 	 * 更新审核状态
