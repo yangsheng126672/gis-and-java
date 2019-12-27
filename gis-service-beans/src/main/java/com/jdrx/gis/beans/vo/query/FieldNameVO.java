@@ -27,4 +27,7 @@ public class FieldNameVO {
 
 	/** 是否可以编辑 */
 	private Boolean edit;
+
+	/** 输入框类型 */
+	private Short inputType;
 }

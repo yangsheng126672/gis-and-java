@@ -32,6 +32,9 @@
         <result column="fieldDesc" jdbcType="VARCHAR" property="fieldDesc"/>
         <result column="fieldName" jdbcType="VARCHAR" property="fieldName"/>
         <result column="idx" jdbcType="SMALLINT" property="idx"/>
+        <result column="fill" jdbcType="BIT" property="fill"/>
+        <result column="edit" jdbcType="BIT" property="edit" />
+        <result column="input_type" jdbcType="SMALLINT" property="inputType" />
     </resultMap>
 
     <resultMap id="BaseResultMap5" type="com.jdrx.gis.beans.vo.query.SonsNumVO">
@@ -227,7 +230,7 @@
     </select>
 
     <select id="findFieldNamesByDevTypeId" parameterType="java.lang.Long" resultMap="BaseResultMap4">
-         SELECT field_name AS fieldName, field_desc AS fieldDesc, idx,data_type as dataType,fill,edit
+         SELECT field_name AS fieldName, field_desc AS fieldDesc, idx,data_type as dataType,fill,edit, input_type
             FROM gis_dev_tpl_attr
             WHERE tpl_id = (
                 select tpl_id from gis_tpl_type where type_id  = (
