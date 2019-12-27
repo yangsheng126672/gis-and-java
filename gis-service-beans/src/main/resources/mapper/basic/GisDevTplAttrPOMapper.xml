@@ -15,10 +15,11 @@
         <result column="idx" jdbcType="SMALLINT" property="idx" />
         <result column="fill" jdbcType="BIT" property="fill" />
         <result column="edit" jdbcType="BIT" property="edit" />
+        <result column="input_type" jdbcType="SMALLINT" property="inputType"/>
     </resultMap>
     <sql id="Base_Column_List">
         id, tpl_id, field_desc, field_name, data_type, delete_flag, create_by, create_at,
-        update_by, update_at, idx, fill,edit
+        update_by, update_at, idx, fill, edit, input_type
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
@@ -30,11 +31,12 @@
         insert into gis_dev_tpl_attr (id, tpl_id, field_desc,
           field_name, data_type, delete_flag,
           create_by, create_at, update_by,
-          update_at, idx, fill,edit)
+          update_at, idx, fill, edit, input_type)
         values (#{id,jdbcType=BIGINT}, #{tplId,jdbcType=BIGINT}, #{fieldDesc,jdbcType=VARCHAR},
            #{fieldName,jdbcType=VARCHAR}, #{dataType,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT},
            #{createBy,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR},
-           #{updateAt,jdbcType=TIMESTAMP}, #{idx,jdbcType=SMALLINT}, #{fill,jdbcType=BIT},#{edit,jdbcType=BIT})
+           #{updateAt,jdbcType=TIMESTAMP}, #{idx,jdbcType=SMALLINT}, #{fill,jdbcType=BIT},#{edit,jdbcType=BIT},
+           #{inputType, jdbcType=SMALLINT})
   </insert>
     <insert id="insertSelective" parameterType="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
         insert into gis_dev_tpl_attr
@@ -78,6 +80,9 @@
             <if test="edit != null">
                 edit,
             </if>
+            <if test="inputType != null">
+                input_type,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -119,6 +124,9 @@
             <if test="edit != null">
                 #{edit,jdbcType=BIT},
             </if>
+            <if test="inputType != null">
+                #{inputType,jdbcType=SMALLINT},
+            </if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.jdrx.gis.beans.entity.basic.GisDevTplAttrPO">
@@ -159,6 +167,9 @@
             </if>
             <if test="edit != null">
                 edit = #{edit,jdbcType=BIT},
+            </if>
+            <if test="inputType != null">
+                input_type = #{inputType,jdbcType=SMALLINT},
             </if>
         </set>
         where id = #{id,jdbcType=BIGINT}

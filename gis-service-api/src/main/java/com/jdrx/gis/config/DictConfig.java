@@ -67,4 +67,7 @@ public class DictConfig {
 
 	/** 图层显示范围 */
 	private String layerExtent;
+
+	/** 下拉选项 */
+	private String devEditOptions;
 }

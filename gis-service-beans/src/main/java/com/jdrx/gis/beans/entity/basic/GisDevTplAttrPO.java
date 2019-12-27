@@ -68,6 +68,11 @@ public class GisDevTplAttrPO {
      */
     private Boolean edit;
 
+	/**
+	 * 1 - 文本框，2 - 数字框，3 - 下拉框，4 - 日期控件
+	 */
+	private Short inputType;
+
     public Long getId() {
         return id;
     }
@@ -171,4 +176,12 @@ public class GisDevTplAttrPO {
     public void setEdit(Boolean edit) {
         this.edit = edit;
     }
+
+	public Short getInputType() {
+		return inputType;
+	}
+
+	public void setInputType(Short inputType) {
+		this.inputType = inputType;
+	}
 }

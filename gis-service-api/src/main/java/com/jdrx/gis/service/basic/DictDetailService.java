@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -196,5 +197,32 @@ public class DictDetailService {
 			e.printStackTrace();
 			throw new BizException("根据typeId查字典数据失败！");
 		}
+	}
+
+	/**
+	 * 根据数据字典的配置，获取配置项的下拉属性， 配置dict_detail中name对应模板字段英文值，val对应需要查询的
+	 * 下拉框配置的值
+	 * @return
+	 * @throws BizException
+	 */
+	public Map<String, List<DictDetailPO>> findOptionsByConfig() throws BizException {
+		String devEditOptions = dictConfig.getDevEditOptions();
+		if (StringUtils.isEmpty(devEditOptions)) {
+			throw new BizException("未配置需要查询的下拉框字典值！");
+		}
+		Map<String, List<DictDetailPO>> map = Maps.newHashMap();
+		List<DictDetailPO> detailsByTypeVal = findDetailsByTypeVal(devEditOptions);
+		if (Objects.nonNull(detailsByTypeVal) && detailsByTypeVal.size() > 0) {
+			detailsByTypeVal.forEach(detail -> {
+				List<DictDetailPO> detailPOS = null;
+				try {
+					detailPOS = findDetailsByTypeVal(detail.getVal());
+				} catch (BizException e) {
+					e.printStackTrace();
+				}
+				map.put(detail.getName(), detailPOS);
+			});
+		}
+		return map;
 	}
 }

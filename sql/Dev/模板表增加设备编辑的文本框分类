@@ -1,0 +1,2 @@
+alter table gis_dev_tpl_attr add column input_type short default 1 ;
+comment on column gis_dev_tpl_attr.input_type is '1 - 文本框，2 - 数字框，3 - 下拉框，4 - 日期控件 ';

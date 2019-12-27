@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 数据字典Api
@@ -105,5 +106,13 @@ public class DictDetailApi {
 		Logger.debug("api/0/dictDetail/findDictDetailListByVal 根据参数值查字典数据 {}", dto.toString());
 		List<DictDetailPO> list = dictDetailService.findDetailsByTypeVal(dto.getVal());
 		return ResponseFactory.ok(list);
+	}
+
+	@ApiOperation(value = "根据配置项获取配置项的下拉选项")
+	@RequestMapping(value = "findOptionsByConfig")
+	public ResposeVO findOptionsByConfig() throws BizException {
+		Logger.debug("api/0/dictDetail/findOptionsByConfig 根据配置项获取配置项的下拉选项");
+		Map<String, List<DictDetailPO>> map = dictDetailService.findOptionsByConfig();
+		return ResponseFactory.ok(map);
 	}
 }
