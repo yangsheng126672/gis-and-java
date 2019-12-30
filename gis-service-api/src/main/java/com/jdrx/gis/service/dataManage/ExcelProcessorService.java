@@ -26,6 +26,7 @@ import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
 import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.gis.service.basic.ShareDevService;
+import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.gis.util.Neo4jUtil;
@@ -102,13 +103,16 @@ public class ExcelProcessorService {
 	@Autowired
 	private Neo4jUtil neo4jUtil;
 
+	@Autowired
+	private QueryDevService queryDevService;
+
 	// 需要判断是否为空的列
 	private static List<String>  validHeader = Lists.newArrayList();
 
 	static {
 		validHeader.add(GISConstants.CALIBER_CHN);
 		validHeader.add(GISConstants.DATA_AUTH_CHN);
-		validHeader.add(GISConstants.DEV_TYPE_NAME_CHN);
+//		validHeader.add(GISConstants.DEV_TYPE_NAME_CHN);
 		validHeader.add(GISConstants.LINE_START_CODE_CHN);
 		validHeader.add(GISConstants.LINE_END_CODE_CHN);
 		validHeader.add(GISConstants.POINT_CODE_CHN);
@@ -408,40 +412,47 @@ public class ExcelProcessorService {
 					}
 				}
 
-				// 如果是管点，X坐标不能为空
-				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName) && GISConstants.X_CHN.equals(headerName)) {
-					if (StringUtils.isEmpty(cellStringVal)) {
-						throw new BizException(cellAddrDesc + "的数据不能为空！");
-					} else if (cellStringVal.length() > 16) {
-						throw new BizException(cellAddrDesc + "的数据长度超过16位，请更改数据内容或把单元格式更改成文本格式！");
+				String typeName = null;
+				// 如果是管点
+				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
+					// 名称不能为空
+					if (GISConstants.DEV_TYPE_NAME_CHN.equals(headerName)) {
+						if (StringUtils.isEmpty(cellStringVal)) {
+							throw new BizException(cellAddrDesc + "的数据不能为空！");
+						}
+						Map<Integer, Map<String, String>> allDevTypeNames = headerMap.get("allDevTypeNames");
+						Map<String, String> allDevTypes = allDevTypeNames.get(KEY);
+						if (!allDevTypes.containsKey(cellStringVal)) {
+							throw new BizException(cellAddrDesc + "的类别名称[" + cellStringVal + "]在数据库中不存在，请确认是" +
+									"否新增类型，如果是，请联系管理员添加；如果不是，请更正数据后重新上传！");
+						}
+						// 把类别名称转为ID
+						typeName = allDevTypes.get(cellStringVal);
+					}
+					// X坐标不能为空
+					if (GISConstants.X_CHN.equals(headerName)) {
+						if (StringUtils.isEmpty(cellStringVal)) {
+							throw new BizException(cellAddrDesc + "的数据不能为空！");
+						} else if (cellStringVal.length() > 16) {
+							throw new BizException(cellAddrDesc + "的数据长度超过16位，请更改数据内容或把单元格式更改成文本格式！");
+						}
+					}
+					// Y坐标不能为空
+					if (GISConstants.Y_CHN.equals(headerName)) {
+						if (StringUtils.isEmpty(cellStringVal)) {
+							throw new BizException(cellAddrDesc + "的数据不能为空！");
+						}  else if (cellStringVal.length() > 16) {
+							throw new BizException(cellAddrDesc + "的数据长度超过16位，请更改数据内容或把单元格式更改成文本格式！");
+						}
 					}
 				}
-				// 如果是管点，Y坐标不能为空
-				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName) && GISConstants.Y_CHN.equals(headerName)) {
-					if (StringUtils.isEmpty(cellStringVal)) {
-						throw new BizException(cellAddrDesc + "的数据不能为空！");
-					}  else if (cellStringVal.length() > 16) {
-						throw new BizException(cellAddrDesc + "的数据长度超过16位，请更改数据内容或把单元格式更改成文本格式！");
-					}
-				}
+
 				// 验证单元格值的数据类型是否正确：数值型 | 字符型 | 日期时间型
 				if (Objects.nonNull(cellStringVal) && !StringUtils.isEmpty(cellStringVal)) {
 					boolean dataTypeStat = validCellDataType(cellStringVal, category);
 					if (!dataTypeStat) {
 						throw new BizException(cellAddrDesc + "的数据格式不正确，请确认并修改！");
 					}
-				}
-				// 验证类别名称是否合法
-				String typeName = null;
-				if (GISConstants.DEV_TYPE_NAME_CHN.equals(headerName)) {
-					Map<Integer, Map<String, String>> allDevTypeNames = headerMap.get("allDevTypeNames");
-					Map<String, String> allDevTypes = allDevTypeNames.get(KEY);
-					if (!allDevTypes.containsKey(cellStringVal)) {
-						throw new BizException(cellAddrDesc + "的类别名称[" + cellStringVal + "]在数据库中不存在，请确认是" +
-								"否新增类型，如果是，请联系管理员添加；如果不是，请更正数据后重新上传！");
-					}
-					// 把类别名称转为ID
-					typeName = allDevTypes.get(cellStringVal);
 				}
 
 				// 验证权属单位是否合法
@@ -667,6 +678,9 @@ public class ExcelProcessorService {
 				Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
 				String devId = String.format("%04d%s%06d",typeId, GISConstants.PLATFORM_CODE, seq);
 				String name = String.valueOf(map.get(GISConstants.DEV_TYPE_NAME_CHN));
+
+				String caliber = Objects.nonNull(map.get(GISConstants.CALIBER_CHN)) ? String.valueOf(map.get(GISConstants.CALIBER_CHN)) : null;
+
 				int p_l = 0;
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
 					p_l = 1;
@@ -680,6 +694,8 @@ public class ExcelProcessorService {
 						}
 					}
 				} else if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
+					String caliberTypeName = queryDevService.getCaliberNameByCaliber(Integer.parseInt(caliber));
+					name = caliberTypeName;
 					p_l = 2;
 					if (EupdateAndInsert.INSERT.getVal() == devSaveParam.getSaveFlag()) {
 						if (existsExtMaps.containsKey(lineCode)) {
@@ -691,7 +707,6 @@ public class ExcelProcessorService {
 						}
 					}
 				}
-				String caliber = Objects.nonNull(map.get(GISConstants.CALIBER_CHN)) ? String.valueOf(map.get(GISConstants.CALIBER_CHN)) : null;
 				String material = Objects.nonNull(map.get(GISConstants.MATERIAL_CHN)) ? String.valueOf(map.get(GISConstants.MATERIAL_CHN)) : null;
 				String belongTo = Objects.nonNull(map.get(GISConstants.AUTH_ID_S)) ? String.valueOf(map.get(GISConstants.AUTH_ID_S)) : null;
 
