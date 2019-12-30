@@ -680,10 +680,19 @@ public class Neo4jUtil {
 	 * @param filePath
 	 */
 	public void createNodesByCsvPoint(String filePath) {
-		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS point "
-				+ "create (:gd{dev_id:point." + GISConstants.DEV_ID + ", name : point." + GISConstants.POINT_CODE_CHN + ", nodetype : point.nodetype, x : point."
-				+ GISConstants.X_CHN + ", y : point." + GISConstants.Y_CHN + ",  belong_to : point." + GISConstants.AUTH_ID_S + "})";
-		session.run(cypherSql);
+		StringBuilder sb = new StringBuilder();
+		sb.append("using periodic commit ")
+			.append(GISConstants.IMPORT_MAX_ROWS)
+			.append(" LOAD CSV WITH HEADERS FROM \" ")
+			.append(filePath)
+			.append("\" AS point ")
+			.append("merge (gd:gd{name:point.").append(GISConstants.POINT_CODE_CHN)
+			.append("})")
+			.append(" SET gd.nodetype=point.nodetype")
+			.append(",gd.x=point.").append(GISConstants.X_CHN)
+			.append(",gd.y=point.").append(GISConstants.Y_CHN)
+			.append(",gd.belong_to=point.").append(GISConstants.AUTH_ID_S);
+		session.run(String.valueOf(sb));
 	}
 
 	/**
@@ -691,11 +700,20 @@ public class Neo4jUtil {
 	 * @param filePath
 	 */
 	public void createNodesByCsvLine(String filePath) {
-		String cypherSql = "using periodic commit " + GISConstants.IMPORT_MAX_ROWS + " LOAD CSV WITH HEADERS FROM \" " + filePath + "\" AS line "
-				+ "match (s:gd{name:line." + GISConstants.LINE_START_CODE_CHN + ",belong_to:line." + GISConstants.AUTH_ID_S + "})"
-				+ "match (e:gd{name:line." + GISConstants.LINE_END_CODE_CHN + ",belong_to:line." + GISConstants.AUTH_ID_S + "})"
-				+ "create (s) - [:gdline{relationID:line." + GISConstants.DEV_ID + ", name:line." + GISConstants.LINE_START_CODE_CHN
-				+ "+\"-\"+line." + GISConstants.LINE_END_CODE_CHN + ", gj:line." + GISConstants.GIS_ATTR_CALIBER + "}]->(e)";
-		session.run(cypherSql);
+		StringBuilder sb = new StringBuilder();
+		sb.append("using periodic commit ")
+				.append(GISConstants.IMPORT_MAX_ROWS)
+				.append(" LOAD CSV WITH HEADERS FROM \" ")
+				.append(filePath)
+				.append("\" AS line ")
+				.append(" match (s:gd{name:line.").append(GISConstants.LINE_START_CODE_CHN).append("})")
+				.append(" match (e:gd{name:line.").append(GISConstants.LINE_END_CODE_CHN).append("})")
+				.append(" merge (s) - [gdline:gdline{name:line.").append(GISConstants.LINE_START_CODE_CHN)
+				.append("+\"-\"+")
+				.append("line.").append(GISConstants.LINE_END_CODE_CHN).append("}]->(e)")
+				.append(" SET gdline.relationID=").append("line.").append(GISConstants.DEV_ID)
+				.append(",gdline.gj=").append("line.").append(GISConstants.GIS_ATTR_CALIBER)
+				.append(",gdline.cztype=").append("line.").append(GISConstants.GIS_ATTR_MATERIAL);
+		session.run(String.valueOf(sb));
 	}
 }
