@@ -136,12 +136,12 @@ public class SpatialAnalysisService {
             s = s.substring(0, s.length() - 1);
             list = neo4jUtil.getLonelyPointsByDevIds(s);
         }
-        if(list!=null&&list.size()>0){
-	        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
-	        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
+        if (list != null && list.size() > 0) {
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
-        }else{
-           return  new PageVO<AnalysisVO>(pageList);
+        } else {
+            return new PageVO<AnalysisVO>(pageList);
         }
 
     }
@@ -241,7 +241,7 @@ public class SpatialAnalysisService {
             Page<AnalysisVO> pageList;
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List list = Arrays.asList(devIDsDTOStr);
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
             pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         }
@@ -256,7 +256,7 @@ public class SpatialAnalysisService {
             Page<AnalysisVO> pageList;
             String[] devIDsDTOStr = devIDsDTO.getDevIds();
             List list = Arrays.asList(devIDsDTOStr);
-            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize(), devIDsDTO.getOrderBy());
+            PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
             pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
             return new PageVO<AnalysisVO>(pageList);
         }

@@ -606,10 +606,10 @@
         select dev_id AS devId,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds ==null or devIds.size==0">
-            and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext bbb  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is null order by st_astext(geom)
+            and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext bbb  where delete_flag = false  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is null order by st_astext(geom)
          </if>
         <if test="devIds != null and devIds.size > 0">
-            AND st_astext(geom) in (select st_astext(geom) From  gis_dev_ext ccc where  dev_id in
+            AND st_astext(geom) in (select st_astext(geom) From  gis_dev_ext ccc  where delete_flag = false and  dev_id in
             <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
@@ -620,10 +620,10 @@
         select dev_id AS devId,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
         <if test="devIds ==null or devIds.size==0">
-            and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext bbb  Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is not null order by st_astext(geom)
+            and st_astext(geom) in (select st_astext(geom) From  gis_dev_ext bbb where delete_flag = false Group By st_astext(geom) Having Count(st_astext(geom))>1) and caliber is not null order by st_astext(geom)
         </if>
         <if test="devIds != null and devIds.size > 0">
-            AND st_astext(geom) in (select st_astext(geom) From  gis_dev_ext ccc where  dev_id in
+            AND st_astext(geom) in (select st_astext(geom) From  gis_dev_ext ccc where delete_flag = false and dev_id in
             <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>

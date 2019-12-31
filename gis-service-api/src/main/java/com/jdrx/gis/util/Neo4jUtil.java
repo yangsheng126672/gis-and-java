@@ -559,8 +559,8 @@ public class Neo4jUtil {
             } else {
                 nodeType = GISConstants.NEO_NODE_NORMAL;
             }
-            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:'%d'})", GISConstants.NEO_POINT, devid,
-                    name, nodeType, dto.getX(), dto.getY(), belongTo);
+            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:'%f',y:'%f',belong_to:'%d',typeid:'%d'})", GISConstants.NEO_POINT, devid,
+                    name, nodeType, dto.getX(), dto.getY(), belongTo,dto.getTypeId());
             session.run(cypherSql);
             //获取管线及管点的属性值
             String relationId = dto.getLineDevId();
@@ -605,7 +605,7 @@ public class Neo4jUtil {
             } else {
                 nodeType = GISConstants.NEO_NODE_NORMAL;
             }
-            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:%f,y:%f,belong_to:'%d'})", GISConstants.NEO_POINT, devid, name, nodeType, dto.getX(), dto.getY(), belongTo);
+            String cypherSql = String.format("create (a:%s{dev_id:\"%s\",name:\"%s\",nodetype:\"%s\",x:'%f',y:'%f',belong_to:'%d',typeid:'%d'})", GISConstants.NEO_POINT, devid, name, nodeType, dto.getX(), dto.getY(), belongTo,dto.getTypeId());
             session.run(cypherSql);
             return true;
         }catch (Exception e){
@@ -650,7 +650,7 @@ public class Neo4jUtil {
     public Boolean updatePointMoveToNeo4j(MovePointDTO dto){
         try{
             //同步管点移动 更改管点移动的坐标属性信息
-            String cypherSql = String.format("match(a:gd) where a.dev_id = \"%s\" set a.x = %f,a.y=%f",dto.getDevId(),dto.getX(),dto.getY());
+            String cypherSql = String.format("match(a:gd) where a.dev_id = \"%s\" set a.x = '%f',a.y='%f'",dto.getDevId(),dto.getX(),dto.getY());
             session.run(cypherSql);
             return true;
         }
