@@ -421,6 +421,7 @@ public class ExcelProcessorService {
 
 					if (GISConstants.CALIBER_CHN.equals(headerName)) {
 						String caliberTypeName = queryDevService.getCaliberNameByCaliber(Integer.parseInt(cellStringVal));
+						shareDevDataMap.put(GISConstants.DEV_TYPE_NAME_CHN, caliberTypeName);
 						typeName  = allDevTypes.get(caliberTypeName);
 					}
 				}
