@@ -652,4 +652,9 @@
         </set>
         WHERE dev_id = #{devId}
     </update>
+
+    <select id="getXYByDevId" parameterType="string" resultType="com.jdrx.gis.beans.vo.datamanage.LineXYVo">
+        SELECT ST_X(ST_StartPoint(geom)),ST_Y(ST_StartPoint(geom)),ST_X(ST_EndPoint(geom)),ST_Y(ST_EndPoint(geom))
+        FROM gis_dev_ext WHERE dev_id=#{devId}
+    </select>
 </mapper>

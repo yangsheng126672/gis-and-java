@@ -10,6 +10,7 @@ import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
+import com.jdrx.gis.beans.vo.datamanage.LineXYVo;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
@@ -273,6 +274,13 @@ public interface GISDevExtPOMapper {
 	int updateMultiVideo(@Param("picUrls") String picUrls,
 	                     @Param("videoUrls") String videoUrls,
 	                     @Param("devId") String devId);
+
+	/**
+	 * 根据devId获取线的起始坐标和终止坐标
+	 * @param devId
+	 * @return
+	 */
+	LineXYVo getXYByDevId(@Param("devId") String devId);
 
 }
 

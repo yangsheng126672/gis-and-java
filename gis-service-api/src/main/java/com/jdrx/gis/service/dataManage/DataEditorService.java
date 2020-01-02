@@ -6,6 +6,7 @@ import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entity.basic.*;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
+import com.jdrx.gis.beans.vo.datamanage.LineXYVo;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
@@ -168,6 +169,19 @@ public class DataEditorService {
             Map<String,Object> map = dto.getMap();
             Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
             String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
+
+            //对于不在线上的点，计算其到最近线的垂足的点，来代替该点
+            LineXYVo lineXYVo = gisDevExtPOMapper.getXYByDevId(dto.getLineDevId());
+            Double x1 = lineXYVo.getX1();
+            Double y1 = lineXYVo.getY1();
+            Double x2 = lineXYVo.getX2();
+            Double y2 = lineXYVo.getY2();
+            double k1 = (y2-y1)/(x2-x1);
+            double k2 = (x1-x2)/(y2-y1);
+            double x = (dto.getY()-y2+k1*x2-k2*dto.getX())/(k1-k2);
+            double y = k1*x+y2-k1*x2;
+            dto.setX(x);
+            dto.setY(y);
 
             String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
             String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
