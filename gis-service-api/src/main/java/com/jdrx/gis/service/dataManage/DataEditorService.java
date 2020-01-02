@@ -142,7 +142,8 @@ public class DataEditorService {
                 if(fieldNameVO.getFieldName().equals(GISConstants.GIS_ATTR_DEVID) || fieldNameVO.getFieldName().equals("geom")){
                     iterator.remove();
                 }
-                if(bl && fieldNameVO.getFieldName().equals(GISConstants.GIS_ATTR_CODE)){
+                //去除管线name字段
+                if(bl && fieldNameVO.getFieldName().equals(GISConstants.GIS_ATTR_NAME)){
                     iterator.remove();
                 }
             }

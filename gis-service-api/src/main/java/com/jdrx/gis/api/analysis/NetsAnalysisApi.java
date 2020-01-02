@@ -1,15 +1,18 @@
 package com.jdrx.gis.api.analysis;
 
 import com.jdrx.gis.api.basic.BasciDevApi;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.AnalysisRecordDTO;
 import com.jdrx.gis.beans.dto.analysis.RecondParamasDTO;
 import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
 import com.jdrx.gis.beans.dto.analysis.ExportValveDTO;
 import com.jdrx.gis.beans.dto.analysis.ExportValveRecondDTO;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
+import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
+import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,6 +37,9 @@ public class NetsAnalysisApi {
 
     @Autowired
     private NetsAnalysisService netsAnalysisService;
+
+    @Autowired
+    private RedisComponents redisComponents;
 
     @ApiOperation(value = "获取爆管分析结果")
     @RequestMapping(value ="getAnalysisiResult")
@@ -87,8 +93,29 @@ public class NetsAnalysisApi {
         if (dto == null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }
-        Logger.debug("api/0/analysis/exportAnalysisiResult 导出关阀分析结果");
-        return  ResponseFactory.ok(netsAnalysisService.exportAnalysisRecond(dto));
+        try {
+            String key = dto.getLineId() + GISConstants.UNDER_LINE + dto.getTime();
+            new Thread(() -> {
+                try {
+                    String result = netsAnalysisService.exportAnalysisRecond(dto);
+                    redisComponents.set(key, result, GISConstants.DOWNLOAD_EXPIRE);
+                    Logger.debug("导出关阀分析结果，key = {}", key);
+                } catch (BizException e) {
+                    e.printStackTrace();
+                    Logger.error("导出关阀分析结果！{}", Thread.currentThread().getName());
+                    redisComponents.set(key, EApiStatus.ERR_SYS.getStatus(), 60);
+                    try {
+                        throw new BizException(e);
+                    } catch (BizException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }).start();
+            return ResponseFactory.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
     }
 
     @ApiOperation(value = "导出历史关阀分析结果")
@@ -97,8 +124,29 @@ public class NetsAnalysisApi {
         if (dto == null){
             return ResponseFactory.err("列表参数为空", EApiStatus.ERR_VALIDATE);
         }
-        Logger.debug("api/0/analysis/exportAnalysisiRecond 导出历史关阀分析结果");
-        return  ResponseFactory.ok(netsAnalysisService.exportAnalysisRecond(dto));
+        try {
+            String key = dto.getLineId() + GISConstants.UNDER_LINE + dto.getTime();
+            new Thread(() -> {
+                try {
+                    String result = netsAnalysisService.exportAnalysisRecond(dto);
+                    redisComponents.set(key, result, GISConstants.DOWNLOAD_EXPIRE);
+                    Logger.debug("导出历史关阀分析结果，key = {}", key);
+                } catch (BizException e) {
+                    e.printStackTrace();
+                    Logger.error("导出历史关阀分析结果！{}", Thread.currentThread().getName());
+                    redisComponents.set(key, EApiStatus.ERR_SYS.getStatus(), 60);
+                    try {
+                        throw new BizException(e);
+                    } catch (BizException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }).start();
+            return ResponseFactory.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
     }
 
 
