@@ -533,7 +533,7 @@ public class Neo4jUtil {
      */
     public Boolean deleteLineById(String devId) {
         try {
-            String cypherSql = String.format("match (a)-[b:%s]-[c] where a.dev_id=\"%s\"  delete b", GISConstants.NEO_LINE, devId);
+            String cypherSql = String.format("match (a)-[b:%s]-[c] where b.dev_id=\"%s\"  delete b", GISConstants.NEO_LINE, devId);
             session.run(cypherSql);
             return true;
         } catch (Exception e) {
@@ -716,4 +716,20 @@ public class Neo4jUtil {
 				.append(",gdline.cztype=").append("line.").append(GISConstants.GIS_ATTR_MATERIAL);
 		session.run(String.valueOf(sb));
 	}
+
+    /**
+     * neo4j删除功能同步  如果是线可直接删除  否则的话需要判断这个点  是孤立点的话就能删除 不是的话就不能删除
+     * 该方法判断点的数量有多少
+     */
+    public int getPointAmount(String devId){
+        Integer amount = null;
+        String cypherSql = String.format("match(a:gd)-[rel:gdline]-(b:gd) where a.dev_id = '%s' return count(*)",devId);
+        StatementResult result = session.run(cypherSql);
+        while(result.hasNext()){
+            Record record = result.next();
+             amount = record.get(0).asInt();
+        }
+        return amount;
+
+    }
 }

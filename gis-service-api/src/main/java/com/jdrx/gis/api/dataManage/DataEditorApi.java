@@ -6,6 +6,7 @@ import com.jdrx.gis.service.dataManage.DataEditorService;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
+import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -114,7 +115,13 @@ public class DataEditorApi {
     @RequestMapping(value ="deleteShareDevByDevId")
     public ResposeVO deleteShareDevByDevId(@ApiParam(name = "dto", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
         Logger.debug("api/0/dataEditor/deleteShareDevByDevId 根据设备id删除设备");
-        return  ResponseFactory.ok(dataEditorService.deleteShareDevByDevId(dto.getId()));
+        try {
+            Boolean aBoolean = dataEditorService.deleteShareDevByDevId(dto.getId());
+            return  ResponseFactory.ok(aBoolean);
+        } catch (BizException e) {
+            e.printStackTrace();
+            return ResponseFactory.err("当前管点连接着管线，不允许删除该管点！", EApiStatus.ERR_SYS.getStatus());
+        }
     }
 
     @ApiOperation(value = "经纬度转为地方坐标系")

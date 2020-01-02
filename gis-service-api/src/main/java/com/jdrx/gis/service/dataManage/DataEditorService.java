@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entity.basic.*;
+import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.config.DictConfig;
@@ -857,16 +858,30 @@ public class DataEditorService {
      * @return
      * @throws BizException
      */
-    public Boolean deleteShareDevByDevId(String devId) throws BizException{
-        try {
-            gisDevExtPOMapper.deleteDevExtByDevId(devId);
-            shareDevPOMapper.deleteByPrimaryKey(devId);
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            Logger.error("根据devId删除设备失败！dev_id ="+devId);
-            throw new BizException("根据devId删除设备失败!");
-        }
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteShareDevByDevId(String devId) throws BizException {
+//        try {
+            FeatureVO featureVO = gisDevExtPOMapper.findFeaturesByDevId(devId);
+            if (("POINT".equals(featureVO.getType()))) {
+                if (neo4jUtil.getPointAmount(devId) > 0) {
+                    throw new BizException("当前管点连接着管线，不允许删除该管点！");
+                } else {
+                    neo4jUtil.deletePointById(devId);
+                    gisDevExtPOMapper.deleteDevExtByDevId(devId);
+                    shareDevPOMapper.deleteByPrimaryKey(devId);
+                    return true;
+                }
+            } else {
+                neo4jUtil.deleteLineById(devId);
+                gisDevExtPOMapper.deleteDevExtByDevId(devId);
+                shareDevPOMapper.deleteByPrimaryKey(devId);
+                return true;
+            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Logger.error("根据devId删除设备失败！dev_id =" + devId);
+//            throw new BizException("根据devId删除设备失败!");
+//        }
     }
 
     /**
