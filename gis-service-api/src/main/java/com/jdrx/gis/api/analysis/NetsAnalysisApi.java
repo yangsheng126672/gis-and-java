@@ -8,6 +8,7 @@ import com.jdrx.gis.beans.dto.analysis.SecondAnalysisDTO;
 import com.jdrx.gis.beans.dto.analysis.ExportValveDTO;
 import com.jdrx.gis.beans.dto.analysis.ExportValveRecondDTO;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
+import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
@@ -40,6 +41,9 @@ public class NetsAnalysisApi {
 
     @Autowired
     private RedisComponents redisComponents;
+
+    @Autowired
+    private QueryDevService queryDevService;
 
     @ApiOperation(value = "获取爆管分析结果")
     @RequestMapping(value ="getAnalysisiResult")
@@ -149,5 +153,12 @@ public class NetsAnalysisApi {
         return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
     }
 
-
+    @ApiOperation(value = "查询下载导出关阀分析文件")
+    @RequestMapping(value = "getExportAnalysisiResult")
+    public ResposeVO getExportAnalysisiResult(@RequestBody ExportValveRecondDTO dto) throws BizException {
+        Logger.debug("查询下载导出关阀分析文件");
+        String key = dto.getLineId() + GISConstants.UNDER_LINE + dto.getTime();
+        String result = queryDevService.getDownLoadFile(key);
+        return ResponseFactory.ok(result);
+    }
 }

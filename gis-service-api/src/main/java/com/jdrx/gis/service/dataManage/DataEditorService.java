@@ -640,13 +640,13 @@ public class DataEditorService {
         try {
             GISDevExtPO po =  gisDevExtPOMapper.selectByCode(code);
             if (po == null){
-                throw new BizException("根据编码查询设备详细信息失败!");
+                throw new BizException("根据编码查询无设备!");
             }
             return po;
         }catch (Exception e){
             e.printStackTrace();
-            Logger.error("根据编码查询设备详细信息失败！"+code);
-            throw new BizException("根据编码查询设备详细信息失败！");
+            Logger.error("根据编码查询无设备！"+code);
+            throw new BizException("根据编码查询无设备！");
 
         }
     }
