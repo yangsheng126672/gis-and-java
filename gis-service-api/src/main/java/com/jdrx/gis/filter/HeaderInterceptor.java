@@ -1,5 +1,6 @@
 package com.jdrx.gis.filter;
 
+import com.jdrx.gis.beans.anno.NoAuthData;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.config.JwtConfig;
 import com.jdrx.gis.filter.assist.OcpService;
@@ -23,9 +24,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Properties;
@@ -54,7 +56,8 @@ public class HeaderInterceptor implements Interceptor {
 	@Autowired
 	private JwtConfig jwtConfig;
 
-	@Override
+
+		@Override
 	public Object intercept(Invocation invocation) throws Throwable {
 		HttpServletRequest request;
 		String deptPath = null;
@@ -80,11 +83,27 @@ public class HeaderInterceptor implements Interceptor {
 		} else {
 			throw new Exception(" http header " + DEPT_PATH + " not found! ");
 		}
+
 		if (invocation.getTarget() instanceof RoutingStatementHandler) {
 			if (StringUtils.isNotBlank(deptPath)) {
 				RoutingStatementHandler statementHandler = (RoutingStatementHandler) invocation.getTarget();
 				StatementHandler delegate = (StatementHandler) getFieldValue(statementHandler, "delegate");
 				MappedStatement mappedStatement = (MappedStatement)getFieldValue(delegate, "mappedStatement");
+
+				// 如果有NoAuthData注解， 就不加权属单位的查询条件
+				String nameSpace = mappedStatement.getId();
+				String className = nameSpace.substring(0,nameSpace.lastIndexOf("."));
+				String methedName= nameSpace.substring(nameSpace.lastIndexOf(".") + 1);
+				Method[] ms = Class.forName(className).getMethods();
+				for(Method m : ms){
+					if(m.getName().equals(methedName)){
+						Annotation annotation = m.getAnnotation(NoAuthData.class);
+						if (Objects.nonNull(annotation)) {
+							return invocation.proceed();
+						}
+					}
+				}
+
 				SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
 				String commandName = sqlCommandType.name();
 				BoundSql boundSql = delegate.getBoundSql();

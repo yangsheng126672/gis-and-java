@@ -1,5 +1,6 @@
 package com.jdrx.gis.dao.basic;
 
+import com.jdrx.gis.beans.anno.NoAuthData;
 import com.jdrx.gis.beans.entity.basic.ShareDevPO;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,6 +15,7 @@ public interface ShareDevPOMapper {
 
 	int insertSelective(ShareDevPO record);
 
+	@NoAuthData
 	ShareDevPO selectByPrimaryKey(String id);
 
 	int updateByPrimaryKeySelective(ShareDevPO record);

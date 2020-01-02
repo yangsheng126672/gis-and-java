@@ -1,5 +1,6 @@
 package com.jdrx.gis.dao.basic;
 
+import com.jdrx.gis.beans.anno.NoAuthData;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entity.basic.CodeXYPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
@@ -86,6 +87,7 @@ public interface GISDevExtPOMapper {
 	 * @param code
 	 * @return
 	 */
+	@NoAuthData
 	GISDevExtPO selectByCode(@Param("code") String code);
 
 	/**
@@ -171,6 +173,7 @@ public interface GISDevExtPOMapper {
 	 * @param codes
 	 * @return
 	 */
+	@NoAuthData
 	List<GISDevExtPO> selectByCodes(@Param("codes") String codes);
 
 	/**
