@@ -1,11 +1,13 @@
 package com.jdrx.gis.api.dataManage;
 
+import com.jdrx.gis.beans.dto.dataManage.MediaDTO;
 import com.jdrx.gis.service.dataManage.MultiMediaService;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 /**
  * @Author: liaosijun
@@ -28,14 +32,25 @@ public class MultiMediaApi {
 	@Autowired
 	private MultiMediaService multiMediaService;
 
+	@ApiOperation(value = "上传文件并获取Url")
+	@RequestMapping(value ="uploadFilesAndGetUrls")
+	public ResposeVO uploadFilesAndGetUrls(@RequestParam(value = "files") MultipartFile[] files) {
+		Logger.debug("api/0/multiMedia/uploadFilesAndGetUrls 上传文件并获取Url");
+		try {
+			List<String> urls = multiMediaService.uploadFilesAndGetUrls(files);
+			return ResponseFactory.ok(urls);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseFactory.err("上传文件失败！", EApiStatus.ERR_SYS);
+		}
+	}
+
 	@ApiOperation(value = "保存多媒体信息")
 	@RequestMapping(value ="saveMultiMedia")
-	public ResposeVO saveMultiMedia(@RequestParam(value = "picFiles") MultipartFile[] picFiles,
-	                                @RequestParam(value = "videoFiles") MultipartFile[] videoFiles,
-	                                @NotBlank @Valid @RequestParam(value = "devId") String devId) {
+	public ResposeVO saveMultiMedia(@ApiParam(name = "dto", required = true) @RequestBody @Valid MediaDTO dto) {
 		Logger.debug("api/0/multiMedia/saveMultiMedia 保存多媒体信息");
 		try {
-			int affect = multiMediaService.saveMultiMedia(picFiles, videoFiles, devId);
+			int affect = multiMediaService.saveMultiMedia(dto);
 			if (affect > 0) {
 				return ResponseFactory.ok("保存成功");
 			}

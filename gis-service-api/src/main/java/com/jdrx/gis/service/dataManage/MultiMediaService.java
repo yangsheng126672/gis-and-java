@@ -2,6 +2,7 @@ package com.jdrx.gis.service.dataManage;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.jdrx.gis.beans.dto.dataManage.MediaDTO;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.util.FileUtil;
@@ -34,20 +35,19 @@ public class MultiMediaService {
 
 	/**
 	 * 保存设备的图片和视频
-	 * @param devId
+	 * @param dto
 	 * @return
 	 * @throws BizException
 	 */
-	public int saveMultiMedia(MultipartFile[] picFiles, MultipartFile[] videoFiles, String devId) throws BizException, IOException {
+	public int saveMultiMedia(MediaDTO dto) throws BizException{
+		String devId = dto.getDevId();
 		if (StringUtils.isEmpty(devId)) {
 			throw new BizException("设备ID不能为空！");
 		}
 		int aff;
 		try {
-			List<String> picUrls = uploadFilesAndGetUrls(picFiles);
-			String pics = Joiner.on(",").join(picUrls);
-			List<String> videoUrls = uploadFilesAndGetUrls(videoFiles);
-			String videos = Joiner.on(",").join(videoUrls);
+			String pics = Joiner.on(",").join(dto.getPicUrls());
+			String videos = Joiner.on(",").join(dto.getVedioUrls());
 			aff = gisDevExtPOMapper.updateMultiVideo(pics, videos, devId);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -62,7 +62,7 @@ public class MultiMediaService {
 	 * @return
 	 * @throws IOException
 	 */
-	private List<String> uploadFilesAndGetUrls(MultipartFile[] files) throws IOException {
+	public List<String> uploadFilesAndGetUrls(MultipartFile[] files) throws IOException {
 		List<String> urls = Lists.newArrayList();
 		for (MultipartFile file : files) {
 			String fileName = file.getOriginalFilename();
