@@ -2,6 +2,8 @@ package com.jdrx.gis.service.analysis;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.*;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
@@ -924,7 +926,7 @@ public class NetsAnalysisService {
                     devIDsFirst.setDevIds(firstdevIdList.toArray(new String[firstdevIdList.size()]));
                     devIDsFirst.setPageSize(pageSize);
                     devIDsFirst.setPageNum(pageNum);
-                    PageVO<SpaceInfoVO> firstPageVO = queryDevService.findDevListPageByTypeID(devIDsFirst);
+                    PageVO<SpaceInfoVO> firstPageVO = queryDevService.findDevListPageByDevIds(devIDsFirst);
                     firstList = firstPageVO.getData();
                 }
                 if ((seconddevIdList != null) && (seconddevIdList.size()>0)){
@@ -932,7 +934,7 @@ public class NetsAnalysisService {
                     devIDsSecond.setDevIds(seconddevIdList.toArray(new String[seconddevIdList.size()]));
                     devIDsSecond.setPageSize(pageSize);
                     devIDsSecond.setPageNum(pageNum);
-                    PageVO<SpaceInfoVO> secondPageVO = queryDevService.findDevListPageByTypeID(devIDsSecond);
+                    PageVO<SpaceInfoVO> secondPageVO = queryDevService.findDevListPageByDevIds(devIDsSecond);
                     secondList = secondPageVO.getData();
                 }
                 if ((faileddevIdList != null) && (faileddevIdList.size()>0)){
@@ -940,7 +942,7 @@ public class NetsAnalysisService {
                     devIDsFailed.setDevIds(faileddevIdList.toArray(new String[faileddevIdList.size()]));
                     devIDsFailed.setPageSize(pageSize);
                     devIDsFailed.setPageNum(pageNum);
-                    PageVO<SpaceInfoVO> failedPageVO = queryDevService.findDevListPageByTypeID(devIDsFailed);
+                    PageVO<SpaceInfoVO> failedPageVO = queryDevService.findDevListPageByDevIds(devIDsFailed);
                     failedList = failedPageVO.getData();
                 }
 

@@ -143,6 +143,23 @@ public class QueryDevService {
 	}
 
 	/**
+	 * 根据设备ids获取设备信息
+	 * @param devIds
+	 * @return
+	 * @throws BizException
+	 */
+	public List<SpaceInfoVO> findDevListByDevIds(String devIds) throws BizException{
+		try {
+			List<SpaceInfoVO> list = devQueryDAO.findDevListByDevIds(devIds);
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("根据设备Ids获取设备信息失败！pid = {} ", devIds);
+			throw  new BizException("根据设备Ids获取设备信息失败！");
+		}
+	}
+
+	/**
 	 * 根据类型ID查表头，递归该ID下面所有子类，让所有子类的模板配置的字段都展示出来，
 	 * 若字段名称一样就合并成一个。
 	 * 把设备编号和类名称放在第一二列
@@ -471,6 +488,24 @@ public class QueryDevService {
 		}
 		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
 		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByTypeID(dto, devStr);
+		return new PageVO<>(list);
+	}
+
+	/**
+	 * 根据设备ids获取设备列表信息，分页
+	 * @param dto
+	 * @return
+	 * @throws BizException
+	 */
+	public PageVO<SpaceInfoVO> findDevListPageByDevIds(DevIDsForTypeDTO dto) throws BizException {
+		String devStr = null;
+		String[] devIds = dto.getDevIds();
+		List<String> ids = Objects.nonNull(devIds) ? Arrays.asList(devIds) : Lists.newArrayList();
+		if (Objects.nonNull(devIds) && devIds.length > 0) {
+			devStr = Joiner.on(",").join(ids);
+		}
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+		Page<SpaceInfoVO> list = (Page<SpaceInfoVO>) findDevListByDevIds(devStr);
 		return new PageVO<>(list);
 	}
 

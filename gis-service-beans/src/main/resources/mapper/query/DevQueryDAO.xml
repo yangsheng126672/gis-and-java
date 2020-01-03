@@ -113,6 +113,24 @@
         ) as jj
     </select>
 
+    <select id="findDevListByDevIds" resultMap="BaseResultMap3">
+       SELECT * FROM (
+            SELECT devId, name, typeName, addr, dataInfo
+                FROM
+                 (
+                  SELECT sd.ID devId, sd.name, sd.addr, sdt.name typeName
+                  FROM
+                    (
+                    SELECT *  FROM share_dev sd
+                      WHERE  EXISTS (select 1 from
+                                (SELECT regexp_split_to_table(#{devIds, jdbcType=VARCHAR},',')::CHAR(12) AS dev_id) AS vir where vir.dev_id = sd.id)
+                        ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
+                        AND sd.del_flag = 0
+                    ) dv INNER JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext gdx WHERE delete_flag = FALSE ) b
+            ON dv.devId = b.dev_id
+        ) as jj
+    </select>
+
     <select id="findDevListByTypeIDCount" resultType="java.lang.Integer">
         SELECT count(*) FROM (
           SELECT devId, name, typeName, addr, dataInfo

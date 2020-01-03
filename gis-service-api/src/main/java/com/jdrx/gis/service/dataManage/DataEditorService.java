@@ -445,7 +445,7 @@ public class DataEditorService {
                 }
                 //同步到neo4j中
                 Boolean flag = neo4jUtil.savePointToNeo4j(dto,devId,deptId);
-                if(flag=false){
+                if(flag == false){
                     Logger.error("添加管网保存管点失败"+list.toString());
                     return false;
                 }
@@ -533,7 +533,7 @@ public class DataEditorService {
                 shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
                 //同步到neo4j中
                 Boolean flag = neo4jUtil.saveLineToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),dto.getStartCode(),dto.getEndCode(),devId,deptId);
-                if(flag =false){
+                if(flag == false){
                     Logger.error("添加管网保存管线失败"+list.toString());
                     return false;
                 }
@@ -638,7 +638,7 @@ public class DataEditorService {
             //同步到neo4j中
             if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
                 Boolean flag = neo4jUtil.updateLineToNeo4j(code,map);
-                if(flag = false){
+                if(flag == false){
                     Logger.error("neo4j更新属性信息失败！"+map.toString());
                     return false;
                 }
@@ -752,7 +752,7 @@ public class DataEditorService {
             }
             //同步到neo4j中
             Boolean flag = neo4jUtil.updatePointMoveToNeo4j(dto);
-            if(flag = false){
+            if(flag == false){
                 Logger.error("neo4j移动管点失败！"+dto.toString());
                 return false;
             }
@@ -828,7 +828,7 @@ public class DataEditorService {
                     shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
                     //同步到neo4j中
                     Boolean flag =neo4jUtil.createTwoPointsConnectionToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),devIdStr.get(0),devIdStr.get(1),devId,deptId);
-                    if(flag = false){
+                    if(flag == false){
                         Logger.error("neo4j两点连接失败");
                         return false;
                     }

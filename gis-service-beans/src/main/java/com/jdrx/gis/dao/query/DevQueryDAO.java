@@ -43,6 +43,12 @@ public interface DevQueryDAO {
 	List<SpaceInfoVO> findDevListByTypeID(@Param("dto") DevIDsForTypeDTO dto, @Param("devIds") String devIds);
 
 	/**
+	 * 根据设备IDs获取设备信息
+	 * @return
+	 */
+	List<SpaceInfoVO> findDevListByDevIds( @Param("devIds") String devIds);
+
+	/**
 	 * 根据类型ID和设备IDs查询所属设备信息查询总条数
 	 * @param dto
 	 * @param devIds
