@@ -194,6 +194,7 @@ public class DataEditorService {
             map.put("x",x);
             map.put("y",y);
             map.put(GISConstants.GIS_ATTR_DEVID,devId);
+
             List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
             for (GisDevTplAttrPO gis:list) {
                 String name = gis.getFieldName();
