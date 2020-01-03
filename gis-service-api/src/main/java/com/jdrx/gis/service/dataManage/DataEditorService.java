@@ -188,8 +188,8 @@ public class DataEditorService {
             double y = k1*x+y2-k1*x2;
             dto.setX(x);
             dto.setY(y);
-            map.replace("x",String.format("%.3f",transPointVo.getX()));
-            map.replace("y",String.format("%.3f",transPointVo.getY()));
+            map.replace("x",String.format("%.3f",x));
+            map.replace("y",String.format("%.3f",y));
             map.put(GISConstants.GIS_ATTR_DEVID,devId);
             List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
             for (GisDevTplAttrPO gis:list) {
