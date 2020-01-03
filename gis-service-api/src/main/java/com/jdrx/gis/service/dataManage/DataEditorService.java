@@ -177,16 +177,17 @@ public class DataEditorService {
             Double x2 = lineXYVo.getX2();
             Double y2 = lineXYVo.getY2();
             double k1 = (y2-y1)/(x2-x1);
-            double k2 = (x1-x2)/(y2-y1);
-            double x = (dto.getY()-y2+k1*x2-k2*dto.getX())/(k1-k2);
-            double y = k1*x+y2-k1*x2;
-            dto.setX(x);
-            dto.setY(y);
-
+            double k2 = (-1)/k1;
             String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
             String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
             String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
             PointVO transPointVo = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
+            Double x0 = transPointVo.getX();
+            Double y0 = transPointVo.getY();
+            double x = (y0-y2+k1*x2-k2*x0)/(k1-k2);
+            double y = k1*x+y2-k1*x2;
+            dto.setX(x);
+            dto.setY(y);
             map.replace("x",String.format("%.3f",transPointVo.getX()));
             map.replace("y",String.format("%.3f",transPointVo.getY()));
             map.put(GISConstants.GIS_ATTR_DEVID,devId);

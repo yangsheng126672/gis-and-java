@@ -654,7 +654,7 @@
     </update>
 
     <select id="getXYByDevId" parameterType="string" resultType="com.jdrx.gis.beans.vo.datamanage.LineXYVo">
-        SELECT ST_X(ST_StartPoint(geom)),ST_Y(ST_StartPoint(geom)),ST_X(ST_EndPoint(geom)),ST_Y(ST_EndPoint(geom))
-        FROM gis_dev_ext WHERE dev_id=#{devId}
+        SELECT ST_X(ST_StartPoint(geom)) AS x1,ST_Y(ST_StartPoint(geom)) AS y1,ST_X(ST_EndPoint(geom)) AS x2,ST_Y(ST_EndPoint(geom)) AS y2
+        FROM gis_dev_ext gdx WHERE dev_id=#{devId}
     </select>
 </mapper>
