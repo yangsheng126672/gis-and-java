@@ -178,18 +178,21 @@ public class DataEditorService {
             Double y2 = lineXYVo.getY2();
             double k1 = (y2-y1)/(x2-x1);
             double k2 = (-1)/k1;
-            String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
+            String geom1 = "POINT("+dto.getX()+" "+dto.getY()+")";
             String srid = netsAnalysisService.getValByDictString(dictConfig.getWaterPipeSrid());
-            String transformGeom = gisDevExtPOMapper.transformWgs84ToCustom(geom,Integer.parseInt(srid));
-            PointVO transPointVo = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
-            Double x0 = transPointVo.getX();
-            Double y0 = transPointVo.getY();
+            String transformGeom1 = gisDevExtPOMapper.transformWgs84ToCustom(geom1,Integer.parseInt(srid));
+            PointVO transPointVo1 = gisDevExtPOMapper.getPointXYFromGeom(transformGeom1);
+            Double x0 = transPointVo1.getX();
+            Double y0 = transPointVo1.getY();
             double x = (y0-y2+k1*x2-k2*x0)/(k1-k2);
             double y = k1*x+y2-k1*x2;
             dto.setX(x);
             dto.setY(y);
-            map.replace("x",String.format("%.3f",x));
-            map.replace("y",String.format("%.3f",y));
+            String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
+            String transformGeom = gisDevExtPOMapper.addGeomWithSrid(geom,Integer.parseInt(srid));
+            PointVO transPointVo = gisDevExtPOMapper.getPointXYFromGeom(transformGeom);
+            map.put("x",x);
+            map.put("y",y);
             map.put(GISConstants.GIS_ATTR_DEVID,devId);
             List<GisDevTplAttrPO> list = gisDevTplAttrPOMapper.selectNameByTqlId(1);//获取管点的全部字段英文名称
             for (GisDevTplAttrPO gis:list) {
