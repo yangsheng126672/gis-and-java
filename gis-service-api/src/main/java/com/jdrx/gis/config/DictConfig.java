@@ -70,4 +70,7 @@ public class DictConfig {
 
 	/** 下拉选项 */
 	private String devEditOptions;
+
+	/** 爆管分析可关闭的阀门类型 */
+	private String closeableValveTypeIds;
 }

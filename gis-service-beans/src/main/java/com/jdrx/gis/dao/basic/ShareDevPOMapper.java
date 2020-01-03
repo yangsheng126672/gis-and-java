@@ -50,7 +50,12 @@ public interface ShareDevPOMapper {
 	 */
 	int batchUpdate(@Param("shareDevPOList") List<ShareDevPO> shareDevPOList);
 
-
-	List<Map<String, Integer>> findNodeType(@Param("devIds") List<String> devIds);
+	/**
+	 * 查询设备是否为可关闭的阀门
+	 * @param devIds    设备列表
+	 * @param typeIds   可关闭的阀门类型集合
+	 * @return
+	 */
+	List<Map<String, Integer>> findNodeType(@Param("devIds") List<String> devIds, @Param("typeIds") List<Long> typeIds);
 
 }

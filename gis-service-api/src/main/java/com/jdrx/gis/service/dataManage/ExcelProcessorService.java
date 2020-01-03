@@ -1013,13 +1013,27 @@ public class ExcelProcessorService {
 	 * @param pointDataList
 	 * @return
 	 */
-	private List<Map<String, Object>> putNodeType(List<Map<String, Object>> pointDataList) {
+	private List<Map<String, Object>> putNodeType(List<Map<String, Object>> pointDataList) throws BizException {
 		List<String> devIds = Lists.newArrayList();
 		for (Map<String, Object> map : pointDataList) {
 			devIds.add(Objects.nonNull(map.get(GISConstants.DEV_ID)) ? String.valueOf(map.get(GISConstants.DEV_ID)) : "");
 		}
+		List<DictDetailPO> details;
+		try {
+			details = dictDetailService.findDetailsByTypeVal(dictConfig.getCloseableValveTypeIds());
+		} catch (BizException e) {
+			e.printStackTrace();
+			throw new BizException("查询可关闭的阀门类型失败！");
+		}
+		List<Long> typeIds = null;
+		if (Objects.nonNull(details)) {
+			typeIds = Lists.newArrayList();
+			for (DictDetailPO dictDetailPO : details) {
+				typeIds.add(Long.parseLong(dictDetailPO.getVal()));
+			}
+		}
 		// 键devId,值是否为阀门
-		List<Map<String, Integer>> nodeTypes = shareDevPOMapper.findNodeType(devIds);
+		List<Map<String, Integer>> nodeTypes = shareDevPOMapper.findNodeType(devIds, typeIds);
 		for (Map<String, Object> map : pointDataList) {
 			String dev_id = String.valueOf(map.get(GISConstants.DEV_ID));
 			for (Map<String, Integer> xMap : nodeTypes) {
