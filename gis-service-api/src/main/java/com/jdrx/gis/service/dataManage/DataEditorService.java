@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import scala.Int;
 
 import java.util.*;
 
@@ -442,14 +443,14 @@ public class DataEditorService {
                 if(dto.getMapAttr().containsKey(GISConstants.GIS_ATTR_ADDR)){
                     shareDevPO.setAddr(dto.getMapAttr().get(GISConstants.GIS_ATTR_ADDR).toString());
                 }
-
+                //同步到neo4j中
+                Boolean flag = neo4jUtil.savePointToNeo4j(dto,devId,deptId);
+                if(flag=false){
+                    Logger.error("添加管网保存管点失败"+list.toString());
+                    return false;
+                }
                 gisDevExtPOMapper.insertSelective(po);
                 shareDevPOMapper.insertSelective(shareDevPO);
-                if(!neo4jUtil.savePointToNeo4j(dto,devId,deptId)){
-                    Logger.error("添加管网保存管点失败"+list.toString());
-                     return false;
-                }
-
             }
 
             return true;
@@ -530,15 +531,15 @@ public class DataEditorService {
                 shareDevPO.setId(gisDevExtPO.getDevId());
                 shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
                 shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
-
-                //保存管线
-                gisDevExtPOMapper.insertSelective(gisDevExtPO);
-                shareDevPOMapper.insertSelective(shareDevPO);
-                if(!neo4jUtil.saveLineToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),dto.getStartCode(),dto.getEndCode(),devId,deptId)){
+                //同步到neo4j中
+                Boolean flag = neo4jUtil.saveLineToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),dto.getStartCode(),dto.getEndCode(),devId,deptId);
+                if(flag =false){
                     Logger.error("添加管网保存管线失败"+list.toString());
                     return false;
                 }
-
+                //保存管线
+                gisDevExtPOMapper.insertSelective(gisDevExtPO);
+                shareDevPOMapper.insertSelective(shareDevPO);
             }
             return true;
         }catch (Exception e){
@@ -619,19 +620,30 @@ public class DataEditorService {
                 }
 
             }
+            //更新gis_dev_ext中的material字段
+            if(map.containsKey(GISConstants.GIS_ATTR_MATERIAL)){
+                gisDevExtPO.setMaterial(String.valueOf(map.get(GISConstants.GIS_ATTR_MATERIAL)));
+            }
+            if(map.containsKey(GISConstants.GIS_ATTR_CALIBER)){
+                //更新gis_dev_ext中的caliber字段
+                gisDevExtPO.setCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER)));
+                //更新gis_dev_ext中的name字段
+                gisDevExtPO.setName(getNameByCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER))));
+            }
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
             jsonObject.setType("jsonb");
             gisDevExtPO.setDataInfo(jsonObject);
-
-            gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
+            //同步到neo4j中
             if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
-                if(!neo4jUtil.updateLineToNeo4j(code,map)){
+                Boolean flag = neo4jUtil.updateLineToNeo4j(code,map);
+                if(flag = false){
                     Logger.error("neo4j更新属性信息失败！"+map.toString());
                     return false;
                 }
             }
+            gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
 
             return true;
         }catch (Exception e){
@@ -738,7 +750,9 @@ public class DataEditorService {
                     gisDevExtPOMapper.updateByPrimaryKeySelective(po);
                 }
             }
-            if(!neo4jUtil.updatePointMoveToNeo4j(dto)){
+            //同步到neo4j中
+            Boolean flag = neo4jUtil.updatePointMoveToNeo4j(dto);
+            if(flag = false){
                 Logger.error("neo4j移动管点失败！"+dto.toString());
                 return false;
             }
@@ -812,13 +826,15 @@ public class DataEditorService {
                     shareDevPO.setId(devId);
                     shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
                     shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
-
+                    //同步到neo4j中
+                    Boolean flag =neo4jUtil.createTwoPointsConnectionToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),devIdStr.get(0),devIdStr.get(1),devId,deptId);
+                    if(flag = false){
+                        Logger.error("neo4j两点连接失败");
+                        return false;
+                    }
                     gisDevExtPOMapper.insertSelective(gisDevExtPO);
                     shareDevPOMapper.insertSelective(shareDevPO);
-                      if(!neo4jUtil.createTwoPointsConnectionToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),devIdStr.get(0),devIdStr.get(1),devId,deptId)){
-                          Logger.error("neo4j两点连接失败");
-                          return false;
-                      }
+
                 }
 
             }else {
