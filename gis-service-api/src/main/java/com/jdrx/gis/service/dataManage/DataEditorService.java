@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entity.basic.*;
+import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.datamanage.LineXYVo;
@@ -14,6 +15,7 @@ import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.gis.service.basic.DictDetailService;
@@ -72,6 +74,9 @@ public class DataEditorService {
     @Autowired
     GisDevTplAttrPOMapper gisDevTplAttrPOMapper;
 
+    @Autowired
+    private UserRpc userRpc;
+
 
     /**
      * 获取所有点类型
@@ -117,9 +122,9 @@ public class DataEditorService {
      * 保存管点及新增管线信息（线上加点）
      * @param dto
      */
-    public Boolean saveAddedSharePoint(ShareAddedPointDTO dto,String deptPath) throws BizException{
+    public Boolean saveAddedSharePoint(ShareAddedPointDTO dto,Long userId, String token,String deptPath) throws BizException{
         try {
-            if(!savaSharePointOnLine(dto,deptPath)){
+            if(!savaSharePointOnLine(dto, userId, token,deptPath)){
                 throw new BizException("保存管点信息失败！");
             }
             return true;
@@ -165,8 +170,11 @@ public class DataEditorService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean savaSharePointOnLine(ShareAddedPointDTO dto,String deptPath){
+    public Boolean savaSharePointOnLine(ShareAddedPointDTO dto,Long userId, String token,String deptPath){
         try {
+            //获得创建人
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
             Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             Map<String,Object> map = dto.getMap();
             Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
@@ -231,6 +239,7 @@ public class DataEditorService {
             po.setDataInfo(jsonObject);
             po.setTplTypeId(dto.getTypeId());
             po.setBelongTo(deptId);
+            po.setCreateBy(loginUserName);
 
             ShareDevPO shareDevPO = new ShareDevPO();
             shareDevPO.setId(devId);
@@ -238,6 +247,7 @@ public class DataEditorService {
             shareDevPO.setTypeId(dto.getTypeId());
             shareDevPO.setLng(String.format("%.3f",transPointVo.getX()));
             shareDevPO.setLat(String.format("%.3f",transPointVo.getY()));
+            shareDevPO.setCreateBy(loginUserName);
             if (map.containsKey(GISConstants.GIS_ATTR_ADDR)){
                 shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
             }
@@ -364,9 +374,9 @@ public class DataEditorService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean saveShareNets(ShareAddedNetsDTO dto,String deptPath) throws BizException{
+    public Boolean saveShareNets(ShareAddedNetsDTO dto,Long userId, String token,String deptPath) throws BizException{
         try {
-            if((!saveSharePoint(dto.getPointList(),deptPath)) ||(!savaShareLine(dto.getLineList(),deptPath))){
+            if((!saveSharePoint(dto.getPointList(),userId,token,deptPath)) ||(!savaShareLine(dto.getLineList(),userId,token,deptPath))){
                 return false;
             }else {
                 return true;
@@ -381,11 +391,14 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean saveSharePoint(List<SharePointDTO> list,String deptPath) throws BizException{
+    public Boolean saveSharePoint(List<SharePointDTO> list,Long userId, String token,String deptPath) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
         try {
+            //获得创建人
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
             Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             for(SharePointDTO dto:list){
                 Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
@@ -434,13 +447,14 @@ public class DataEditorService {
                 po.setDataInfo(jsonObject);
                 po.setTplTypeId(dto.getTypeId());
                 po.setBelongTo(deptId);
-
+                po.setCreateBy(loginUserName);
                 ShareDevPO shareDevPO = new ShareDevPO();
                 shareDevPO.setId(po.getDevId());
                 shareDevPO.setName(po.getName());
                 shareDevPO.setTypeId(po.getTplTypeId());
                 shareDevPO.setLng(String.format("%.3f",pointVO.getX()));
                 shareDevPO.setLat(String.format("%.3f",pointVO.getY()));
+                shareDevPO.setCreateBy(loginUserName);
                 if(dto.getMapAttr().containsKey(GISConstants.GIS_ATTR_ADDR)){
                     shareDevPO.setAddr(dto.getMapAttr().get(GISConstants.GIS_ATTR_ADDR).toString());
                 }
@@ -467,11 +481,14 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean savaShareLine(List<ShareLineDTO> list,String deptPath) throws BizException{
+    public Boolean savaShareLine(List<ShareLineDTO> list,Long userId, String token,String deptPath) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
         try {
+            //获得创建人
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
             Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             for (ShareLineDTO dto:list){
                 Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
@@ -527,11 +544,13 @@ public class DataEditorService {
                 gisDevExtPO.setGeom(transformGeomStr);
                 gisDevExtPO.setBelongTo(deptId);
                 gisDevExtPO.setName(getNameByCaliber(dto.getCaliber()));
+                gisDevExtPO.setCreateBy(loginUserName);
 
                 ShareDevPO shareDevPO = new ShareDevPO();
                 shareDevPO.setId(gisDevExtPO.getDevId());
                 shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
                 shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
+                shareDevPO.setCreateBy(loginUserName);
                 //同步到neo4j中
                 Boolean flag = neo4jUtil.saveLineToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),dto.getStartCode(),dto.getEndCode(),devId,deptId);
                 if(flag == false){
@@ -575,8 +594,10 @@ public class DataEditorService {
      * @return
      * @throws BizException
      */
-    public Boolean updateGISDevExtAttr(Map<String,Object> map) throws BizException{
+    public Boolean updateGISDevExtAttr(Map<String,Object> map,Long userId, String token) throws BizException{
         try {
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
             String code = null;
             if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
                 code = map.get(GISConstants.GIS_ATTR_QDBM).toString()+"-"+map.get(GISConstants.GIS_ATTR_ZDBM).toString();
@@ -636,6 +657,8 @@ public class DataEditorService {
             jsonObject.setValue(jsonStr);
             jsonObject.setType("jsonb");
             gisDevExtPO.setDataInfo(jsonObject);
+            gisDevExtPO.setUpdateBy(loginUserName);
+            gisDevExtPO.setUpdateAt(new Date());
             //同步到neo4j中
             if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
                 Boolean flag = neo4jUtil.updateLineToNeo4j(code,map);
@@ -691,8 +714,11 @@ public class DataEditorService {
      * @throws BizException
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean moveShareDevPoint(MovePointDTO dto)throws BizException{
+    public Boolean moveShareDevPoint(MovePointDTO dto, Long userId, String token)throws BizException{
         try {
+            //获得修改人
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(dto.getDevId());
             String geom = "POINT("+dto.getX()+" "+dto.getY()+")";
             String srid = detailService.findDetailsByTypeVal(dictConfig.getWaterPipeSrid()).get(0).getVal();
@@ -712,6 +738,8 @@ public class DataEditorService {
             jsonObject.setType("jsonb");
             gisDevExtPO.setDataInfo(jsonObject);
             gisDevExtPO.setGeom(transformGeom);
+            gisDevExtPO.setUpdateBy(loginUserName);
+            gisDevExtPO.setUpdateAt(new Date());
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
             //同步到share_dev中
             gisDevExtPOMapper.updateShareDev(String.format("%.3f",dto.getX()),String.format("%.3f",dto.getY()),dto.getDevId());
@@ -748,6 +776,8 @@ public class DataEditorService {
                     jsonObject1.setValue(jsonStr1);
                     jsonObject1.setType("jsonb");
                     po.setDataInfo(jsonObject1);
+                    po.setUpdateBy(loginUserName);
+                    po.setUpdateAt(new Date());
                     gisDevExtPOMapper.updateByPrimaryKeySelective(po);
                 }
             }
@@ -772,8 +802,11 @@ public class DataEditorService {
      * @throws BizException
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean connectPoints(ConnectPointsDTO dto,String deptPath)throws BizException {
+    public Boolean connectPoints(ConnectPointsDTO dto,Long userId, String token,String deptPath)throws BizException {
         try {
+            //获得创建人
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
             Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
             List<String> devIdStr = dto.getDevIds();
             if(2 == devIdStr.size()){
@@ -822,11 +855,12 @@ public class DataEditorService {
                     gisDevExtPO.setDataInfo(jsonObject);
                     gisDevExtPO.setBelongTo(deptId);
                     gisDevExtPO.setName(getNameByCaliber(dto.getCaliber()));
-
+                    gisDevExtPO.setCreateBy(loginUserName);
                     ShareDevPO shareDevPO = new ShareDevPO();
                     shareDevPO.setId(devId);
                     shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
                     shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
+                    shareDevPO.setCreateBy(loginUserName);
                     //同步到neo4j中
                     Boolean flag =neo4jUtil.createTwoPointsConnectionToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),devIdStr.get(0),devIdStr.get(1),devId,deptId);
                     if(flag == false){

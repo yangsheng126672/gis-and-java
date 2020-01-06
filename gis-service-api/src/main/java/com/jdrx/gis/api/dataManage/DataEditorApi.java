@@ -3,6 +3,7 @@ package com.jdrx.gis.api.dataManage;
 import com.jdrx.gis.api.analysis.SpatialAnalysisApi;
 import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.service.dataManage.DataEditorService;
+import com.jdrx.platform.common.support.gateway.GwConstants;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -45,17 +46,21 @@ public class DataEditorApi {
     @ApiOperation(value = "保存新增管点")
     @RequestMapping(value ="saveSharePoint")
     public ResposeVO saveSharePoint(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedPointDTO dto,
+                                    @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                    @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token,
                                      @RequestHeader(name ="deptPath") String deptPath) throws Exception{
         Logger.debug("api/0/dataEditor/saveSharePoint 保存新增管点");
-        return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto,deptPath));
+        return  ResponseFactory.ok(dataEditorService.saveAddedSharePoint(dto,userId,token,deptPath));
     }
 
     @ApiOperation(value = "保存新增管网")
     @RequestMapping(value ="saveShareNets")
     public ResposeVO saveShareNets(@ApiParam(name = "dto", required = true) @RequestBody @Valid ShareAddedNetsDTO dto,
+                                   @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                   @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token,
                                    @RequestHeader(name ="deptPath") String deptPath) throws Exception{
         Logger.debug("api/0/dataEditor/saveShareNets 保存新增管网");
-        return  ResponseFactory.ok(dataEditorService.saveShareNets(dto,deptPath));
+        return  ResponseFactory.ok(dataEditorService.saveShareNets(dto,userId,token,deptPath));
     }
 
     @ApiOperation(value = "获取管线类型")
@@ -91,24 +96,30 @@ public class DataEditorApi {
 
     @ApiOperation(value = "更新设备属性信息")
     @RequestMapping(value ="updateShareDataInfo")
-    public ResposeVO updateShareDataInfo(@ApiParam(name = "dto", required = true) @RequestBody @Valid MapAttrDTO dto) throws Exception{
+    public ResposeVO updateShareDataInfo(@ApiParam(name = "dto", required = true) @RequestBody @Valid MapAttrDTO dto,
+                                         @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                         @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
         Logger.debug("api/0/dataEditor/updateShareDataInfo 更新设备属性信息");
-        return  ResponseFactory.ok(dataEditorService.updateGISDevExtAttr(dto.getMapAttr()));
+        return  ResponseFactory.ok(dataEditorService.updateGISDevExtAttr(dto.getMapAttr(),userId,token));
     }
 
     @ApiOperation(value = "移动管点及关联管线")
     @RequestMapping(value ="moveSharePointWithLine")
-    public ResposeVO moveSharePointWithLine(@ApiParam(name = "dto", required = true) @RequestBody @Valid MovePointDTO dto) throws Exception{
+    public ResposeVO moveSharePointWithLine(@ApiParam(name = "dto", required = true) @RequestBody @Valid MovePointDTO dto,
+                                            @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                            @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
         Logger.debug("api/0/dataEditor/moveSharePointWithLine 移动管点及关联管线");
-        return  ResponseFactory.ok(dataEditorService.moveShareDevPoint(dto));
+        return  ResponseFactory.ok(dataEditorService.moveShareDevPoint(dto,userId,token));
     }
 
     @ApiOperation(value = "连接两点功能")
     @RequestMapping(value ="connectPointsByDevIds")
     public ResposeVO connectPointsByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid ConnectPointsDTO dto,
-                                           @RequestHeader(name ="deptPath") String deptPath) throws Exception{
+                                           @RequestHeader(name ="deptPath") String deptPath,
+                                           @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                           @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
         Logger.debug("api/0/dataEditor/connectPointsByDevIds 连接两点功能");
-        return  ResponseFactory.ok(dataEditorService.connectPoints(dto,deptPath));
+        return  ResponseFactory.ok(dataEditorService.connectPoints(dto,userId,token,deptPath));
     }
 
     @ApiOperation(value = "根据设备id删除设备")
