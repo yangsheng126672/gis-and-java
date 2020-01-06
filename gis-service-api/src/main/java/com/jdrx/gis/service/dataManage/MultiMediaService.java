@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,8 +47,15 @@ public class MultiMediaService {
 		}
 		int aff;
 		try {
-			String pics = Joiner.on(",").join(dto.getPicUrls());
-			String videos = Joiner.on(",").join(dto.getVedioUrls());
+			List<String> picUrls = dto.getPicUrls();
+			List<String> vedioUrls = dto.getVedioUrls();
+			String pics = "", videos = "";
+			if (Objects.nonNull(picUrls) && picUrls.size() > 0) {
+				pics = Joiner.on(",").join(picUrls);
+			}
+			if (Objects.nonNull(vedioUrls) && vedioUrls.size() > 0) {
+				videos = Joiner.on(",").join(vedioUrls);
+			}
 			aff = gisDevExtPOMapper.updateMultiVideo(pics, videos, devId);
 		} catch (Exception e) {
 			e.printStackTrace();

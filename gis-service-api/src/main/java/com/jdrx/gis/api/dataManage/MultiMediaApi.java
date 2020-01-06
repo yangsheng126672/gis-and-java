@@ -54,6 +54,7 @@ public class MultiMediaApi {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.error(e.getMessage());
 		}
 		return ResponseFactory.err("保存失败", EApiStatus.ERR_SYS.getMessage());
 	}
