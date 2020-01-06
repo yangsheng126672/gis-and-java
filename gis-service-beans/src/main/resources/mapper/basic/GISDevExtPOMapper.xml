@@ -592,7 +592,7 @@
 
     <select id="findFeaturesByDevId" parameterType="java.lang.String" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
         select dev_id AS devId,GeometryType(geom) as type,ST_AsText(geom) AS geom
-        from gis_dev_ext
+        from gis_dev_ext gdx
         where dev_id = #{devId} AND delete_flag = false
     </select>
 
