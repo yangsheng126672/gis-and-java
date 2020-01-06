@@ -533,7 +533,7 @@ public class Neo4jUtil {
      */
     public Boolean deleteLineById(String devId) {
         try {
-            String cypherSql = String.format("match (a)-[b:%s]-[c] where b.dev_id=\"%s\"  delete b", GISConstants.NEO_LINE, devId);
+            String cypherSql = String.format("match (a)-[b:%s]-(c) where b.relationID=\"%s\"  delete b", GISConstants.NEO_LINE, devId);
             session.run(cypherSql);
             return true;
         } catch (Exception e) {
