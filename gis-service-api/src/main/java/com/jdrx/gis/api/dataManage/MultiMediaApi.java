@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -34,11 +32,11 @@ public class MultiMediaApi {
 
 	@ApiOperation(value = "上传文件并获取Url")
 	@RequestMapping(value ="uploadFilesAndGetUrls")
-	public ResposeVO uploadFilesAndGetUrls(@RequestParam(value = "files") MultipartFile[] files) {
+	public ResposeVO uploadFilesAndGetUrls(@RequestParam(value = "file") MultipartFile file) {
 		Logger.debug("api/0/multiMedia/uploadFilesAndGetUrls 上传文件并获取Url");
 		try {
-			List<String> urls = multiMediaService.uploadFilesAndGetUrls(files);
-			return ResponseFactory.ok(urls);
+			String url = multiMediaService.uploadFilesAndGetUrls(file);
+			return ResponseFactory.ok(url);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseFactory.err("上传文件失败！", EApiStatus.ERR_SYS);

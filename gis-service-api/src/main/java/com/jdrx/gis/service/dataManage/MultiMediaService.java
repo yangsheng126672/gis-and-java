@@ -58,23 +58,20 @@ public class MultiMediaService {
 
 	/**
 	 * 上传文件并获取url
-	 * @param files
+	 * @param file
 	 * @return
 	 * @throws IOException
 	 */
-	public List<String> uploadFilesAndGetUrls(MultipartFile[] files) throws IOException {
-		List<String> urls = Lists.newArrayList();
-		for (MultipartFile file : files) {
-			String fileName = file.getOriginalFilename();
-			if (Objects.isNull(fileName)) {
-				return urls;
-			}
-			String outPath = pathConfig.getDownloadPath() + File.separator + fileName;
-			InputStream inputStream = file.getInputStream();
-			FileUtil.bufferedWrite(inputStream, outPath);
-			String remoteUrl = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), outPath);
-			urls.add(remoteUrl);
+	public String uploadFilesAndGetUrls(MultipartFile file) throws IOException {
+		String url = "";
+		String fileName = file.getOriginalFilename();
+		if (Objects.isNull(fileName)) {
+			return url;
 		}
-		return urls;
+		String outPath = pathConfig.getDownloadPath() + File.separator + fileName;
+		InputStream inputStream = file.getInputStream();
+		FileUtil.bufferedWrite(inputStream, outPath);
+		String remoteUrl = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), outPath);
+		return remoteUrl;
 	}
 }
