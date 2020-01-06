@@ -21,5 +21,5 @@ public class MediaDTO {
 	private List<String> picUrls;
 
 	@ApiModelProperty("视频url集合")
-	private List<String> vedioUrls;
+	private List<String> videoUrls;
 }

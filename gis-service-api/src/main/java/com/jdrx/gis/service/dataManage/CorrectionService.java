@@ -30,6 +30,7 @@ import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
+import com.sun.tools.internal.xjc.reader.dtd.bindinfo.BIAttribute;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -160,9 +161,13 @@ public class CorrectionService {
 				} else if (Objects.nonNull(dto.getEndDate()) && Objects.isNull(dto.getStartDate())) {
 					throw new BizException("开始日期为空！");
 				}
+			} else {
+				throw new BizException("参数为空！");
 			}
 			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
-			return gisCorrectionPOManualMapper.selectRecords(dto, EAuditStatus.NO_AUDIT.getVal(), deptId);
+			dto.setAuditStatus(EAuditStatus.NO_AUDIT.getVal());
+			dto.setBelongTo(deptId);
+			return gisCorrectionPOManualMapper.selectRecords(dto);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BizException(e);
@@ -321,7 +326,8 @@ public class CorrectionService {
 			List<HistoryRecordVO> data = Lists.newArrayList();
 			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 			PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-			Page<GISCorrectionPO> list = (Page<GISCorrectionPO>) gisCorrectionPOManualMapper.selectRecords(dto, null, deptId);
+			dto.setBelongTo(deptId);
+			Page<GISCorrectionPO> list = (Page<GISCorrectionPO>) gisCorrectionPOManualMapper.selectRecords(dto);
 			historyRecordVOS.setPageNum(list.getPageNum());
 			historyRecordVOS.setPageSize(list.getPageSize());
 			historyRecordVOS.setTotal(list.getTotal());

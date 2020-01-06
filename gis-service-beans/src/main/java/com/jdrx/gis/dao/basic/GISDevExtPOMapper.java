@@ -4,6 +4,7 @@ import com.jdrx.gis.beans.anno.NoAuthData;
 import com.jdrx.gis.beans.dto.query.AttrQeuryDTO;
 import com.jdrx.gis.beans.entity.basic.CodeXYPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.dataManage.MultiMediaPO;
 import com.jdrx.gis.beans.entity.query.PipeLengthPO;
 import com.jdrx.gis.beans.vo.basic.AnalysisVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
@@ -266,14 +267,10 @@ public interface GISDevExtPOMapper {
 
 	/**
 	 * 保存视频和图片
-	 * @param picUrls
-	 * @param videoUrls
-	 * @param devId
+	 * @param po
 	 * @return
 	 */
-	int updateMultiVideo(@Param("picUrls") String picUrls,
-	                     @Param("videoUrls") String videoUrls,
-	                     @Param("devId") String devId);
+	int updateMultiVideo(@Param("po") MultiMediaPO po);
 
 	/**
 	 * 根据devId获取线的起始坐标和终止坐标

@@ -22,4 +22,10 @@ public class QueryAuditDTO extends PageDTO {
 
 	@ApiModelProperty("查询截止日期，格式YYYY-MM-DD")
 	private String endDate;
+
+	@ApiModelProperty("0-未审核, 1-已审核")
+	private Integer auditStatus;
+
+	@ApiModelProperty("权属单位ID")
+	private Long belongTo;
 }

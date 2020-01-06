@@ -1,10 +1,12 @@
 package com.jdrx.gis.service.dataManage;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.dto.dataManage.MediaDTO;
+import com.jdrx.gis.beans.entity.dataManage.MultiMediaPO;
+import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.util.FileUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -16,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +35,8 @@ public class MultiMediaService {
 	@Autowired
 	private GISDevExtPOMapper gisDevExtPOMapper;
 
+	@Autowired
+	private UserRpc userRpc;
 
 	/**
 	 * 保存设备的图片和视频
@@ -40,23 +44,31 @@ public class MultiMediaService {
 	 * @return
 	 * @throws BizException
 	 */
-	public int saveMultiMedia(MediaDTO dto) throws BizException{
+	public int saveMultiMedia(MediaDTO dto, Long userId, String token) throws BizException{
 		String devId = dto.getDevId();
 		if (StringUtils.isEmpty(devId)) {
 			throw new BizException("设备ID不能为空！");
 		}
+		SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+		String loginUserName = sysOcpUserPo.getName();
+		MultiMediaPO po = new MultiMediaPO();
+		po.setUpdateAt(new Date());
+		po.setUpdateBy(loginUserName);
+		po.setDevId(devId);
 		int aff;
 		try {
 			List<String> picUrls = dto.getPicUrls();
-			List<String> vedioUrls = dto.getVedioUrls();
-			String pics = "", videos = "";
+			List<String> vedioUrls = dto.getVideoUrls();
+			String pics, videos;
 			if (Objects.nonNull(picUrls) && picUrls.size() > 0) {
 				pics = Joiner.on(",").join(picUrls);
+				po.setPicUrls(pics);
 			}
 			if (Objects.nonNull(vedioUrls) && vedioUrls.size() > 0) {
 				videos = Joiner.on(",").join(vedioUrls);
+				po.setVideoUrls(videos);
 			}
-			aff = gisDevExtPOMapper.updateMultiVideo(pics, videos, devId);
+			aff = gisDevExtPOMapper.updateMultiVideo(po);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

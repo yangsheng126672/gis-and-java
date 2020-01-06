@@ -2,6 +2,7 @@ package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.beans.dto.dataManage.MediaDTO;
 import com.jdrx.gis.service.dataManage.MultiMediaService;
+import com.jdrx.platform.common.support.gateway.GwConstants;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
@@ -45,10 +46,12 @@ public class MultiMediaApi {
 
 	@ApiOperation(value = "保存多媒体信息")
 	@RequestMapping(value ="saveMultiMedia")
-	public ResposeVO saveMultiMedia(@ApiParam(name = "dto", required = true) @RequestBody @Valid MediaDTO dto) {
+	public ResposeVO saveMultiMedia(@ApiParam(name = "dto", required = true) @RequestBody @Valid MediaDTO dto,
+	                                @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+	                                @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) {
 		Logger.debug("api/0/multiMedia/saveMultiMedia 保存多媒体信息");
 		try {
-			int affect = multiMediaService.saveMultiMedia(dto);
+			int affect = multiMediaService.saveMultiMedia(dto, userId, token);
 			if (affect > 0) {
 				return ResponseFactory.ok("保存成功");
 			}

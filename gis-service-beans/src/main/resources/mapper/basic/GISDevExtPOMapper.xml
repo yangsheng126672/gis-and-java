@@ -46,7 +46,7 @@
     <select id="getDevExtByDevId" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
         id, dev_id, name, code, caliber, material, st_astext(geom) geom, tpl_type_id, data_info, delete_flag,
-    create_by, create_at, update_by, update_at,belong_to
+    create_by, create_at, update_by, update_at,belong_to, pic_urls, video_urls
         from gis_dev_ext gdx
         where dev_id = #{devId,jdbcType=VARCHAR}
         limit 1
@@ -643,14 +643,20 @@
     <update id="updateMultiVideo" >
         UPDATE gis_dev_ext
         <set>
-            <if test="picUrls != null and picUrls != ''">
-                pic_urls = #{picUrls},
+            <if test="po.picUrls != null and po.picUrls != ''">
+                pic_urls = #{po.picUrls},
             </if>
-            <if test="videoUrls != null and videoUrls != ''">
-                video_urls = #{videoUrls},
+            <if test="po.videoUrls != null and po.videoUrls != ''">
+                video_urls = #{po.videoUrls},
+            </if>
+            <if test="po.updateBy != null and po.updateBy != ''">
+                update_by = #{po.updateBy},
+            </if>
+            <if test="po.updateAt != null">
+                update_at = #{po.updateAt},
             </if>
         </set>
-        WHERE dev_id = #{devId}
+        WHERE dev_id = #{po.devId}
     </update>
 
     <select id="getXYByDevId" parameterType="string" resultType="com.jdrx.gis.beans.vo.datamanage.LineXYVo">

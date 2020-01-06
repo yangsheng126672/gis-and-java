@@ -23,8 +23,8 @@
         FROM gis_correction_record
         WHERE
           delete_flag = false
-          <if test="status != null">
-              AND status = #{status}
+          <if test="dto.auditStatus != null">
+              AND status = #{dto.auditStatus}
           </if>
           <if test="dto.code != null and dto.code != ''">
               AND code like concat('%',#{dto.code},'%')
@@ -38,8 +38,8 @@
           <if test="dto.endDate != null and dto.endDate != ''">
               AND to_char(create_at,'YYYY-MM-DD') <![CDATA[<=]]> #{dto.endDate}
           </if>
-          <if test="belongTo != null">
-              AND belong_to = #{belongTo}
+          <if test="dto.belongTo != null">
+              AND belong_to = #{dto.belongTo}
           </if>
     </select>
 
