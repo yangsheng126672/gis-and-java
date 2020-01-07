@@ -119,7 +119,13 @@ public class DataEditorApi {
                                            @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
                                            @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
         Logger.debug("api/0/dataEditor/connectPointsByDevIds 连接两点功能");
-        return  ResponseFactory.ok(dataEditorService.connectPoints(dto,userId,token,deptPath));
+        try{
+             Boolean b = dataEditorService.connectPoints(dto,userId,token,deptPath);
+             return ResponseFactory.ok(b);
+        }catch(BizException e){
+            return ResponseFactory.err(e.getMessage(),EApiStatus.ERR_SYS.getStatus());
+        }
+
     }
 
     @ApiOperation(value = "根据设备id删除设备")

@@ -663,4 +663,10 @@
         SELECT ST_X(ST_StartPoint(geom)) AS x1,ST_Y(ST_StartPoint(geom)) AS y1,ST_X(ST_EndPoint(geom)) AS x2,ST_Y(ST_EndPoint(geom)) AS y2
         FROM gis_dev_ext gdx WHERE dev_id=#{devId}
     </select>
+
+    <select id="getFromStartCodeAndEndCode" parameterType="java.lang.String" resultType="com.jdrx.gis.beans.entity.basic.GISDevExtPO">
+        SELECT  id, dev_id, name, code, caliber, material, st_astext(geom) as geom, tpl_type_id, data_info, delete_flag,
+        create_by, create_at, update_by, update_at, belong_to from gis_dev_ext gdx
+        WHERE   (data_info->>'startCode' = #{startCode} and data_info->>'endCode' = #{endCode}) or (data_info->>'startCode' = #{endCode} and data_info->>'endCode' = #{startCode})
+    </select>
 </mapper>

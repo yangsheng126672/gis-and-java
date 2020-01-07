@@ -278,6 +278,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	LineXYVo getXYByDevId(@Param("devId") String devId);
+	/**
+	 * 根据前端所传起点编码和终点编码判断是否存在该管线
+	 * @param
+	 * @return
+	 */
+	List<GISDevExtPO> getFromStartCodeAndEndCode(@Param("startCode") String startCode, @Param("endCode") String endCode);
 
 }
 

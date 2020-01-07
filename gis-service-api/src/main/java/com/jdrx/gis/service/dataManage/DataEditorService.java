@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import scala.Int;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -803,7 +804,12 @@ public class DataEditorService {
      */
     @Transactional(rollbackFor = Exception.class)
     public Boolean connectPoints(ConnectPointsDTO dto,Long userId, String token,String deptPath)throws BizException {
-        try {
+
+            //判断当前两点连接是否在一条管线上
+            List<GISDevExtPO> gisDevExtPo = gisDevExtPOMapper.getFromStartCodeAndEndCode(dto.getStartCode(),dto.getEndCode());
+            if(gisDevExtPo!=null&&gisDevExtPo.size()>0){
+                throw new BizException("不允许在同一条管线上进行两点连接操作！");
+            }
             //获得创建人
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
@@ -842,9 +848,13 @@ public class DataEditorService {
 
                     String jsonStr = JSONObject.toJSONString(mapAttr);
                     PGobject jsonObject = new PGobject();
-                    jsonObject.setValue(jsonStr);
-                    jsonObject.setType("jsonb");
 
+                    try {
+                        jsonObject.setValue(jsonStr);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    jsonObject.setType("jsonb");
                     GISDevExtPO gisDevExtPO = new GISDevExtPO();
                     gisDevExtPO.setDevId(devId);
                     gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
@@ -877,11 +887,6 @@ public class DataEditorService {
                 throw new BizException("两点连接点位个数不对!");
             }
 
-
-        }catch (Exception e){
-            Logger.error("两点连接失败！"+e.getMessage());
-            throw new BizException("两点连接失败!");
-        }
         return true;
     }
 
