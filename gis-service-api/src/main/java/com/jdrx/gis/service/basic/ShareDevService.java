@@ -1,12 +1,15 @@
 package com.jdrx.gis.service.basic;
 
 import com.jdrx.gis.beans.entity.basic.ShareDevPO;
+import com.jdrx.gis.beans.vo.basic.ShareDevVO;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,5 +63,22 @@ public class ShareDevService {
 			step++;
 		}
 		return total;
+	}
+
+	/**
+	 * 根据主键获取
+	 * @param id
+	 * @return
+	 */
+	public ShareDevVO selectByPrimaryKey(String id) throws BizException {
+		try {
+			ShareDevPO shareDevPO = shareDevPOMapper.selectByPrimaryKey(id);
+			ShareDevVO shareDevVO = new ShareDevVO();
+			BeanUtils.copyProperties(shareDevPO, shareDevVO);
+			return shareDevVO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BizException("根据devId获取设备失败！");
+		}
 	}
 }

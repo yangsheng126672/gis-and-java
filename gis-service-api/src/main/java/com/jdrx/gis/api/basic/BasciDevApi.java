@@ -8,6 +8,7 @@ import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
+import com.jdrx.gis.service.basic.ShareDevService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.RedisComponents;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -47,6 +48,9 @@ public class BasciDevApi {
 
 	@Autowired
 	private QueryDevService queryDevService;
+
+	@Autowired
+	private ShareDevService shareDevService;
 
 	@ApiOperation(value = "获取首层图层")
 	@RequestMapping(value = "findFirstHierarchyDevType")
@@ -170,4 +174,10 @@ public class BasciDevApi {
 		return ResponseFactory.ok(basicDevQuery.getPipeLengthByDeptPath());
 	}
 
+	@ApiOperation(value = "根据DevId获取设备信息")
+	@RequestMapping(value = "selectShareDevById")
+	public ResposeVO selectShareDevById(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) throws BizException{
+		Logger.debug("api/0/basic/selectShareDevById 根据DevId获取设备信息");
+		return ResponseFactory.ok(shareDevService.selectByPrimaryKey(dto.getId()));
+	}
 }
