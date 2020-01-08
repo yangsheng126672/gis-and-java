@@ -669,4 +669,14 @@
         create_by, create_at, update_by, update_at, belong_to from gis_dev_ext gdx
         WHERE   (data_info->>'startCode' = #{startCode} and data_info->>'endCode' = #{endCode}) or (data_info->>'startCode' = #{endCode} and data_info->>'endCode' = #{startCode})
     </select>
+
+    <select id="findFeaturesListByDevIdList" parameterType="java.util.List" resultType="com.jdrx.gis.beans.vo.basic.FeatureVO">
+        select dev_id AS devId,GeometryType(geom) as type,ST_AsText(geom) AS geom
+        from gis_dev_ext gdx
+        where dev_id in
+        <foreach collection="devId_list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND delete_flag = false
+    </select>
 </mapper>
