@@ -338,8 +338,10 @@ public class BasicDevQuery {
 			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
 			//获取地图中心点
 			String ceterStr = getMapCenterByByAuthId(deptId);
-			vo.setX(ceterStr.split(",")[0]);
-			vo.setY(ceterStr.split(",")[1]);
+			if (!StringUtils.isEmpty(ceterStr)){
+				vo.setX(ceterStr.split(",")[0]);
+				vo.setY(ceterStr.split(",")[1]);
+			}
 
 			//获取图层范围
 			String extentStr = getLayerExtentByAuthId(deptId);
@@ -366,6 +368,14 @@ public class BasicDevQuery {
 					vo.setResolutions(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("popLayer")){
 					vo.setPopLayer(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("x")){
+					if(vo.getX() == null){
+						vo.setX(dictDetail.getVal());
+					}
+				}else if (dictDetail.getName().equals("y")){
+					if (vo.getY() == null){
+						vo.setY(dictDetail.getVal());
+					}
 				}
 			}
 		} catch (Exception e) {
