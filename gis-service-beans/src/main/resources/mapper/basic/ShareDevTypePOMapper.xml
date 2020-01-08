@@ -220,4 +220,10 @@
             ) SELECT *  FROM A
         )a
     </select>
+    <select id="getIdByName" resultType="java.lang.Long">
+        SELECT id FROM share_dev_type
+        WHERE del_flag = 0
+        AND name  = #{name}
+        LIMIT 1
+    </select>
 </mapper>

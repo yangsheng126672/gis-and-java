@@ -648,11 +648,20 @@ public class DataEditorService {
                 gisDevExtPO.setMaterial(String.valueOf(map.get(GISConstants.GIS_ATTR_MATERIAL)));
             }
             if(map.containsKey(GISConstants.GIS_ATTR_CALIBER)){
+                //更新管线信息
                 //更新gis_dev_ext中的caliber字段
                 gisDevExtPO.setCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER)));
                 //更新gis_dev_ext中的name字段
                 gisDevExtPO.setName(getNameByCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER))));
+                //更新gis_dev_ext中的tplTypeId字段
+            }else{
+                //更新管点信息中的name和tplTypeId字段
+                String name = String.valueOf(map.get(GISConstants.GIS_ATTR_NAME));
+                gisDevExtPO.setName(name);
+                long tplTypeId = shareDevTypePOMapper.getIdByName(name);
+                gisDevExtPO.setTplTypeId(tplTypeId);
             }
+
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);

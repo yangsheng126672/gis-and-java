@@ -106,4 +106,9 @@ public interface ShareDevTypePOMapper {
 	 */
 	List<Long> getAllTypeIdByTopId(@Param("topId") Long topId);
 
+	/**
+	 * 通过name查找该id
+	 */
+	long getIdByName (@Param("name") String name);
+
 }

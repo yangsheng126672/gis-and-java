@@ -285,5 +285,6 @@ public interface GISDevExtPOMapper {
 	 */
 	List<GISDevExtPO> getFromStartCodeAndEndCode(@Param("startCode") String startCode, @Param("endCode") String endCode);
 
+
 }
 
