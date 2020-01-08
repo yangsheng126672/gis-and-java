@@ -381,7 +381,7 @@
     </select>
 
     <update id="deleteDevExtByDevId" parameterType="java.lang.String" >
-        UPDATE gis_dev_ext set delete_flag = TRUE  where dev_id = #{devId}
+        UPDATE gis_dev_ext set delete_flag = TRUE,update_by = #{loginUserName}  where dev_id = #{devId}
     </update>
     <update id="deleteShareDevByDevId" parameterType="java.lang.String" >
         UPDATE share_dev set del_flag = 1  where id = #{devId}

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface ShareDevPOMapper {
 
-	int deleteByPrimaryKey(String id);
+	int deleteByPrimaryKey(String id,String loginUserName);
 
 	int insert(ShareDevPO record);
 

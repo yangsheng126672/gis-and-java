@@ -161,7 +161,7 @@ public interface GISDevExtPOMapper {
 	 * @param devId
 	 * @return
 	 */
-	Integer deleteDevExtByDevId(@Param("devId")String devId);
+	Integer deleteDevExtByDevId(@Param("devId")String devId,@Param("loginUserName") String loginUserName);
 
 	/**
 	 * 批量更新

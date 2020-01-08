@@ -344,14 +344,14 @@ public class DataEditorService {
             shareDevPOLine2.setTypeId(shareDevPOLine.getTypeId());
 
             //先删除gis_dev_ext原来管线
-            gisDevExtPOMapper.deleteDevExtByDevId(dto.getLineDevId());
+            gisDevExtPOMapper.deleteDevExtByDevId(dto.getLineDevId(),loginUserName);
 
             //增加的两条管线
             gisDevExtPOMapper.insertSelective(gisDevExtPOLine1);
             gisDevExtPOMapper.insertSelective(gisDevExtPOLine2);
 
             //先删除share_dev原来管线
-            shareDevPOMapper.deleteByPrimaryKey(dto.getLineDevId());
+            shareDevPOMapper.deleteByPrimaryKey(dto.getLineDevId(),loginUserName);
 
             shareDevPOMapper.insertSelective(shareDevPOLine1);
             shareDevPOMapper.insertSelective(shareDevPOLine2);
@@ -630,10 +630,6 @@ public class DataEditorService {
                     gisDevExtPO.setTplTypeId(Long.valueOf(map.get("typeId").toString()));
                     shareDevPO.setTypeId(Long.valueOf(map.get("typeId").toString()));
                 }
-                //判断街道是否改变
-                if(map.containsKey(GISConstants.GIS_ATTR_ADDR)){
-                    shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
-                }
             }else {
                 //判断类型是否改变
                 if(!gisDevExtPO.getTplTypeId().equals(Long.valueOf(map.get("typeId").toString()))){
@@ -653,15 +649,22 @@ public class DataEditorService {
                 gisDevExtPO.setCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER)));
                 //更新gis_dev_ext中的name字段
                 gisDevExtPO.setName(getNameByCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER))));
-                //更新gis_dev_ext中的tplTypeId字段
+                //更新share_dev中的tplTypeId和name字段
+                shareDevPO.setName(getNameByCaliber((Integer)(map.get(GISConstants.GIS_ATTR_CALIBER))));
             }else{
                 //更新管点信息中的name和tplTypeId字段
                 String name = String.valueOf(map.get(GISConstants.GIS_ATTR_NAME));
                 gisDevExtPO.setName(name);
                 long tplTypeId = shareDevTypePOMapper.getIdByName(name);
                 gisDevExtPO.setTplTypeId(tplTypeId);
+                //更新share_dev中的name和typeId字段
+                shareDevPO.setName(name);
+                shareDevPO.setTypeId(tplTypeId);
             }
-
+            //判断街道是否改变
+            if(map.containsKey(GISConstants.GIS_ATTR_ADDR)){
+                shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
+            }
             String jsonStr = JSONObject.toJSONString(map);
             PGobject jsonObject = new PGobject();
             jsonObject.setValue(jsonStr);
@@ -669,6 +672,8 @@ public class DataEditorService {
             gisDevExtPO.setDataInfo(jsonObject);
             gisDevExtPO.setUpdateBy(loginUserName);
             gisDevExtPO.setUpdateAt(new Date());
+            shareDevPO.setUpdateBy(loginUserName);
+            shareDevPO.setUpdateAt(new Date());
             //同步到neo4j中
             if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
                 Boolean flag = neo4jUtil.updateLineToNeo4j(code,map);
@@ -678,6 +683,7 @@ public class DataEditorService {
                 }
             }
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
+            shareDevPOMapper.updateByPrimaryKeySelective(shareDevPO);
 
             return true;
         }catch (Exception e){
@@ -943,29 +949,26 @@ public class DataEditorService {
      * @throws BizException
      */
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteShareDevByDevId(String devId) throws BizException {
-//        try {
+    public Boolean deleteShareDevByDevId(String devId,Long userId, String token) throws BizException {
+        //获得删除人
+        SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+        String loginUserName = sysOcpUserPo.getName();
             FeatureVO featureVO = gisDevExtPOMapper.findFeaturesByDevId(devId);
             if (("POINT".equals(featureVO.getType()))) {
                 if (neo4jUtil.getPointAmount(devId) > 0) {
                     throw new BizException("当前管点连接着管线，不允许删除该管点！");
                 } else {
                     neo4jUtil.deletePointById(devId);
-                    gisDevExtPOMapper.deleteDevExtByDevId(devId);
-                    shareDevPOMapper.deleteByPrimaryKey(devId);
+                    gisDevExtPOMapper.deleteDevExtByDevId(devId,loginUserName);
+                    shareDevPOMapper.deleteByPrimaryKey(devId,loginUserName);
                     return true;
                 }
             } else {
                 neo4jUtil.deleteLineById(devId);
-                gisDevExtPOMapper.deleteDevExtByDevId(devId);
-                shareDevPOMapper.deleteByPrimaryKey(devId);
+                gisDevExtPOMapper.deleteDevExtByDevId(devId,loginUserName);
+                shareDevPOMapper.deleteByPrimaryKey(devId,loginUserName);
                 return true;
             }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Logger.error("根据devId删除设备失败！dev_id =" + devId);
-//            throw new BizException("根据devId删除设备失败!");
-//        }
     }
 
     /**

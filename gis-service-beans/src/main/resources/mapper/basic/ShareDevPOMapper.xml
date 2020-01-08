@@ -64,11 +64,11 @@
        SELECT <include refid="Base_Column_List"/> FROM share_dev sd
         where id = #{id,jdbcType=CHAR}
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <update id="deleteByPrimaryKey" parameterType="java.lang.String">
         update  share_dev
-        SET del_flag = 1
+        SET del_flag = 1,update_by = #{loginUserName}
         where id = #{id,jdbcType=CHAR}
-    </delete>
+    </update>
     <insert id="insert" parameterType="com.jdrx.gis.beans.entity.basic.ShareDevPO">
         <!--
           WARNING - @mbg.generated

@@ -182,53 +182,6 @@ public class SpatialAnalysisService {
 
         }
 
-        /**
-         * 逻辑删除gis_dev_ext 和share_dev 点
-         *
-         * @param devId
-         * @return
-         * @throws BizException
-         */
-        @Transactional(rollbackFor = Exception.class)
-        public Boolean deleteLonelyPointByDevId(String devId) throws BizException {
-            try {
-                getGisDevExtPOMapper.deleteDevExtByDevId(devId);
-                getGisDevExtPOMapper.deleteShareDevByDevId(devId);
-//            if (neo4jUtil.deletePointById(devId)) {
-                return true;
-//            } else {
-//                return false;
-//            }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.error("根据devId删除点失败！dev_id =" + devId);
-                throw new BizException("根据devId删除点失败!");
-            }
-        }
-
-        /**
-         * 逻辑删除gis_dev_ext 和share_dev线
-         *
-         * @param devId
-         * @return
-         * @throws BizException
-         */
-        @Transactional(rollbackFor = Exception.class)
-        public Boolean deleteLonelyLineByDevId(String devId) throws BizException {
-            try {
-                getGisDevExtPOMapper.deleteDevExtByDevId(devId);
-                getGisDevExtPOMapper.deleteShareDevByDevId(devId);
-//            if (neo4jUtil.deleteLineById(devId)) {
-                return true;
-//            } else {
-//                return false;
-//            }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.error("根据devId删除线失败！dev_id =" + devId);
-                throw new BizException("根据devId删除线失败!");
-            }
-        }
 
         /**
          * 重复点分页查询

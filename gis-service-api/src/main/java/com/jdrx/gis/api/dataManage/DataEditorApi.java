@@ -130,10 +130,12 @@ public class DataEditorApi {
 
     @ApiOperation(value = "根据设备id删除设备")
     @RequestMapping(value ="deleteShareDevByDevId")
-    public ResposeVO deleteShareDevByDevId(@ApiParam(name = "dto", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
+    public ResposeVO deleteShareDevByDevId(@ApiParam(name = "dto", required = true) @RequestBody @Valid  IdDTO<String> dto,
+                                           @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                           @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
         Logger.debug("api/0/dataEditor/deleteShareDevByDevId 根据设备id删除设备");
         try {
-            Boolean aBoolean = dataEditorService.deleteShareDevByDevId(dto.getId());
+            Boolean aBoolean = dataEditorService.deleteShareDevByDevId(dto.getId(),userId,token);
             return  ResponseFactory.ok(aBoolean);
         } catch (BizException e) {
             e.printStackTrace();
