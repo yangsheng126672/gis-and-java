@@ -36,12 +36,12 @@ import java.util.Properties;
 /**
  * 拦截header的deptPath,做数据权限控制
  */
-@Intercepts({
-		@Signature(type = StatementHandler.class,
-				method = "prepare",
-				args = {Connection.class, Integer.class})
-})
-@Component
+//@Intercepts({
+//		@Signature(type = StatementHandler.class,
+//				method = "prepare",
+//				args = {Connection.class, Integer.class})
+//})
+//@Component
 public class HeaderInterceptor implements Interceptor {
 
 	private static Logger logger = LoggerFactory.getLogger(HeaderInterceptor.class);
