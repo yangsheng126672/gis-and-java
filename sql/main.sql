@@ -479,7 +479,8 @@ CREATE TABLE gis_correction_record (
   create_by varchar(32) NOT NULL DEFAULT '',
   create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   update_by varchar(32) NOT NULL DEFAULT '',
-  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  belong_to int8 default -1
 )
 ;
 COMMENT ON COLUMN gis_correction_record.id IS '主键';
@@ -491,6 +492,7 @@ COMMENT ON COLUMN gis_correction_record.create_by IS '创建人';
 COMMENT ON COLUMN gis_correction_record.create_at IS '创建时间';
 COMMENT ON COLUMN gis_correction_record.update_by IS '修改人';
 COMMENT ON COLUMN gis_correction_record.update_at IS '修改时间';
+COMMENT ON COLUMN gis_correction_record.belong_to IS '权属单位';
 COMMENT ON TABLE gis_correction_record is '纠错记录表';
 
 -- [18] 设备纠错记录详情
@@ -506,7 +508,8 @@ CREATE TABLE gis_correction_record_detail (
   create_by varchar(32) NOT NULL DEFAULT '',
   create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   update_by varchar(32) NOT NULL DEFAULT '',
-  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  belong_to int8 default -1
 )
 ;
 COMMENT ON COLUMN gis_correction_record_detail.id IS '主键';
@@ -520,6 +523,7 @@ COMMENT ON COLUMN gis_correction_record_detail.create_by IS '创建人';
 COMMENT ON COLUMN gis_correction_record_detail.create_at IS '创建时间';
 COMMENT ON COLUMN gis_correction_record_detail.update_by IS '修改人';
 COMMENT ON COLUMN gis_correction_record_detail.update_at IS '修改时间';
+COMMENT ON COLUMN gis_correction_record_detail.belong_to IS '权属单位';
 COMMENT ON TABLE gis_correction_record_detail is '纠错记录详情表';
 
 ------------------------------增加唯一性约束begin-----------------------
