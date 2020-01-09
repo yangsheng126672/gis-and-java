@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import sun.awt.AWTCharset;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
