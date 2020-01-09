@@ -325,7 +325,6 @@ public class BasicDevQuery {
 		}
 	}
 
-
 	/**
 	 * 获取默认地图相关配置
 	 * @return
@@ -334,22 +333,24 @@ public class BasicDevQuery {
 		DefaultLayersVO vo = new DefaultLayersVO();
 		String layerUrl = null;
 		Map<String,String> map = new HashMap<>();
+		Long deptId = null;
+		String extentStr = null;
 		try {
-			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
-			//获取地图中心点
-			String ceterStr = getMapCenterByByAuthId(deptId);
-			if (!StringUtils.isEmpty(ceterStr)){
-				vo.setX(ceterStr.split(",")[0]);
-				vo.setY(ceterStr.split(",")[1]);
+			if (!StringUtils.isEmpty(deptPath)){
+				deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+				//获取地图中心点
+				String ceterStr = getMapCenterByByAuthId(deptId);
+				if (!StringUtils.isEmpty(ceterStr)){
+					vo.setX(ceterStr.split(",")[0]);
+					vo.setY(ceterStr.split(",")[1]);
+				}
+				//获取图层范围
+				extentStr = getLayerExtentByAuthId(deptId);
+				vo.setLayerExtent(extentStr);
 			}
-
-			//获取图层范围
-			String extentStr = getLayerExtentByAuthId(deptId);
-			vo.setLayerExtent(extentStr);
 
 			Long tmpNumber = System.currentTimeMillis();
 			String tmpStr = "&number="+String.valueOf(tmpNumber);
-
 			layerUrl = dictConfig.getDefaultLayerUrl();
 			List<DictDetailPO> detailPOs = detailService.findDetailsByTypeVal(layerUrl);
 			for (DictDetailPO dictDetail:detailPOs){
@@ -376,10 +377,16 @@ public class BasicDevQuery {
 					if (vo.getY() == null){
 						vo.setY(dictDetail.getVal());
 					}
+				}else if (dictDetail.getName().equals("layerExtent")){
+					if (vo.getLayerExtent() == null){
+						vo.setLayerExtent(dictDetail.getVal());
+					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.error(e.getMessage());
+			throw new BizException("获取地图默认配置失败");
 		}
 		return vo;
 	}
@@ -422,6 +429,7 @@ public class BasicDevQuery {
 			}
 		}catch (Exception e){
 			e.printStackTrace();
+			Logger.error(e.getMessage());
 		}
 		return centerStr;
 	}
@@ -432,6 +440,9 @@ public class BasicDevQuery {
 	 * @return
 	 */
 	public String getLayerExtentByAuthId(Long deptId){
+		if (deptId == null){
+			return null;
+		}
 		String extent = null;
 		try {
 			List<DictDetailPO> list = detailService.findDetailsByTypeVal(dictConfig.getLayerExtent());
@@ -449,6 +460,7 @@ public class BasicDevQuery {
 			}
 		}catch (Exception e){
 			e.printStackTrace();
+			Logger.error(e.getMessage());
 		}
 		return extent;
 	}

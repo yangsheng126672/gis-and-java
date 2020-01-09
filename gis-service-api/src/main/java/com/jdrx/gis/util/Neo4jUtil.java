@@ -64,37 +64,37 @@ public class Neo4jUtil {
         mapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
     }
 
-    /**
-     * 创建管点node
-     * @param lableType
-     * lableType = gd or lableType = ljgd
-     */
-    public  void createNeoNodes(String lableType,String devIds){
-        try {
-            String nodeType;
-            List<NeoPointVO> pointVOList = gisDevExtPOMapper.getPointDevExt(devIds);
-            for (NeoPointVO pointVO:pointVOList){
-                nodeType = GISConstants.NEO_NODE_NORMAL;
-                if(pointVO.getName().contains("阀")){
-                    nodeType = GISConstants.NEO_NODE_VALVE;
-                }
-                // 1.首先创线首节点
-                RNode firstNode = new RNode();
-                firstNode.setName(pointVO.getName());
-                firstNode.setLabel(lableType);
-                firstNode.addProperty("dev_id",pointVO.getDev_id());
-                firstNode.addProperty("name",pointVO.getName());
-                firstNode.addProperty("nodetype",nodeType);
-                firstNode.addProperty("x",pointVO.getX());
-                firstNode.addProperty("y",pointVO.getY());
-                firstNode.addProperty("belong_to",pointVO.getBelong_to());
-                createNode(firstNode);
-            }
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
+//    /**
+//     * 创建管点node
+//     * @param lableType
+//     * lableType = gd or lableType = ljgd
+//     */
+//    public  void createNeoNodes(String lableType,String devIds){
+//        try {
+//            String nodeType;
+//            List<NeoPointVO> pointVOList = gisDevExtPOMapper.getPointDevExt(devIds);
+//            for (NeoPointVO pointVO:pointVOList){
+//                nodeType = GISConstants.NEO_NODE_NORMAL;
+//                if(pointVO.getName().contains("阀")){
+//                    nodeType = GISConstants.NEO_NODE_VALVE;
+//                }
+//                // 1.首先创线首节点
+//                RNode firstNode = new RNode();
+//                firstNode.setName(pointVO.getName());
+//                firstNode.setLabel(lableType);
+//                firstNode.addProperty("dev_id",pointVO.getDev_id());
+//                firstNode.addProperty("name",pointVO.getName());
+//                firstNode.addProperty("nodetype",nodeType);
+//                firstNode.addProperty("x",pointVO.getX());
+//                firstNode.addProperty("y",pointVO.getY());
+//                firstNode.addProperty("belong_to",pointVO.getBelong_to());
+//                createNode(firstNode);
+//            }
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 创建管线
@@ -269,50 +269,50 @@ public class Neo4jUtil {
         }
     }
 
-    /**
-     * 线上加点
-     * @param po
-     * @param devId 管线设备id
-     * @return
-     */
-    public  Boolean addNeoPointOnLine(GISDevExtPO po,String devId,String addDevIds){
-        try {
-            //创建管点
-            createNeoNodes(GISConstants.NEO_POINT,po.getDevId());
-            //删除管线
-            deleteNeoLineById(GISConstants.NEO_LINE,devId);
-            //创建新的两条管线
-            createNeoLine(GISConstants.NEO_POINT,GISConstants.NEO_LINE,addDevIds);
-            //创建逻辑管网
-            //......
-
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 根据设备编码集合创建图数据库管网数据
-     * @param devIds
-     * @return
-     */
-    public  Boolean addNeoNets(String devIds){
-        if (StringUtils.isEmpty(devIds)) {
-            return false;
-        }
-        try {
-            //创建管点数据
-            createNeoNodes(GISConstants.NEO_POINT,devIds);
-            //创建管线数据
-            createNeoLine(GISConstants.NEO_POINT,GISConstants.NEO_LINE,devIds);
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-    }
+//    /**
+//     * 线上加点
+//     * @param po
+//     * @param devId 管线设备id
+//     * @return
+//     */
+//    public  Boolean addNeoPointOnLine(GISDevExtPO po,String devId,String addDevIds){
+//        try {
+//            //创建管点
+//            createNeoNodes(GISConstants.NEO_POINT,po.getDevId());
+//            //删除管线
+//            deleteNeoLineById(GISConstants.NEO_LINE,devId);
+//            //创建新的两条管线
+//            createNeoLine(GISConstants.NEO_POINT,GISConstants.NEO_LINE,addDevIds);
+//            //创建逻辑管网
+//            //......
+//
+//            return true;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+//
+//    /**
+//     * 根据设备编码集合创建图数据库管网数据
+//     * @param devIds
+//     * @return
+//     */
+//    public  Boolean addNeoNets(String devIds){
+//        if (StringUtils.isEmpty(devIds)) {
+//            return false;
+//        }
+//        try {
+//            //创建管点数据
+//            createNeoNodes(GISConstants.NEO_POINT,devIds);
+//            //创建管线数据
+//            createNeoLine(GISConstants.NEO_POINT,GISConstants.NEO_LINE,devIds);
+//            return true;
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
 
     /**
      * 获取节点详细信息
@@ -563,7 +563,16 @@ public class Neo4jUtil {
             //同步管点
             String nodeType;
             String name = dto.getMap().get(GISConstants.GIS_ATTR_CODE).toString();
-            if (dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("阀")) {
+
+            List<DictDetailPO> details = dictDetailService.findDetailsByTypeVal(dictConfig.getCloseableValveTypeIds());
+            List<Long> typeIds = null;
+            if (Objects.nonNull(details)) {
+                typeIds = Lists.newArrayList();
+                for (DictDetailPO dictDetailPO : details) {
+                    typeIds.add(Long.parseLong(dictDetailPO.getVal()));
+                }
+            }
+            if (typeIds.contains(dto.getTypeId())) {
                 nodeType = GISConstants.NEO_NODE_VALVE;
             } else if (dto.getMap().get(GISConstants.GIS_ATTR_NAME).toString().contains("水源")) {
                 nodeType = GISConstants.NEO_NODE_WATER;
@@ -615,10 +624,9 @@ public class Neo4jUtil {
                     typeIds.add(Long.parseLong(dictDetailPO.getVal()));
                 }
             }
-
             String nodeType;
             String name = dto.getMapAttr().get(GISConstants.GIS_ATTR_CODE).toString();
-            if (dto.getMapAttr().get(GISConstants.GIS_ATTR_NAME).toString().contains("阀")) {
+            if (typeIds.contains(dto.getTypeId())) {
                 nodeType = GISConstants.NEO_NODE_VALVE;
             } else if (dto.getMapAttr().get(GISConstants.GIS_ATTR_NAME).toString().contains("水源")) {
                 nodeType = GISConstants.NEO_NODE_WATER;
