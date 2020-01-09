@@ -285,6 +285,11 @@ public interface GISDevExtPOMapper {
 	 */
 	List<GISDevExtPO> getFromStartCodeAndEndCode(@Param("startCode") String startCode, @Param("endCode") String endCode);
 
-
+	/**
+	 * 根据devId集合获取要素信息集
+	 * @param devId_list
+	 * @return
+	 */
+	List<FeatureVO> findFeaturesListByDevIdList(@Param("devId_list") List<String> devId_list);
 }
 

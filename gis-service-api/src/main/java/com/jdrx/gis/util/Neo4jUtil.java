@@ -3,15 +3,19 @@ package com.jdrx.gis.util;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.NodeDTO;
 import com.jdrx.gis.beans.dto.dataManage.*;
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.datamanage.REdge;
 import com.jdrx.gis.beans.vo.datamanage.RNode;
+import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.service.basic.DictDetailService;
 import org.apache.poi.ss.extractor.ExcelExtractor;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
@@ -25,6 +29,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Description
@@ -39,6 +44,12 @@ public class Neo4jUtil {
 
     @Autowired
     GISDevExtPOMapper gisDevExtPOMapper;
+
+    @Autowired
+    DictDetailService dictDetailService;
+
+    @Autowired
+    private DictConfig dictConfig;
 
     final static ObjectMapper mapper = new ObjectMapper();
 
@@ -596,6 +607,15 @@ public class Neo4jUtil {
      */
     public Boolean savePointToNeo4j(SharePointDTO dto,String devid,Long belongTo){
         try{
+            List<DictDetailPO> details = dictDetailService.findDetailsByTypeVal(dictConfig.getCloseableValveTypeIds());
+            List<Long> typeIds = null;
+            if (Objects.nonNull(details)) {
+                typeIds = Lists.newArrayList();
+                for (DictDetailPO dictDetailPO : details) {
+                    typeIds.add(Long.parseLong(dictDetailPO.getVal()));
+                }
+            }
+
             String nodeType;
             String name = dto.getMapAttr().get(GISConstants.GIS_ATTR_CODE).toString();
             if (dto.getMapAttr().get(GISConstants.GIS_ATTR_NAME).toString().contains("阀")) {

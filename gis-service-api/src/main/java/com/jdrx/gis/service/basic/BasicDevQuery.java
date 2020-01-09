@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.base.TypeIdDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
@@ -28,6 +29,7 @@ import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.Foreach;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -336,8 +338,10 @@ public class BasicDevQuery {
 			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
 			//获取地图中心点
 			String ceterStr = getMapCenterByByAuthId(deptId);
-			vo.setX(ceterStr.split(",")[0]);
-			vo.setY(ceterStr.split(",")[1]);
+			if (!StringUtils.isEmpty(ceterStr)){
+				vo.setX(ceterStr.split(",")[0]);
+				vo.setY(ceterStr.split(",")[1]);
+			}
 
 			//获取图层范围
 			String extentStr = getLayerExtentByAuthId(deptId);
@@ -364,6 +368,14 @@ public class BasicDevQuery {
 					vo.setResolutions(dictDetail.getVal());
 				}else if (dictDetail.getName().equals("popLayer")){
 					vo.setPopLayer(dictDetail.getVal());
+				}else if (dictDetail.getName().equals("x")){
+					if(vo.getX() == null){
+						vo.setX(dictDetail.getVal());
+					}
+				}else if (dictDetail.getName().equals("y")){
+					if (vo.getY() == null){
+						vo.setY(dictDetail.getVal());
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -442,15 +454,26 @@ public class BasicDevQuery {
 	}
 
 	/**
-	 * 根据id获取图层
+	 * 导出CAD的核心代码
 	 * @param list_id
 	 */
 	public String findLayerById(List<TypeIdDTO> list_id) throws BizException {
 		try {
-			Document doc = new Document();
+			Document doc = new Document();//工具类，制作CAD图层用
 			for (TypeIdDTO id:list_id) {
 				List<ExportCadVO> list = gisDevExtPOMapper.selectGeomByTypeId(id.getId());
-				for (ExportCadVO exportCadVO:list) {
+				List<FeatureVO> featureVO = new ArrayList<>();
+				if(id.getId()==19) {//当节点为阀门时，查出其再逻辑管网上的相邻节点之一，用来给阀门做角度
+					List<String> devId_list = new ArrayList<>();
+					for (ExportCadVO exportCadVO : list) {
+						String devId2 = neo4jUtil.getValveNodeByDevId(exportCadVO.getDevId()).getDev_id();
+						if (devId2 != null && devId2.length() != 0) {
+							devId_list.add(devId2);
+						}
+					}
+					featureVO = gisDevExtPOMapper.findFeaturesListByDevIdList(devId_list);//节点太多，使用集合形式，批量查询对应属性
+				}
+				for (ExportCadVO exportCadVO:list) {//对于每个数据进行绘制
 					String name = exportCadVO.getName();
 					String type = exportCadVO.getType();
 					String geom = exportCadVO.getGeom();
@@ -467,16 +490,18 @@ public class BasicDevQuery {
 							double cos;
 							double d1=2/(Math.sqrt(2));
 							double d2=-2/(Math.sqrt(2));
-							if(devId2!=null && devId2.length()!=0){
-								FeatureVO featureVO = gisDevExtPOMapper.findFeaturesByDevId(devId2);
-								String geom1= featureVO.getGeom();
-								String aa1 = geom1.substring(6,geom1.length()-1);
-								Double x1 = Double.parseDouble(aa1.split(" ")[0]);
-								Double y1 = Double.parseDouble(aa1.split(" ")[1]);
-								sin = (y1-y)/(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y)));
-								cos = (x1-x)/(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y)));
-								d1 = (sin+cos)*(2/(Math.sqrt(2)));
-								d2 = (sin-cos)*(2/(Math.sqrt(2)));
+							for (FeatureVO fea:featureVO){
+								//从相邻节点的信息集featureVO，中匹配当前节点对应的相邻节点的信息
+								if(devId2!=null && devId2.length()!=0 && devId2.equals(fea.getDevId())){
+									String geom1= fea.getGeom();
+									String aa1 = geom1.substring(6,geom1.length()-1);
+									Double x1 = Double.parseDouble(aa1.split(" ")[0]);
+									Double y1 = Double.parseDouble(aa1.split(" ")[1]);
+									sin = (y1-y)/(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y)));
+									cos = (x1-x)/(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y)));
+									d1 = (sin+cos)*(2/(Math.sqrt(2)));
+									d2 = (sin-cos)*(2/(Math.sqrt(2)));
+								}
 							}
 							double r=R/2;
 							Vertex v1 = new Vertex(x-(r*d1), y-(r*d2), "Vertex");
@@ -554,22 +579,22 @@ public class BasicDevQuery {
 						Double xf = Double.parseDouble(aa.split(",")[1].split(" ")[0]);
 						Double yf = Double.parseDouble(aa.split(",")[1].split(" ")[1]);
 						Line line = new Line("Line",xi, yi,xf ,yf);
-						if(name.equals("DN600-DN900管段")){
+						if(name.equals(GISConstants.CALIBER_600)){
 							line.setLwidth(6+"");//紫色
 						}
-						else if(name.equals("DN400-DN600管段")){
+						else if(name.equals(GISConstants.CALIBER_400)){
 							line.setLwidth(4+"");//浅蓝色
 						}
-						else if(name.equals("DN200-DN400管段")){
+						else if(name.equals(GISConstants.CALIBER_200)){
 							line.setLwidth(3+"");//绿色
 						}
-						else if(name.equals("DN100-DN200管段")){
+						else if(name.equals(GISConstants.CALIBER_100)){
 							line.setLwidth(5+"");//深蓝
 						}
-						else if(name.equals("DN100（不含）以下管段")){
+						else if(name.equals(GISConstants.CALIBER_0)){
 							line.setLwidth(40+"");//橘色
 						}
-						else if(name.equals("DN900（含）以上管段")){
+						else if(name.equals(GISConstants.CALIBER_900)){
 							line.setLwidth(1+"");//红色
 						}
 						doc.add(line);
