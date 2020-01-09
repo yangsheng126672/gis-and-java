@@ -294,7 +294,6 @@ public class CorrectionService {
 				ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.selectByTypeName(typeName);
 				shareDevPO.setTypeId(shareDevTypePO.getId());
 				shareDevPO.setName(typeName);
-				po.setName(typeName);
 				valueObj.put(GISConstants.GIS_ATTR_NAME, typeName);
 				if (!StringUtils.isEmpty(address)) {
 					shareDevPO.setAddr(address);
@@ -304,6 +303,7 @@ public class CorrectionService {
 				dataInfoPG.setValue(JSONObject.toJSONString(valueObj));
 				dataInfoPG.setType("jsonb");
 				po.setDataInfo(dataInfoPG);
+				po.setName(typeName);
 				shareDevPOMapper.updateByPrimaryKeySelective(shareDevPO);
 				gisDevExtPOMapper.updateDataInfoByDevId(po);
 			}
