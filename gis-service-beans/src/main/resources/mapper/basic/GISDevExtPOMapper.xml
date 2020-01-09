@@ -380,8 +380,15 @@
         select st_x (geom1) as x,st_y(geom1) as y  from (select st_transform(geom,4544) as geom1 from (select st_geomfromtext(#{geom},4326) as geom) a ) cc;
     </select>
 
-    <update id="deleteDevExtByDevId" parameterType="java.lang.String" >
-        UPDATE gis_dev_ext set delete_flag = TRUE,update_by = #{loginUserName}  where dev_id = #{devId}
+    <update id="deleteDevExtByDevId">
+        UPDATE gis_dev_ext
+        <set>
+            delete_flag = TRUE,
+            <if test="loginUserName != null">
+                update_by = #{loginUserName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where dev_id = #{devId}
     </update>
     <update id="deleteShareDevByDevId" parameterType="java.lang.String" >
         UPDATE share_dev set del_flag = 1  where id = #{devId}

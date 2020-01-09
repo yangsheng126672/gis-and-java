@@ -64,9 +64,14 @@
        SELECT <include refid="Base_Column_List"/> FROM share_dev sd
         where id = #{id,jdbcType=CHAR}
     </select>
-    <update id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <update id="deleteByPrimaryKey" >
         update  share_dev
-        SET del_flag = 1,update_by = #{loginUserName}
+        <set>
+            del_flag = 1,
+            <if test="loginUserName != null">
+                update_by = #{loginUserName,jdbcType=VARCHAR},
+            </if>
+        </set>
         where id = #{id,jdbcType=CHAR}
     </update>
     <insert id="insert" parameterType="com.jdrx.gis.beans.entity.basic.ShareDevPO">
