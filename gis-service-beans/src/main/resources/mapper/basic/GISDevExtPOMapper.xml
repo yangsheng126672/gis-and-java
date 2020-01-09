@@ -232,7 +232,8 @@
     </select>
 
     <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
-        SELECT <include refid="Base_Column_List" />
+        SELECT id, dev_id, name, code, caliber, material, ST_AsText(st_transform(geom, 4326)) geom, tpl_type_id, data_info, delete_flag,
+           create_by, create_at, update_by, update_at, belong_to, pic_urls, video_urls
         FROM gis_dev_ext gdx
         WHERE delete_flag = false
         AND code = #{code}
