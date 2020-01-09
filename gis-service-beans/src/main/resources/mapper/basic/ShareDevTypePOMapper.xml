@@ -188,6 +188,7 @@
         FROM share_dev_type
         WHERE del_flag = 0
           AND name = #{name}
+          AND limb_leaf = 2
         LIMIT 1
     </select>
 

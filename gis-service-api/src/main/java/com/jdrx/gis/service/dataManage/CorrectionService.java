@@ -233,6 +233,7 @@ public class CorrectionService {
 			int caliber = 0;
 			String material = "";
 			String address = "";
+			String typeName = "";
 			Date now = new Date();
 			int passCount = 0; // 通过条数
 			for (AuditCorrectionDTO dto : list) {
@@ -261,6 +262,8 @@ public class CorrectionService {
 								material = updVal;
 							} else if (GISConstants.DEV_ADDR_CHN.equals(chnName)) {
 								address = updVal;
+							} else if (GISConstants.DEV_TYPE_NAME_CHN.equals(chnName)) {
+								typeName = updVal;
 							}
 						}
 						break;
@@ -286,12 +289,13 @@ public class CorrectionService {
 				if (caliber != 0) {
 					po.setCaliber(caliber);
 					String caliberTypeName = queryDevService.getCaliberNameByCaliber(caliber);
-					ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.selectByTypeName(caliberTypeName);
-					shareDevPO.setTypeId(shareDevTypePO.getId());
-					shareDevPO.setName(caliberTypeName);
-					po.setName(caliberTypeName);
-					valueObj.put(GISConstants.GIS_ATTR_NAME, caliberTypeName);
+					typeName = caliberTypeName;
 				}
+				ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.selectByTypeName(typeName);
+				shareDevPO.setTypeId(shareDevTypePO.getId());
+				shareDevPO.setName(typeName);
+				po.setName(typeName);
+				valueObj.put(GISConstants.GIS_ATTR_NAME, typeName);
 				if (!StringUtils.isEmpty(address)) {
 					shareDevPO.setAddr(address);
 				}
@@ -300,7 +304,6 @@ public class CorrectionService {
 				dataInfoPG.setValue(JSONObject.toJSONString(valueObj));
 				dataInfoPG.setType("jsonb");
 				po.setDataInfo(dataInfoPG);
-
 				shareDevPOMapper.updateByPrimaryKeySelective(shareDevPO);
 				gisDevExtPOMapper.updateDataInfoByDevId(po);
 			}

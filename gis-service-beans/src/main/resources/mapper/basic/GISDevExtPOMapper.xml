@@ -574,6 +574,9 @@
             <if test="updateAt != null">
                 update_at = #{updateAt,jdbcType=TIMESTAMP},
             </if>
+            <if test="typeId != null">
+                type_id = #{typeId,jdbcType=BIGINT},
+            </if>
         </set>
         WHERE dev_id = #{devId}
     </update>
