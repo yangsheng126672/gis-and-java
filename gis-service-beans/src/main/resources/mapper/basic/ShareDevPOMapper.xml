@@ -71,6 +71,9 @@
             <if test="loginUserName != null">
                 update_by = #{loginUserName,jdbcType=VARCHAR},
             </if>
+            <if test = "date != null">
+                update_at =#{date,jdbcType=TIMESTAMP},
+            </if>
         </set>
         where id = #{id,jdbcType=CHAR}
     </update>

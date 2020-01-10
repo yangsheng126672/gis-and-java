@@ -18,6 +18,7 @@ import com.jdrx.gis.beans.vo.query.GISDevExt2VO;
 import com.jdrx.gis.beans.vo.query.GISDevExtVO;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -161,7 +162,7 @@ public interface GISDevExtPOMapper {
 	 * @param devId
 	 * @return
 	 */
-	Integer deleteDevExtByDevId(@Param("devId")String devId,@Param("loginUserName") String loginUserName);
+	Integer deleteDevExtByDevId(@Param("devId")String devId,@Param("loginUserName") String loginUserName,@Param("date") Date date);
 
 	/**
 	 * 批量更新
@@ -230,6 +231,12 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	 List<PipeLengthVO> getPipeLengthByAuthId();
+
+	/**
+	 * 根据权限值获取管网总长度(系统统一保留三位小数）
+	 * @return
+	 */
+	List<PipeLengthVO> getPipeLengthByAll();
 
 	/**
 	 * 根据devIds获取孤立设备基础分析信息

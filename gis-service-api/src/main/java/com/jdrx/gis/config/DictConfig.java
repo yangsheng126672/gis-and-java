@@ -73,4 +73,7 @@ public class DictConfig {
 
 	/** 爆管分析可关闭的阀门类型 */
 	private String closeableValveTypeIds;
+
+	/**  系统权限  */
+	private String sysPermission;
 }

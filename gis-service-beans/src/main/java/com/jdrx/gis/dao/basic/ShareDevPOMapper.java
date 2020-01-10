@@ -4,12 +4,13 @@ import com.jdrx.gis.beans.anno.NoAuthData;
 import com.jdrx.gis.beans.entity.basic.ShareDevPO;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public interface ShareDevPOMapper {
 
-	int deleteByPrimaryKey(@Param("id") String id,@Param("loginUserName") String loginUserName);
+	int deleteByPrimaryKey(@Param("id") String id,@Param("loginUserName") String loginUserName,@Param("date") Date date);
 
 	int insert(ShareDevPO record);
 

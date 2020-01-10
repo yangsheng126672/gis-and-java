@@ -232,8 +232,7 @@
     </select>
 
     <select id="selectByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
-        SELECT id, dev_id, name, code, caliber, material, ST_AsText(st_transform(geom, 4326)) geom, tpl_type_id, data_info, delete_flag,
-           create_by, create_at, update_by, update_at, belong_to, pic_urls, video_urls
+        SELECT <include refid="Base_Column_List"/>
         FROM gis_dev_ext gdx
         WHERE delete_flag = false
         AND code = #{code}
@@ -387,6 +386,9 @@
             delete_flag = TRUE,
             <if test="loginUserName != null">
                 update_by = #{loginUserName,jdbcType=VARCHAR},
+            </if>
+            <if test = "date != null">
+                update_at =#{date,jdbcType=TIMESTAMP},
             </if>
         </set>
         where dev_id = #{devId}
@@ -610,6 +612,12 @@
         where caliber  is not null and delete_flag = false GROUP BY belong_to
     </select>
 
+    <select id="getPipeLengthByAll"  resultType="com.jdrx.gis.beans.vo.basic.PipeLengthVO">
+        select  ROUND(st_length(st_Astext(ST_Union(geom)))::NUMERIC,0)/1000 as length
+        from  gis_dev_ext a
+        where caliber  is not null and delete_flag = false
+    </select>
+
     <select id="getRepeatPointsByDevIds" resultType="com.jdrx.gis.beans.vo.basic.AnalysisVO">
         select dev_id AS devId,code,ST_AsText(st_transform(geom, 4326)) AS geom,name from gis_dev_ext aaa
         where delete_flag = false
@@ -651,12 +659,8 @@
     <update id="updateMultiVideo" >
         UPDATE gis_dev_ext
         <set>
-            <if test="po.picUrls != null and po.picUrls != ''">
-                pic_urls = #{po.picUrls},
-            </if>
-            <if test="po.videoUrls != null and po.videoUrls != ''">
-                video_urls = #{po.videoUrls},
-            </if>
+            pic_urls = #{po.picUrls},
+            video_urls = #{po.videoUrls},
             <if test="po.updateBy != null and po.updateBy != ''">
                 update_by = #{po.updateBy},
             </if>

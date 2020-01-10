@@ -632,18 +632,32 @@ public class BasicDevQuery {
 	 */
 	public Map<String, String> getPipeLengthByDeptPath() throws BizException{
 		Map<String,String>map = new HashMap<>();
+		List<PipeLengthVO> list =null;
 		try {
-			List<PipeLengthVO> list = gisDevExtPOMapper.getPipeLengthByAuthId();
-			List<DictDetailPO> detailPOS = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
-			for(PipeLengthVO vo:list){
-				for (DictDetailPO po: detailPOS){
-					if (po.getVal().equals(String.valueOf(vo.getAuthId()))){
-						map.put(po.getName(),String.valueOf(vo.getLength()));
+			String permissionVal = null;
+			List<DictDetailPO> detailPOS = detailService.findDetailsByTypeVal(dictConfig.getSysPermission());
+			permissionVal = detailPOS.get(0).getVal();
+			//判断系统是否有权限
+			if (Boolean.valueOf(permissionVal)){
+				list = gisDevExtPOMapper.getPipeLengthByAuthId();
+				List<DictDetailPO> detailPOS1 = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+				for(PipeLengthVO vo:list){
+					for (DictDetailPO po: detailPOS1){
+						if (po.getVal().equals(String.valueOf(vo.getAuthId()))){
+							map.put(po.getName(),String.valueOf(vo.getLength()));
+						}
 					}
 				}
+			}else {
+				list = gisDevExtPOMapper.getPipeLengthByAll();
+				List<DictDetailPO> detailPOS1 = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
+				map.put(detailPOS1.get(0).getName(),list.get(0).getLength().toString());
 			}
+
 		}catch (Exception e){
 			e.printStackTrace();
+			Logger.error(e.getMessage());
+			throw new BizException("获取管网长度失败");
 		}
 		return map;
 	}
