@@ -291,5 +291,13 @@ public interface GISDevExtPOMapper {
 	 * @return
 	 */
 	List<FeatureVO> findFeaturesListByDevIdList(@Param("devId_list") List<String> devId_list);
+
+	/**
+	 * 根据devId获取经纬度
+	 * @param devId
+	 * @return
+	 */
+	@NoAuthData
+	String getLngLatByDevId(@Param("devId") String devId);
 }
 

@@ -108,4 +108,15 @@ public class GisDevExtService {
 		}
 		return list;
 	}
+
+	/**
+	 * 获取经纬度
+	 * @param devId
+	 * @return
+	 * @throws BizException
+	 */
+	public String getLngLatByDevId(String devId) {
+		return gisDevExtPOMapper.getLngLatByDevId(devId);
+	}
+
 }

@@ -687,4 +687,8 @@
         </foreach>
         AND delete_flag = false
     </select>
+
+    <select id="getLngLatByDevId" parameterType="string" resultType="string">
+        SELECT ST_AsText(st_transform(geom, 4326)) geom FROM gis_dev_ext gdx where dev_id = #{devId}
+    </select>
 </mapper>

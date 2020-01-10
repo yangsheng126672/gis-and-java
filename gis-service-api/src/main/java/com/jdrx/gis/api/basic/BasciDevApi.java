@@ -8,6 +8,7 @@ import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.service.basic.BasicDevQuery;
+import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.gis.service.basic.ShareDevService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.RedisComponents;
@@ -51,6 +52,9 @@ public class BasciDevApi {
 
 	@Autowired
 	private ShareDevService shareDevService;
+
+	@Autowired
+	private GisDevExtService gisDevExtService;
 
 	@ApiOperation(value = "获取首层图层")
 	@RequestMapping(value = "findFirstHierarchyDevType")
@@ -179,5 +183,19 @@ public class BasciDevApi {
 	public ResposeVO selectShareDevById(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) throws BizException{
 		Logger.debug("api/0/basic/selectShareDevById 根据DevId获取设备信息");
 		return ResponseFactory.ok(shareDevService.selectByPrimaryKey(dto.getId()));
+	}
+
+	@ApiOperation(value = "根据DevId获取经纬度")
+	@RequestMapping(value = "getLngLatByDevId")
+	public ResposeVO getLngLatByDevId(@ApiParam(name = "iddto", required = true) @RequestBody @Valid IdDTO<String> dto) {
+		Logger.debug("api/0/basic/getLngLatByDevId 根据DevId获取经纬度");
+		try {
+			String lngLat = gisDevExtService.getLngLatByDevId(dto.getId());
+			return ResponseFactory.ok(lngLat);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error(e.getMessage());
+			return ResponseFactory.err("获取经纬度失败！", EApiStatus.ERR_SYS);
+		}
 	}
 }
