@@ -19,6 +19,7 @@ import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
 import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
+import com.jdrx.gis.config.SwitchConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
@@ -82,6 +83,8 @@ public class BasicDevQuery {
 
 	public final static String SHARE_DEV_TYPE_NAME_OTHER = "其他";
 
+	@Autowired
+	private SwitchConfig switchConfig;
 	/**
 	 * 递归处理   数据库树结构数据->树形json
 	 * @param id
@@ -634,11 +637,9 @@ public class BasicDevQuery {
 		Map<String,String>map = new HashMap<>();
 		List<PipeLengthVO> list =null;
 		try {
-			String permissionVal = null;
-			List<DictDetailPO> detailPOS = detailService.findDetailsByTypeVal(dictConfig.getSysPermission());
-			permissionVal = detailPOS.get(0).getVal();
+			boolean dataPermission = switchConfig.getPermission();
 			//判断系统是否有权限
-			if (Boolean.valueOf(permissionVal)){
+			if (dataPermission){
 				list = gisDevExtPOMapper.getPipeLengthByAuthId();
 				List<DictDetailPO> detailPOS1 = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
 				for(PipeLengthVO vo:list){
