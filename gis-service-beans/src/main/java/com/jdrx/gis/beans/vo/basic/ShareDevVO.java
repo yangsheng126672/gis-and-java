@@ -1,11 +1,14 @@
 package com.jdrx.gis.beans.vo.basic;
 
+import lombok.Data;
+
 import java.util.Date;
 
 /**
  * @Author: liaosijun
  * @Time: 2020/1/7 13:37
  */
+@Data
 public class ShareDevVO {
 	/**
 	 * 主键
@@ -77,115 +80,4 @@ public class ShareDevVO {
 	 */
 	private Short delFlag;
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id == null ? null : id.trim();
-	}
-
-	public Long getTypeId() {
-		return typeId;
-	}
-
-	public void setTypeId(Long typeId) {
-		this.typeId = typeId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name == null ? null : name.trim();
-	}
-
-	public Short getStatus() {
-		return status;
-	}
-
-	public void setStatus(Short status) {
-		this.status = status;
-	}
-
-	public String getSn() {
-		return sn;
-	}
-
-	public void setSn(String sn) {
-		this.sn = sn == null ? null : sn.trim();
-	}
-
-	public String getLng() {
-		return lng;
-	}
-
-	public void setLng(String lng) {
-		this.lng = lng == null ? null : lng.trim();
-	}
-
-	public String getLat() {
-		return lat;
-	}
-
-	public void setLat(String lat) {
-		this.lat = lat == null ? null : lat.trim();
-	}
-
-	public String getAddr() {
-		return addr;
-	}
-
-	public void setAddr(String addr) {
-		this.addr = addr == null ? null : addr.trim();
-	}
-
-	public String getPlatformCode() {
-		return platformCode;
-	}
-
-	public void setPlatformCode(String platformCode) {
-		this.platformCode = platformCode == null ? null : platformCode.trim();
-	}
-
-	public String getCreateBy() {
-		return createBy;
-	}
-
-	public void setCreateBy(String createBy) {
-		this.createBy = createBy == null ? null : createBy.trim();
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public String getUpdateBy() {
-		return updateBy;
-	}
-
-	public void setUpdateBy(String updateBy) {
-		this.updateBy = updateBy == null ? null : updateBy.trim();
-	}
-
-	public Date getUpdateAt() {
-		return updateAt;
-	}
-
-	public void setUpdateAt(Date updateAt) {
-		this.updateAt = updateAt;
-	}
-
-	public Short getDelFlag() {
-		return delFlag;
-	}
-
-	public void setDelFlag(Short delFlag) {
-		this.delFlag = delFlag;
-	}
 }
