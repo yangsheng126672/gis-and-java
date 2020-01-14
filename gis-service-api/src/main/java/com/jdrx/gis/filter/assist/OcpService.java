@@ -1,8 +1,17 @@
 package com.jdrx.gis.filter.assist;
 
+import com.jdrx.gis.beans.entity.basic.DictDetailPO;
+import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.config.SwitchConfig;
+import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author: Huangxg
@@ -10,11 +19,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class OcpService {
+
+	private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(OcpService.class);
+
 	/**
 	 * 用户所属机构父级路径，约定规则如下：第一级为集团机构信息、集团之下也就是第二级为水厂机构信息，
 	 * 最后一级为当前用户直属机构信息
 	 */
 	private String[] deptIds;
+
+	@Autowired
+	private SwitchConfig switchConfig;
 
 	public OcpService setDeptPath(String deptPath) throws BizException {
 		if (StringUtils.isEmpty(deptPath)) {
@@ -57,9 +72,11 @@ public class OcpService {
 	 * @return
 	 */
 	public Long getUserWaterworksDeptId() {
-		if (this.deptIds.length >= 2) {
-			return Long.valueOf(this.deptIds[1]);
+		boolean bool = switchConfig.getPermission();
+		if (bool) { // 设置了权限
+			return this.deptIds.length >= 2 ? Long.valueOf(this.deptIds[1]) : null;
+		} else { // 没有设置权限
+			return this.deptIds.length >= 2 ? Long.valueOf(this.deptIds[0]) : null;
 		}
-		return null;
 	}
 }

@@ -35,6 +35,7 @@ public class UserRpc {
 	 * @return
 	 */
 	public SysOcpUserPo getUserById(Long userId, String token) {
+
 		HashMap<String, Object> reqMap = Maps.newHashMap();
 		reqMap.put("id", userId);
 		DubboRpcBean rpcBean = DubboRpcBean.builder().setRpcPath("/oapi/0/queryUserById").setBody(reqMap).

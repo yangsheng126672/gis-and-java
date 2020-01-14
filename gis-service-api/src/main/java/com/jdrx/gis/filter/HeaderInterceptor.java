@@ -3,6 +3,7 @@ package com.jdrx.gis.filter;
 import com.jdrx.gis.beans.anno.NoAuthData;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.config.JwtConfig;
+import com.jdrx.gis.config.SwitchConfig;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.util.ComUtil;
 import io.jsonwebtoken.JwtParser;
@@ -56,14 +57,22 @@ public class HeaderInterceptor implements Interceptor {
 	@Autowired
 	private JwtConfig jwtConfig;
 
+	@Autowired
+	private SwitchConfig switchConfig;
 
 	@Override
 	public Object intercept(Invocation invocation) throws Throwable {
 		HttpServletRequest request;
 		String deptPath = null;
+		// 如果请求为空，不做处理
 		if (RequestContextHolder.getRequestAttributes() != null) {
 			request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		} else {
+			return invocation.proceed();
+		}
+		// 如果配置的数据权限为false，不做处理
+		boolean bool = switchConfig.getPermission();
+		if (!bool){
 			return invocation.proceed();
 		}
 		if (Objects.nonNull(request)) {
