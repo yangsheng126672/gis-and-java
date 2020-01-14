@@ -30,7 +30,6 @@ import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.Foreach;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -85,6 +84,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private SwitchConfig switchConfig;
+
+	@Autowired
+	private OcpService ocpService;
 	/**
 	 * 递归处理   数据库树结构数据->树形json
 	 * @param id
