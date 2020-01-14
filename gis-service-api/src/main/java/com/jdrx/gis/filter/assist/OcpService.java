@@ -1,17 +1,11 @@
 package com.jdrx.gis.filter.assist;
 
-import com.jdrx.gis.beans.entity.basic.DictDetailPO;
-import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.SwitchConfig;
-import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @Author: Huangxg

@@ -107,6 +107,8 @@ public class NetsAnalysisService {
     private DictDetailService detailService;
     @Autowired
     private GISDevExtPOMapper gisDevExtPOMapper;
+    @Autowired
+    private OcpService ocpService;
 
     /**
      * 查找一级关阀所有点
@@ -545,7 +547,7 @@ public class NetsAnalysisService {
      */
     public boolean saveAnalysisRecond(AnalysisRecordDTO recordDTO,String deptPath) throws BizException {
         try {
-            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+            Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
             GisPipeAnalysisPO gisPipeAnalysisPO =new GisPipeAnalysisPO();
             gisPipeAnalysisPO.setCode(recordDTO.getCode()) ;
             gisPipeAnalysisPO.setX(BigDecimal.valueOf(recordDTO.getPoint()[0]));

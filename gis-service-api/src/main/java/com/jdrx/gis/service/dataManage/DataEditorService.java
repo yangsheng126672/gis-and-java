@@ -78,6 +78,9 @@ public class DataEditorService {
     @Autowired
     private UserRpc userRpc;
 
+    @Autowired
+    private OcpService ocpService;
+
 
     /**
      * 获取所有点类型
@@ -176,7 +179,7 @@ public class DataEditorService {
             //获得创建人
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
-            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+            Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
             Map<String,Object> map = dto.getMap();
             Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
             String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
@@ -400,7 +403,7 @@ public class DataEditorService {
             //获得创建人
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
-            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+            Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
             for(SharePointDTO dto:list){
                 Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
                 String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
@@ -490,7 +493,7 @@ public class DataEditorService {
             //获得创建人
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
-            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+            Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
             for (ShareLineDTO dto:list){
                 Long seq = sequenceDefineService.increment(gisDeviceService.sequenceKey());
                 String devId = String.format("%04d%s%06d",dto.getTypeId(), GISConstants.PLATFORM_CODE, seq);
@@ -841,7 +844,7 @@ public class DataEditorService {
             //获得创建人
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
-            Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+            Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
             List<String> devIdStr = dto.getDevIds();
             if(2 == devIdStr.size()){
                 GISDevExtPO firstPointPO = gisDevExtPOMapper.getDevExtByDevId(devIdStr.get(0));

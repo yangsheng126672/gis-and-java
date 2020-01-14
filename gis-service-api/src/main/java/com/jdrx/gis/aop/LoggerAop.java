@@ -179,8 +179,7 @@ public class LoggerAop {
 
 	@AfterThrowing(value = "logcut()", throwing = "exception")
 	public void afterThrowing(JoinPoint joinPoint, Exception exception) throws Throwable {
-		exception.printStackTrace();
-		Logger.error(exception.getMessage());
+		Logger.error("ERROR -> ", exception);
 		GisTransLog gisTransLog = gisTransLogLocal.get();
 		Long start =  gisTransLog.getCost().longValue();
 		Long end = System.currentTimeMillis();

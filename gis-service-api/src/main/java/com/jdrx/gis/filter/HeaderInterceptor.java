@@ -60,6 +60,9 @@ public class HeaderInterceptor implements Interceptor {
 	@Autowired
 	private SwitchConfig switchConfig;
 
+	@Autowired
+	private OcpService ocpService;
+
 	@Override
 	public Object intercept(Invocation invocation) throws Throwable {
 		HttpServletRequest request;
@@ -133,7 +136,7 @@ public class HeaderInterceptor implements Interceptor {
 	 * @return
 	 * @throws Exception
 	 */
-	private static String handleSql(String sql, String deptPath) throws Exception {
+	private String handleSql(String sql, String deptPath) throws Exception {
 		StringBuffer sb1 = new StringBuffer().append("(SELECT a.* FROM ")
 				.append(T_DEV)
 				.append(" a INNER JOIN (SELECT * FROM ")
@@ -150,7 +153,7 @@ public class HeaderInterceptor implements Interceptor {
 				.append(" WHERE belong_to = ~)");
 
 		if (Objects.nonNull(deptPath) && Objects.nonNull(sql)) {
-			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 			if (Objects.nonNull(deptId)) {
 				sql = ComUtil.replaceTargetIngorCase(sql, T_EXT, String.valueOf(sb2)).replaceAll("\\~", String.valueOf(deptId));
 				sql = ComUtil.replaceTargetIngorCase(sql, T_DEV, String.valueOf(sb1)).replaceAll("\\~", String.valueOf(deptId));

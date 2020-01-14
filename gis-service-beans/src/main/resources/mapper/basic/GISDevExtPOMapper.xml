@@ -106,7 +106,7 @@
                 </if>
             </where>
         ) ext inner join (
-        select dv.id ,dv.type_id,dvt.name from (select * from share_dev where del_flag = 0) dv left join share_dev_type dvt on dv.type_id = dvt.id
+        select dv.id ,dv.type_id,dvt.name from (select * from share_dev sd where del_flag = 0) dv left join share_dev_type dvt on dv.type_id = dvt.id
         ) dt on ext.dev_id = dt.id
     </select>
 
@@ -147,8 +147,8 @@
                 (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
             </if>
         </where>
-        ) ext left join (
-        select dv.id ,dv.type_id,dvt.name from share_dev dv left join share_dev_type dvt on dv.type_id = dvt.id
+        ) ext inner join (
+        select dv.id ,dv.type_id,dvt.name from (select * from share_dev sd where del_flag = 0) dv left join share_dev_type dvt on dv.type_id = dvt.id
         ) dt on ext.dev_id = dt.id
     </select>
 

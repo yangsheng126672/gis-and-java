@@ -269,7 +269,7 @@ public class BasicDevQuery {
 	 */
 	public Integer saveMeasurement(MeasurementDTO dto,String deptPath) throws BizException{
 		try {
-			Long deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 			dto.setBelongTo(deptId);
 			return measurementPOMapper.insertSelective(dto);
 		} catch (Exception e) {
@@ -340,7 +340,7 @@ public class BasicDevQuery {
 		String extentStr = null;
 		try {
 			if (!StringUtils.isEmpty(deptPath)){
-				deptId = new OcpService().setDeptPath(deptPath).getUserWaterworksDeptId();
+				deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 				//获取地图中心点
 				String ceterStr = getMapCenterByByAuthId(deptId);
 				if (!StringUtils.isEmpty(ceterStr)){
