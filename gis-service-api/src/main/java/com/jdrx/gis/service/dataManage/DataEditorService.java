@@ -540,7 +540,9 @@ public class DataEditorService {
                 gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
                 gisDevExtPO.setCaliber(dto.getCaliber());
                 gisDevExtPO.setMaterial(dto.getMaterial());
-                gisDevExtPO.setTplTypeId(dto.getTypeId());
+                //根据管径大小获得名称 然后找到share_dev_type中的id
+                long tplTypeId = shareDevTypePOMapper.getIdByName(getNameByCaliber(dto.getCaliber()));
+                gisDevExtPO.setTplTypeId(tplTypeId);
                 gisDevExtPO.setDataInfo(jsonObject);
                 gisDevExtPO.setGeom(transformGeomStr);
                 gisDevExtPO.setBelongTo(deptId);
@@ -552,6 +554,9 @@ public class DataEditorService {
                 shareDevPO.setTypeId(gisDevExtPO.getTplTypeId());
                 shareDevPO.setName(getNameByCaliber(gisDevExtPO.getCaliber()));
                 shareDevPO.setCreateBy(loginUserName);
+                if(map.containsKey(GISConstants.GIS_ATTR_ADDR)){
+                    shareDevPO.setAddr(map.get(GISConstants.GIS_ATTR_ADDR).toString());
+                }
                 //同步到neo4j中
                 Boolean flag = neo4jUtil.saveLineToNeo4j(dto,dto.getStartCode()+"-"+dto.getEndCode(),dto.getStartCode(),dto.getEndCode(),devId,deptId);
                 if(flag == false){
@@ -648,9 +653,14 @@ public class DataEditorService {
                 //更新gis_dev_ext中的caliber字段
                 gisDevExtPO.setCaliber(Integer.valueOf(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
                 //更新gis_dev_ext中的name字段
-                gisDevExtPO.setName(getNameByCaliber(Integer.valueOf(map.get(GISConstants.GIS_ATTR_CALIBER).toString())));
+                String name = getNameByCaliber(Integer.valueOf(map.get(GISConstants.GIS_ATTR_CALIBER).toString()));
+                gisDevExtPO.setName(name);
+                //更新gis_dev_ext中的tplTypeId字段
+                long tplTypeId = shareDevTypePOMapper.getIdByName(name);
+                gisDevExtPO.setTplTypeId(tplTypeId);
                 //更新share_dev中的tplTypeId和name字段
                 shareDevPO.setName(getNameByCaliber(Integer.valueOf(map.get(GISConstants.GIS_ATTR_CALIBER).toString())));
+                shareDevPO.setTypeId(tplTypeId);
             }else{
                 if (map.containsKey(GISConstants.GIS_ATTR_NAME)){
                     //更新管点信息中的name和tplTypeId字段
@@ -876,7 +886,9 @@ public class DataEditorService {
                     GISDevExtPO gisDevExtPO = new GISDevExtPO();
                     gisDevExtPO.setDevId(devId);
                     gisDevExtPO.setCode(dto.getStartCode()+"-"+dto.getEndCode());
-                    gisDevExtPO.setTplTypeId(dto.getTypeId());
+                    //根据管径大小获得tplTypeId
+                    long tplTypeId = shareDevTypePOMapper.getIdByName(getNameByCaliber(dto.getCaliber()));
+                    gisDevExtPO.setTplTypeId(tplTypeId);
                     gisDevExtPO.setCaliber(dto.getCaliber());
                     gisDevExtPO.setMaterial(dto.getMaterial());
                     gisDevExtPO.setGeom(transformGeom);
@@ -995,6 +1007,4 @@ public class DataEditorService {
         }
         return pointVO;
     }
-
-
 }
