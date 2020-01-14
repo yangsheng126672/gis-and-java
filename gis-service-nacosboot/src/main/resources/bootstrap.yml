@@ -9,6 +9,6 @@ spring:
         # 河北冀州生产配置中心地址
         server-addr: ms-cc-00:8848,ms-cc-01:8848,ms-cc-02:8848
         file-extension: properties
-        group: sw-biz-gagis
+        group: sw-biz-aaa
   profiles:
     active: dev
