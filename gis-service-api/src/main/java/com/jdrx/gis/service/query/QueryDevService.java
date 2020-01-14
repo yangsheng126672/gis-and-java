@@ -664,6 +664,9 @@ public class QueryDevService {
 		typesDTO.setDevIds(dto.getDevIds());
 		typesDTO.setTypeIds(new Long[]{dto.getTypeId()});
 		List<GISDevExt2VO> devListByTypeIdsAndDevIds = findDevListByTypeIdsAndDevIds(typesDTO);
+		if (Objects.isNull(devListByTypeIdsAndDevIds)) {
+			return JSON.parseArray(JSON.toJSON(Lists.newArrayList()).toString());
+		}
 		Map<Long, List<GISDevExt2VO>> collect = devListByTypeIdsAndDevIds.stream().collect(Collectors.groupingBy(GISDevExt2VO::getTypeId));
 		List<GISDevExt2VO> t = Lists.newArrayList();
 		for (Map.Entry<Long, List<GISDevExt2VO>>  entry : collect.entrySet()) {
