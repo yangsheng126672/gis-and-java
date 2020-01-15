@@ -150,7 +150,7 @@
         where  del_flag = 0
         <if test="devIds != null and devIds != ''">
             and EXISTS (select 1 from
-            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = sd.id)
+            (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir  where vir.dev_id = sd.id)
         </if>
     </select>
 
