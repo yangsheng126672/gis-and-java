@@ -102,7 +102,7 @@
                 </if>
                 <if test="devIds != null and devIds != ''">
                     and EXISTS (select 1 from
-                    (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
+                    (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
                 </if>
             </where>
         ) ext inner join (
@@ -144,7 +144,7 @@
             </if>
             <if test="devIds != null and devIds != ''">
                 and EXISTS (select 1 from
-                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
+                (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
             </if>
         </where>
         ) ext inner join (
@@ -171,7 +171,7 @@
                             AND EXISTS (
                                 SELECT 1
                                 FROM (
-                                    SELECT regexp_split_to_table(#{devIds}, ',') AS dev_id
+                                    SELECT regexp_split_to_table(#{devIds}, ',') ::CHAR(12) AS dev_id
                                 ) vir
                                 WHERE vir.dev_id = t1.dev_id
                             )
@@ -695,4 +695,5 @@
     <select id="getLngLatByDevId" parameterType="string" resultType="string">
         SELECT ST_AsText(st_transform(geom, 4326)) geom FROM gis_dev_ext gdx where dev_id = #{devId}
     </select>
+
 </mapper>

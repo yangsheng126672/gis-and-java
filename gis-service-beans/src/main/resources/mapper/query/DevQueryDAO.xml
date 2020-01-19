@@ -77,7 +77,7 @@
             </if>
             <if test="devIds != null and devIds != ''">
                 and EXISTS (select 1 from
-                (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir where vir.dev_id = sd.id)
+                (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir where vir.dev_id = sd.id)
             </if>
         </where>
     </select>
@@ -157,7 +157,7 @@
           )
         <if test="devIds != null and devIds != ''">
             and EXISTS (select 1 from
-            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir where vir.dev_id = sd.id)
+            (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir where vir.dev_id = sd.id)
         </if>
         ) sd LEFT JOIN share_dev_type sdt ON sd.type_id = sdt.ID
         ) dv INNER JOIN ( SELECT dev_id, data_info dataInfo FROM gis_dev_ext gdx WHERE delete_flag = FALSE ) b
@@ -194,7 +194,7 @@
         where delete_flag = false
         <if test="devIds != null and devIds != ''">
             and EXISTS (select 1 from
-            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
+            (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir  where vir.dev_id = gdx.dev_id)
         </if>
         <choose>
             <when test='pre == "("'>
@@ -223,7 +223,7 @@
                         delete_flag = false
                         <if test="devIds != null and devIds != ''">
                             and EXISTS (select 1 from
-                            (SELECT regexp_split_to_table(#{devIds},',') AS dev_id) AS vir  where vir.dev_id= gdx.dev_id)
+                            (SELECT regexp_split_to_table(#{devIds},',') ::CHAR(12) AS dev_id) AS vir  where vir.dev_id= gdx.dev_id)
                         </if>
                     </where>
                 ) a INNER JOIN share_dev b on a.dev_id = b.id AND  b.del_flag = 0

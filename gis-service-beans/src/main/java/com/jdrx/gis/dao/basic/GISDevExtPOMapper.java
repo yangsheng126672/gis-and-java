@@ -306,5 +306,7 @@ public interface GISDevExtPOMapper {
 	 */
 	@NoAuthData
 	String getLngLatByDevId(@Param("devId") String devId);
+
+
 }
 
