@@ -24,4 +24,10 @@ public interface SelfExamination {
 	 */
 	@NoAuthData
 	List<TypeToDevNumsPO> findDevNums();
+
+	/**
+	 * 获取数据库中的所有的管点编码
+	 */
+	@NoAuthData
+	List<String> findCodes();
 }

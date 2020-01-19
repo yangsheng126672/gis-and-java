@@ -5,6 +5,7 @@ import com.jdrx.gis.beans.entity.basic.ExcelLinePo;
 import com.jdrx.gis.beans.entity.basic.ExcelPointPo;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.query.SelfExamination;
 import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 public class VerifyDataService {
 
     @Autowired
-    private GISDevExtPOMapper gisDevExtPOMapper;
+    private SelfExamination selfExamination;
 
     @Autowired
     private PathConfig pathConfig;
@@ -441,7 +442,7 @@ public class VerifyDataService {
      */
     public List findDataBaseRepeatCode(List<ExcelPointPo> list) throws BizException {
         List<String> excelCodeList = new ArrayList();
-        List<String> dataBaseCodeList = gisDevExtPOMapper.findCodes();
+        List<String> dataBaseCodeList = selfExamination.findCodes();
         List listRepeat = new ArrayList();
         for (ExcelPointPo po : list) {
             if (dataBaseCodeList.contains(po.getPointCode())) {
@@ -496,7 +497,7 @@ public class VerifyDataService {
     public List findNoExistStartCodes(List<ExcelLinePo> lineList, List<ExcelPointPo> pointList) throws BizException {
         List<String> excelCodeList = new ArrayList();
         List listRepeatStartCode = new ArrayList();
-        List<String> dataBaseCodeList = gisDevExtPOMapper.findCodes();
+        List<String> dataBaseCodeList = selfExamination.findCodes();
         //取得excel中所有的管点code
         for (ExcelPointPo po : pointList) {
             if (po.getPointCode() != null) {
@@ -520,7 +521,7 @@ public class VerifyDataService {
     public List findNoExistEndCodes(List<ExcelLinePo> lineList, List<ExcelPointPo> pointList) throws BizException {
         List<String> excelCodeList = new ArrayList();
         List listRepeatEndCode = new ArrayList();
-        List<String> dataBaseCodeList = gisDevExtPOMapper.findCodes();
+        List<String> dataBaseCodeList = selfExamination.findCodes();
         //取得excel中所有的管点code
         for (ExcelPointPo po : pointList) {
             if (po.getPointCode() != null) {

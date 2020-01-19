@@ -696,7 +696,4 @@
         SELECT ST_AsText(st_transform(geom, 4326)) geom FROM gis_dev_ext gdx where dev_id = #{devId}
     </select>
 
-    <select id="findCodes" resultType="java.lang.String">
-        select code from gis_dev_ext gdx where delete_flag = false
-    </select>
 </mapper>

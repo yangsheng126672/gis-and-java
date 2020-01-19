@@ -64,4 +64,7 @@
                 ) as bb on aa.id = bb.type_id
 	) as cc GROUP BY id,name order by id asc ,name asc
     </select>
+    <select id="findCodes" resultType="java.lang.String">
+        select code from gis_dev_ext gdx where delete_flag = false
+    </select>
 </mapper>
