@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.entity.query.Pipe;
+import com.jdrx.gis.beans.entity.query.PipeCaliber;
 import com.jdrx.gis.beans.entity.query.TypeToDevNumsPO;
 import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.config.DictConfig;
@@ -14,10 +15,13 @@ import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.util.ExcelStyleUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.exception.BizException;
+import io.swagger.models.auth.In;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,8 @@ import java.util.*;
  */
 @Service
 public class SelfExaminationReportService {
+
+	private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(SelfExaminationReportService.class);
 
 	@Autowired
 	private GISDevExtPOMapper gisDevExtPOMapper;
@@ -52,13 +58,17 @@ public class SelfExaminationReportService {
 
 	String[] headerDevNums = {"name", "num"};
 
+	String[] headerLengthCaliber = {"name", "pipeLength"};
+
 	static Map<String, String> map1;
 
 	static Map<String, String> map2;
 
+	static Map<String, String> map3;
+
 	static {
 		map1 = Maps.newHashMap();
-		map1.put("name", "类型");
+		map1.put("name", "类别名称");
 		map1.put("num", "设备个数");
 	}
 
@@ -68,9 +78,14 @@ public class SelfExaminationReportService {
 		map2.put("pipeLength", "管网长度");
 	}
 
+	static {
+		map3 = Maps.newHashMap();
+		map3.put("name","口径类型名称");
+		map3.put("pipeLength", "管网长度");
+	}
+
 	/**
 	 * 获取每个区的管网长度
-	 *
 	 * @return
 	 */
 	public List<Pipe> getPipeLength() throws BizException {
@@ -96,6 +111,10 @@ public class SelfExaminationReportService {
 		return dataList;
 	}
 
+	/**
+	 * 填充表头
+	 * @param param
+	 */
 	private void createHeader(Param param) {
 		SXSSFWorkbook workbook = param.getWorkbook();
 		String[] headerNames = param.getHeaderNames();
@@ -111,6 +130,11 @@ public class SelfExaminationReportService {
 		}
 	}
 
+	/**
+	 * 填充表格内容
+	 * @param param
+	 * @throws BizException
+	 */
 	private void createData(Param param) throws BizException {
 		SXSSFWorkbook workbook = param.getWorkbook();
 		String[] headerNames = param.getHeaderNames();
@@ -120,49 +144,51 @@ public class SelfExaminationReportService {
 		Sheet sheet = workbook.getSheet(param.getSheetName());
 		if (Objects.isNull(list) && list.size() == 0) {
 			throw new BizException("数据为空！");
-		} else {
-			List<Map<String, Object>> rList = Lists.newArrayList();
-			list.forEach(po -> {
+		}
+		List<Map<String, Object>> rList = Lists.newArrayList();
+		list.forEach(po -> {
+			try {
 				Field[] declaredFields = clazz.getDeclaredFields();
 				Object poCopy;
-				try {
-					poCopy = clazz.newInstance();
-					BeanUtils.copyProperties(po, poCopy);
-					Map<String, Object> dataMap = Maps.newHashMap();
-					for (Field field : declaredFields) {
-						String fieldName = field.getName();
-						for (Map.Entry<String, String> entry : map.entrySet()) {
-							String key = entry.getKey();
-							if (fieldName.equals(key)) {
-								field.setAccessible(true);
-								Object fieldVal = field.get(poCopy);
-								dataMap.put(fieldName, fieldVal);
-								break;
-							}
+				poCopy = clazz.newInstance();
+				BeanUtils.copyProperties(po, poCopy);
+				Map<String, Object> dataMap = Maps.newHashMap();
+				for (Field field : declaredFields) {
+					String fieldName = field.getName();
+					for (Map.Entry<String, String> entry : map.entrySet()) {
+						String key = entry.getKey();
+						if (fieldName.equals(key)) {
+							field.setAccessible(true);
+							Object fieldVal = field.get(poCopy);
+							dataMap.put(fieldName, fieldVal);
+							break;
 						}
 					}
-					rList.add(dataMap);
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
 				}
-
-			});
-			CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
-			for (int i = 0; i < rList.size(); i++) {
-				Row row = sheet.createRow(i + 1);
-				Map<String, Object> objectMap = rList.get(i);
-				for (int j = 0; j < headerNames.length; j++) {
-					Cell cell = row.createCell(j);
-					cell.setCellStyle(style2);
-					Object obj = objectMap.get(headerNames[j]);
-					cell.setCellValue(Objects.isNull(obj) ? "" : String.valueOf(obj));
-				}
+				rList.add(dataMap);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Logger.error("获取数据失败！", e);
+			}
+		});
+		CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+		for (int i = 0; i < rList.size(); i++) {
+			Row row = sheet.createRow(i + 1);
+			Map<String, Object> objectMap = rList.get(i);
+			for (int j = 0; j < headerNames.length; j++) {
+				Cell cell = row.createCell(j);
+				cell.setCellStyle(style2);
+				Object obj = objectMap.get(headerNames[j]);
+				cell.setCellValue(Objects.isNull(obj) ? "" : String.valueOf(obj));
 			}
 		}
 	}
 
+	/**
+	 * 获取各设备类型及数量
+	 * @param workbook
+	 * @throws BizException
+	 */
 	public void getDevNums(SXSSFWorkbook workbook) throws BizException {
 		Param param = new Param();
 		param.setWorkbook(workbook);
@@ -176,10 +202,15 @@ public class SelfExaminationReportService {
 		createData(param);
 	}
 
+	/**
+	 * 获取各个区域的管网长度
+	 * @param workbook
+	 * @throws BizException
+	 */
 	public void getPipeLengthForExcel(SXSSFWorkbook workbook) throws BizException {
 		Param param = new Param();
 		param.setWorkbook(workbook);
-		param.setSheetName("管网长度");
+		param.setSheetName("按区域划分的管网长度");
 		param.setHeaderNames(headerLength);
 		param.setMap(map2);
 		createHeader(param);
@@ -189,10 +220,78 @@ public class SelfExaminationReportService {
 		createData(param);
 	}
 
+	/**
+	 * 按口径获取管网长度
+	 * @param workbook
+	 * @throws BizException
+	 */
+	public void getPipeLengthForCaliber(SXSSFWorkbook workbook) throws BizException {
+		Param param = new Param();
+		param.setWorkbook(workbook);
+		param.setSheetName("按口径划分的管网长度");
+		param.setHeaderNames(headerLengthCaliber);
+		param.setMap(map3);
+		createHeader(param);
+		List<PipeCaliber> calibers = selfExamination.findPipeLengthForCaliber();
+		param.setClazz(PipeCaliber.class);
+		param.setList(calibers);
+		createData(param);
+	}
+
+	/**
+	 * 获取设备数量，按层级划分
+	 * @param workbook
+	 * @throws BizException
+	 */
+	public void getDevNumsByHierarchy(SXSSFWorkbook workbook) throws BizException {
+		List<TypeToDevNumsPO> typeToDevNumsPOS = selfExamination.findTypeTodevNums();
+		if (Objects.nonNull(typeToDevNumsPOS) && typeToDevNumsPOS.size() == 0) {
+			throw new BizException("数据为空！");
+		}
+		List<Integer> maxDepth = Lists.newArrayList();
+		typeToDevNumsPOS.stream().forEach(typeToDevNumsPO -> {
+			maxDepth.add(typeToDevNumsPO.getDepth());
+		});
+		int max = Collections.max(maxDepth);
+		SXSSFSheet sheet = workbook.createSheet("设备数量（层级）");
+		CellStyle style = ExcelStyleUtil.createHeaderStyle(workbook);
+		SXSSFRow headRow = sheet.createRow(0);
+		Cell cell0 = headRow.createCell(0);
+		cell0.setCellStyle(style);
+		cell0.setCellValue("类别名称");
+		CellRangeAddress region = new CellRangeAddress(0, 0, 0, (max-1));
+		sheet.addMergedRegion(region);
+		Cell cell1 = headRow.createCell(1);
+		cell1.setCellStyle(style);
+		cell1.setCellValue("数量");
+		int startContent = 1;
+		CellStyle style2 = ExcelStyleUtil.createBodyStyle(workbook);
+		if (Objects.nonNull(typeToDevNumsPOS) && typeToDevNumsPOS.size() > 0) {
+			for (TypeToDevNumsPO po : typeToDevNumsPOS) {
+				Row contentRow = sheet.createRow(startContent ++);
+				Cell cell = contentRow.createCell(po.getDepth() - 1);
+				cell.setCellStyle(style2);
+				cell.setCellValue(po.getName());
+				if (2 == po.getLimbLeaf().intValue()) {
+					Cell cell2 = contentRow.createCell(max);
+					cell2.setCellStyle(style2);
+					cell2.setCellValue(po.getNum());
+				}
+			}
+		}
+	}
+
+	/**
+	 * 写入Excel
+	 * @return
+	 * @throws BizException
+	 */
 	public String exportSelfExaminationReport() throws BizException {
 		SXSSFWorkbook workbook = new SXSSFWorkbook(1000);
 		getPipeLengthForExcel(workbook);
 		getDevNums(workbook);
+		getPipeLengthForCaliber(workbook);
+		getDevNumsByHierarchy(workbook);
 		String filePath = pathConfig.getDownloadPath() + File.separator + "数据报告.xlsx";
 		FileOutputStream bos;
 		String result;

@@ -1,6 +1,7 @@
 package com.jdrx.gis.dao.query;
 
 import com.jdrx.gis.beans.anno.NoAuthData;
+import com.jdrx.gis.beans.entity.query.PipeCaliber;
 import com.jdrx.gis.beans.entity.query.TypeToDevNumsPO;
 
 import java.util.List;
@@ -30,4 +31,10 @@ public interface SelfExamination {
 	 */
 	@NoAuthData
 	List<String> findCodes();
+
+	/**
+	 * 获取每个管段类型的管网长度
+	 */
+	@NoAuthData
+	List<PipeCaliber> findPipeLengthForCaliber();
 }
