@@ -591,7 +591,7 @@ public class Neo4jUtil {
             Long gj = null;
             while (result.hasNext()) {
                 Record record = result.next();
-                gj = (Long) record.get(0).asMap().get("gj");
+                gj = Long.valueOf(record.get(0).asMap().get("gj").toString());
                 cztype = record.get(0).asMap().get("cztype").toString();
             }
             //删除原有管线
