@@ -15,7 +15,7 @@
         <result column="pipe_length" property="pipeLength" jdbcType="DOUBLE"/>
     </resultMap>
     <select id="findTypeTodevNums" resultMap="BaseResultMap">
-        select id,name,depth,path,limb_leaf,COUNT(1) num from (
+        select id,name,depth,path,limb_leaf,COUNT(type_id) num from (
             select * from (
                 select b.*,
                 a.limb_leaf
@@ -84,6 +84,22 @@
                     and a.dev_id = b.id
                     and a.caliber is not null
             ) as rs GROUP BY name order by name
+        ) cal where name is not null and name <> ''
+        ]]>
+    </select>
+
+    <select id="findPipeLengthForMaterial" resultMap="BaseResultMap2">
+        <![CDATA[
+        select * from
+        (
+            select material as name, ROUND(st_length(st_Astext(ST_Union(geom)))::NUMERIC,0)/1000 as pipe_length from
+            (
+                select a.* from  gis_dev_ext a, share_dev b
+                where a.delete_flag = false
+                and b.del_flag = 0
+                and a.dev_id = b.id
+                and a.material is not null
+            ) as rs GROUP BY material
         ) cal where name is not null and name <> ''
         ]]>
     </select>

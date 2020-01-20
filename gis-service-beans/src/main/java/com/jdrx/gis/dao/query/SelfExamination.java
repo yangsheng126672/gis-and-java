@@ -37,4 +37,11 @@ public interface SelfExamination {
 	 */
 	@NoAuthData
 	List<PipeCaliber> findPipeLengthForCaliber();
+
+	/**
+	 * 获取每种材质的管网长度
+	 * @return
+	 */
+	@NoAuthData
+	List<PipeCaliber> findPipeLengthForMaterial();
 }

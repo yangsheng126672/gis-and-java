@@ -66,6 +66,8 @@ public class SelfExaminationReportService {
 
 	static Map<String, String> map3;
 
+	static Map<String, String> map4;
+
 	static {
 		map1 = Maps.newHashMap();
 		map1.put("name", "类别名称");
@@ -82,6 +84,12 @@ public class SelfExaminationReportService {
 		map3 = Maps.newHashMap();
 		map3.put("name","口径类型名称");
 		map3.put("pipeLength", "管网长度");
+	}
+
+	static {
+		map4 = Maps.newHashMap();
+		map4.put("name", "材质名称");
+		map4.put("pipeLength", "管网长度");
 	}
 
 	/**
@@ -261,7 +269,7 @@ public class SelfExaminationReportService {
 		cell0.setCellValue("类别名称");
 		CellRangeAddress region = new CellRangeAddress(0, 0, 0, (max-1));
 		sheet.addMergedRegion(region);
-		Cell cell1 = headRow.createCell(1);
+		Cell cell1 = headRow.createCell(max);
 		cell1.setCellStyle(style);
 		cell1.setCellValue("数量");
 		int startContent = 1;
@@ -269,16 +277,48 @@ public class SelfExaminationReportService {
 		if (Objects.nonNull(typeToDevNumsPOS) && typeToDevNumsPOS.size() > 0) {
 			for (TypeToDevNumsPO po : typeToDevNumsPOS) {
 				Row contentRow = sheet.createRow(startContent ++);
-				Cell cell = contentRow.createCell(po.getDepth() - 1);
-				cell.setCellStyle(style2);
-				cell.setCellValue(po.getName());
-				if (2 == po.getLimbLeaf().intValue()) {
-					Cell cell2 = contentRow.createCell(max);
-					cell2.setCellStyle(style2);
-					cell2.setCellValue(po.getNum());
+				for (int i = 0;i <= max; i ++) {
+					if (i == (po.getDepth() - 1)) {
+						Cell cell = contentRow.createCell(i);
+						cell.setCellStyle(style2);
+						cell.setCellValue(po.getName());
+					} else if (i == max) {
+						if (2 == po.getLimbLeaf().intValue()) {
+							Cell cell = contentRow.createCell(i);
+							cell.setCellStyle(style2);
+							cell.setCellValue(po.getNum());
+						}else {
+							Cell cell = contentRow.createCell(i);
+							cell.setCellStyle(style2);
+							cell.setCellValue("");
+						}
+					} else {
+						Cell cell = contentRow.createCell(i);
+						cell.setCellStyle(style2);
+						cell.setCellValue("");
+					}
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * 按材质获取管网长度
+	 * @param workbook
+	 * @throws BizException
+	 */
+	public void getPipeLengthForMaterial(SXSSFWorkbook workbook) throws BizException {
+		Param param = new Param();
+		param.setWorkbook(workbook);
+		param.setSheetName("按材质划分的管网长度");
+		param.setHeaderNames(headerLengthCaliber);
+		param.setMap(map4);
+		createHeader(param);
+		List<PipeCaliber> calibers = selfExamination.findPipeLengthForMaterial();
+		param.setClazz(PipeCaliber.class);
+		param.setList(calibers);
+		createData(param);
 	}
 
 	/**
@@ -292,6 +332,7 @@ public class SelfExaminationReportService {
 		getDevNums(workbook);
 		getPipeLengthForCaliber(workbook);
 		getDevNumsByHierarchy(workbook);
+		getPipeLengthForMaterial(workbook);
 		String filePath = pathConfig.getDownloadPath() + File.separator + "数据报告.xlsx";
 		FileOutputStream bos;
 		String result;
