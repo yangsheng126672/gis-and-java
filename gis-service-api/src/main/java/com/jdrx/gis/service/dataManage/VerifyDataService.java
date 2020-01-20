@@ -554,14 +554,28 @@ public class VerifyDataService {
             return null;
         }
     }
-    public static String vertifyDateCell(Cell cell) throws  Exception{
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-         if(cell!=null){
-             String str = sdf.format(cell.getDateCellValue());
-             return str;
-         }else{
-             return null;
-         }
+    public static String vertifyDateCell(Cell cell) throws BizException{
+        String addr = "第" + (cell.getAddress().getRow() + 1) + "行" +  (cell.getAddress().getColumn() + 1) + "列";
+        try {
+            boolean isDateCell = false;
+            try {
+                isDateCell = DateUtil.isCellDateFormatted(cell);
+            } catch (Exception e) {
+                throw new BizException(addr + "不是日期格式，请更改单元格格式！");
+            }
+            if (!isDateCell) {
+                throw new BizException(addr + "不是日期格式，请更改单元格格式！");
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date cellDate = cell.getDateCellValue();
+            if(cellDate==null){
+                return null;
+            }
+            return sdf.format(cellDate);
+        } catch (Exception e) {
+            Logger.error(addr + "单元格的日期格式不正确！");
+            throw new BizException(e.getMessage());
+        }
     }
 
     /**

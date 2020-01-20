@@ -2,6 +2,7 @@ package com.jdrx.gis.api.dataManage;
 
 import com.jdrx.gis.service.dataManage.SelfExaminationReportService;
 import com.jdrx.gis.service.dataManage.VerifyDataService;
+import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
@@ -37,7 +38,13 @@ public class DataVerifyApi {
 	@ApiOperation(value = "分析上传的excel获得错误数据")
 	@RequestMapping(value ="analysisExcelData")
 	public ResposeVO analysisExcelData(MultipartFile file) throws BizException{
-		return ResponseFactory.ok(VerifyDataService.exportSelfExaminationReport(file));
+		try{
+			String result = VerifyDataService.exportSelfExaminationReport(file);
+			return ResponseFactory.ok(result);
+		}catch (BizException e){
+			return ResponseFactory.err(e.getMessage(), EApiStatus.ERR_SYS.getStatus());
+		}
+
 	}
 
 }
