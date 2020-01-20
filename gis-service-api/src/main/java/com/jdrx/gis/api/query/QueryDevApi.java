@@ -114,31 +114,6 @@ public class QueryDevApi {
 		return ResponseFactory.err("文件生成中...", EApiStatus.ERR_SYS);
 	}
 
-	/**
-	@ApiOperation(value = "根据设备ID集合查设备列表数据(分页)", notes = "根据设备ID集合查设备列表数据(分页)")
-	@RequestMapping(value = "findDevListPageByDevIDs", method = RequestMethod.POST)
-	public ResposeVO findDevListPageByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
-		throws BizException {
-		Logger.debug("api/0/query/findDevListPageByDevIDs 根据设备ID集合查设备列表数据(分页)");
-		if (Objects.isNull(devDTO)){
-			throw new BizException("参数为空");
-		}
-		return ResponseFactory.ok(queryDevService.findDevListPageByDevIDs(devDTO));
-	}*/
-
-	/**
-	 *  查所有数据太多，用分页
-	@ApiOperation(value = "根据设备ID集合查设备列表数据", notes = "根据设备ID集合查设备列表数据")
-	@RequestMapping(value = "findDevListByDevIDs", method = RequestMethod.POST)
-	public ResposeVO findDevListByDevIDs(@ApiParam(name = "dto", required = true) @RequestBody @Valid QueryDevDTO devDTO)
-			throws BizException {
-		Logger.debug("api/0/query/findDevListByDevIDs 根据设备ID集合查设备列表数据");
-		if (Objects.isNull(devDTO)){
-			throw new BizException("参数为空");
-		}
-		return ResponseFactory.ok(queryDevService.findDevListByDevIDs(devDTO.getDevIds()));
-	}**/
-
 	@ApiOperation(value = "查询下载文件")
 	@RequestMapping(value = "getDownLoadFile")
 	public ResposeVO getDownLoadFile(@RequestBody DevIDsForTypeDTO dto) throws BizException {
