@@ -2,21 +2,22 @@ package com.jdrx.gis.api.analysis;
 
 import com.jdrx.gis.beans.dto.query.DevIDsDTO;
 import com.jdrx.gis.service.analysis.SpatialAnalysisService;
+import com.jdrx.platform.common.support.gateway.GwConstants;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
+import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @Description
@@ -67,19 +68,6 @@ public class SpatialAnalysisApi {
         return  ResponseFactory.ok(spatialAnalysisService.getLonelyLinesByDevIds(devIDsDTO));
     }
 
-//    @ApiOperation(value = "根据devid删除点")
-//    @RequestMapping(value ="deletePointByDevId")
-//    public ResposeVO deletePointByDevId(@ApiParam(name = "dto", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
-//        Logger.debug("api/0/spatialAnalysis/deleteShareDevByDevId 根据设备id删除设备");
-//        return  ResponseFactory.ok(spatialAnalysisService.deleteLonelyPointByDevId(dto.getId()));
-//    }
-//
-//    @ApiOperation(value = "根据devid删除线")
-//    @RequestMapping(value ="deleteLineByDevId")
-//    public ResposeVO deleteLineByDevId(@ApiParam(name = "dto", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
-//        Logger.debug("api/0/spatialAnalysis/deleteShareDevByDevId 根据设备id删除设备");
-//        return  ResponseFactory.ok(spatialAnalysisService.deleteLonelyLineByDevId(dto.getId()));
-//    }
 
     @ApiOperation(value = "重复点分析")
     @RequestMapping(value ="getRepeatPointsByDevIds")
@@ -95,5 +83,20 @@ public class SpatialAnalysisApi {
         return  ResponseFactory.ok(spatialAnalysisService.getRepeatLinesByDevIds(devIDsDTO));
     }
 
+    @ApiOperation(value = "根据设备id数组删除重复点")
+    @RequestMapping(value ="deleteRepeatPointByDevIds")
+    public ResposeVO deleteRepeatPointByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid  DevIDsDTO dto,
+                                           @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                           @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
+        Logger.debug("api/0/spatialAnalysis/deleteRepeatPointByDevId 根据ID删除重复点");
+        try {
+            List list = new LinkedList<>();
+            Boolean aBoolean = spatialAnalysisService.deleteRepeatPointByDevIds(dto.getDevIds(),userId,token);
+            return  ResponseFactory.ok(aBoolean);
+        } catch (BizException e) {
+            e.printStackTrace();
+            return ResponseFactory.err(e.getMessage(), EApiStatus.ERR_SYS.getStatus());
+        }
+    }
 
 }

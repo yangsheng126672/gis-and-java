@@ -5,10 +5,13 @@ import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
 import com.jdrx.gis.beans.dto.query.DevIDsDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.basic.AnalysisVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -18,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Description
@@ -50,6 +50,12 @@ public class SpatialAnalysisService {
 
     @Autowired
     Neo4jUtil neo4jUtil;
+
+    @Autowired
+    private UserRpc userRpc;
+
+    @Autowired
+    ShareDevPOMapper shareDevPOMapper;
 
 
 
@@ -214,4 +220,46 @@ public class SpatialAnalysisService {
             return new PageVO<AnalysisVO>(pageList);
         }
 
+    /**
+     * 重复点拓扑删除
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteRepeatPointByDevIds(String [] devId,Long userId, String token) throws BizException {
+        //获得删除人
+        SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+        String loginUserName = sysOcpUserPo.getName();
+        Date date = new Date();
+        List list = Arrays.asList(devId);
+        //找出重复点是孤立的点直接删除
+        for(String id : devId){
+            if(neo4jUtil.getPointAmount(id)==0){
+                neo4jUtil.deletePointById(id);
+                gisDevExtPOMapper.deleteDevExtByDevId(id,loginUserName,date);
+                shareDevPOMapper.deleteByPrimaryKey(id,loginUserName,date);
+                list.remove(id);
+            }
+        }
+        //判断list的数量,如果还为2,那么这些重复点就将重新建立拓扑关系
+        if(list.size()==2){
+             int amount1 = neo4jUtil.getPointAmount(list.get(0).toString());
+             int amount2 = neo4jUtil.getPointAmount(list.get(1).toString());
+             //优先将管点连接数量少的重复点删除了
+             if(amount1>amount2){
+                 neo4jUtil.deletePointById(list.get(1).toString());
+                 gisDevExtPOMapper.deleteDevExtByDevId(list.get(1).toString(),loginUserName,date);
+                 shareDevPOMapper.deleteByPrimaryKey(list.get(1).toString(),loginUserName,date);
+                 //找到删除的点的信息
+                 GISDevExtPO point = gisDevExtPOMapper.getDevExtByDevId(list.get(1).toString());
+                 String code = point.getCode();
+             }else{
+                 neo4jUtil.deletePointById(list.get(0).toString());
+                 gisDevExtPOMapper.deleteDevExtByDevId(list.get(0).toString(),loginUserName,date);
+                 shareDevPOMapper.deleteByPrimaryKey(list.get(0).toString(),loginUserName,date);
+             }
+        }
+        return true;
+
     }
+
+
+}

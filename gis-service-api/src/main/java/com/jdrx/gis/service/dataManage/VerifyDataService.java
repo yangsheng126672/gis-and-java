@@ -81,7 +81,7 @@ public class VerifyDataService {
             cell12.setCellValue(repeatCodeList.get(i).getRemark());
         }
         //获得x坐标为空的管点编码
-        SXSSFSheet sheet1 = workbook.createSheet("x坐标为空的管点编码");
+        SXSSFSheet sheet1 = workbook.createSheet("x坐标为空的管点编码数据");
         List<ExcelPointPo> xIsNullCodeList = findXIsNullCode(pointList);
         Row headerRow1 = sheet1.createRow(0);
         getPointHeader(headerRow1);
@@ -115,7 +115,7 @@ public class VerifyDataService {
             cell12.setCellValue(xIsNullCodeList.get(i).getRemark());
         }
         //获得y坐标为空的管点编码
-        SXSSFSheet sheet2 = workbook.createSheet("y坐标为空的管点编码");
+        SXSSFSheet sheet2 = workbook.createSheet("y坐标为空的管点编码数据");
         List<ExcelPointPo> yIsNullCodeList = findYIsNullCode(pointList);
         Row headerRow2 = sheet2.createRow(0);
         getPointHeader(headerRow2);
@@ -149,7 +149,7 @@ public class VerifyDataService {
             cell12.setCellValue(yIsNullCodeList.get(i).getRemark());
         }
         //excel数据在系统中存在的管点编码
-        SXSSFSheet sheet3 = workbook.createSheet("系统已存在的管点编码");
+        SXSSFSheet sheet3 = workbook.createSheet("系统已存在的管点编码数据");
         List<ExcelPointPo> listRepeat = findDataBaseRepeatCode(pointList);
         Row headerRow3 = sheet3.createRow(0);
         getPointHeader(headerRow3);
@@ -183,7 +183,7 @@ public class VerifyDataService {
             cell12.setCellValue(listRepeat.get(i).getRemark());
         }
         //管线起点编码在excel和系统中不存在的编码
-        SXSSFSheet sheet4 = workbook.createSheet("管线起点编码在excel和系统中不存在的编码");
+        SXSSFSheet sheet4 = workbook.createSheet("管线起点编码在excel和系统中不存在");
         List<ExcelLinePo> noExistStartCodesList = findNoExistStartCodes(lineList, pointList);
         Row headerRow4 = sheet4.createRow(0);
         getLineHeader(headerRow4);
@@ -215,7 +215,7 @@ public class VerifyDataService {
             cell11.setCellValue(noExistStartCodesList.get(i).getAddress());
         }
         //管线终点编码在excel和系统中不存在的编码
-        SXSSFSheet sheet5 = workbook.createSheet("管线终点编码在excel和系统中不存在的编码");
+        SXSSFSheet sheet5 = workbook.createSheet("管线终点编码在excel和系统中不存在");
         List<ExcelLinePo> noExistEndCodesList = findNoExistEndCodes(lineList, pointList);
         Row headerRow5 = sheet5.createRow(0);
         getLineHeader(headerRow5);
@@ -245,6 +245,70 @@ public class VerifyDataService {
             cell10.setCellValue(noExistEndCodesList.get(i).getRemark());
             Cell cell11 = row.createCell(11);
             cell11.setCellValue(noExistEndCodesList.get(i).getAddress());
+        }
+        //管线起点编码和终点编码重复的数据
+        SXSSFSheet sheet6 = workbook.createSheet("excel管线编码重复的数据");
+        List<ExcelLinePo> escelRepeatLineList = findExcelRepeatLine(lineList);
+        Row headerRow6 = sheet6.createRow(0);
+        getLineHeader(headerRow6);
+        for (int i = 0; i < escelRepeatLineList.size(); i++) {
+            Row row = sheet6.createRow(i + 1);
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(escelRepeatLineList.get(i).getStartCode());
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(escelRepeatLineList.get(i).getEndCode());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(escelRepeatLineList.get(i).getMaterial());
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(escelRepeatLineList.get(i).getCaliber());
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(escelRepeatLineList.get(i).getStartDepth());
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(escelRepeatLineList.get(i).getEndDepth());
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(escelRepeatLineList.get(i).getBuryType());
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(escelRepeatLineList.get(i).getSurveyCompany());
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(escelRepeatLineList.get(i).getSurveyDate());
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(escelRepeatLineList.get(i).getBelong_to());
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(escelRepeatLineList.get(i).getRemark());
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(escelRepeatLineList.get(i).getAddress());
+        }
+        //系统已存在的管线数据
+        SXSSFSheet sheet7 = workbook.createSheet("系统已存在的管线数据");
+        List<ExcelLinePo> dataBaseRepeatLineList = findDataBaseRepeatLine(lineList);
+        Row headerRow7 = sheet7.createRow(0);
+        getLineHeader(headerRow7);
+        for (int i = 0; i < dataBaseRepeatLineList.size(); i++) {
+            Row row = sheet7.createRow(i + 1);
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(dataBaseRepeatLineList.get(i).getStartCode());
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(dataBaseRepeatLineList.get(i).getEndCode());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(dataBaseRepeatLineList.get(i).getMaterial());
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(dataBaseRepeatLineList.get(i).getCaliber());
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(dataBaseRepeatLineList.get(i).getStartDepth());
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(dataBaseRepeatLineList.get(i).getEndDepth());
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(dataBaseRepeatLineList.get(i).getBuryType());
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(dataBaseRepeatLineList.get(i).getSurveyCompany());
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(dataBaseRepeatLineList.get(i).getSurveyDate());
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(dataBaseRepeatLineList.get(i).getBelong_to());
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(dataBaseRepeatLineList.get(i).getRemark());
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(dataBaseRepeatLineList.get(i).getAddress());
         }
         String result;
         try {
@@ -540,6 +604,50 @@ public class VerifyDataService {
     }
 
     /**
+     * 将excel中的管线的数据 起点编码和终点编码重复的数据找出来
+     */
+    public List findExcelRepeatLine(List<ExcelLinePo> list ) throws BizException {
+        Map<String,Map<String, List<ExcelLinePo>>> map = list.stream().collect(Collectors.groupingBy(ExcelLinePo::getStartCode, Collectors.groupingBy(ExcelLinePo::getEndCode)));
+        List<ExcelLinePo> rLists = Lists.newArrayList();
+        Set<ExcelLinePo>  set = new HashSet<>();
+        for(Map.Entry<String,Map<String, List<ExcelLinePo>>> o : map.entrySet()) {
+            for (Map.Entry<String, List<ExcelLinePo>> a : o.getValue().entrySet()) {
+                if (a.getValue().size() > 1) {
+                    rLists.addAll(a.getValue());
+                }
+            }
+        }
+            for(ExcelLinePo b:list){
+                for(ExcelLinePo c:list){
+                    if(b.getStartCode()!=null&&b.getEndCode()!=null&&c.getStartCode()!=null&&c.getEndCode()!=null){
+                        if(b.getStartCode().equals(c.getEndCode())&&b.getEndCode().equals(c.getStartCode())){
+                            set.add(b);
+                            set.add(c);
+                        }
+                    }
+                }
+            }
+            rLists.addAll(set);
+            return rLists;
+        }
+
+    /**
+     * 将excel在系统中已经存在的管线数据找出来
+     */
+    public List findDataBaseRepeatLine(List<ExcelLinePo> list ) throws BizException {
+        List<String> dataBaseCodeList = selfExamination.findCodes();
+        List listRepeat = new ArrayList();
+        for(ExcelLinePo s:list){
+            String code = s.getStartCode()+"-"+s.getEndCode();
+            String code1 = s.getEndCode()+"-"+s.getStartCode();
+            if(dataBaseCodeList.contains(code)||dataBaseCodeList.contains(code1)){
+                listRepeat.add(s);
+            }
+        }
+        return listRepeat;
+    }
+
+    /**
      * 读取单元格内容判断是否为空  空或者空字符串返回null
      */
     public static String verifyCell(Cell cell) {
@@ -555,6 +663,9 @@ public class VerifyDataService {
         }
     }
     public static String vertifyDateCell(Cell cell) throws BizException{
+        if (cell==null){
+            return null;
+        }
         String addr = "第" + (cell.getAddress().getRow() + 1) + "行" +  (cell.getAddress().getColumn() + 1) + "列";
         try {
             boolean isDateCell = false;
