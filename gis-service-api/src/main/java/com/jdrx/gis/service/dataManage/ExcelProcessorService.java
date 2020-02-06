@@ -116,6 +116,7 @@ public class ExcelProcessorService {
 		validHeader1.add(GISConstants.DATA_AUTH_CHN);
 		validHeader1.add(GISConstants.LINE_START_CODE_CHN);
 		validHeader1.add(GISConstants.LINE_END_CODE_CHN);
+		validHeader1.add(GISConstants.MATERIAL_CHN);
 	}
 
 	static {
@@ -336,6 +337,9 @@ public class ExcelProcessorService {
 			}
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date cellDate = cell.getDateCellValue();
+			if (Objects.isNull(cellDate)) {
+				return "";
+			}
 			return sdf.format(cellDate);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1046,6 +1050,5 @@ public class ExcelProcessorService {
 		}
 		return pointDataList;
 	}
-
 
 }
