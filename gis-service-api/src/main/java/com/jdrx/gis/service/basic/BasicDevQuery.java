@@ -7,12 +7,11 @@ import com.github.pagehelper.PageHelper;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.base.TypeIdDTO;
+import com.jdrx.gis.beans.dto.basic.BookMarkDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
-import com.jdrx.gis.beans.entity.basic.DictDetailPO;
-import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entity.basic.MeasurementPO;
-import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
+import com.jdrx.gis.beans.entity.basic.*;
 import com.jdrx.gis.beans.entity.cad.*;
+import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.basic.DefaultLayersVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.datamanage.ExportCadVO;
@@ -20,10 +19,12 @@ import com.jdrx.gis.beans.vo.basic.PipeLengthVO;
 import com.jdrx.gis.config.DictConfig;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.config.SwitchConfig;
+import com.jdrx.gis.dao.basic.BookMarkMapper;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.MeasurementPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
+import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.LayerService;
 import com.jdrx.gis.util.JavaFileToFormUpload;
@@ -78,6 +79,9 @@ public class BasicDevQuery {
 	@Autowired
 	private Neo4jUtil neo4jUtil;
 
+	@Autowired
+	private UserRpc userRpc;
+
 	public final static String SHARE_DEV_TYPE_NAME_PIPE = "水管";
 
 	public final static String SHARE_DEV_TYPE_NAME_OTHER = "其他";
@@ -87,6 +91,9 @@ public class BasicDevQuery {
 
 	@Autowired
 	private OcpService ocpService;
+
+	@Autowired
+	private BookMarkMapper bookMarkMapper;
 	/**
 	 * 递归处理   数据库树结构数据->树形json
 	 * @param id
@@ -665,4 +672,52 @@ public class BasicDevQuery {
 		return map;
 	}
 
+	/**
+	 * 保存书签
+	 * @param dto
+	 * @return
+	 */
+	public Integer saveBookmark(BookMarkDTO dto, String deptPath, Long userId, String token) throws BizException{
+		try {
+			SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+			String loginUserName = sysOcpUserPo.getName();
+			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
+			dto.setBelongTo(deptId);
+			dto.setCreatBy(loginUserName);
+			return bookMarkMapper.insertBookMark(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("保存书签失败！", e.getMessage());
+			throw new BizException(e.getMessage());
+		}
+	}
+
+	/**
+	 * 删除书签
+	 * @param
+	 * @return
+	 */
+	public Integer deleteBookmarkById(Long id,  Long userId, String token) throws BizException{
+		try {
+			SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+			String loginUserName = sysOcpUserPo.getName();
+			Date date = new Date();
+			return bookMarkMapper.deleteBookMarkById(id,loginUserName,date);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error("删除书签失败！", e.getMessage());
+			throw new BizException(e.getMessage());
+		}
+	}
+
+	/**
+	 * 获得书签列表信息
+	 * @param
+	 * @return
+	 */
+	public PageVO<BookMarkPO> findBookMarkList(PageDTO dto) throws BizException {
+		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
+		Page<BookMarkPO> list = (Page<BookMarkPO>) bookMarkMapper.findBookMarkList();
+		return new PageVO<BookMarkPO>(list);
+	}
 }

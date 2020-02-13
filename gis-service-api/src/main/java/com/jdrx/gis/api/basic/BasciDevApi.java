@@ -4,6 +4,7 @@ import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.base.KeyWordDTO;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.base.TypeIdDTO;
+import com.jdrx.gis.beans.dto.basic.BookMarkDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
@@ -12,6 +13,7 @@ import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.gis.service.basic.ShareDevService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.RedisComponents;
+import com.jdrx.platform.common.support.gateway.GwConstants;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
 import com.jdrx.platform.commons.rest.beans.enums.EApiStatus;
 import com.jdrx.platform.commons.rest.beans.vo.ResposeVO;
@@ -197,5 +199,50 @@ public class BasciDevApi {
 			Logger.error(e.getMessage());
 			return ResponseFactory.err("获取经纬度失败！", EApiStatus.ERR_SYS);
 		}
+	}
+
+	@ApiOperation(value = "保存书签")
+	@RequestMapping(value ="saveBookmark" )
+	public ResposeVO saveBookmark(@ApiParam(name = "dto", required = true)@RequestBody @Valid BookMarkDTO dto,
+								  @RequestHeader(name ="deptPath") String deptPath,
+								  @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+								  @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException{
+		Logger.debug("api/0/basic/saveBookmark 保存书签");
+		try{
+			int result = basicDevQuery.saveBookmark(dto,deptPath,userId,token);
+			if(result>0){
+				return ResponseFactory.ok("保存成功");
+			}
+		}catch(BizException e){
+			e.printStackTrace();
+			Logger.error(e.getMessage());
+		}
+               return ResponseFactory.err("保存失败",EApiStatus.ERR_SYS);
+	}
+
+	@ApiOperation(value = "删除书签")
+	@RequestMapping(value ="deleteBookmark" )
+	public ResposeVO deleteBookmark(@ApiParam(name = "dto", required = true)@RequestBody @Valid  IdDTO<Long> dto,
+								  @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+								  @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException{
+		Logger.debug("api/0/basic/deleteBookmark 删除书签");
+		try{
+			int result = basicDevQuery.deleteBookmarkById(dto.getId(),userId,token);
+			if(result>0){
+				return ResponseFactory.ok("删除成功！");
+			}
+		}catch(BizException e){
+			e.printStackTrace();
+			Logger.error(e.getMessage());
+		}
+		return ResponseFactory.err("删除失败",EApiStatus.ERR_SYS);
+	}
+
+	@ApiOperation(value = "获取所有书签列表")
+	@RequestMapping(value = "findBookMarkList")
+	public ResposeVO findBookMarkList(@ApiParam(name = "dto", required = true)@RequestBody @Valid PageDTO dto
+									  ) throws BizException{
+		Logger.debug("api/0/basic/findBookMarkList 获取所有书签信息");
+		return ResponseFactory.ok(basicDevQuery.findBookMarkList(dto));
 	}
 }

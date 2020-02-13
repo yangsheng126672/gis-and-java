@@ -310,6 +310,70 @@ public class VerifyDataService {
             Cell cell11 = row.createCell(11);
             cell11.setCellValue(dataBaseRepeatLineList.get(i).getAddress());
         }
+        //管线管径为空的数据
+        SXSSFSheet sheet8 = workbook.createSheet("管线管径为空");
+        List<ExcelLinePo> caliberIsNullList = findLineCaliberIsNull(lineList);
+        Row headerRow8 = sheet8.createRow(0);
+        getLineHeader(headerRow8);
+        for (int i = 0; i < caliberIsNullList.size(); i++) {
+            Row row = sheet8.createRow(i + 1);
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(caliberIsNullList.get(i).getStartCode());
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(caliberIsNullList.get(i).getEndCode());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(caliberIsNullList.get(i).getMaterial());
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(caliberIsNullList.get(i).getCaliber());
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(caliberIsNullList.get(i).getStartDepth());
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(caliberIsNullList.get(i).getEndDepth());
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(caliberIsNullList.get(i).getBuryType());
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(caliberIsNullList.get(i).getSurveyCompany());
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(caliberIsNullList.get(i).getSurveyDate());
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(caliberIsNullList.get(i).getBelong_to());
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(caliberIsNullList.get(i).getRemark());
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(caliberIsNullList.get(i).getAddress());
+        }
+        //管线材质为空的数据
+        SXSSFSheet sheet9 = workbook.createSheet("管线材质为空");
+        List<ExcelLinePo> materialIsNullList = findLineMaterialIsNull(lineList);
+        Row headerRow9 = sheet9.createRow(0);
+        getLineHeader(headerRow9);
+        for (int i = 0; i < materialIsNullList.size(); i++) {
+            Row row = sheet9.createRow(i + 1);
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(materialIsNullList.get(i).getStartCode());
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(materialIsNullList.get(i).getEndCode());
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(materialIsNullList.get(i).getMaterial());
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(materialIsNullList.get(i).getCaliber());
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(materialIsNullList.get(i).getStartDepth());
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(materialIsNullList.get(i).getEndDepth());
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(materialIsNullList.get(i).getBuryType());
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(materialIsNullList.get(i).getSurveyCompany());
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(materialIsNullList.get(i).getSurveyDate());
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(materialIsNullList.get(i).getBelong_to());
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(materialIsNullList.get(i).getRemark());
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(materialIsNullList.get(i).getAddress());
+        }
         String result;
         try {
             String filePath = pathConfig.getDownloadPath() + File.separator + "管网错误数据分析报告.xlsx";
@@ -607,6 +671,14 @@ public class VerifyDataService {
      * 将excel中的管线的数据 起点编码和终点编码重复的数据找出来
      */
     public List findExcelRepeatLine(List<ExcelLinePo> list ) throws BizException {
+        //找出管线中起点编码和终点编码为空的数据防止报错。
+           Iterator<ExcelLinePo> it = list.iterator();
+           while(it.hasNext()){
+               ExcelLinePo po = it.next();
+               if(po.getStartCode()==null||po.getEndCode()==null){
+                   it.remove();
+               }
+           }
         Map<String,Map<String, List<ExcelLinePo>>> map = list.stream().collect(Collectors.groupingBy(ExcelLinePo::getStartCode, Collectors.groupingBy(ExcelLinePo::getEndCode)));
         List<ExcelLinePo> rLists = Lists.newArrayList();
         Set<ExcelLinePo>  set = new HashSet<>();
@@ -645,6 +717,32 @@ public class VerifyDataService {
             }
         }
         return listRepeat;
+    }
+
+    /**
+     * excel管线管径数据为空的数据
+     */
+    public List findLineCaliberIsNull(List<ExcelLinePo> list ) throws BizException {
+        List list1 = new ArrayList();
+        for(ExcelLinePo s:list){
+            if(s.getCaliber()==null){
+               list1.add(s);
+            }
+        }
+        return list1;
+    }
+
+    /**
+     * excel管线材质为空的数据
+     */
+    public List findLineMaterialIsNull(List<ExcelLinePo> list ) throws BizException {
+        List list1 = new ArrayList();
+        for(ExcelLinePo s:list){
+            if(s.getMaterial()==null){
+                list1.add(s);
+            }
+        }
+        return list1;
     }
 
     /**

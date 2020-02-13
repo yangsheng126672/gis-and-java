@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jdrx.gis.dao.basic.BookMarkMapper">
+    <resultMap id="BaseResultMap" type="com.jdrx.gis.beans.entity.basic.BookMarkPO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="url" jdbcType="VARCHAR" property="url" />
+        <result column="delete_flag" jdbcType="BIT" property="deleteFlag" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+        <result column="update_at" jdbcType="TIMESTAMP" property="updateAt" />
+        <result column="zoom" jdbcType="INTEGER" property="zoom" />
+        <result column="x" jdbcType="DOUBLE" property="x"/>
+        <result column="y" jdbcType="DOUBLE" property="y"/>
+        <result column="belong_to" jdbcType="BIGINT" property="belongTo" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, name, url, delete_flag, create_by, create_at, update_by,
+        update_at,zoom,belong_to, x, y
+    </sql>
+    <update id="deleteBookMarkById" >
+        UPDATE gis_bookmark
+        <set>
+            delete_flag = TRUE,
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="date != null">
+                update_at = #{date,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <insert id="insertBookMark" parameterType="com.jdrx.gis.beans.dto.basic.BookMarkDTO">
+        insert into gis_bookmark
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                name,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="zoom != null">
+                zoom,
+            </if>
+            <if test="belongTo != null">
+                belong_to,
+            </if>
+            <if test="x != null">
+                x,
+            </if>
+            <if test="y != null">
+                y,
+            </if>
+            <if test="creatBy != null">
+                create_by,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="url != null">
+                #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="zoom != null">
+                #{zoom,jdbcType=INTEGER},
+            </if>
+            <if test="belongTo != null">
+                #{belongTo,jdbcType=BIGINT},
+            </if>
+            <if test="x != null">
+                #{x,jdbcType=DOUBLE},
+            </if>
+            <if test="y != null">
+                #{belongTo,jdbcType=DOUBLE},
+            </if>
+            <if test="creatBy != null">
+                #{creatBy,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="findBookMarkList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from gis_bookmark a
+        WHERE delete_flag = FALSE
+    </select>
+
+</mapper>

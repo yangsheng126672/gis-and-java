@@ -1,8 +1,10 @@
 package com.jdrx.gis.dao.query;
 
 import com.jdrx.gis.beans.anno.NoAuthData;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entity.query.PipeCaliber;
 import com.jdrx.gis.beans.entity.query.TypeToDevNumsPO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -44,4 +46,5 @@ public interface SelfExamination {
 	 */
 	@NoAuthData
 	List<PipeCaliber> findPipeLengthForMaterial();
+
 }

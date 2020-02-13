@@ -88,10 +88,26 @@ public class SpatialAnalysisApi {
     public ResposeVO deleteRepeatPointByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid  DevIDsDTO dto,
                                            @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
                                            @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
-        Logger.debug("api/0/spatialAnalysis/deleteRepeatPointByDevId 根据ID删除重复点");
+        Logger.debug("api/0/spatialAnalysis/deleteRepeatPointByDevId 根据devid数组删除重复点");
         try {
             List list = new LinkedList<>();
             Boolean aBoolean = spatialAnalysisService.deleteRepeatPointByDevIds(dto.getDevIds(),userId,token);
+            return  ResponseFactory.ok(aBoolean);
+        } catch (BizException e) {
+            e.printStackTrace();
+            return ResponseFactory.err(e.getMessage(), EApiStatus.ERR_SYS.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "根据设备id数组删除重复线")
+    @RequestMapping(value ="deleteRepeatLineByDevIds")
+    public ResposeVO deleteRepeatLineByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid  DevIDsDTO dto,
+                                               @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
+                                               @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws Exception{
+        Logger.debug("api/0/spatialAnalysis/deleteRepeatLineByDevIds 根据devid数组删除重复线");
+        try {
+            List list = new LinkedList<>();
+            Boolean aBoolean = spatialAnalysisService.deleteRepeatLineByDevIds(dto.getDevIds(),userId,token);
             return  ResponseFactory.ok(aBoolean);
         } catch (BizException e) {
             e.printStackTrace();
