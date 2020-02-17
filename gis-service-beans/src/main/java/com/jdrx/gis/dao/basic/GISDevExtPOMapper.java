@@ -21,6 +21,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface GISDevExtPOMapper {
 
@@ -306,7 +307,20 @@ public interface GISDevExtPOMapper {
 	 */
 	@NoAuthData
 	String getLngLatByDevId(@Param("devId") String devId);
+	/**
+	 * 根据编码获得与之相连的管线
+	 * @param
+	 * @return
+	 */
+	@NoAuthData
+	List<GISDevExtPO> findLinesFromCode(@Param("code") String code);
 
-
+	/**
+	 * 根据codeList查询数据库存在的个数
+	 * @param codeList
+	 * @return
+	 */
+	@NoAuthData
+	Integer findCountByCodes(@Param("codeList") Set codeList);
 }
 

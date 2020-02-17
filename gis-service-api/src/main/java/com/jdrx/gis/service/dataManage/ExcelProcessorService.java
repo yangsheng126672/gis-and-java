@@ -111,6 +111,8 @@ public class ExcelProcessorService {
 	// 需要判断是否为空的列 point
 	private static List<String>  validHeader2 = Lists.newArrayList();
 
+	private final static String CONNECTOR = "-";
+
 	static {
 		validHeader1.add(GISConstants.CALIBER_CHN);
 		validHeader1.add(GISConstants.DATA_AUTH_CHN);
@@ -479,14 +481,23 @@ public class ExcelProcessorService {
 
 				// 用以验证管点的编码是否重复
 				if (GISConstants.IMPORT_SHEET0_NAME.equals(sheetName) && GISConstants.POINT_CODE_CHN.equals(headerName)) {
+					if (cellStringVal.contains(CONNECTOR)) {
+						throw new BizException("编码格式不正确，不能含有" + CONNECTOR);
+					}
 					pointCodeSets.add(cellStringVal);
 				}
 
 				if (GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)){
 					if (GISConstants.LINE_START_CODE_CHN.equals(headerName)) {
+						if (cellStringVal.contains(CONNECTOR)) {
+							throw new BizException("编码格式不正确，不能含有" + CONNECTOR);
+						}
 						lineCode.append(cellStringVal);
 					} else if (GISConstants.LINE_END_CODE_CHN.equals(headerName)) {
-						lineCode.append(cellStringVal);
+						if (cellStringVal.contains(CONNECTOR)) {
+							throw new BizException("编码格式不正确，不能含有" + CONNECTOR);
+						}
+						lineCode.append(CONNECTOR).append(cellStringVal);
 					}
 
 				}
@@ -513,15 +524,24 @@ public class ExcelProcessorService {
 			lineCodeSets.add(String.valueOf(lineCode));
 			excelDevList.add(shareDevDataMap);
 		}
-
+		int pointCodeNum = 0, lineCodeNum = 0;
+		if (pointCodeSets.size() > 0) {
+			pointCodeNum = gisDevExtPOMapper.findCountByCodes(pointCodeSets);
+		}
+		if (lineCodeSets.size() > 0) {
+			lineCodeNum = gisDevExtPOMapper.findCountByCodes(lineCodeSets);
+		}
+		if (pointCodeNum + lineCodeNum > 0) {
+			throw new BizException("部分编码已经存在，请更正后上传！");
+		}
 		if(GISConstants.IMPORT_SHEET0_NAME.equals(sheetName)) {
 			if (pointCodeSets.size() != total - 1) {
-				throw new BizException(GISConstants.POINT_CODE_CHN + "有重复编码，请更正后上传！");
+				throw new BizException("Excel中" + GISConstants.POINT_CODE_CHN + "有重复编码，请更正后上传！");
 			}
 		}
 		if(GISConstants.IMPORT_SHEET1_NAME.equals(sheetName)) {
 			if (lineCodeSets.size() != total -1 ) {
-				throw new BizException(GISConstants.LINE_START_CODE_CHN + "和" + GISConstants.LINE_END_CODE_CHN + "有重复编码，请更正后上传！");
+				throw new BizException("Excel中" + GISConstants.LINE_START_CODE_CHN + "和" + GISConstants.LINE_END_CODE_CHN + "有重复编码，请更正后上传！");
 			}
 		}
 		return excelDevList;
