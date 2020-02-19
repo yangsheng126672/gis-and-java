@@ -1,6 +1,7 @@
 package com.jdrx.gis.api.analysis;
 
 import com.jdrx.gis.beans.dto.query.DevIDsDTO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.service.analysis.SpatialAnalysisService;
 import com.jdrx.platform.common.support.gateway.GwConstants;
 import com.jdrx.platform.commons.rest.beans.dto.IdDTO;
@@ -109,6 +110,34 @@ public class SpatialAnalysisApi {
             List list = new LinkedList<>();
             Boolean aBoolean = spatialAnalysisService.deleteRepeatLineByDevIds(dto.getDevIds(),userId,token);
             return  ResponseFactory.ok(aBoolean);
+        } catch (BizException e) {
+            e.printStackTrace();
+            return ResponseFactory.err(e.getMessage(), EApiStatus.ERR_SYS.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "根据设备id数组获得删除的重复的点信息")
+    @RequestMapping(value ="findDeletePointByDevIds")
+    public ResposeVO findDeletePointByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid  DevIDsDTO dto
+                                    ) throws Exception{
+        Logger.debug("api/0/spatialAnalysis/findDeletePointByDevIds 根据devid数组找到删除的重复点信息");
+        try {
+            List<GISDevExtPO> list = spatialAnalysisService.findDeletePointByDevIds(dto.getDevIds());
+            return  ResponseFactory.ok(list);
+        } catch (BizException e) {
+            e.printStackTrace();
+            return ResponseFactory.err(e.getMessage(), EApiStatus.ERR_SYS.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "根据设备id数组获得删除的重复的线信息")
+    @RequestMapping(value ="findDeleteLineByDevIds")
+    public ResposeVO findDeleteLineByDevIds(@ApiParam(name = "dto", required = true) @RequestBody @Valid  DevIDsDTO dto
+    ) throws Exception{
+        Logger.debug("api/0/spatialAnalysis/findDeleteLineByDevIds 根据devid数组找到删除的重复线信息");
+        try {
+            List<GISDevExtPO> list = spatialAnalysisService.findDeleteLineByDevIds(dto.getDevIds());
+            return  ResponseFactory.ok(list);
         } catch (BizException e) {
             e.printStackTrace();
             return ResponseFactory.err(e.getMessage(), EApiStatus.ERR_SYS.getStatus());

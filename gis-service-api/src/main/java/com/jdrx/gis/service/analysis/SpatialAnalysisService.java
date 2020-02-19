@@ -198,13 +198,15 @@ public class SpatialAnalysisService {
      * @return
      * @throws BizException
      */
-    public PageVO<AnalysisVO> getRepeatPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-        Page<AnalysisVO> pageList;
+    public List<AnalysisVO> getRepeatPointsByDevIds(DevIDsDTO devIDsDTO) throws BizException {
+//        Page<AnalysisVO> pageList;
         String[] devIDsDTOStr = devIDsDTO.getDevIds();
         List list = Arrays.asList(devIDsDTOStr);
-        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
-        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
-        return new PageVO<AnalysisVO>(pageList);
+//        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
+//        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
+        List<AnalysisVO> list1 = gisDevExtPOMapper.getRepeatPointsByDevIds(list);
+//        return new PageVO<AnalysisVO>(pageList);
+        return list1;
     }
 
     /**
@@ -214,13 +216,15 @@ public class SpatialAnalysisService {
      * @return
      * @throws BizException
      */
-    public PageVO<AnalysisVO> getRepeatLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
-        Page<AnalysisVO> pageList;
+    public List<AnalysisVO> getRepeatLinesByDevIds(DevIDsDTO devIDsDTO) throws BizException {
+//        Page<AnalysisVO> pageList;
         String[] devIDsDTOStr = devIDsDTO.getDevIds();
         List list = Arrays.asList(devIDsDTOStr);
-        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
-        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
-        return new PageVO<AnalysisVO>(pageList);
+//        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
+//        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
+//        return new PageVO<AnalysisVO>(pageList);
+        List<AnalysisVO> list1 = gisDevExtPOMapper.getRepeatLinesByDevIds(list);
+        return list1;
     }
 
     /**
@@ -355,17 +359,64 @@ public class SpatialAnalysisService {
         SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
         String loginUserName = sysOcpUserPo.getName();
         Date date = new Date();
-        if(devId.length<2){
-            throw new BizException("重复线数目少于2！");
-            //如果重复线的数目>2，则删掉重复线，保留一个
-        }else{
+//        if(devId.length<2){
+//            throw new BizException("重复线数目少于2！");
+//            //如果重复线的数目>2，则删掉重复线，保留一个
+//        }else{
             for(int i = 0;i<devId.length-1;i++){
                 neo4jUtil.deleteLineById(devId[i]);
                 gisDevExtPOMapper.deleteDevExtByDevId(devId[i], loginUserName, date);
                 shareDevPOMapper.deleteByPrimaryKey(devId[i], loginUserName, date);
             }
-        }
+//        }
              return true;
 
     }
+
+    /**
+     * 找到删除的重复点信息
+     * @param devId
+     * @return
+     */
+    public List<GISDevExtPO>  findDeletePointByDevIds(String[] devId) throws Exception{
+        List<String> list = Arrays.asList(devId);
+        List<String> list1 = new ArrayList();
+        List<GISDevExtPO> list2 = new ArrayList();
+        for (String id : devId) {
+            if (neo4jUtil.getPointAmount(id) == 0) {
+                list1.add(id);
+                list.remove(id);
+            }
+        }
+        if(list.size()==2){
+            int amount1 = neo4jUtil.getPointAmount(list.get(0).toString());
+            int amount2 = neo4jUtil.getPointAmount(list.get(1).toString());
+            if(amount1>amount2){
+                list1.add(list.get(1));
+            }else{
+                list1.add(list.get(0));
+            }
+        }
+        for(String devid:list1){
+            GISDevExtPO po = gisDevExtPOMapper.getDevExtByDevId(devid);
+            list2.add(po);
+        }
+        return list2;
+    }
+
+    /**
+     * 找到删除的重复线信息
+     * @param devId
+     * @return
+     */
+    public List<GISDevExtPO>  findDeleteLineByDevIds(String[] devId) throws Exception{
+        List<GISDevExtPO> list2 = new ArrayList();
+        for(int i = 0;i<devId.length-1;i++){
+            GISDevExtPO po = gisDevExtPOMapper.getDevExtByDevId(devId[i]);
+            list2.add(po);
+        }
+        return list2;
+    }
+
+
 }
