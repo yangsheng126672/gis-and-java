@@ -236,7 +236,8 @@ public class SpatialAnalysisService {
         SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
         String loginUserName = sysOcpUserPo.getName();
         Date date = new Date();
-        List list = Arrays.asList(devId);
+        List list1 = Arrays.asList(devId);
+        List list = new ArrayList(list1);
         //找出重复点是孤立的点直接删除
         for (String id : devId) {
             if (neo4jUtil.getPointAmount(id) == 0) {
@@ -380,21 +381,30 @@ public class SpatialAnalysisService {
      */
     public List<GISDevExtPO>  findDeletePointByDevIds(String[] devId) throws Exception{
         List<String> list = Arrays.asList(devId);
+        List<String> list3 = new ArrayList<>(list);
         List<String> list1 = new ArrayList();
         List<GISDevExtPO> list2 = new ArrayList();
-        for (String id : devId) {
-            if (neo4jUtil.getPointAmount(id) == 0) {
-                list1.add(id);
-                list.remove(id);
+        Iterator<String> iterator = list3.iterator();
+        while(iterator.hasNext()){
+            String s = iterator.next();
+            if(neo4jUtil.getPointAmount(s)==0){
+                iterator.remove();
+                list1.add(s);
             }
         }
-        if(list.size()==2){
-            int amount1 = neo4jUtil.getPointAmount(list.get(0).toString());
-            int amount2 = neo4jUtil.getPointAmount(list.get(1).toString());
+//        for (int i=0; i<devId.length;i++) {
+//            if (neo4jUtil.getPointAmount(devId[i]) == 0) {
+//                list1.add(devId[i]);
+//                list.remove(devId[i]);
+//            }
+//        }
+        if(list3.size()==2){
+            int amount1 = neo4jUtil.getPointAmount(list3.get(0).toString());
+            int amount2 = neo4jUtil.getPointAmount(list3.get(1).toString());
             if(amount1>amount2){
-                list1.add(list.get(1));
+                list1.add(list3.get(1));
             }else{
-                list1.add(list.get(0));
+                list1.add(list3.get(0));
             }
         }
         for(String devid:list1){
