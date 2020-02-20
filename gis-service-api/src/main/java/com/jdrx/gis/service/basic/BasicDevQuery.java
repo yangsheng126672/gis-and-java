@@ -27,6 +27,7 @@ import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.query.LayerService;
+import com.jdrx.gis.util.FileUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -684,7 +685,17 @@ public class BasicDevQuery {
 			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 			dto.setBelongTo(deptId);
 			dto.setCreatBy(loginUserName);
-			return bookMarkMapper.insertBookMark(dto);
+			String imgStr = dto.getUrl();
+			Long mill = System.currentTimeMillis();
+			String path = pathConfig.getDownloadPath()+File.separator+"书签图片"+mill.toString()+".jpg";
+			Boolean flag = FileUtil.GenerateImage(imgStr,path);
+			if(flag){
+
+                return bookMarkMapper.insertBookMark(dto);
+            }else{
+				throw new Exception("保存失败");
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error("保存书签失败！", e.getMessage());

@@ -1,6 +1,11 @@
 package com.jdrx.gis.util;
 
+import sun.misc.BASE64Decoder;
+
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Objects;
 
 /**
  * @Author: liaosijun
@@ -37,6 +42,43 @@ public class FileUtil {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	/**
+	 * 将base64位的String转化为图片写入到本地
+	 *
+	 */
+	public static boolean GenerateImage(String imgStr,String localPath) {
+		if(Objects.isNull(imgStr)){
+			return false;
+		}
+		BASE64Decoder decoder = new BASE64Decoder();
+		try {
+			byte[] b = decoder.decodeBuffer(imgStr);
+			for(int i=0;i<b.length;i++){
+				if(b[i]<0){
+					//调整异常数据
+					b[i]+=256;
+				}
+			}
+			OutputStream out = new FileOutputStream(localPath);
+			BufferedOutputStream bufferOut = new BufferedOutputStream(out);
+			bufferOut.write(b);
+			bufferOut.flush();
+			bufferOut.close();
+			return true;
+		} catch (Exception e) {
+			return  false;
+		}
+	}
+
+	public static void main(String[] args) {
+		try {
+			String host = InetAddress.getLocalHost().getHostAddress();
+			System.out.println(host);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		}
 	}
 }
