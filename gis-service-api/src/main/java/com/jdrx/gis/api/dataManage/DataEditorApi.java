@@ -12,6 +12,7 @@ import com.jdrx.platform.commons.rest.factory.ResponseFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.neo4j.cypher.internal.v3_4.functions.E;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -80,11 +81,16 @@ public class DataEditorApi {
         return  ResponseFactory.ok(dataEditorService.getDevExtByTopPid(dto.getId()));
     }
 
-    @ApiOperation(value = "判断管点编号是否存在（true：存在 false：不存在）")
+    @ApiOperation(value = "判断管点编号是否存在，是否带有-（true：存在 false：不存在）")
     @RequestMapping(value ="getCodeExist")
     public ResposeVO getCodeExist(@ApiParam(name = "code", required = true) @RequestBody @Valid  IdDTO<String> dto) throws Exception{
-        Logger.debug("api/0/dataEditor/getCodeExist 判断管点编号是否重复");
-        return  ResponseFactory.ok(dataEditorService.getCodeExist(dto.getId()));
+        Logger.debug("api/0/dataEditor/getCodeExist 判断编码问题是否重复，是否带有-");
+        try{
+            Boolean flag = dataEditorService.getCodeExist(dto.getId());
+            return  ResponseFactory.ok(flag);
+        }catch (Exception e){
+            return  ResponseFactory.err(e.getMessage(),EApiStatus.ERR_SYS.getStatus());
+        }
     }
 
     @ApiOperation(value = "根据设备code精准查询设备")

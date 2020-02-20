@@ -714,9 +714,15 @@ public class DataEditorService {
      * @param code
      * @return
      */
-    public Boolean getCodeExist(String code){
+    public Boolean getCodeExist(String code) throws Exception{
+        if(code.contains("-")){
+            throw new Exception("管点编码中不允许带有'-',请改正！");
+        }
         GISDevExtPO po = gisDevExtPOMapper.selectByCode(code);
-        return po == null? false: true;
+        if(po!=null){
+            throw new Exception("管点编码重复,请改正！");
+        }
+        return false;
     }
 
     /**
