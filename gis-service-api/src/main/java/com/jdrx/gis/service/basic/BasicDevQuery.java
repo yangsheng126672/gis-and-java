@@ -35,6 +35,7 @@ import com.jdrx.platform.jdbc.beans.vo.PageVO;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -687,13 +688,14 @@ public class BasicDevQuery {
 			dto.setCreatBy(loginUserName);
 			String imgStr = dto.getUrl();
 			Long mill = System.currentTimeMillis();
-			String path = pathConfig.getDownloadPath()+File.separator+"书签图片"+mill.toString()+".jpg";
-			Boolean flag = FileUtil.GenerateImage(imgStr,path);
+			String contentPath = ClassUtils.getDefaultClassLoader().getResource("").getPath();
+			String path = pathConfig.getStaticPath()+File.separator+"书签图片"+mill.toString()+".jpg";
+			dto.setUrl("书签图片"+mill.toString()+".jpg");
+			Boolean flag = FileUtil.GenerateImage(imgStr,contentPath+File.separator+path);
 			if(flag){
-
                 return bookMarkMapper.insertBookMark(dto);
             }else{
-				throw new Exception("保存失败");
+				throw new Exception("保存书签失败!");
 			}
 
 		} catch (Exception e) {
@@ -731,4 +733,5 @@ public class BasicDevQuery {
 		Page<BookMarkPO> list = (Page<BookMarkPO>) bookMarkMapper.findBookMarkList();
 		return new PageVO<BookMarkPO>(list);
 	}
+
 }

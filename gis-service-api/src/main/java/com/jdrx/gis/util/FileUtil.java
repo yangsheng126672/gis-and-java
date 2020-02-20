@@ -62,7 +62,11 @@ public class FileUtil {
 					b[i]+=256;
 				}
 			}
-			OutputStream out = new FileOutputStream(localPath);
+			File file = new File(localPath);
+			if(!file.exists()){
+                file.getParentFile().mkdir();
+            }
+			OutputStream out = new FileOutputStream(file);
 			BufferedOutputStream bufferOut = new BufferedOutputStream(out);
 			bufferOut.write(b);
 			bufferOut.flush();
