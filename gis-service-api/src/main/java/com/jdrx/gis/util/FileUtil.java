@@ -3,8 +3,6 @@ package com.jdrx.gis.util;
 import sun.misc.BASE64Decoder;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Objects;
 
 /**
@@ -67,22 +65,15 @@ public class FileUtil {
                 file.getParentFile().mkdir();
             }
 			OutputStream out = new FileOutputStream(file);
-			BufferedOutputStream bufferOut = new BufferedOutputStream(out);
-			bufferOut.write(b);
-			bufferOut.flush();
-			bufferOut.close();
+//			BufferedOutputStream bufferOut = new BufferedOutputStream(out);
+			out.write(b);
+			out.flush();
+			out.close();
 			return true;
 		} catch (Exception e) {
 			return  false;
 		}
 	}
 
-	public static void main(String[] args) {
-		try {
-			String host = InetAddress.getLocalHost().getHostAddress();
-			System.out.println(host);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-	}
+
 }

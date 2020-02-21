@@ -686,11 +686,14 @@ public class BasicDevQuery {
 			Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 			dto.setBelongTo(deptId);
 			dto.setCreatBy(loginUserName);
-			String imgStr = dto.getUrl();
+			if(Objects.isNull(dto.getUrl())){
+				throw new BizException("未上传书签图片!");
+			}
+			String imgStr = dto.getUrl().substring(dto.getUrl().indexOf("base64,")+7);
 			Long mill = System.currentTimeMillis();
 			String contentPath = ClassUtils.getDefaultClassLoader().getResource("").getPath();
-			String path = pathConfig.getStaticPath()+File.separator+"书签图片"+mill.toString()+".jpg";
-			dto.setUrl("书签图片"+mill.toString()+".jpg");
+			String path = pathConfig.getStaticPath()+File.separator+mill.toString()+".png";
+			dto.setUrl(mill.toString()+".png");
 			Boolean flag = FileUtil.GenerateImage(imgStr,contentPath+File.separator+path);
 			if(flag){
                 return bookMarkMapper.insertBookMark(dto);
