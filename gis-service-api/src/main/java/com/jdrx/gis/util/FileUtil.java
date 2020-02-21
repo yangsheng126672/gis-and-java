@@ -45,25 +45,24 @@ public class FileUtil {
 
 	/**
 	 * 将base64位的String转化为图片写入到本地
-	 *
 	 */
-	public static boolean GenerateImage(String imgStr,String localPath) {
-		if(Objects.isNull(imgStr)){
+	public static boolean GenerateImage(String imgStr, String localPath) {
+		if (Objects.isNull(imgStr)) {
 			return false;
 		}
 		BASE64Decoder decoder = new BASE64Decoder();
 		try {
 			byte[] b = decoder.decodeBuffer(imgStr);
-			for(int i=0;i<b.length;i++){
-				if(b[i]<0){
+			for (int i = 0; i < b.length; i++) {
+				if (b[i] < 0) {
 					//调整异常数据
-					b[i]+=256;
+					b[i] += 256;
 				}
 			}
 			File file = new File(localPath);
-			if(!file.exists()){
-                file.getParentFile().mkdir();
-            }
+			if (!file.exists()) {
+				file.getParentFile().mkdir();
+			}
 			OutputStream out = new FileOutputStream(file);
 //			BufferedOutputStream bufferOut = new BufferedOutputStream(out);
 			out.write(b);
@@ -71,7 +70,7 @@ public class FileUtil {
 			out.close();
 			return true;
 		} catch (Exception e) {
-			return  false;
+			return false;
 		}
 	}
 

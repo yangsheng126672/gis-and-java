@@ -21,5 +21,5 @@ public class PathConfig {
 	/** 模板存放的目录 */
 	private String templatePath;
 
-    private String staticPath;
+    private String uploadPath;
 }
