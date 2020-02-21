@@ -74,7 +74,7 @@
                 #{x,jdbcType=DOUBLE},
             </if>
             <if test="y != null">
-                #{belongTo,jdbcType=DOUBLE},
+                #{y,jdbcType=DOUBLE},
             </if>
             <if test="creatBy != null">
                 #{creatBy,jdbcType=VARCHAR},
