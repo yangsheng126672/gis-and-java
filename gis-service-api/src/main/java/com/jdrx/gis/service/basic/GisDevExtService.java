@@ -55,7 +55,7 @@ public class GisDevExtService {
 			return 0;
 		}
 		int total = gisDevExtPOS.size();
-		int loopcnt = total / PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
+		int loopcnt = total % PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
 		if (total < PAGE_SIZE) {
 			loopcnt = 1;
 		}
@@ -74,7 +74,7 @@ public class GisDevExtService {
 			return 0;
 		}
 		int total = gisDevExtPOS.size();
-		int loopcnt = total / PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
+		int loopcnt = total % PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
 		if (total < PAGE_SIZE) {
 			loopcnt = 1;
 		}
@@ -94,7 +94,7 @@ public class GisDevExtService {
 			return list;
 		}
 		int total = codeXYPOs.size();
-		int loopcnt = total / PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
+		int loopcnt = total % PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
 		if (total < PAGE_SIZE) {
 			loopcnt = 1;
 		}

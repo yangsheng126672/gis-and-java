@@ -32,7 +32,7 @@ public class ShareDevService {
 			return 0;
 		}
 		int total = shareDevPOList.size();
-		int loopcnt = total / PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
+		int loopcnt = total % PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
 		if (total < PAGE_SIZE) {
 			loopcnt = 1;
 		}
@@ -51,7 +51,7 @@ public class ShareDevService {
 			return 0;
 		}
 		int total = shareDevPOList.size();
-		int loopcnt = total / PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
+		int loopcnt = total % PAGE_SIZE == 0 ? total / PAGE_SIZE : total / PAGE_SIZE + 1;
 		if (total < PAGE_SIZE) {
 			loopcnt = 1;
 		}
