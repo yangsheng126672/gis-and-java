@@ -8,6 +8,7 @@ import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.base.TypeIdDTO;
 import com.jdrx.gis.beans.dto.basic.BookMarkDTO;
+import com.jdrx.gis.beans.dto.basic.DeleteBookMarkDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.entity.basic.*;
 import com.jdrx.gis.beans.entity.cad.*;
@@ -713,11 +714,17 @@ public class BasicDevQuery {
 	 * @param
 	 * @return
 	 */
-	public Integer deleteBookmarkById(Long id,  Long userId, String token) throws BizException{
+	public Integer deleteBookmarkById(DeleteBookMarkDTO dto, Long userId, String token) throws BizException{
 		try {
 			SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
 			String loginUserName = sysOcpUserPo.getName();
 			Date date = new Date();
+			Long id = dto.getId();
+			String url = dto.getUrl();
+			//截取images/
+			String path = url.substring(7);
+			File file = new File(pathConfig.getUploadPath()+File.separator+path);
+			file.delete();
 			return bookMarkMapper.deleteBookMarkById(id,loginUserName,date);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -731,9 +738,10 @@ public class BasicDevQuery {
 	 * @param
 	 * @return
 	 */
-	public PageVO<BookMarkPO> findBookMarkList(PageDTO dto) throws BizException {
+	public PageVO<BookMarkPO> findBookMarkList(PageDTO dto,String deptPath) throws BizException {
+		Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
 		PageHelper.startPage(dto.getPageNum(), dto.getPageSize(), dto.getOrderBy());
-		Page<BookMarkPO> list = (Page<BookMarkPO>) bookMarkMapper.findBookMarkList();
+		Page<BookMarkPO> list = (Page<BookMarkPO>) bookMarkMapper.findBookMarkList(deptId);
 		return new PageVO<BookMarkPO>(list);
 	}
 

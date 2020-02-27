@@ -5,6 +5,7 @@ import com.jdrx.gis.beans.dto.base.KeyWordDTO;
 import com.jdrx.gis.beans.dto.base.PageDTO;
 import com.jdrx.gis.beans.dto.base.TypeIdDTO;
 import com.jdrx.gis.beans.dto.basic.BookMarkDTO;
+import com.jdrx.gis.beans.dto.basic.DeleteBookMarkDTO;
 import com.jdrx.gis.beans.dto.basic.MeasurementDTO;
 import com.jdrx.gis.beans.dto.query.DevIDsForTypeDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
@@ -222,12 +223,12 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "删除书签")
 	@RequestMapping(value ="deleteBookmark" )
-	public ResposeVO deleteBookmark(@ApiParam(name = "dto", required = true)@RequestBody @Valid  IdDTO<Long> dto,
+	public ResposeVO deleteBookmark(@ApiParam(name = "dto", required = true)@RequestBody @Valid DeleteBookMarkDTO dto,
 								  @RequestHeader(value = GwConstants.TRANSPARENT_USERID_FEILD) Long userId,
 								  @RequestHeader(value = GwConstants.TRANSPARENT_TOKEN_FEILD) String token) throws BizException{
 		Logger.debug("api/0/basic/deleteBookmark 删除书签");
 		try{
-			int result = basicDevQuery.deleteBookmarkById(dto.getId(),userId,token);
+			int result = basicDevQuery.deleteBookmarkById(dto,userId,token);
 			if(result>0){
 				return ResponseFactory.ok("删除成功！");
 			}
@@ -240,9 +241,10 @@ public class BasciDevApi {
 
 	@ApiOperation(value = "获取所有书签列表")
 	@RequestMapping(value = "findBookMarkList")
-	public ResposeVO findBookMarkList(@ApiParam(name = "dto", required = true)@RequestBody @Valid PageDTO dto
+	public ResposeVO findBookMarkList(@ApiParam(name = "dto", required = true)@RequestBody @Valid PageDTO dto,
+									  @RequestHeader(name ="deptPath") String deptPath
 									  ) throws BizException{
 		Logger.debug("api/0/basic/findBookMarkList 获取所有书签信息");
-		return ResponseFactory.ok(basicDevQuery.findBookMarkList(dto));
+		return ResponseFactory.ok(basicDevQuery.findBookMarkList(dto,deptPath));
 	}
 }

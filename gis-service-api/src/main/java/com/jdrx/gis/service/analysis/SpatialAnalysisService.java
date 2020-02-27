@@ -255,7 +255,9 @@ public class SpatialAnalysisService {
             if (amount1 > amount2) {
                 //找到删除的点的信息
                 GISDevExtPO point = gisDevExtPOMapper.getDevExtByDevId(list.get(1).toString());
-                neo4jUtil.deletePointById(list.get(1).toString());
+                //未删除的点的信息
+                GISDevExtPO point1 = gisDevExtPOMapper.getDevExtByDevId(list.get(0).toString());
+                neo4jUtil.deleteRepeatPoint(point.getDevId(),point.getCode(),point1.getDevId(),point1.getCode());
                 gisDevExtPOMapper.deleteDevExtByDevId(list.get(1).toString(), loginUserName, date);
                 shareDevPOMapper.deleteByPrimaryKey(list.get(1).toString(), loginUserName, date);
                 String code = point.getCode();
@@ -302,6 +304,9 @@ public class SpatialAnalysisService {
             } else {
                 //找到删除的点的信息
                 GISDevExtPO point = gisDevExtPOMapper.getDevExtByDevId(list.get(0).toString());
+                //找到未删除的点的信息
+                GISDevExtPO point1 = gisDevExtPOMapper.getDevExtByDevId(list.get(1).toString());
+                neo4jUtil.deleteRepeatPoint(point.getDevId(),point.getCode(),point1.getDevId(),point1.getCode());
                 neo4jUtil.deletePointById(list.get(0).toString());
                 gisDevExtPOMapper.deleteDevExtByDevId(list.get(0).toString(), loginUserName, date);
                 shareDevPOMapper.deleteByPrimaryKey(list.get(0).toString(), loginUserName, date);

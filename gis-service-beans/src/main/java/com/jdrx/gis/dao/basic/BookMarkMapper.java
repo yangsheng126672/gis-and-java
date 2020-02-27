@@ -27,5 +27,5 @@ public interface BookMarkMapper {
      * @param
      * @return
      */
-    List<BookMarkPO> findBookMarkList();
+    List<BookMarkPO> findBookMarkList(@Param("belongTo") Long belongTo);
 }

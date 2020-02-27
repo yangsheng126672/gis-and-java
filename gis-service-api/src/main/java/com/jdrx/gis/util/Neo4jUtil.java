@@ -9,6 +9,8 @@ import com.jdrx.gis.beans.dto.analysis.NodeDTO;
 import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.neo4j.Neo4jGd;
+import com.jdrx.gis.beans.entity.neo4j.Neo4jGdline;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.datamanage.REdge;
@@ -759,5 +761,48 @@ public class Neo4jUtil {
         }
         return amount;
 
+    }
+
+    /**
+     * 图数据库重复点删除 拓扑重建
+     * 参数一为删除的点的dev_id,参数二为删除的点的编码,参数三为未删除的点的id,参数四为未删除的点的编码
+     */
+    public void deleteRepeatPoint(String deletePointId,String deleteCode,String id,String code){
+        try{
+            List<Neo4jGdline> list = new ArrayList<>();
+            List<String> list1 = new ArrayList<>();
+            String cypherSql = String.format("match(a:gd)-[rel:gdline]-(b:gd) where a.dev_id = '%s' return rel,b",deletePointId);
+            StatementResult result = session.run(cypherSql);
+            while(result.hasNext()){
+                Record record = result.next();
+                Map map1 = record.get(0).asMap();
+                Map map2 = record.get(1).asMap();
+                Neo4jGdline gdline = new Neo4jGdline();
+                gdline.setBelong_to(map1.get("belong_to").toString());
+                gdline.setCztype(map1.get("cztype").toString());
+                gdline.setGj(map1.get("gj").toString());
+                gdline.setName(map1.get("name").toString());
+                gdline.setRelationID(map1.get("relationID").toString());
+                list.add(gdline);
+                list1.add(map2.get("dev_id").toString());
+            }
+            //删除与点相连的线
+            for(Neo4jGdline line:list){
+                String cypherSql1 =String.format("match(a)-[rel:gdline]-(b) where rel.relationID = '%s' delete rel",line.getRelationID());
+                session.run(cypherSql1);
+            }
+            //删除重复点
+            String cypherSql2 = String.format("match (a:gd) where a.dev_id= '%s'  delete a",deletePointId);
+            session.run(cypherSql2);
+            for(int i=0;i<list.size();i++){
+                //将之前的管线编码替换为新的管线编码
+                String lineCode = list.get(i).getName().replace(deleteCode,code);
+             String cypherSql3 = String.format("match (a:gd{dev_id:'%s'}),(b:gd{dev_id:'%s'}) create(a)-[c:gdline{cztype:'%s',gj:'%s',relationID:'%s'," +
+                     "belong_to:'%s',name:'%s'}]->(b)",id,list1.get(i),list.get(i).getCztype(),list.get(i).getGj(),list.get(i).getRelationID(),list.get(i).getBelong_to(),lineCode) ;
+             session.run(cypherSql3);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

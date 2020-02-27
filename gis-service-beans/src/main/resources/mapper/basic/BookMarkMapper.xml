@@ -87,6 +87,12 @@
         <include refid="Base_Column_List" />
         from gis_bookmark a
         WHERE delete_flag = FALSE
+        <if test="belongTo ==null">
+            and belong_to is null
+        </if>
+        <if test="belongTo !=null">
+            and belong_to = #{belongTo}
+        </if>
     </select>
 
 </mapper>
