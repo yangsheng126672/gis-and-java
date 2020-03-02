@@ -697,7 +697,7 @@
     </select>
 
     <select id="findLinesFromCode" parameterType="java.lang.String" resultMap="BaseResultMap">
-        SELECT  id, dev_id, name, code, caliber, material, st_astext(geom) as geom, tpl_type_id, data_info, delete_flag,
+        SELECT  id, dev_id, name, code, caliber, material, geom, tpl_type_id, data_info, delete_flag,
         create_by, create_at, update_by, update_at, belong_to, pic_urls, video_urls from gis_dev_ext gdx
         WHERE   data_info->>'startCode' = #{code}  or data_info->>'endCode' = #{code}
     </select>
