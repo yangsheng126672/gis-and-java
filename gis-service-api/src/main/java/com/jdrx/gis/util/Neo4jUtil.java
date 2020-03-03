@@ -721,6 +721,7 @@ public class Neo4jUtil {
 			.append(" SET gd.nodetype=point.nodetype")
 			.append(",gd.x=point.").append(GISConstants.X_CHN)
 			.append(",gd.y=point.").append(GISConstants.Y_CHN)
+                .append(",gd.dev_id=point.").append(GISConstants.DEV_ID)
 			.append(",gd.belong_to=point.").append(GISConstants.AUTH_ID_S);
 		session.run(String.valueOf(sb));
 	}
@@ -743,7 +744,8 @@ public class Neo4jUtil {
 				.append("line.").append(GISConstants.LINE_END_CODE_CHN).append("}]->(e)")
 				.append(" SET gdline.relationID=").append("line.").append(GISConstants.DEV_ID)
 				.append(",gdline.gj=").append("line.").append(GISConstants.GIS_ATTR_CALIBER)
-				.append(",gdline.cztype=").append("line.").append(GISConstants.GIS_ATTR_MATERIAL);
+                .append(",gdline.belong_to=").append("line.").append(GISConstants.AUTH_ID_S)
+				.append(",gdline.cztype=").append("line.").append(GISConstants.MATERIAL_CHN);
 		session.run(String.valueOf(sb));
 	}
 
