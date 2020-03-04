@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  *  GIS NACOS 启动类
@@ -16,8 +17,8 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @MapperScan({"com.jdrx.gis.dao.*","com.jdrx.share.*"})
 @ImportAutoConfiguration({PGConfigProperties.class})
+@EnableScheduling
 public class GisNacosBootApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(GisNacosBootApplication.class, args);
     }

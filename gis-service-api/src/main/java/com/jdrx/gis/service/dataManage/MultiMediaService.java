@@ -1,12 +1,18 @@
 package com.jdrx.gis.service.dataManage;
 
 import com.google.common.base.Joiner;
+import com.jdrx.gis.beans.constants.basic.EDBCommand;
 import com.jdrx.gis.beans.dto.dataManage.MediaDTO;
+import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.basic.ShareDevPO;
 import com.jdrx.gis.beans.entity.dataManage.MultiMediaPO;
+import com.jdrx.gis.beans.entity.log.GisDevVer;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
+import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dubboRpc.UserRpc;
+import com.jdrx.gis.service.log.GisDevVerService;
 import com.jdrx.gis.util.FileUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -38,6 +44,11 @@ public class MultiMediaService {
 	@Autowired
 	private UserRpc userRpc;
 
+	@Autowired
+	private GisDevVerService gisDevVerService;
+
+	@Autowired
+	private ShareDevPOMapper shareDevPOMapper;
 	/**
 	 * 保存设备的图片和视频
 	 * @param dto
@@ -68,6 +79,13 @@ public class MultiMediaService {
 				videos = Joiner.on(",").join(vedioUrls);
 				po.setVideoUrls(videos);
 			}
+			ShareDevPO shareDevLog = shareDevPOMapper.selectByPrimaryKey(devId);
+			GisDevVer gisDevVer = new GisDevVer();
+			gisDevVer.setCreateAt(new Date());
+			gisDevVer.setCreateBy(loginUserName);
+			gisDevVer.setCommand(EDBCommand.UPDATE.getVal().shortValue());
+			GISDevExtPO ext = gisDevExtPOMapper.getDevExtByDevId(devId);
+			gisDevVerService.saveDevEditLog(gisDevVer, shareDevLog, ext);
 			aff = gisDevExtPOMapper.updateMultiVideo(po);
 		} catch (Exception e) {
 			e.printStackTrace();

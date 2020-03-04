@@ -1,6 +1,7 @@
 package com.jdrx.gis.beans.entity.dataManage;
 
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.log.GisDevVer;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,9 @@ public class DevSaveParam {
 
 	/** 1-insert, 2-update */
 	private int saveFlag;
+
+	/** 版本信息*/
+	private GisDevVer gisDevVer;
 
 	public List<Map<String, Object>> getDataMapList() {
 		return dataMapList;
@@ -86,5 +90,13 @@ public class DevSaveParam {
 
 	public void setSaveFlag(int saveFlag) {
 		this.saveFlag = saveFlag;
+	}
+
+	public GisDevVer getGisDevVer() {
+		return gisDevVer;
+	}
+
+	public void setGisDevVer(GisDevVer gisDevVer) {
+		this.gisDevVer = gisDevVer;
 	}
 }

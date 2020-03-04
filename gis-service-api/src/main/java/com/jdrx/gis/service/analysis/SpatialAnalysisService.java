@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
+import com.jdrx.gis.beans.constants.basic.EDBCommand;
 import com.jdrx.gis.beans.dto.query.DevIDsDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
+import com.jdrx.gis.beans.entity.log.GisDevVer;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.basic.AnalysisVO;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
@@ -13,6 +15,7 @@ import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dubboRpc.UserRpc;
+import com.jdrx.gis.service.log.GisDevVerService;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
@@ -59,7 +62,8 @@ public class SpatialAnalysisService {
     @Autowired
     ShareDevPOMapper shareDevPOMapper;
 
-
+	@Autowired
+	private GisDevVerService gisDevVerService;
     /**
      * 获取连通性分析结果
      *
@@ -71,21 +75,21 @@ public class SpatialAnalysisService {
         try {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.getDevExtByDevId(devId);
             //判断设备类型是线的话，返回线两端的点设备和连通的线;如果是点，则返回连通的线
-            if (gisDevExtPO.getGeom().contains("POINT")) {
+            if(gisDevExtPO.getGeom().contains("POINT")){
                 list = neo4jUtil.getNodeConnectionLine(gisDevExtPO.getDevId());
-            } else {
+            }else{
                 list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
-            if (list.size() > 0) {
+            if(list.size() > 0){
                 featureVOList = getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             }
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
             Logger.error("获取连通性分析结果失败!");
             throw new BizException("获取连通性分析结果失败!");
         }
-        if (featureVOList.size() == 0) {
+        if (featureVOList.size() == 0){
             throw new BizException("设备连通个数为0");
         }
         return featureVOList;
@@ -103,21 +107,21 @@ public class SpatialAnalysisService {
             GISDevExtPO gisDevExtPO = gisDevExtPOMapper.selectByCode(code);
             String geomType = gisDevExtPOMapper.getGeomTypeByGeomStr(gisDevExtPO.getGeom());
             //判断设备类型是线的话，返回线两端的点设备和连通的线;如果是点，则返回连通的线
-            if (geomType.contains("POINT")) {
+            if(geomType.contains("POINT")){
                 list = neo4jUtil.getNodeConnectionLine(gisDevExtPO.getDevId());
-            } else {
+            }else{
                 list = neo4jUtil.getNodeConnectionPointAndLine(gisDevExtPO.getDevId());
             }
-            if (list.size() > 0) {
+            if(list.size() > 0){
                 featureVOList = getGisDevExtPOMapper.getLonelyShareDevByDevIds(list);
             }
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
             Logger.error("获取连通性分析结果失败!");
             throw new BizException("获取连通性分析结果失败!");
         }
-        if (featureVOList.size() == 0) {
+        if (featureVOList.size() == 0){
             throw new BizException("设备连通个数为0");
         }
         return featureVOList;
@@ -238,9 +242,16 @@ public class SpatialAnalysisService {
         Date date = new Date();
         List list1 = Arrays.asList(devId);
         List list = new ArrayList(list1);
+
+	    GisDevVer gisDevVer = new GisDevVer();
+	    gisDevVer.setCreateAt(date);
+	    gisDevVer.setCreateBy(loginUserName);
+	    gisDevVer.setCommand(EDBCommand.DELETE.getVal().shortValue());
+
         //找出重复点是孤立的点直接删除
         for (String id : devId) {
             if (neo4jUtil.getPointAmount(id) == 0) {
+	            gisDevVerService.saveDevEditLog(gisDevVer, id);
                 neo4jUtil.deletePointById(id);
                 gisDevExtPOMapper.deleteDevExtByDevId(id, loginUserName, date);
                 shareDevPOMapper.deleteByPrimaryKey(id, loginUserName, date);
@@ -258,6 +269,7 @@ public class SpatialAnalysisService {
                 //未删除的点的信息
                 GISDevExtPO point1 = gisDevExtPOMapper.getDevExtByDevId(list.get(0).toString());
                 neo4jUtil.deleteRepeatPoint(point.getDevId(),point.getCode(),point1.getDevId(),point1.getCode());
+	            gisDevVerService.saveDevEditLog(gisDevVer, list.get(1).toString());
                 gisDevExtPOMapper.deleteDevExtByDevId(list.get(1).toString(), loginUserName, date);
                 shareDevPOMapper.deleteByPrimaryKey(list.get(1).toString(), loginUserName, date);
                 String code = point.getCode();
@@ -361,21 +373,26 @@ public class SpatialAnalysisService {
      */
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteRepeatLineByDevIds(String[] devId, Long userId, String token) throws Exception {
-        //获得删除人
-        SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
-        String loginUserName = sysOcpUserPo.getName();
-        Date date = new Date();
+	    //获得删除人
+	    SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+	    String loginUserName = sysOcpUserPo.getName();
+	    Date date = new Date();
 //        if(devId.length<2){
 //            throw new BizException("重复线数目少于2！");
 //            //如果重复线的数目>2，则删掉重复线，保留一个
 //        }else{
-            for(int i = 0;i<devId.length-1;i++){
-                neo4jUtil.deleteLineById(devId[i]);
-                gisDevExtPOMapper.deleteDevExtByDevId(devId[i], loginUserName, date);
-                shareDevPOMapper.deleteByPrimaryKey(devId[i], loginUserName, date);
-            }
+	    GisDevVer gisDevVer = new GisDevVer();
+	    gisDevVer.setCreateAt(date);
+	    gisDevVer.setCreateBy(loginUserName);
+	    gisDevVer.setCommand(EDBCommand.DELETE.getVal().shortValue());
+	    gisDevVerService.saveDevEditLogs(gisDevVer, devId);
+	    for (int i = 0; i < devId.length - 1; i++) {
+		    neo4jUtil.deleteLineById(devId[i]);
+		    gisDevExtPOMapper.deleteDevExtByDevId(devId[i], loginUserName, date);
+		    shareDevPOMapper.deleteByPrimaryKey(devId[i], loginUserName, date);
+	    }
 //        }
-             return true;
+	    return true;
 
     }
 

@@ -487,11 +487,18 @@ public class BasicDevQuery {
 	 */
 	public String findLayerById(List<TypeIdDTO> list_id) throws BizException {
 		try {
-			Document doc = new Document();//工具类，制作CAD图层用
+			Map<Long,String> map = new HashMap<>();
+			List<DictDetailPO> detailPOS = detailService.findDetailsByTypeVal(dictConfig.getExportCadType());
+			for (DictDetailPO po: detailPOS){
+				map.put(Long.valueOf(po.getVal().trim()),po.getName());
+			}
+			//工具类，制作CAD图层用
+			Document doc = new Document();
 			for (TypeIdDTO id:list_id) {
 				List<ExportCadVO> list = gisDevExtPOMapper.selectGeomByTypeId(id.getId());
 				List<FeatureVO> featureVO = new ArrayList<>();
-				if(id.getId()==19) {//当节点为阀门时，查出其再逻辑管网上的相邻节点之一，用来给阀门做角度
+				//当节点为阀门时，查出其再逻辑管网上的相邻节点之一，用来给阀门做角度
+				if(map.containsKey(id.getId())&&(map.get(id.getId()).equals(GISConstants.GIS_MENU_VALVE))) {
 					List<String> devId_list = new ArrayList<>();
 					for (ExportCadVO exportCadVO : list) {
 						String devId2 = neo4jUtil.getValveNodeByDevId(exportCadVO.getDevId()).getDev_id();
@@ -499,7 +506,8 @@ public class BasicDevQuery {
 							devId_list.add(devId2);
 						}
 					}
-					featureVO = gisDevExtPOMapper.findFeaturesListByDevIdList(devId_list);//节点太多，使用集合形式，批量查询对应属性
+					//节点太多，使用集合形式，批量查询对应属性
+					featureVO = gisDevExtPOMapper.findFeaturesListByDevIdList(devId_list);
 				}
 				for (ExportCadVO exportCadVO:list) {//对于每个数据进行绘制
 					String name = exportCadVO.getName();
@@ -511,7 +519,7 @@ public class BasicDevQuery {
 						Double y = Double.parseDouble(aa.split(" ")[1]);
 						double R = 0.3;
 						double d = R/(Math.sqrt(2));
-						if(id.getId()==19){//阀门
+						if(map.containsKey(id.getId())&&(map.get(id.getId()).equals(GISConstants.GIS_MENU_VALVE))){//阀门
 							String devId = exportCadVO.getDevId();
 							String devId2 = neo4jUtil.getValveNodeByDevId(devId).getDev_id();
 							double sin;
@@ -547,7 +555,8 @@ public class BasicDevQuery {
 							polyLine.AddVertex(v6);
 							doc.add(polyLine);
 						}
-						if(id.getId()==26){//管件
+						//管件
+						if(map.containsKey(id.getId())&&(map.get(id.getId()).equals(GISConstants.GIS_MENU_FITTINGS))){
 							Vertex v1 = new Vertex(x-d, y-d, "Vertex");
 							Vertex v2 = new Vertex(x+d, y-d, "Vertex");
 							Vertex v3 = new Vertex(x+d, y, "Vertex");
@@ -567,7 +576,8 @@ public class BasicDevQuery {
 							polyLine.AddVertex(v8);
 							doc.add(polyLine);
 						}
-						if(id.getId()==18){//消防栓
+						//消防栓
+						if(map.containsKey(id.getId())&&(map.get(id.getId()).equals(GISConstants.GIS_MENU_HYDRANT))){
 							Vertex v1 = new Vertex(x-0.5*d, y, "Vertex");
 							Vertex v2 = new Vertex(x-0.5*d, y-d, "Vertex");
 							Vertex v3 = new Vertex(x+0.5*d, y-d, "Vertex");
@@ -585,7 +595,8 @@ public class BasicDevQuery {
 							polyLine.AddVertex(v7);
 							doc.add(polyLine);
 						}
-						if(id.getId()==1){//其它
+						//其它
+						if(map.containsKey(id.getId())&&(map.get(id.getId()).equals(GISConstants.GIS_MENU_OTHER))){
 							Vertex v1 = new Vertex(x-d, y-d, "Vertex");
 							Vertex v2 = new Vertex(x+d, y-d, "Vertex");
 							Vertex v3 = new Vertex(x+d, y+d, "Vertex");
@@ -597,8 +608,10 @@ public class BasicDevQuery {
 							polyLine.AddVertex(v4);
 							doc.add(polyLine);
 						}
-						Circle cc = new Circle(x,y, R, "pointTest");
+						//外接圆
+						Circle cc = new Circle(x,y, R, "Circle");
 						doc.add(cc);
+
 					}
 					if(type.equals("LINESTRING")){
 						String aa = geom.substring(11,geom.length()-1);

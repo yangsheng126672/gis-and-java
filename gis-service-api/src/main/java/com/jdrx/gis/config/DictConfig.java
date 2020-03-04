@@ -74,4 +74,10 @@ public class DictConfig {
 	/** 爆管分析可关闭的阀门类型 */
 	private String closeableValveTypeIds;
 
+	/** 导出CAD文件勾选图层类型 */
+	private String exportCadType;
+
+	/** 定时任务时间 */
+	private String taskTime;
+
 }

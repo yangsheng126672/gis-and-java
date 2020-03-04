@@ -118,5 +118,14 @@ public class GisDevExtService {
 	public String getLngLatByDevId(String devId) {
 		return gisDevExtPOMapper.getLngLatByDevId(devId);
 	}
-
+	
+		/**
+	 * 获取经空间位置信息
+	 * @param devId
+	 * @return
+	 * @throws BizException
+	 */
+	public String getGeomByDevId(String devId) {
+		return gisDevExtPOMapper.getGeomByDevIdToWGS(devId);
+	}
 }

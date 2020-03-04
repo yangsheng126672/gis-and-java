@@ -138,6 +138,9 @@ public class GISConstants {
 
 	/********************************Neo4j图数据库常量字段**********************/
 
+	/** 图数据库鉴别节点是否为阀门 1-是，0-不是 */
+	public final static String NODE_TYPE = "nodetype";
+
 	/** 管点标签 一个标签其实就是代表一张表*/
 	public final static String NEO_POINT = "gd";
 
@@ -158,6 +161,34 @@ public class GISConstants {
 
 	/** 水源节点 */
 	public final static String NEO_NODE_WATER = "2";
+
+	/** 管线设备id */
+	public final static String NEO_LINE_ID = "relationID";
+
+	/** 管线设备name */
+	public final static String NEO_LINE_NAME = "name";
+
+	/** 管线设备材质 */
+	public final static String NEO_LINE_MATERIAL = "material";
+
+	/** 管线设备管径 */
+	public final static String NEO_LINE_CALIBER = "caliber";
+
+	/** 管点设备id */
+	public final static String NEO_POINT_DEVID = "dev_id";
+
+	/** 设备权属 */
+	public final static String NEO_BELONGTO = "belong_to";
+
+	/** 管点设备x坐标 */
+	public final static String NEO_POINT_X = "x";
+
+	/** 管点设备y坐标 */
+	public final static String NEO_POINT_Y = "y";
+
+	/** 管点设备name */
+	public final static String NEO_POINT_NAME = "name";
+
 	/** typeName */
 	public final static String DEV_TYPE_NAME_EN = "typeName";
 
@@ -205,7 +236,17 @@ public class GISConstants {
 
 	public final static String GIS_ATTR_PIPE_LENGTH = "pipe_length";
 
-	/** 图数据库鉴别节点是否为阀门 1-是，0-不是 */
-	public final static String NODE_TYPE = "nodetype";
+	/** 系统六大类 */
+	public final static String GIS_MENU_PIPE = "水管";
+
+	public final static String GIS_MENU_HYDRANT = "消防栓";
+
+	public final static String GIS_MENU_MATERING = "计量点";
+
+	public final static String GIS_MENU_FITTINGS = "管件";
+
+	public final static String GIS_MENU_VALVE = "阀门";
+
+	public final static String GIS_MENU_OTHER = "其它";
 
 }

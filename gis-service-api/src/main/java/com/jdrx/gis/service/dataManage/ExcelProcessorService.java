@@ -6,11 +6,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.jdrx.gis.beans.constants.basic.EDBCommand;
 import com.jdrx.gis.beans.constants.basic.EPGDataTypeCategory;
 import com.jdrx.gis.beans.constants.basic.EupdateAndInsert;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.entity.basic.*;
 import com.jdrx.gis.beans.entity.dataManage.DevSaveParam;
+import com.jdrx.gis.beans.entity.log.GisDevEditLog;
+import com.jdrx.gis.beans.entity.log.GisDevVer;
+import com.jdrx.gis.beans.entity.log.ShareDevEditLog;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.datamanage.ImportVO;
 import com.jdrx.gis.config.DictConfig;
@@ -18,6 +22,9 @@ import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dao.log.GisDevVerManualMapper;
+import com.jdrx.gis.dao.log.autoGenerate.GisDevEditLogMapper;
+import com.jdrx.gis.dao.log.autoGenerate.ShareDevEditLogMapper;
 import com.jdrx.gis.dao.pgSys.PgTypeDAO;
 import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
@@ -25,6 +32,8 @@ import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
 import com.jdrx.gis.service.basic.GisDevExtService;
 import com.jdrx.gis.service.basic.ShareDevService;
+import com.jdrx.gis.service.log.GisDevEditLogService;
+import com.jdrx.gis.service.log.ShareDevEditLogService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.gis.util.ComUtil;
 import com.jdrx.gis.util.JavaFileToFormUpload;
@@ -35,6 +44,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.postgis.PGgeometry;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -104,6 +114,15 @@ public class ExcelProcessorService {
 
 	@Autowired
 	private QueryDevService queryDevService;
+
+	@Autowired
+	private GisDevVerManualMapper gisDevVerManualMapper;
+
+	@Autowired
+	private ShareDevEditLogService shareDevEditLogService;
+
+	@Autowired
+	private GisDevEditLogService gisDevEditLogService;
 
 	// 需要判断是否为空的列 line
 	private static List<String>  validHeader1 = Lists.newArrayList();
@@ -548,74 +567,112 @@ public class ExcelProcessorService {
 	}
 
 	/**
-	 * 保存Excel数据
+	 * 保存或更新Excel数据
 	 * @param devSaveParam
 	 * @return
 	 * @throws BizException
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public List<Map<String, String>> saveExcelData(DevSaveParam devSaveParam) throws BizException {
+	public List<Map<String, String>> saveOrUpdateExcelData(DevSaveParam devSaveParam) throws BizException {
 		List<Map<String, String>> codeDevIdMapList = Lists.newArrayList();
 		devSaveParam.setSaveFlag(1);
+		int flag = devSaveParam.getSaveFlag();
 		Map<String, List> buildMap = buildDevPO(devSaveParam);
 		try {
 			List<ShareDevPO> shareDevPOS = buildMap.get(GISConstants.SHARE_DEV_S);
 			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
+			List<ShareDevEditLog> shareDevEditLogs = Lists.newArrayList();
+			List<GisDevEditLog> gisDevEditLogs = Lists.newArrayList();
 			int e1 = 0, e2 = 0;
 			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
-				e1 = shareDevService.splitBatchInsert(shareDevPOS);
+				if (EupdateAndInsert.INSERT.getVal() == flag) {
+					e1 = shareDevService.splitBatchInsert(shareDevPOS);
+				} else if (EupdateAndInsert.UPDATE.getVal() == flag){
+					e1 = shareDevService.splitBatchUpdate(shareDevPOS);
+				}
+				shareDevPOS.forEach(shareDevPO -> {
+					ShareDevEditLog devEditLog = new ShareDevEditLog();
+					BeanUtils.copyProperties(shareDevPO, devEditLog);
+					devEditLog.setDevId(shareDevPO.getId());
+					shareDevEditLogs.add(devEditLog);
+				});
 			}
 			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
 				for (GISDevExtPO gisDevExtPO : gisDevExtPOS){
 					Map<String, String> map = Maps.newHashMap();
 					map.put(gisDevExtPO.getCode(), gisDevExtPO.getDevId());
 					codeDevIdMapList.add(map);
+					GisDevEditLog gisDevEditLog = new GisDevEditLog();
+					BeanUtils.copyProperties(gisDevExtPO, gisDevEditLog);
+					gisDevEditLogs.add(gisDevEditLog);
 				}
-				e2 = gisDevExtService.splitBatchInsert(gisDevExtPOS);
+				if (EupdateAndInsert.INSERT.getVal() == flag) {
+					e2 = gisDevExtService.splitBatchInsert(gisDevExtPOS);
+				} else if (EupdateAndInsert.UPDATE.getVal() == flag){
+					e2 = gisDevExtService.splitBatchUpdate(gisDevExtPOS);
+				}
+
 			}
-			Logger.debug("share_dev add " + e1 + " rows, and gis_dev_ext add " + e2 + " rows");
+			// 留存版本历史记录
+			Long verNum = devSaveParam.getGisDevVer() == null ? 0L : devSaveParam.getGisDevVer().getId();
+			saveLog(verNum, gisDevEditLogs, shareDevEditLogs);
+			Logger.debug("share_dev saveOrUpdate " + e1 + " rows, and gis_dev_ext saveOrUpdate " + e2 + " rows");
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error(e.getMessage());
-			new BizException("保存设备数据失败！");
+			new BizException("保存或更新设备数据失败！");
 		}
 		return codeDevIdMapList;
 	}
 
-	/**
-	 * 更新数据
-	 * @param devSaveParam
-	 * @return
-	 * @throws BizException
-	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public List<Map<String, String>> updateDBData(DevSaveParam devSaveParam) throws BizException {
-		devSaveParam.setSaveFlag(2);
-		Map<String, List> buildMap = buildDevPO(devSaveParam);
-		List<Map<String, String>> codeDevIdMapList = Lists.newArrayList();
-		try {
-			List<ShareDevPO> shareDevPOS = buildMap.get(GISConstants.SHARE_DEV_S);
-			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
-			int e1 = 0, e2 = 0;
-			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
-				e1 = shareDevService.splitBatchUpdate(shareDevPOS);
-			}
-			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
-				for (GISDevExtPO gisDevExtPO : gisDevExtPOS){
-					Map<String, String> map = Maps.newHashMap();
-					map.put(gisDevExtPO.getCode(), gisDevExtPO.getDevId());
-					codeDevIdMapList.add(map);
-				}
-				e2 = gisDevExtService.splitBatchUpdate(gisDevExtPOS);
-			}
-			Logger.debug("share_dev update " + e1 + " rows, and gis_dev_ext update " + e2 + " rows");
-		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.error(e.getMessage());
-			new BizException("保存设备数据失败！");
-		}
-		return codeDevIdMapList;
-	}
+//	/**
+//	 * 更新数据
+//	 * @param devSaveParam
+//	 * @return
+//	 * @throws BizException
+//	 */
+//	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+//	public List<Map<String, String>> updateDBData(DevSaveParam devSaveParam) throws BizException {
+//		devSaveParam.setSaveFlag(2);
+//		Map<String, List> buildMap = buildDevPO(devSaveParam);
+//		List<Map<String, String>> codeDevIdMapList = Lists.newArrayList();
+//		try {
+//			List<ShareDevPO> shareDevPOS = buildMap.get(GISConstants.SHARE_DEV_S);
+//			List<GISDevExtPO> gisDevExtPOS = buildMap.get(GISConstants.GIS_DEV_EXT_S);
+//			List<ShareDevEditLog> shareDevEditLogs = Lists.newArrayList();
+//			List<GisDevEditLog> gisDevEditLogs = Lists.newArrayList();
+//			int e1 = 0, e2 = 0;
+//			if (Objects.nonNull(shareDevPOS) && shareDevPOS.size() > 0) {
+//				e1 = shareDevService.splitBatchUpdate(shareDevPOS);
+//				shareDevPOS.forEach(shareDevPO -> {
+//					ShareDevEditLog devEditLog = new ShareDevEditLog();
+//					BeanUtils.copyProperties(shareDevPO, devEditLog);
+//					devEditLog.setDevId(shareDevPO.getId());
+//					shareDevEditLogs.add(devEditLog);
+//				});
+//			}
+//			if(Objects.nonNull(gisDevExtPOS) && gisDevExtPOS.size() > 0) {
+//				for (GISDevExtPO gisDevExtPO : gisDevExtPOS){
+//					Map<String, String> map = Maps.newHashMap();
+//					map.put(gisDevExtPO.getCode(), gisDevExtPO.getDevId());
+//					codeDevIdMapList.add(map);
+//					GisDevEditLog gisDevEditLog = new GisDevEditLog();
+//					BeanUtils.copyProperties(gisDevExtPO, gisDevEditLog);
+//					gisDevEditLogs.add(gisDevEditLog);
+//				}
+//				e2 = gisDevExtService.splitBatchUpdate(gisDevExtPOS);
+//			}
+//			// 留存版本历史记录
+//			Long verNum = devSaveParam.getGisDevVer() == null ? 0L : devSaveParam.getGisDevVer().getId();
+//			saveLog(verNum, gisDevEditLogs, shareDevEditLogs);
+//			Logger.debug("share_dev update " + e1 + " rows, and gis_dev_ext update " + e2 + " rows");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			Logger.error(e.getMessage());
+//			new BizException("保存设备数据失败！");
+//		}
+//		return codeDevIdMapList;
+//	}
 
 	/**
 	 * 创建PO对象，包含gis_dev_ext和share_dev的
@@ -849,6 +906,23 @@ public class ExcelProcessorService {
 	}
 
 	/**
+	 * 保存设备的历史记录
+	 * @param verNum
+	 * @param gisDevEditLogs
+	 * @param shareDevEditLogs
+	 */
+	private void saveLog(Long verNum, List<GisDevEditLog> gisDevEditLogs, List<ShareDevEditLog> shareDevEditLogs) {
+		shareDevEditLogs.forEach(shareDevEditLog -> {
+			shareDevEditLog.setVerNum(verNum);
+		});
+		gisDevEditLogs.forEach(gisDevEditLog -> {
+			gisDevEditLog.setVerNum(verNum);
+		});
+		int e1 = shareDevEditLogService.splitBatchInsert(shareDevEditLogs);
+		int e2 = gisDevEditLogService.splitBatchInsert(gisDevEditLogs);
+		Logger.debug("版本记录插入：" + e1 + "条！");
+	}
+	/**
 	 * 根据解析出来的Excel数据，导入到数据库中
 	 * @param dataMap           解析的Excel数据
 	 * @param userId            登录用户的ID
@@ -895,14 +969,24 @@ public class ExcelProcessorService {
 		DevSaveParam devSaveParam = new DevSaveParam();
 		devSaveParam.setLoginUserName(loginUserName);
 		devSaveParam.setExistsCodes(existsExtPOs);
+		// 记录版本信息
+		GisDevVer gisDevVer = new GisDevVer();
+		Date now = new Date();
+		gisDevVer.setCreateAt(now);
+		gisDevVer.setCreateBy(devSaveParam.getLoginUserName());
+		gisDevVer.setCommand(EDBCommand.INSERT.getVal().shortValue());
+		gisDevVerManualMapper.insertReturnId(gisDevVer);
+		devSaveParam.setGisDevVer(gisDevVer);
 		if (Objects.nonNull(pointDataList)) { // 点
 			devSaveParam.setDataMapList(pointDataList);
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET0_NAME);
 			List<Map<String, String>> pList = Lists.newArrayList();
 			if (tsBool) {
-				pList = updateDBData(devSaveParam);
+				devSaveParam.setSaveFlag(EupdateAndInsert.UPDATE.getVal());
+				pList = saveOrUpdateExcelData(devSaveParam);
 			}
-			result1 = saveExcelData(devSaveParam);
+			devSaveParam.setSaveFlag(EupdateAndInsert.INSERT.getVal());
+			result1 = saveOrUpdateExcelData(devSaveParam);
 			result1.addAll(pList);
 			pointDataList = putDevId(result1, pointDataList, 0);
 			pointDataList = putNodeType(pointDataList);
@@ -913,9 +997,11 @@ public class ExcelProcessorService {
 			devSaveParam.setSheetName(GISConstants.IMPORT_SHEET1_NAME);
 			List<Map<String, String>> pList = Lists.newArrayList();
 			if (tsBool) {
-				pList = updateDBData(devSaveParam);
+				devSaveParam.setSaveFlag(EupdateAndInsert.UPDATE.getVal());
+				pList = saveOrUpdateExcelData(devSaveParam);
 			}
-			result2 = saveExcelData(devSaveParam);
+			devSaveParam.setSaveFlag(EupdateAndInsert.INSERT.getVal());
+			result2 = saveOrUpdateExcelData(devSaveParam);
 			result2.addAll(pList);
 			lineDataList = putDevId(result2, lineDataList, 1);
 		}

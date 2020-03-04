@@ -13,6 +13,7 @@ import com.jdrx.gis.beans.entity.basic.DictDetailPO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.vo.analysis.AnalysisResultVO;
 import com.jdrx.gis.beans.vo.analysis.RecondValveVO;
+import com.jdrx.gis.beans.vo.basic.PointVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
 import com.jdrx.gis.beans.vo.query.SpaceInfoVO;
 import com.jdrx.gis.config.DictConfig;
@@ -115,7 +116,7 @@ public class NetsAnalysisService {
      * @param relationID
      * */
 
-    public List<NodeDTO> findAllFamens(String relationID){
+    public List<NodeDTO> findAllValves(String relationID){
         String rid  = relationID;
         List<Value> values = neo4jUtil.getNodesFromRel(rid,GISConstants.NEO_LINE);
         if(values == null){
@@ -146,14 +147,15 @@ public class NetsAnalysisService {
                 //从待访问列表中移除节点
                 iterator.remove();
                 //判断nodetype是否为阀门类型
-                nodeName = tmpValue.asNode().get("name").asString();
-                dev_id = tmpValue.asNode().get("dev_id").asString();
-                nodetype = tmpValue.asNode().get("nodetype").asString();
+                nodeName = tmpValue.asNode().get(GISConstants.GIS_ATTR_NAME).asString();
+                dev_id = tmpValue.asNode().get(GISConstants.GIS_ATTR_DEVID).asString();
+                nodetype = tmpValue.asNode().get(GISConstants.NODE_TYPE).asString();
                 if (GISConstants.NEO_NODE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(nodeName))){
                     //是阀门节点，添加到待返回的阀门队列
+                    PointVO pointVO = gisDevExtPOMapper.getPointByDevIdToWGS(dev_id);
                     NodeDTO dto = new NodeDTO();
-                    dto.setX(Double.valueOf(tmpValue.asNode().get("x").asString()));
-                    dto.setY(Double.valueOf(tmpValue.asNode().get("y").asString()));
+                    dto.setX(pointVO.getX());
+                    dto.setY(pointVO.getY());
                     dto.setCode(nodeName);
                     dto.setDev_id(dev_id);
                     nodeDTOList.add(dto);
@@ -186,7 +188,7 @@ public class NetsAnalysisService {
      * */
 
     public List<NodeDTO> findSecondAnalysisResult(String failedValve,List<String> valveList) throws BizException{
-        List<Value> values = neo4jUtil.getNextNode(failedValve,GISConstants.NEO_POINT_LJ);
+        List<Value> values = neo4jUtil.getNextNode(failedValve,GISConstants.NEO_POINT);
         if(values.size() == 0){
             throw new BizException("二级关阀查询失败，无关系设备id ："+ failedValve);
         }
@@ -214,19 +216,20 @@ public class NetsAnalysisService {
                 //从待访问列表中移除节点
                 iterator.remove();
                 //判断是不是在第一次关阀列表中
-                nodeName = tmpValue.asNode().get("name").asString();
-                devId = tmpValue.asNode().get("dev_id").asString();
+                nodeName = tmpValue.asNode().get(GISConstants.GIS_ATTR_NAME).asString();
+                devId = tmpValue.asNode().get(GISConstants.GIS_ATTR_DEVID).asString();
                 if (valveList.contains(devId)){
                     continue;
                 }
                 //判断nodetype是否为阀门类型
-                nodetype = tmpValue.asNode().get("nodetype").asString();
+                nodetype = tmpValue.asNode().get(GISConstants.NODE_TYPE).asString();
                 if (GISConstants.NEO_NODE_VALVE.equals(nodetype) &&(!nodeDTOList.contains(devId))){
                     //是阀门节点，添加到待返回的阀门队列
+                    PointVO pointVO = gisDevExtPOMapper.getPointByDevIdToWGS(devId);
                     NodeDTO dto = new NodeDTO();
-                    dto.setDev_id(tmpValue.asNode().get("dev_id").asString());
-                    dto.setX(Double.valueOf(tmpValue.asNode().get("x").asString()));
-                    dto.setY(Double.valueOf(tmpValue.asNode().get("y").asString()));
+                    dto.setDev_id(devId);
+                    dto.setX(pointVO.getX());
+                    dto.setY(pointVO.getY());
                     dto.setCode(nodeName);
                     nodeDTOList.add(dto);
                     continue;
@@ -272,9 +275,11 @@ public class NetsAnalysisService {
      * 从一级关阀的所有阀门中筛选必须关闭的阀门
      * @param nodeDTOS
      */
-    public List<NodeDTO> findFinalFamens(List<NodeDTO> nodeDTOS,String belongTo) throws Exception{
+    public List<NodeDTO> findFinalValves(List<NodeDTO> nodeDTOS,String belongTo) throws Exception{
         if ((nodeDTOS == null) ){
             return null;
+        }else if(nodeDTOS.size() >50){
+            return nodeDTOS;
         }
         List<NodeDTO> valves = new ArrayList<>();
         List<String> valveList = new ArrayList<>();
@@ -297,14 +302,14 @@ public class NetsAnalysisService {
             //循环所有一级关阀的阀门列表,把每个阀门和所有水源地做连通分析和路径分析
             for (String tmpDevId :valveList){
                 //以阀门为起点遍历相邻节点
-                tmpList =  neo4jUtil.getNextNode(tmpDevId,GISConstants.NEO_POINT_LJ);
+                tmpList =  neo4jUtil.getNextNode(tmpDevId,GISConstants.NEO_POINT);
                 lookingSet.clear();
                 lookedSet.clear();
                 lookingSet.addAll(tmpList);
                 iterator = lookingSet.listIterator();
                 while (iterator.hasNext()){
                     tmpNode = iterator.next();
-                    devId = tmpNode.get("dev_id").asString();
+                    devId = tmpNode.get(GISConstants.GIS_ATTR_DEVID).asString();
                     //如果不在已经访问的节点中，添加到已访问列表
                     if(!(lookedSet.contains(tmpNode))){
                         lookedSet.add(tmpNode);
@@ -318,9 +323,9 @@ public class NetsAnalysisService {
                         break;
                     }
                     //获取这个节点的相邻节点
-                    tmpList = neo4jUtil.getNextNode(devId,GISConstants.NEO_POINT_LJ);
+                    tmpList = neo4jUtil.getNextNode(devId,GISConstants.NEO_POINT);
                     for (Value nodeValue:tmpList ){
-                        devId = nodeValue.get("dev_id").asString();
+                        devId = nodeValue.get(GISConstants.GIS_ATTR_DEVID).asString();
                         //首先判断这个节点是不是在阀门列表
                         if (valveList.contains(devId)){
                             continue;
@@ -377,7 +382,7 @@ public class NetsAnalysisService {
         List<Value> valueList = neo4jUtil.getNodesFromRel(lineID,GISConstants.NEO_LINE);
         for(Value value:valueList){
             Node node = value.asNode();
-            String devId = node.asMap().get("dev_id").toString();
+            String devId = node.asMap().get(GISConstants.GIS_ATTR_DEVID).toString();
             if (!lookingNodes.contains(devId)){
                 lookingNodes.add(devId);
             }
@@ -394,8 +399,8 @@ public class NetsAnalysisService {
                 //如果不是必须关闭的阀门，查找相邻的边和点
                 List<Record> nextNodeAndPath= neo4jUtil.getNextNodeAndPath(tmpDevId,GISConstants.NEO_POINT);
                 for(Record record:nextNodeAndPath){
-                    nextDevId = record.get(0).asNode().asMap().get("dev_id").toString();
-                    nextPathID = record.get(1).asMap().get("relationID").toString();
+                    nextDevId = record.get(0).asNode().asMap().get(GISConstants.GIS_ATTR_DEVID).toString();
+                    nextPathID = record.get(1).asMap().get(GISConstants.NEO_LINE_ID).toString();
                     if(!famenList.contains(nextDevId)){
                         if (!lookingNodes.contains(nextDevId)&&(!lookedNodes.contains(nextDevId)))
                             //不是阀门，并且不在待访问和已访问列表，添加
@@ -438,9 +443,9 @@ public class NetsAnalysisService {
             //获取管网坐标系srid
             String srid = getValByDictString(dictConfig.getWaterPipeSrid());
             //获取所有阀门列表
-            List<NodeDTO> valve_all = findAllFamens(dto.getId());
+            List<NodeDTO> valve_all = findAllValves(dto.getId());
             //获取必须关闭的阀门
-            List<NodeDTO> valve_final = findFinalFamens(valve_all,String.valueOf(gisDevExtPO.getBelongTo()));
+            List<NodeDTO> valve_final = findFinalValves(valve_all,String.valueOf(gisDevExtPO.getBelongTo()));
             //获取影响范围
             List<String> devIds = findInfluenceArea(dto.getId(),valve_final);
             if (devIds == null){
@@ -474,7 +479,7 @@ public class NetsAnalysisService {
         AnalysisResultVO vo = new AnalysisResultVO();
         List<String>failedList = secondAnalysisDTO.getFealtureList();
         List<String>fmList = new ArrayList<>();
-        List<NodeDTO> fmlistNode = findAllFamens(secondAnalysisDTO.getDev_id());
+        List<NodeDTO> fmlistNode = findAllValves(secondAnalysisDTO.getDev_id());
         List<String> fmlistTmp = secondAnalysisDTO.getFmlist();
         String devId =secondAnalysisDTO.getDev_id();
         List<NodeDTO> resultDtoList = new ArrayList<>();
@@ -508,7 +513,7 @@ public class NetsAnalysisService {
           fmlist_all.addAll(resultDtoList);
 
            //获取必须关阀列表
-           List<NodeDTO> finalList = findFinalFamens(fmlist_all,String.valueOf(po.getBelongTo()));
+           List<NodeDTO> finalList = findFinalValves(fmlist_all,String.valueOf(po.getBelongTo()));
            //去除第一次关阀列表中的阀门
            Iterator iterator = finalList.listIterator();
            NodeDTO nodeDTO = null;
@@ -632,13 +637,16 @@ public class NetsAnalysisService {
         List<GisPipeAnalysisValvePO> valvePOS = valvePOMapper.selectByPrimaryKey(id);
         for(GisPipeAnalysisValvePO po:valvePOS){
             if (!StringUtils.isEmpty(po.getValveFirst())){
-                NodeDTO node = neo4jUtil.getValveNode(po.getValveFirst());
+                NodeDTO node = gisDevExtPOMapper.getValveByDevId(po.getValveFirst());
+                node.setDev_id(po.getValveFirst());
                 valveFirst.add(node);
             }else if(!StringUtils.isEmpty(po.getValveFailed())){
-                NodeDTO node = neo4jUtil.getValveNode(po.getValveFailed());
+                NodeDTO node = gisDevExtPOMapper.getValveByDevId(po.getValveFailed());
+                node.setDev_id(po.getValveFailed());
                 valveFailed.add(node);
             }else if(!StringUtils.isEmpty(po.getValveSecond())){
-                NodeDTO node = neo4jUtil.getValveNode(po.getValveSecond());
+                NodeDTO node = gisDevExtPOMapper.getValveByDevId(po.getValveSecond());
+                node.setDev_id(po.getValveSecond());
                 valveSecond.add(node);
             }
         }

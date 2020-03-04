@@ -710,4 +710,47 @@
            #{item}
         </foreach>
     </select>
+
+    <select id="findByDevIds" resultMap="BaseResultMap" parameterType="java.util.List">
+        select
+        <include refid="Base_Column_List"/>
+        from gis_dev_ext gdx
+        <where>
+            delete_flag = FALSE
+            <if test="devIds != null and devIds.size > 0">
+                and dev_id in
+                <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    
+     <select id="getGeomByDevIdToWGS" parameterType="string" resultType="string">
+        SELECT ST_AsText(st_transform(geom, 4326)) geom FROM gis_dev_ext gdx where dev_id = #{devId}
+    </select>
+
+    <select id="getPointByDevIdToWGS" parameterType="string" resultType="com.jdrx.gis.beans.vo.basic.PointVO">
+        SELECT st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y
+        FROM gis_dev_ext gdx
+        where dev_id = #{devId}
+    </select>
+
+    <select id="getValveByDevId" parameterType="string" resultType="com.jdrx.gis.beans.dto.analysis.NodeDTO">
+        SELECT code,dev_id as dev_id,st_x(ST_Transform((geom),4326)) as x,st_y(st_astext(ST_Transform((geom),4326))) as y
+        FROM gis_dev_ext gdx
+        WHERE dev_id = #{devId}
+    </select>
+
+    <select id="getAllPoints" resultType="com.jdrx.gis.beans.vo.basic.NeoNodeVO">
+        select dev_id as devID,code,name,(belong_to::TEXT) as belongTo,(st_x(geom)::TEXT) as x,(st_y(geom)::TEXT) as y
+        from public.gis_dev_ext gdx
+        where caliber is NULL and delete_flag = FALSE
+    </select>
+
+    <select id="getAllLines" resultType="com.jdrx.gis.beans.vo.basic.NeoRelVO">
+        select dev_id as relationId,material,caliber,(belong_to::TEXT) as belongTo,data_info::jsonb->>'startCode' as startCode,data_info::jsonb->>'endCode' as endCode
+        from public.gis_dev_ext gdx
+        where caliber is NOT NULL and delete_flag = FALSE
+    </select>
 </mapper>

@@ -391,4 +391,19 @@
             ON a.type_id = b.typeid
         ) c
     </select>
+
+    <select id="findByDevIds" resultMap="BaseResultMap" parameterType="java.util.List">
+        select
+        <include refid="Base_Column_List"/>
+        from share_dev sd
+        <where>
+            del_flag = 0
+            <if test="devIds != null and devIds.size > 0">
+                and id in
+                <foreach collection="devIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

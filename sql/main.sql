@@ -526,6 +526,104 @@ COMMENT ON COLUMN gis_correction_record_detail.update_at IS '修改时间';
 COMMENT ON COLUMN gis_correction_record_detail.belong_to IS '权属单位';
 COMMENT ON TABLE gis_correction_record_detail is '纠错记录详情表';
 
+-- [19]
+DROP TABLE IF EXISTS share_dev_edit_log;
+CREATE TABLE share_dev_edit_log (
+	id serial8 primary key,
+	ver_num int8 not null,
+  dev_id char(12) not null,
+  type_id int8 NOT NULL,
+  name varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  lng varchar(16) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  lat varchar(16) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  addr varchar(128) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  del_flag int2 NOT NULL DEFAULT 0,
+  create_by varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_by varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN share_dev_edit_log.id IS '主键';
+COMMENT ON COLUMN share_dev_edit_log.ver_num IS '版本号';
+COMMENT ON COLUMN share_dev_edit_log.type_id IS '设备类型ID';
+COMMENT ON COLUMN share_dev_edit_log.name IS '名称';
+COMMENT ON COLUMN share_dev_edit_log.lng IS '经度';
+COMMENT ON COLUMN share_dev_edit_log.lat IS '纬度';
+COMMENT ON COLUMN share_dev_edit_log.addr IS '详细地址';
+COMMENT ON COLUMN share_dev_edit_log.del_flag IS '是否删除,0-正常，1-删除';
+COMMENT ON COLUMN share_dev_edit_log.create_by IS '创建人';
+COMMENT ON COLUMN share_dev_edit_log.create_at IS '创建时间';
+COMMENT ON COLUMN share_dev_edit_log.update_by IS '修改人';
+COMMENT ON COLUMN share_dev_edit_log.update_at IS '修改时间';
+COMMENT ON TABLE share_dev_edit_log is '设备信息变更流水表';
+
+-- [20]
+DROP TABLE IF EXISTS gis_dev_edit_log;
+CREATE TABLE gis_dev_edit_log (
+  id serial8 primary key,
+  ver_num int8 not null,
+  dev_id char(12) NOT NULL,
+  name varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  code varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  caliber int4,
+  material varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  geom geometry not null,
+  tpl_type_id int8 NOT NULL,
+  data_info jsonb NOT NULL,
+  belong_to int8 not null,
+  pic_urls varchar(512)  COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  video_urls varchar(512)  COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  delete_flag bool NOT NULL DEFAULT false,
+  create_by varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_by varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN gis_dev_edit_log.id IS '主键';
+COMMENT ON COLUMN gis_dev_edit_log.ver_num IS '版本号';
+COMMENT ON COLUMN gis_dev_edit_log.dev_id IS '设备ID';
+COMMENT ON COLUMN gis_dev_edit_log.name IS '设备名称';
+COMMENT ON COLUMN gis_dev_edit_log.code IS '设备编码';
+COMMENT ON COLUMN gis_dev_edit_log.caliber IS '管径';
+COMMENT ON COLUMN gis_dev_edit_log.material IS '材质';
+COMMENT ON COLUMN gis_dev_edit_log.geom IS '空间信息';
+COMMENT ON COLUMN gis_dev_edit_log.tpl_type_id IS '模板类型ID';
+COMMENT ON COLUMN gis_dev_edit_log.data_info IS 'JSON数据';
+COMMENT ON COLUMN gis_dev_edit_log.belong_to IS '权属单位';
+COMMENT ON COLUMN gis_dev_edit_log.pic_urls IS '图片地址';
+COMMENT ON COLUMN gis_dev_edit_log.video_urls IS '视频地址';
+COMMENT ON COLUMN gis_dev_edit_log.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_dev_edit_log.create_by IS '创建人';
+COMMENT ON COLUMN gis_dev_edit_log.create_at IS '创建时间';
+COMMENT ON COLUMN gis_dev_edit_log.update_by IS '修改人';
+COMMENT ON COLUMN gis_dev_edit_log.update_at IS '修改时间';
+COMMENT ON TABLE gis_dev_edit_log is '设备扩展信息变更流水表';
+
+-- [21]
+DROP TABLE IF EXISTS gis_dev_ver;
+CREATE TABLE gis_dev_ver (
+  id serial8 primary key,
+  command int2 not null,
+  remark varchar(64) not null default '',
+  delete_flag bool NOT NULL DEFAULT false,
+  create_by varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_by varchar(32) COLLATE pg_catalog.default NOT NULL DEFAULT ''::character varying,
+  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+COMMENT ON COLUMN gis_dev_ver.id IS '主键';
+COMMENT ON COLUMN gis_dev_ver.command IS '操作 1-增加，2-修改，3-删除';
+COMMENT ON COLUMN gis_dev_ver.remark IS '备注';
+COMMENT ON COLUMN gis_dev_ver.delete_flag IS '是否删除';
+COMMENT ON COLUMN gis_dev_ver.create_by IS '创建人';
+COMMENT ON COLUMN gis_dev_ver.create_at IS '创建时间';
+COMMENT ON COLUMN gis_dev_ver.update_by IS '修改人';
+COMMENT ON COLUMN gis_dev_ver.update_at IS '修改时间';
+COMMENT ON TABLE gis_dev_ver is '设备版本';
+
 ------------------------------增加唯一性约束begin-----------------------
 -- 数据字典中，同一类型下不能有重复的名称和值
 alter table dict_detail add constraint uk_t_n_v unique(type_id,name,val);

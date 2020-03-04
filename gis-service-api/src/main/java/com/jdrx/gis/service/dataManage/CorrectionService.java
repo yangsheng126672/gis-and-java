@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jdrx.gis.beans.constants.basic.EAuditStatus;
+import com.jdrx.gis.beans.constants.basic.EDBCommand;
 import com.jdrx.gis.beans.constants.basic.EPassStatus;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.AuditCorrectionDTO;
@@ -16,6 +17,7 @@ import com.jdrx.gis.beans.entity.basic.ShareDevPO;
 import com.jdrx.gis.beans.entity.basic.ShareDevTypePO;
 import com.jdrx.gis.beans.entity.dataManage.GISCorrectionDetailPO;
 import com.jdrx.gis.beans.entity.dataManage.GISCorrectionPO;
+import com.jdrx.gis.beans.entity.log.GisDevVer;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.datamanage.HistoryRecordVO;
 import com.jdrx.gis.beans.vo.query.FieldNameVO;
@@ -26,11 +28,11 @@ import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
 import com.jdrx.gis.dao.basic.autoGenerate.GISCorrectionPOMapper;
 import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.filter.assist.OcpService;
+import com.jdrx.gis.service.log.GisDevVerService;
 import com.jdrx.gis.service.query.AttrQueryService;
 import com.jdrx.gis.service.query.QueryDevService;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.platform.jdbc.beans.vo.PageVO;
-import com.sun.tools.internal.xjc.reader.dtd.bindinfo.BIAttribute;
 import org.postgresql.util.PGobject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -83,6 +85,8 @@ public class CorrectionService {
 	@Autowired
 	private OcpService ocpService;
 
+	@Autowired
+	private GisDevVerService gisDevVerService;
 	/**
 	 * 报错纠错信息
 	 * @param dto
@@ -291,13 +295,22 @@ public class CorrectionService {
 					String caliberTypeName = queryDevService.getCaliberNameByCaliber(caliber);
 					typeName = caliberTypeName;
 				}
-				ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.selectByTypeName(typeName);
-				shareDevPO.setTypeId(shareDevTypePO.getId());
-				shareDevPO.setName(typeName);
-				valueObj.put(GISConstants.GIS_ATTR_NAME, typeName);
+				if (!StringUtils.isEmpty(typeName)) {
+					ShareDevTypePO shareDevTypePO = shareDevTypePOMapper.selectByTypeName(typeName);
+					shareDevPO.setTypeId(shareDevTypePO.getId());
+					shareDevPO.setName(typeName);
+					valueObj.put(GISConstants.GIS_ATTR_NAME, typeName);
+				}
 				if (!StringUtils.isEmpty(address)) {
 					shareDevPO.setAddr(address);
 				}
+				// 存历史
+				ShareDevPO shareDevLog = shareDevPOMapper.selectByPrimaryKey(devId);
+				GisDevVer gisDevVer = new GisDevVer();
+				gisDevVer.setCreateAt(now);
+				gisDevVer.setCreateBy(loginUserName);
+				gisDevVer.setCommand(EDBCommand.UPDATE.getVal().shortValue());
+				gisDevVerService.saveDevEditLog(gisDevVer, shareDevLog, gisDevExtPO);
 
 				PGobject dataInfoPG = new PGobject();
 				dataInfoPG.setValue(JSONObject.toJSONString(valueObj));

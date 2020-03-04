@@ -307,6 +307,7 @@ public interface GISDevExtPOMapper {
 	 */
 	@NoAuthData
 	String getLngLatByDevId(@Param("devId") String devId);
+
 	/**
 	 * 根据编码获得与之相连的管线
 	 * @param
@@ -322,5 +323,47 @@ public interface GISDevExtPOMapper {
 	 */
 	@NoAuthData
 	Integer findCountByCodes(@Param("codeList") Set codeList);
+
+	/**
+	 * 根据ID集获取数据
+	 * @param devIds
+	 * @return
+	 */
+	@NoAuthData
+	List<GISDevExtPO> findByDevIds(@Param("devIds") List<String> devIds);
+	/**
+	 * 根据devId获取空间信息
+	 * @param devId
+	 * @return
+	 */
+	@NoAuthData
+	String getGeomByDevIdToWGS(@Param("devId") String devId);
+
+	/**
+	 * 根据devId获取经纬度
+	 * @param devId
+	 * @return
+	 */
+	@NoAuthData
+	PointVO getPointByDevIdToWGS(@Param("devId") String devId);
+
+	/**
+	 * 获取爆管阀门详细信息
+	 * @return
+	 */
+	@NoAuthData
+	NodeDTO getValveByDevId(@Param("devId") String devId);
+
+	/**
+	 * 获取所有点设备信息
+	 * @return
+	 */
+	List<NeoNodeVO> getAllPoints();
+
+	/**
+	 * 获取所有管线设备信息
+	 * @return
+	 */
+	List<NeoRelVO> getAllLines();
 }
 

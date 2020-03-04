@@ -4,34 +4,39 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.analysis.NodeDTO;
 import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entity.basic.DictDetailPO;
-import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
-import com.jdrx.gis.beans.entity.neo4j.Neo4jGd;
 import com.jdrx.gis.beans.entity.neo4j.Neo4jGdline;
+import com.jdrx.gis.beans.vo.basic.NeoNodeVO;
+import com.jdrx.gis.beans.vo.basic.NeoRelVO;
 import com.jdrx.gis.beans.vo.datamanage.NeoLineVO;
-import com.jdrx.gis.beans.vo.datamanage.NeoPointVO;
 import com.jdrx.gis.beans.vo.datamanage.REdge;
 import com.jdrx.gis.beans.vo.datamanage.RNode;
 import com.jdrx.gis.config.DictConfig;
+import com.jdrx.gis.config.PathConfig;
 import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.service.basic.DictDetailService;
-import org.apache.poi.ss.extractor.ExcelExtractor;
+import au.com.bytecode.opencsv.CSVWriter;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Value;
 import org.neo4j.driver.v1.types.Node;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @Description
@@ -54,6 +59,11 @@ public class Neo4jUtil {
     private DictConfig dictConfig;
 
     final static ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    private PathConfig pathConfig;
+
+	private static final org.slf4j.Logger Logger = LoggerFactory.getLogger(Neo4jUtil.class);
 
     static {
         /**
@@ -707,6 +717,7 @@ public class Neo4jUtil {
 
 	/**
 	 * 创建管点
+	 *
 	 * @param filePath
 	 */
 	public void createNodesByCsvPoint(String filePath) {
@@ -721,7 +732,7 @@ public class Neo4jUtil {
 			.append(" SET gd.nodetype=point.nodetype")
 			.append(",gd.x=point.").append(GISConstants.X_CHN)
 			.append(",gd.y=point.").append(GISConstants.Y_CHN)
-                .append(",gd.dev_id=point.").append(GISConstants.DEV_ID)
+			.append(",gd.dev_id=point.").append(GISConstants.DEV_ID)
 			.append(",gd.belong_to=point.").append(GISConstants.AUTH_ID_S);
 		session.run(String.valueOf(sb));
 	}
@@ -733,19 +744,19 @@ public class Neo4jUtil {
 	public void createNodesByCsvLine(String filePath) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("using periodic commit ")
-				.append(GISConstants.IMPORT_MAX_ROWS)
-				.append(" LOAD CSV WITH HEADERS FROM \" ")
-				.append(filePath)
-				.append("\" AS line ")
-				.append(" match (s:gd{name:line.").append(GISConstants.LINE_START_CODE_CHN).append("})")
-				.append(" match (e:gd{name:line.").append(GISConstants.LINE_END_CODE_CHN).append("})")
-				.append(" merge (s) - [gdline:gdline{name:line.").append(GISConstants.LINE_START_CODE_CHN)
-				.append("+\"-\"+")
-				.append("line.").append(GISConstants.LINE_END_CODE_CHN).append("}]->(e)")
-				.append(" SET gdline.relationID=").append("line.").append(GISConstants.DEV_ID)
-				.append(",gdline.gj=").append("line.").append(GISConstants.GIS_ATTR_CALIBER)
-                .append(",gdline.belong_to=").append("line.").append(GISConstants.AUTH_ID_S)
-				.append(",gdline.cztype=").append("line.").append(GISConstants.MATERIAL_CHN);
+			.append(GISConstants.IMPORT_MAX_ROWS)
+			.append(" LOAD CSV WITH HEADERS FROM \" ")
+			.append(filePath)
+			.append("\" AS line ")
+			.append(" match (s:gd{name:line.").append(GISConstants.LINE_START_CODE_CHN).append("})")
+			.append(" match (e:gd{name:line.").append(GISConstants.LINE_END_CODE_CHN).append("})")
+			.append(" merge (s) - [gdline:gdline{name:line.").append(GISConstants.LINE_START_CODE_CHN)
+			.append("+\"-\"+")
+			.append("line.").append(GISConstants.LINE_END_CODE_CHN).append("}]->(e)")
+			.append(" SET gdline.relationID=").append("line.").append(GISConstants.DEV_ID)
+			.append(",gdline.gj=").append("line.").append(GISConstants.GIS_ATTR_CALIBER)
+            .append(",gdline.belong_to=").append("line.").append(GISConstants.AUTH_ID_S)
+			.append(",gdline.cztype=").append("line.").append(GISConstants.MATERIAL_CHN);
 		session.run(String.valueOf(sb));
 	}
 
@@ -806,5 +817,385 @@ public class Neo4jUtil {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+	/**
+     * 更新图数据库管点类型
+     * @param devId
+     * @param typeId
+     * @param lable
+     * @return
+     */
+    public boolean updateNodeType(String devId,Long typeId,String lable){
+        try {
+            String nodeType;
+            List<DictDetailPO> details = dictDetailService.findDetailsByTypeVal(dictConfig.getCloseableValveTypeIds());
+            List<Long> typeIds = null;
+            if (Objects.nonNull(details)) {
+                typeIds = Lists.newArrayList();
+                for (DictDetailPO dictDetailPO : details) {
+                    typeIds.add(Long.parseLong(dictDetailPO.getVal()));
+                }
+            }
+            if (typeIds.contains(typeId)) {
+                nodeType = GISConstants.NEO_NODE_VALVE;
+            } else {
+                nodeType = GISConstants.NEO_NODE_NORMAL;
+            }
+            String cypherSql = String.format("match (n:%s{dev_id:\"%s\"}) set n.nodetype=\"%s\" return n", lable,devId,nodeType);
+            session.run(cypherSql);
+
+            return true;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 创建逻辑管网
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public Boolean mergeLJNets(){
+        String name = null;
+        String startCode1;
+        String startCode2;
+        String endCode1;
+        String endCode2;
+        String code;
+        String line1;
+        String line2;
+        List<String> typeNameList = new ArrayList<>();
+        List<Value> values = new ArrayList<>();
+        try {
+            //删除原来的逻辑管网数据
+            deleteNeoNets(GISConstants.NEO_POINT_LJ,GISConstants.NEO_LINE_LJ);
+            //创建最新的逻辑管网
+            createNeoNets(GISConstants.NEO_POINT_LJ,GISConstants.NEO_LINE_LJ);
+            //获取爆管阀门类型
+            List<DictDetailPO> details = dictDetailService.findDetailsByTypeVal(dictConfig.getCloseableValveTypeIds());
+            for (DictDetailPO dictDetailPO : details) {
+                typeNameList.add(dictDetailPO.getName());
+            }
+            List<NeoNodeVO> points = gisDevExtPOMapper.getAllPoints();
+            for (NeoNodeVO po : points) {
+                name = po.getName();
+                code = po.getCode();
+                //判断当前节点是否是阀门，如果是阀门，跳过
+                if (typeNameList.contains(name)) {
+                    continue;
+                }
+                //查询这个节点附带的关系有几条  如果是两条，合并这两条关系
+                values = getAllRelFromNode(GISConstants.NEO_POINT_LJ, code);
+                if (values.size() == 2) {
+                    line1 = values.get(0).asMap().get(GISConstants.NEO_POINT_NAME).toString();
+                    line2 = values.get(1).asMap().get(GISConstants.NEO_POINT_NAME).toString();
+                    startCode1 = line1.substring(0,line1.indexOf("-"));
+                    endCode1 = line1.substring(line1.indexOf("-")+1);
+                    startCode2 = line2.substring(0,line2.indexOf("-"));
+                    endCode2 = line2.substring(line2.indexOf("-")+1);
+
+                    String repeatNM = null;
+                    StringBuffer nm_new = null;
+                    RNode firstNode = new RNode();
+                    RNode secondNode = new RNode();
+                    RNode commonNode = new RNode();
+                    //设置管点lable
+                    firstNode.setLabel(GISConstants.NEO_POINT_LJ);
+                    secondNode.setLabel(GISConstants.NEO_POINT_LJ);
+                    commonNode.setLabel(GISConstants.NEO_POINT_LJ);
+                    //创建关系并设置属性
+                    REdge edge = new REdge();
+                    edge.setLabel(GISConstants.NEO_LINE_LJ);
+                    //判断重复的节点
+                    if (startCode1.equals(startCode2)) {
+                        repeatNM = startCode1;
+                        nm_new = new StringBuffer().append(endCode1)
+                                .append("-")
+                                .append(endCode2);
+                        edge.setName(String.valueOf(nm_new));
+                        firstNode.setName(endCode1);
+                        secondNode.setName(endCode2);
+
+                    } else if (startCode1.equals(endCode2)) {
+                        repeatNM = startCode1;
+                        nm_new = new StringBuffer().append(endCode1)
+                                .append("-")
+                                .append(startCode2);
+                        edge.setName(String.valueOf(nm_new));
+                        firstNode.setName(endCode1);
+                        secondNode.setName(startCode2);
+                    } else if (endCode1.equals(startCode2)) {
+                        repeatNM = endCode1;
+                        nm_new = new StringBuffer().append(startCode1)
+                                .append("-")
+                                .append(endCode2);
+                        edge.setName(String.valueOf(nm_new));
+                        firstNode.setName(startCode1);
+                        secondNode.setName(endCode2);
+
+                    } else if (endCode1.equals(endCode2)) {
+                        repeatNM = endCode1;
+                        nm_new = new StringBuffer().append(startCode1)
+                                .append("-")
+                                .append(startCode2);
+                        edge.setName(String.valueOf(nm_new));
+                        firstNode.setName(startCode1);
+                        secondNode.setName(startCode2);
+                    }
+                    //设置edg边
+                    edge.addProperty(GISConstants.NEO_LINE_NAME, edge.getName());
+                    //合并管线
+                    commonNode.setName(repeatNM);
+                    mergeRelation(commonNode, firstNode, secondNode, edge);
+                }
+            }
+            return true;
+
+        }catch (Exception e){
+            Logger.info(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 获取节点附属所有关系
+     * @param lable
+     * @param name
+     * @return
+     */
+    public List<Value> getAllRelFromNode(String lable , String name){
+        String cypherSql = String.format("MATCH (n:%s{name:\"%s\"})-[r]-(b) return r  ", lable,name);
+        StatementResult result = session.run(cypherSql);
+        List<Value> values = new ArrayList<>();
+        while (result.hasNext()){
+            Record record = result.next();
+            values.addAll(record.values());
+        }
+        return values;
+    }
+
+    /**
+     * 根据公共节点，合并两边关系
+     * @param commonNode
+     * @param firstNode
+     * @param secondNode
+     * @param edge
+     * 先删除两边关系，再删除节点，最后连接新的起始节点
+     */
+    public void mergeRelation(RNode commonNode,RNode firstNode,RNode secondNode,REdge edge){
+        try {
+            //删除两边关系
+            String cypherSql = String.format("match (n:%s{name:\"%s\"})-[r]-(b) delete r" ,commonNode.getLabel(),commonNode.getName());
+            session.run(cypherSql);
+            //删除公共节点
+            String delSql = String.format("match (n:%s{name:\"%s\"}) delete n",commonNode.getLabel(),commonNode.getName());
+            session.run(delSql);
+            //创建新的起始节点关系
+            String addLineSql = String.format("MATCH (n:%s{name:\"%s\"}),(b:%s{name:\"%s\"})\n" +
+                    "CREATE (n)-[r:%s]->(b) RETURN r",firstNode.getLabel(),firstNode.getName(),secondNode.getLabel(),secondNode.getName(),edge.getLabel()+mapper.writeValueAsString(edge.getProperties()));
+            StatementResult result = session.run(addLineSql);
+            if (!result.hasNext()){
+                System.out.println(firstNode.getName()+"-"+secondNode.getName()+"关系创建失败！");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 删除图数据库管网
+     * @param nodeLable
+     * @param lineLable
+     * @return
+     */
+    public Boolean deleteNeoNets(String nodeLable,String lineLable){
+        try {
+            //先删除管线
+            String delSql = String.format("MATCH p=()-[r:%s]->() delete r",lineLable);
+            StatementResult result = session.run(delSql);
+            //再删除管点
+            String delNodeSql = String.format("MATCH (n:%s) delete n",nodeLable);
+            StatementResult result2 = session.run(delNodeSql);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    /**
+     * 创建图数据库管网
+     * @param nodeLable
+     * @param lineLable
+     * @return
+     */
+    public Boolean createNeoNets(String nodeLable,String lineLable){
+        List<Map<String,Object>> pointMapList = new ArrayList<>();
+        Map<String,Object> pointMap;
+        List<Map<String,Object>> lineMapList = new ArrayList<>();
+        Map<String,Object> lineMap;
+        try {
+            //创建管点csv
+            List<DictDetailPO> dictDetailPOS = dictDetailService.findDetailsByTypeVal(dictConfig.getCloseableValveTypeIds());
+            List<NeoNodeVO> points = gisDevExtPOMapper.getAllPoints();
+            for (NeoNodeVO po: points){
+                pointMap = new HashMap<>();
+                pointMap.put(GISConstants.NEO_POINT_NAME,po.getCode());
+                pointMap.put(GISConstants.NEO_POINT_DEVID,po.getDevId());
+                pointMap.put(GISConstants.NEO_POINT_X,po.getX());
+                pointMap.put(GISConstants.NEO_POINT_Y,po.getY());
+                pointMap.put(GISConstants.NODE_TYPE,getNodeType(po.getName(),dictDetailPOS));
+                pointMap.put(GISConstants.NEO_BELONGTO,po.getBelongTo());
+                pointMapList.add(pointMap);
+            }
+            String pointFilePath = writeNeoCSV(pointMapList,"point");
+            createNodesByCsv(pointFilePath,nodeLable);
+
+            List<NeoRelVO> lines = gisDevExtPOMapper.getAllLines();
+            for (NeoRelVO  relVO:lines){
+                lineMap = new HashMap<>();
+                lineMap.put("startCode",relVO.getStartCode());
+                lineMap.put("endCode",relVO.getEndCode());
+                lineMap.put(GISConstants.NEO_LINE_ID,relVO.getRelationId());
+                lineMap.put(GISConstants.NEO_BELONGTO,relVO.getBelongTo());
+                lineMap.put(GISConstants.NEO_LINE_CALIBER,relVO.getCaliber());
+                lineMap.put(GISConstants.NEO_LINE_MATERIAL,relVO.getMaterial());
+                lineMapList.add(lineMap);
+            }
+            String lineFilePath = writeNeoCSV(lineMapList,"line");
+            createLineByCsv(lineFilePath,nodeLable,lineLable);
+
+        }catch (Exception e){
+            Logger.error(e.getMessage());
+        }
+        return  true;
+    }
+
+    /**
+     * 创建上传图数据库的csv
+     * @param pointDataList
+     * @param title
+     * @return
+     */
+    public String writeNeoCSV(List<Map<String,Object>>pointDataList,String title){
+        String path = "";
+        try {
+            Set<String> headerSet = Sets.newHashSet();
+            if (Objects.nonNull(pointDataList) && pointDataList.size() > 0) {
+                Set<String> headers = pointDataList.get(0).keySet();
+                headerSet.addAll(headers);
+            }
+            String filePath = pathConfig.getDownloadPath() + "/" + title + ".csv";
+            CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8),
+                    CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
+            writer.writeNext(StringUtils.toStringArray(headerSet));
+            int total = pointDataList.size();
+            int pageSize = GISConstants.EXPORT_PAGESIZE;
+            int pageTotal;
+            if (total <= pageSize) {
+                pageTotal = 1;
+            } else {
+                pageTotal = total / pageSize == 0 ? total / pageSize : total / pageSize + 1;
+            }
+            int pageNum = 0;
+            while (pageTotal-- > 0) {
+                List<Map<String, Object>> subList = pointDataList.subList(pageNum * pageSize,
+                        (pageNum + 1) * pageSize > total ? total : (pageNum + 1) * pageSize);
+                for (Map<String, Object> map : subList) {
+                    Iterator<String> iterator = headerSet.iterator();
+                    String[] rows = new String[map.size()];
+                    for (int i = 0; i < headerSet.size(); i++) {
+                        String header = iterator.hasNext() ? iterator.next() : "";
+                        String txt = Objects.nonNull(map.get(header)) ? String.valueOf(map.get(header)) : "";
+                        rows[i] = txt;
+                    }
+                    writer.writeNext(rows);
+                }
+                pageNum++;
+            }
+            writer.flush();
+            writer.close();
+            path = JavaFileToFormUpload.send(pathConfig.getUploadFileUrl(), filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return path;
+    }
+
+    /**
+     * 根据管点名称获取管点类型
+     * @param name
+     * @param dictDetailPOS
+     * @return
+     */
+   public String getNodeType(String name,List<DictDetailPO> dictDetailPOS){
+        String type = GISConstants.NEO_NODE_NORMAL;
+        try {
+            List<String> typeNameList = new ArrayList<>();
+            for(DictDetailPO po:dictDetailPOS){
+                typeNameList.add(po.getName());
+            }
+            if (typeNameList.contains(name)){
+                type = GISConstants.NEO_NODE_VALVE;
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return type;
+   }
+
+    /**
+     * 创建管点
+     * @param filePath
+     * @param lable
+     */
+    public void createNodesByCsv(String filePath,String lable) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("using periodic commit ")
+                .append(GISConstants.IMPORT_MAX_ROWS)
+                .append(" LOAD CSV WITH HEADERS FROM \" ")
+                .append(filePath)
+                .append("\" AS point ")
+                .append("merge (n:").append(lable)
+                .append("{name:point.name})")
+                .append(" SET n.dev_id=point.dev_id")
+                .append(",n.nodetype=point.nodetype")
+                .append(",n.x=point.x")
+                .append(",n.y=point.y")
+                .append(",n.belong_to=point.belong_to");
+        session.run(String.valueOf(sb));
+    }
+
+    /**
+     * 创建管线
+     * @param filePath
+     * @param nodeLable
+     * @param lineLable
+     */
+    public void createLineByCsv(String filePath,String nodeLable,String lineLable) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("using periodic commit ")
+                .append(GISConstants.IMPORT_MAX_ROWS)
+                .append(" LOAD CSV WITH HEADERS FROM \" ")
+                .append(filePath)
+                .append("\" AS line ")
+                .append(" match (s:").append(nodeLable)
+                .append("{name:line.startCode})")
+                .append(" match (e:").append(nodeLable)
+                .append("{name:line.endCode})")
+                .append(" merge (s) - [r:").append(lineLable)
+                .append("{name:line.startCode")
+                .append("+\"-\"+")
+                .append("line.endCode").append("}]->(e)")
+                .append(" SET r.relationID=line.relationID")
+                .append(",r.belong_to = line.belong_to")
+                .append(",r.gj=").append("line.").append(GISConstants.GIS_ATTR_CALIBER)
+                .append(",r.cztype=").append("line.").append(GISConstants.GIS_ATTR_MATERIAL);
+        session.run(String.valueOf(sb));
     }
 }

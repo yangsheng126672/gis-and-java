@@ -1,9 +1,14 @@
 package com.jdrx.gis.service.dataManage;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
+import com.jdrx.gis.beans.constants.basic.EDBCommand;
 import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.dataManage.*;
 import com.jdrx.gis.beans.entity.basic.*;
+import com.jdrx.gis.beans.entity.log.GisDevEditLog;
+import com.jdrx.gis.beans.entity.log.GisDevVer;
+import com.jdrx.gis.beans.entity.log.ShareDevEditLog;
 import com.jdrx.gis.beans.entity.user.SysOcpUserPo;
 import com.jdrx.gis.beans.vo.basic.FeatureVO;
 import com.jdrx.gis.beans.vo.basic.PointVO;
@@ -14,12 +19,17 @@ import com.jdrx.gis.dao.basic.GISDevExtPOMapper;
 import com.jdrx.gis.dao.basic.GisDevTplAttrPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevPOMapper;
 import com.jdrx.gis.dao.basic.ShareDevTypePOMapper;
+import com.jdrx.gis.dao.log.GisDevEditLogManualMapper;
+import com.jdrx.gis.dao.log.GisDevVerManualMapper;
+import com.jdrx.gis.dao.log.autoGenerate.GisDevEditLogMapper;
+import com.jdrx.gis.dao.log.autoGenerate.ShareDevEditLogMapper;
 import com.jdrx.gis.dao.query.DevQueryDAO;
 import com.jdrx.gis.dubboRpc.UserRpc;
 import com.jdrx.gis.filter.assist.OcpService;
 import com.jdrx.gis.service.analysis.NetsAnalysisService;
 import com.jdrx.gis.service.basic.DictDetailService;
 import com.jdrx.gis.service.basic.GISDeviceService;
+import com.jdrx.gis.service.log.GisDevVerService;
 import com.jdrx.gis.util.Neo4jUtil;
 import com.jdrx.platform.commons.rest.exception.BizException;
 import com.jdrx.share.service.SequenceDefineService;
@@ -81,6 +91,8 @@ public class DataEditorService {
     @Autowired
     private OcpService ocpService;
 
+   @Autowired
+   private GisDevVerService gisDevVerService;
 
     /**
      * 获取所有点类型
@@ -218,14 +230,14 @@ public class DataEditorService {
                 }
             }
             //增加data_info属性信息的belong_to字段
-            if (!map.containsKey("belong_to")) {
+            if (map.containsKey("belong_to")) {
                 String depId1 = String.valueOf(deptId);
                 String belongTo = "";
                 List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
                 for (DictDetailPO po : dictDetailPOList) {
                     if (po.getVal().equals(depId1)) {
                         belongTo = po.getName();
-                        map.put("belong_to", belongTo);
+                        map.replace("belong_to", belongTo);
                     }
                 }
             }
@@ -358,6 +370,12 @@ public class DataEditorService {
 
             shareDevPOMapper.insertSelective(shareDevPOLine1);
             shareDevPOMapper.insertSelective(shareDevPOLine2);
+            //保存至设备版本管理表中
+            GisDevVer gisDevVer = new GisDevVer();
+            gisDevVer.setCreateAt(new Date());
+            gisDevVer.setCreateBy(loginUserName);
+            gisDevVer.setCommand(EDBCommand.INSERT.getVal().shortValue());
+            gisDevVerService.saveDevEditLog(gisDevVer,shareDevPOLine,gisDevExtPOLine);
             String code = gisDevExtPOLine.getCode();
             if(neo4jUtil.saveToNeo4j(dto,devId,code.substring(0,code.indexOf("-")),devIdLine1,lineCode1,
                     code.substring(code.indexOf("-")+1),devIdLine2,lineCode2,deptId )){
@@ -380,7 +398,13 @@ public class DataEditorService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveShareNets(ShareAddedNetsDTO dto,Long userId, String token,String deptPath) throws BizException{
         try {
-            if((!saveSharePoint(dto.getPointList(),userId,token,deptPath)) ||(!savaShareLine(dto.getLineList(),userId,token,deptPath))){
+            GisDevVer gisDevVer = new GisDevVer();
+            SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
+            String loginUserName = sysOcpUserPo.getName();
+            gisDevVer.setCreateAt(new Date());
+            gisDevVer.setCreateBy(loginUserName);
+            gisDevVer.setCommand(EDBCommand.INSERT.getVal().shortValue());
+            if((!saveSharePoint(dto.getPointList(),userId,token,deptPath,gisDevVer)) ||(!savaShareLine(dto.getLineList(),userId,token,deptPath,gisDevVer))){
                 return false;
             }else {
                 return true;
@@ -395,7 +419,7 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean saveSharePoint(List<SharePointDTO> list,Long userId, String token,String deptPath) throws BizException{
+    public Boolean saveSharePoint(List<SharePointDTO> list,Long userId, String token,String deptPath,GisDevVer gisDevVer) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
@@ -426,15 +450,15 @@ public class DataEditorService {
                         map.put(name,"");
                     }
                 }
-                //增加data_info属性信息的belong_to字段
-                if (!map.containsKey("belong_to")) {
+                //修改data_info属性信息的belong_to字段
+                if (map.containsKey("belong_to")) {
                     String depId1 = String.valueOf(deptId);
                     String belongTo = "";
                     List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
                     for (DictDetailPO po : dictDetailPOList) {
                         if (po.getVal().equals(depId1)) {
                             belongTo = po.getName();
-                            map.put("belong_to", belongTo);
+                            map.replace("belong_to", belongTo);
                         }
                     }
                 }
@@ -470,6 +494,9 @@ public class DataEditorService {
                 }
                 gisDevExtPOMapper.insertSelective(po);
                 shareDevPOMapper.insertSelective(shareDevPO);
+                //数据备份到版本管理表中
+                gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,po);
+
             }
 
             return true;
@@ -485,7 +512,7 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean savaShareLine(List<ShareLineDTO> list,Long userId, String token,String deptPath) throws BizException{
+    public Boolean savaShareLine(List<ShareLineDTO> list,Long userId, String token,String deptPath,GisDevVer gisDevVer) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
@@ -521,18 +548,20 @@ public class DataEditorService {
                         map.put(name,"");
                     }
                 }
-                //增加data_info属性信息的belong_to字段
-                if (!map.containsKey("belong_to")) {
+                //修改data_info属性信息的belong_to字段
+                if (map.containsKey("belong_to")) {
                     String depId1 = String.valueOf(deptId);
                     String belongTo = "";
                     List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
                     for (DictDetailPO po : dictDetailPOList) {
                         if (po.getVal().equals(depId1)) {
                             belongTo = po.getName();
-                            map.put("belong_to", belongTo);
+                            map.replace("belong_to", belongTo);
                         }
                     }
                 }
+                //补全管线名称
+                map.replace(GISConstants.GIS_ATTR_NAME,getNameByCaliber(dto.getCaliber()));
                 String jsonStr = JSONObject.toJSONString(map);
                 PGobject jsonObject = new PGobject();
                 jsonObject.setValue(jsonStr);
@@ -569,6 +598,8 @@ public class DataEditorService {
                 //保存管线
                 gisDevExtPOMapper.insertSelective(gisDevExtPO);
                 shareDevPOMapper.insertSelective(shareDevPO);
+                //数据备份到版本管理表中
+                gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,gisDevExtPO);
             }
             return true;
         }catch (Exception e){
@@ -603,10 +634,15 @@ public class DataEditorService {
      * @return
      * @throws BizException
      */
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateGISDevExtAttr(Map<String,Object> map,Long userId, String token) throws BizException{
         try {
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
+            GisDevVer gisDevVer = new GisDevVer();
+            gisDevVer.setCreateAt(new Date());
+            gisDevVer.setCreateBy(loginUserName);
+            gisDevVer.setCommand(EDBCommand.UPDATE.getVal().shortValue());
             String code = null;
             if(!map.containsKey(GISConstants.GIS_ATTR_CODE)){
                 code = map.get(GISConstants.GIS_ATTR_QDBM).toString()+"-"+map.get(GISConstants.GIS_ATTR_ZDBM).toString();
@@ -619,7 +655,8 @@ public class DataEditorService {
                 throw new BizException("查询设备失败！");
             }
             ShareDevPO shareDevPO = shareDevPOMapper.selectByPrimaryKey(gisDevExtPO.getDevId());
-
+            //数据备份到版本管理表中
+            gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,gisDevExtPO);
             List<DictDetailPO> dictDetailPOS = detailService.findDetailsByTypeVal(dictConfig.getLineType());
             List<Long> list = shareDevTypePOMapper.getAllTypeIdByTopId(Long.valueOf(dictDetailPOS.get(0).getVal()));
             //判断是否是线类型
@@ -671,6 +708,8 @@ public class DataEditorService {
                     gisDevExtPO.setName(name);
                     long tplTypeId = shareDevTypePOMapper.getIdByName(name);
                     gisDevExtPO.setTplTypeId(tplTypeId);
+                    //更新neo4j管点类型
+                    neo4jUtil.updateNodeType(gisDevExtPO.getDevId(),tplTypeId,GISConstants.NEO_POINT);
                     //更新share_dev中的name和typeId字段
                     shareDevPO.setName(name);
                     shareDevPO.setTypeId(tplTypeId);
@@ -778,12 +817,25 @@ public class DataEditorService {
             gisDevExtPO.setGeom(transformGeom);
             gisDevExtPO.setUpdateBy(loginUserName);
             gisDevExtPO.setUpdateAt(new Date());
+            // 记录版本历史
+	        GisDevVer gisDevVer = new GisDevVer();
+	        gisDevVer.setCreateAt(new Date());
+	        gisDevVer.setCreateBy(loginUserName);
+	        gisDevVer.setCommand(EDBCommand.UPDATE.getVal().shortValue());
+	        gisDevVerService.saveDevEditLog(gisDevVer, dto.getDevId());
             gisDevExtPOMapper.updateByPrimaryKeySelective(gisDevExtPO);
             //同步到share_dev中
             gisDevExtPOMapper.updateShareDev(String.format("%.3f",dto.getX()),String.format("%.3f",dto.getY()),dto.getDevId());
 
             //查找相关联的管线
             List<GISDevExtPO> gisDevExtPOLines = gisDevExtPOMapper.selectLineByCode(gisDevExtPO.getCode());
+            List<String> devIds = Lists.newArrayList();
+            if (Objects.nonNull(gisDevExtPOLines)){
+            	gisDevExtPOLines.forEach(gisDevExtPO1 -> {
+            		devIds.add(gisDevExtPO1.getDevId());
+	            });
+            }
+            gisDevVerService.saveDevEditLogs(gisDevVer, devIds.toArray(new String[devIds.size()]));
             for(GISDevExtPO po: gisDevExtPOLines ){
                 Object datainfo = po.getDataInfo();
                 JSONObject jb = JSONObject.parseObject(datainfo.toString());
@@ -850,6 +902,10 @@ public class DataEditorService {
             //获得创建人
             SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
             String loginUserName = sysOcpUserPo.getName();
+            GisDevVer gisDevVer = new GisDevVer();
+            gisDevVer.setCreateAt(new Date());
+            gisDevVer.setCreateBy(loginUserName);
+            gisDevVer.setCommand(EDBCommand.INSERT.getVal().shortValue());
             Long deptId = ocpService.setDeptPath(deptPath).getUserWaterworksDeptId();
             List<String> devIdStr = dto.getDevIds();
             if(2 == devIdStr.size()){
@@ -870,19 +926,29 @@ public class DataEditorService {
                     Map<String,Object> mapAttr = dto.getMapAttr();
                     mapAttr.put(GISConstants.GIS_ATTR_DEVID,devId);
                     mapAttr.put(GISConstants.GIS_ATTR_PIPE_LENGTH,pipe_length);
-                    //增加data_info属性信息的belong_to字段
-                    if (!mapAttr.containsKey("belong_to")) {
+
+                    List<GisDevTplAttrPO> list1 = gisDevTplAttrPOMapper.selectNameByTqlId(2);//获取管线的全部字段英文名称
+                    for (GisDevTplAttrPO gis:list1) {
+                        String name = gis.getFieldName();
+                        //如果map集合的key中没有某些管点属性英文字段，则对其增加key并赋值为""
+                        if(!mapAttr.containsKey(name)){
+                            mapAttr.put(name,"");
+                        }
+                    }
+                    //修改data_info属性信息的belong_to字段
+                    if (mapAttr.containsKey("belong_to")) {
                         String depId1 = String.valueOf(deptId);
                         String belongTo = "";
                         List<DictDetailPO> dictDetailPOList = detailService.findDetailsByTypeVal(dictConfig.getAuthId());
                         for (DictDetailPO po : dictDetailPOList) {
                             if (po.getVal().equals(depId1)) {
                                 belongTo = po.getName();
-                                mapAttr.put("belong_to", belongTo);
+                                mapAttr.replace("belong_to", belongTo);
                             }
                         }
                     }
-
+                    //补全管线名称
+                    mapAttr.replace(GISConstants.GIS_ATTR_NAME,getNameByCaliber(dto.getCaliber()));
                     String jsonStr = JSONObject.toJSONString(mapAttr);
                     PGobject jsonObject = new PGobject();
 
@@ -918,6 +984,8 @@ public class DataEditorService {
                     }
                     gisDevExtPOMapper.insertSelective(gisDevExtPO);
                     shareDevPOMapper.insertSelective(shareDevPO);
+                    //数据备份到版本管理表中
+                    gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,gisDevExtPO);;
 
                 }
 
@@ -978,6 +1046,12 @@ public class DataEditorService {
         SysOcpUserPo sysOcpUserPo = userRpc.getUserById(userId, token);
         String loginUserName = sysOcpUserPo.getName();
          Date date = new Date();
+        GisDevVer gisDevVer = new GisDevVer();
+        gisDevVer.setCreateAt(date);
+        gisDevVer.setCreateBy(loginUserName);
+        gisDevVer.setCommand(EDBCommand.DELETE.getVal().shortValue());
+        GISDevExtPO po = gisDevExtPOMapper.getDevExtByDevId(devId);
+        ShareDevPO shareDevPO = shareDevPOMapper.selectByPrimaryKey(devId);
             FeatureVO featureVO = gisDevExtPOMapper.findFeaturesByDevId(devId);
             if (("POINT".equals(featureVO.getType()))) {
                 if (neo4jUtil.getPointAmount(devId) > 0) {
@@ -986,12 +1060,14 @@ public class DataEditorService {
                     neo4jUtil.deletePointById(devId);
                     gisDevExtPOMapper.deleteDevExtByDevId(devId,loginUserName,date);
                     shareDevPOMapper.deleteByPrimaryKey(devId,loginUserName,date);
+                    gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,po);
                     return true;
                 }
             } else {
                 neo4jUtil.deleteLineById(devId);
                 gisDevExtPOMapper.deleteDevExtByDevId(devId,loginUserName,date);
                 shareDevPOMapper.deleteByPrimaryKey(devId,loginUserName,date);
+                gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,po);
                 return true;
             }
     }
