@@ -59,4 +59,11 @@ public interface ShareDevPOMapper {
 	 */
 	List<Map<String, Integer>> findNodeType(@Param("devIds") List<String> devIds, @Param("typeIds") List<Long> typeIds);
 
+	/**
+	 * 根据ID集获取数据
+	 * @param devIds
+	 * @return
+	 */
+	@NoAuthData
+	List<ShareDevPO> findByDevIds(@Param("devIds") List<String> devIds);
 }
