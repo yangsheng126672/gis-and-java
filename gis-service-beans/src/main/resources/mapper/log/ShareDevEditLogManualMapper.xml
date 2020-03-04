@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jdrx.gis.dao.log.ShareDevEditLogManualMapper">
+    <insert id="batchInsertSelective" parameterType="java.util.List">
+        <foreach collection="shareDevEditLogList" item="item" index="index" separator=";">
+            insert into share_dev_edit_log
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="item.verNum != null">ver_num,</if>
+                <if test="item.devId != null">dev_id,</if>
+                <if test="item.typeId != null">type_id,</if>
+                <if test="item.name != null">name,</if>
+                <if test="item.lng != null">lng,</if>
+                <if test="item.lat != null">lat,</if>
+                <if test="item.addr != null">addr,</if>
+                <if test="item.createBy != null">create_by,</if>
+                <if test="item.createAt != null">create_at,</if>
+                <if test="item.updateBy != null">update_by,</if>
+                <if test="item.updateAt != null">update_at,</if>
+            </trim>
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="item.verNum != null">#{item.verNum,jdbcType=BIGINT},</if>
+                <if test="item.devId != null">#{item.devId,jdbcType=CHAR},</if>
+                <if test="item.typeId != null">#{item.typeId,jdbcType=BIGINT},</if>
+                <if test="item.name != null">#{item.name,jdbcType=VARCHAR},</if>
+                <if test="item.lng != null">#{item.lng,jdbcType=VARCHAR},</if>
+                <if test="item.lat != null">#{item.lat,jdbcType=VARCHAR},</if>
+                <if test="item.addr != null">#{item.addr,jdbcType=VARCHAR},</if>
+                <if test="item.createBy != null">#{item.createBy,jdbcType=VARCHAR},</if>
+                <if test="item.createAt != null">#{item.createAt,jdbcType=TIMESTAMP},</if>
+                <if test="item.updateBy != null">#{item.updateBy,jdbcType=VARCHAR},</if>
+                <if test="item.updateAt != null">#{item.updateAt,jdbcType=TIMESTAMP},</if>
+            </trim>
+        </foreach>
+    </insert>
+</mapper>
