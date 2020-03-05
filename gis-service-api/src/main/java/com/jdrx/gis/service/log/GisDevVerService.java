@@ -76,13 +76,25 @@ public class GisDevVerService {
 	 * @param devIds
 	 */
 	public void saveDevEditLogs(GisDevVer gisDevVer, String[] devIds) {
-		gisDevVerManualMapper.insertReturnId(gisDevVer);
+		Long verNum = gisDevVer.getId();
+		if (Objects.isNull(verNum)) {
+			gisDevVerManualMapper.insertReturnId(gisDevVer);
+		}
+		saveDevEditLogs(verNum, devIds);
+	}
+
+	/**
+	 * 保存多条
+	 * @param verNum
+	 * @param devIds
+	 */
+	public void saveDevEditLogs(Long verNum, String[] devIds) {
 		List<ShareDevPO> shareDevs = shareDevPOMapper.findByDevIds(Arrays.asList(devIds));
 		List<ShareDevEditLog> devEditLogs = Lists.newArrayList();
 		if (Objects.nonNull(shareDevs)) {
 			shareDevs.forEach(shareDevPO -> {
 				ShareDevEditLog shareDevEditLog = new ShareDevEditLog();
-				shareDevEditLog.setVerNum(gisDevVer.getId());
+				shareDevEditLog.setVerNum(verNum);
 				BeanUtils.copyProperties(shareDevPO, shareDevEditLog);
 				shareDevEditLog.setDevId(shareDevPO.getId());
 				devEditLogs.add(shareDevEditLog);
@@ -93,7 +105,7 @@ public class GisDevVerService {
 		if (Objects.nonNull(byDevIds)) {
 			gisDevEditLogs.forEach(gisDevPO -> {
 				GisDevEditLog gisDevEditLog = new GisDevEditLog();
-				gisDevEditLog.setVerNum(gisDevVer.getId());
+				gisDevEditLog.setVerNum(verNum);
 				BeanUtils.copyProperties(gisDevPO, gisDevEditLog);
 				gisDevEditLogs.add(gisDevEditLog);
 			});

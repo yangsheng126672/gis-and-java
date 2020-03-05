@@ -840,7 +840,7 @@ public class DataEditorService {
             		devIds.add(gisDevExtPO1.getDevId());
 	            });
             }
-            gisDevVerService.saveDevEditLogs(gisDevVer, devIds.toArray(new String[devIds.size()]));
+            gisDevVerService.saveDevEditLogs(gisDevVer.getId(), devIds.toArray(new String[devIds.size()]));
             for(GISDevExtPO po: gisDevExtPOLines ){
                 Object datainfo = po.getDataInfo();
                 JSONObject jb = JSONObject.parseObject(datainfo.toString());
