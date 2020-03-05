@@ -94,6 +94,9 @@ public class DataEditorService {
    @Autowired
    private GisDevVerService gisDevVerService;
 
+    @Autowired
+    private GisDevVerManualMapper gisDevVerManualMapper;
+
     /**
      * 获取所有点类型
      * @return
@@ -404,7 +407,9 @@ public class DataEditorService {
             gisDevVer.setCreateAt(new Date());
             gisDevVer.setCreateBy(loginUserName);
             gisDevVer.setCommand(EDBCommand.INSERT.getVal().shortValue());
-            if((!saveSharePoint(dto.getPointList(),userId,token,deptPath,gisDevVer)) ||(!savaShareLine(dto.getLineList(),userId,token,deptPath,gisDevVer))){
+            gisDevVerManualMapper.insertReturnId(gisDevVer);
+            Long varNum = gisDevVer.getId();
+            if((!saveSharePoint(dto.getPointList(),userId,token,deptPath,varNum)) ||(!savaShareLine(dto.getLineList(),userId,token,deptPath,varNum))){
                 return false;
             }else {
                 return true;
@@ -419,7 +424,7 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean saveSharePoint(List<SharePointDTO> list,Long userId, String token,String deptPath,GisDevVer gisDevVer) throws BizException{
+    public Boolean saveSharePoint(List<SharePointDTO> list,Long userId, String token,String deptPath,Long varNum) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
@@ -495,7 +500,7 @@ public class DataEditorService {
                 gisDevExtPOMapper.insertSelective(po);
                 shareDevPOMapper.insertSelective(shareDevPO);
                 //数据备份到版本管理表中
-                gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,po);
+                gisDevVerService.saveDevEditLog(varNum,shareDevPO,po);
 
             }
 
@@ -512,7 +517,7 @@ public class DataEditorService {
      * @param list
      * @return
      */
-    public Boolean savaShareLine(List<ShareLineDTO> list,Long userId, String token,String deptPath,GisDevVer gisDevVer) throws BizException{
+    public Boolean savaShareLine(List<ShareLineDTO> list,Long userId, String token,String deptPath,Long varNum) throws BizException{
         if (list == null||list.size() == 0 ){
             return false;
         }
@@ -599,7 +604,7 @@ public class DataEditorService {
                 gisDevExtPOMapper.insertSelective(gisDevExtPO);
                 shareDevPOMapper.insertSelective(shareDevPO);
                 //数据备份到版本管理表中
-                gisDevVerService.saveDevEditLog(gisDevVer,shareDevPO,gisDevExtPO);
+                gisDevVerService.saveDevEditLog(varNum,shareDevPO,gisDevExtPO);
             }
             return true;
         }catch (Exception e){

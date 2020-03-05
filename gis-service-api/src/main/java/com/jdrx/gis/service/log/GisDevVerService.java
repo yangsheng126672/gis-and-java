@@ -121,4 +121,22 @@ public class GisDevVerService {
 		shareDevEditLog.setDevId(shareDevPO.getId());
 		shareDevEditLogMapper.insertSelective(shareDevEditLog);
 	}
+
+	/**
+	 * 保存单条版本记录
+	 * @param varNum
+	 * @param shareDevPO
+	 * @param gisDevExtPO
+	 */
+	public void saveDevEditLog(Long varNum, ShareDevPO shareDevPO, GISDevExtPO gisDevExtPO) {
+		GisDevEditLog gisDevEditLog = new GisDevEditLog();
+		gisDevEditLog.setVerNum(varNum);
+		BeanUtils.copyProperties(gisDevExtPO, gisDevEditLog);
+		gisDevEditLogManualMapper.insertSelective(gisDevEditLog);
+		ShareDevEditLog shareDevEditLog = new ShareDevEditLog();
+		shareDevEditLog.setVerNum(varNum);
+		BeanUtils.copyProperties(shareDevPO, shareDevEditLog);
+		shareDevEditLog.setDevId(shareDevPO.getId());
+		shareDevEditLogMapper.insertSelective(shareDevEditLog);
+	}
 }
