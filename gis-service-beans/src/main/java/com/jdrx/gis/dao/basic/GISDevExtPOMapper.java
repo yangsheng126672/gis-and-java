@@ -256,13 +256,13 @@ public interface GISDevExtPOMapper {
      * @return
      */
 
-    List<AnalysisVO> getRepeatPointsByDevIds(@Param("devIds") List<String> devIds);
+    List<AnalysisVO> getRepeatPointsByDevIds(@Param("devIds") List<String> devIds,@Param("depth") String depth);
 	/**
 	 * 根据devIds获取重复线基础信息
 	 * @param devIds
 	 * @return
 	 */
-	List<AnalysisVO> getRepeatLinesByDevIds(@Param("devIds") List<String> devIds);
+	List<AnalysisVO> getRepeatLinesByDevIds(@Param("devIds") List<String> devIds,@Param("startDepth") String startDepth,@Param("endDepth") String endDepth);
 
 	/**
 	 * 根据geom获取空间类型

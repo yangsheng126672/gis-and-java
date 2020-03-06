@@ -248,5 +248,12 @@ public class GISConstants {
 	public final static String GIS_MENU_VALVE = "阀门";
 
 	public final static String GIS_MENU_OTHER = "其它";
+	/** 管点data_info字段信息 */
+	public final static String GIS_DATAINFO_DEPTH = "depth";
+
+	/** 管线data_info字段信息 */
+	public final static String GIS_DATAINFO_STARTDEPTH = "startDepth";
+
+	public final static String GIS_DATAINFO_ENDDEPTH = "endDepth";
 
 }

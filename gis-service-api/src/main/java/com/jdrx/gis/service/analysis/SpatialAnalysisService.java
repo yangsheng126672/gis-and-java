@@ -5,6 +5,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
 import com.jdrx.gis.beans.constants.basic.EDBCommand;
+import com.jdrx.gis.beans.constants.basic.GISConstants;
 import com.jdrx.gis.beans.dto.query.DevIDsDTO;
 import com.jdrx.gis.beans.entity.basic.GISDevExtPO;
 import com.jdrx.gis.beans.entity.log.GisDevVer;
@@ -208,7 +209,7 @@ public class SpatialAnalysisService {
         List list = Arrays.asList(devIDsDTOStr);
 //        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
 //        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatPointsByDevIds(list);
-        List<AnalysisVO> list1 = gisDevExtPOMapper.getRepeatPointsByDevIds(list);
+        List<AnalysisVO> list1 = gisDevExtPOMapper.getRepeatPointsByDevIds(list, GISConstants.GIS_DATAINFO_DEPTH);
 //        return new PageVO<AnalysisVO>(pageList);
         return list1;
     }
@@ -227,7 +228,7 @@ public class SpatialAnalysisService {
 //        PageHelper.startPage(devIDsDTO.getPageNum(), devIDsDTO.getPageSize());
 //        pageList = (Page<AnalysisVO>) getGisDevExtPOMapper.getRepeatLinesByDevIds(list);
 //        return new PageVO<AnalysisVO>(pageList);
-        List<AnalysisVO> list1 = gisDevExtPOMapper.getRepeatLinesByDevIds(list);
+        List<AnalysisVO> list1 = gisDevExtPOMapper.getRepeatLinesByDevIds(list,GISConstants.GIS_DATAINFO_STARTDEPTH,GISConstants.GIS_DATAINFO_ENDDEPTH);
         return list1;
     }
 
